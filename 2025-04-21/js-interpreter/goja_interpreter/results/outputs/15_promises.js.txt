@@ -1,0 +1,9 @@
+Test results for 15_promises.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Promise resolved: Operation successful
+Chain result: Next step
+All promises resolved: [First Second Third]
+First promise resolved: First

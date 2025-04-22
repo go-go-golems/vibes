@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destructuring - JavaScript Testing with Goja</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        header h1 {
+            color: white;
+        }
+        nav {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+        nav ul li a:hover {
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .failure-badge {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .code-container {
+            margin: 20px 0;
+        }
+        .result-container {
+            margin: 20px 0;
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #1a252f;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Destructuring</h1>
+        <p>JavaScript Program Test Results</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="#code">Program Code</a></li>
+            <li><a href="#results">Test Results</a></li>
+        </ul>
+    </nav>
+
+    <section id="code">
+        <h2>Program Code</h2>
+        <p>This program tests destructuring assignment in JavaScript, including array destructuring, object destructuring, and nested destructuring.</p>
+        
+        <div class="code-container">
+            <pre><code>// Destructuring
+// Array destructuring
+const numbers = [1, 2, 3, 4, 5];
+
+// Basic array destructuring
+const [first, second, ...rest] = numbers;
+console.log("First:", first);
+console.log("Second:", second);
+console.log("Rest:", rest);
+
+// Skipping elements
+const [a, , c] = numbers;
+console.log("a:", a);
+console.log("c:", c);
+
+// Default values
+const [x = 10, y = 20, z = 30] = [1, 2];
+console.log("x, y, z:", x, y, z);
+
+// Swapping variables
+let m = 1;
+let n = 2;
+[m, n] = [n, m];
+console.log("Swapped m, n:", m, n);
+
+// Object destructuring
+const person = {
+    name: "John",
+    age: 30,
+    city: "New York",
+    country: "USA"
+};
+
+// Basic object destructuring
+const { name, age } = person;
+console.log("Name:", name);
+console.log("Age:", age);
+
+// Renaming properties
+const { city: location, country: nation } = person;
+console.log("Location:", location);
+console.log("Nation:", nation);
+
+// Default values
+const { hobby = "Reading" } = person;
+console.log("Hobby:", hobby);
+
+// Nested destructuring
+const user = {
+    id: 1,
+    details: {
+        firstName: "Alice",
+        lastName: "Smith",
+        address: {
+            street: "123 Main St",
+            city: "Boston"
+        }
+    },
+    hobbies: ["Reading", "Hiking", "Coding"]
+};
+
+// Extracting nested properties
+const { 
+    details: { 
+        firstName, 
+        lastName,
+        address: { city: userCity }
+    },
+    hobbies: [firstHobby, ...otherHobbies]
+} = user;
+
+console.log("First name:", firstName);
+console.log("Last name:", lastName);
+console.log("User city:", userCity);
+console.log("First hobby:", firstHobby);
+console.log("Other hobbies:", otherHobbies);
+
+// Function parameter destructuring
+function printUserInfo({ name, age, city = "Unknown" }) {
+    console.log(`${name}, ${age}, ${city}`);
+}
+
+printUserInfo(person);</code></pre>
+        </div>
+    </section>
+
+    <section id="results">
+        <h2>Test Results</h2>
+        <p>Results from running this program with the Goja JavaScript interpreter:</p>
+        
+        <div class="result-container">
+            <h3>Execution Details</h3>
+            <p><strong>Status:</strong> <span class="success-badge">Success</span></p>
+            <p><strong>Execution Time:</strong> 0 ms</p>
+            
+            <h3>Console Output</h3>
+            <pre><code>First: 1
+Second: 2
+Rest: [3 4 5]
+a: 1
+c: 3
+x, y, z: 1 2 30
+Swapped m, n: 2 1
+Name: John
+Age: 30
+Location: New York
+Nation: USA
+Hobby: Reading
+First name: Alice
+Last name: Smith
+User city: Boston
+First hobby: Reading
+Other hobbies: [Hiking Coding]
+John, 30, New York</code></pre>
+        </div>
+        
+        <h3>Analysis</h3>
+        <p>The program successfully demonstrated destructuring assignment in JavaScript:</p>
+        <ul>
+            <li><strong>Array destructuring</strong>: Successfully implemented:
+                <ul>
+                    <li>Basic array destructuring with rest pattern</li>
+                    <li>Skipping elements in the array</li>
+                    <li>Default values for missing elements</li>
+                    <li>Variable swapping using destructuring</li>
+                </ul>
+            </li>
+            <li><strong>Object destructuring</strong>: Successfully implemented:
+                <ul>
+                    <li>Basic property extraction</li>
+                    <li>Property renaming</li>
+                    <li>Default values for missing properties</li>
+                </ul>
+            </li>
+            <li><strong>Nested destructuring</strong>: Successfully extracted:
+                <ul>
+                    <li>Nested object properties (firstName, lastName, city)</li>
+                    <li>Array elements within an object (firstHobby, otherHobbies)</li>
+                </ul>
+            </li>
+            <li><strong>Function parameter destructuring</strong>: Successfully used object destructuring in function parameters</li>
+        </ul>
+        <p>This confirms that the Goja interpreter correctly implements destructuring assignment in JavaScript, including array destructuring, object destructuring, nested destructuring, and function parameter destructuring. The output format for arrays is slightly different from standard JavaScript (using square brackets with space-separated values), but the functionality is correct.</p>
+    </section>
+
+    <a href="../index.html" class="back-link">← Back to All Programs</a>
+
+    <footer>
+        <p>&copy; 2025 JavaScript Testing with Goja Interpreter Project</p>
+        <p>Created on April 22, 2025</p>
+    </footer>
+</body>
+</html>

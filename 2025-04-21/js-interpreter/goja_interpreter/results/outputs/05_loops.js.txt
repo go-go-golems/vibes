@@ -1,0 +1,10 @@
+Test results for 05_loops.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+For loop sum: 10
+While loop sum: 10
+Do-while loop sum: 10
+For...of loop sum: 15
+Object properties: [name age job]

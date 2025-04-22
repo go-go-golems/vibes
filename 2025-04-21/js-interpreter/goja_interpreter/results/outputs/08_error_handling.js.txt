@@ -1,0 +1,10 @@
+Test results for 08_error_handling.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Result: +Inf
+This won't be printed
+Finally block always executes
+Access denied: Age must be at least 18
+Type error: Cannot read property 'name' of undefined

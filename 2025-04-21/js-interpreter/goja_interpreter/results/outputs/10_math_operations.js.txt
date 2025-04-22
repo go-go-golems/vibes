@@ -1,0 +1,11 @@
+Test results for 10_math_operations.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Constants - PI: 3.141592653589793 E: 2.718281828459045
+Basic operations - abs: 5 floor: 3 ceil: 4 round: 5 trunc: 6
+Powers and roots - sqrt: 4 cbrt: 3 pow: 8
+Trigonometric - sin: 1 cos: 1 tan: 1
+Min/Max - min: 1 max: 8 random: 0.6046602879796196
+Logarithmic - log: 2.302585092994046 log10: 2 log2: 3

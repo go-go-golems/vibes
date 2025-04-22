@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sets - JavaScript Testing with Goja</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        header h1 {
+            color: white;
+        }
+        nav {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+        nav ul li a:hover {
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .failure-badge {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .code-container {
+            margin: 20px 0;
+        }
+        .result-container {
+            margin: 20px 0;
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #1a252f;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sets</h1>
+        <p>JavaScript Program Test Results</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="#code">Program Code</a></li>
+            <li><a href="#results">Test Results</a></li>
+        </ul>
+    </nav>
+
+    <section id="code">
+        <h2>Program Code</h2>
+        <p>This program tests Set objects in JavaScript, including creation, manipulation, and set operations.</p>
+        
+        <div class="code-container">
+            <pre><code>// Sets
+// Creating a Set
+const fruits = new Set(['apple', 'banana', 'orange', 'apple']);
+console.log("Fruits set size:", fruits.size);
+console.log("Fruits set has apple:", fruits.has('apple'));
+console.log("Fruits set has grape:", fruits.has('grape'));
+
+// Adding and deleting elements
+fruits.add('grape');
+fruits.add('mango');
+fruits.delete('banana');
+console.log("Updated fruits set size:", fruits.size);
+
+// Iterating over a Set
+console.log("Fruits set elements:");
+fruits.forEach(fruit => {
+    console.log("- " + fruit);
+});
+
+// Converting Set to Array
+const fruitsArray = Array.from(fruits);
+console.log("Fruits array:", fruitsArray);
+
+// Set operations (using arrays and Sets)
+const setA = new Set([1, 2, 3, 4, 5]);
+const setB = new Set([3, 4, 5, 6, 7]);
+
+// Union
+const union = new Set([...setA, ...setB]);
+console.log("Union:", Array.from(union));
+
+// Intersection
+const intersection = new Set(
+    [...setA].filter(x => setB.has(x))
+);
+console.log("Intersection:", Array.from(intersection));
+
+// Difference (A - B)
+const difference = new Set(
+    [...setA].filter(x => !setB.has(x))
+);
+console.log("Difference (A - B):", Array.from(difference));
+
+// Symmetric difference
+const symmetricDifference = new Set(
+    [...setA].filter(x => !setB.has(x)).concat([...setB].filter(x => !setA.has(x)))
+);
+console.log("Symmetric difference:", Array.from(symmetricDifference));</code></pre>
+        </div>
+    </section>
+
+    <section id="results">
+        <h2>Test Results</h2>
+        <p>Results from running this program with the Goja JavaScript interpreter:</p>
+        
+        <div class="result-container">
+            <h3>Execution Details</h3>
+            <p><strong>Status:</strong> <span class="success-badge">Success</span></p>
+            <p><strong>Execution Time:</strong> 0 ms</p>
+            
+            <h3>Console Output</h3>
+            <pre><code>Fruits set size: 3
+Fruits set has apple: true
+Fruits set has grape: false
+Updated fruits set size: 4
+Fruits set elements:
+- apple
+- orange
+- grape
+- mango
+Fruits array: [apple orange grape mango]
+Union: [1 2 3 4 5 6 7]
+Intersection: [3 4 5]
+Difference (A - B): [1 2]
+Symmetric difference: [1 2 6 7]</code></pre>
+        </div>
+        
+        <h3>Analysis</h3>
+        <p>The program successfully executed all Set operations:</p>
+        <ul>
+            <li><strong>Set creation</strong>: Successfully created a Set with automatic deduplication (note that 'apple' appears only once)</li>
+            <li><strong>Basic operations</strong>: Correctly implemented size checking, element existence checking (has), adding, and deleting elements</li>
+            <li><strong>Iteration</strong>: Successfully iterated over Set elements using forEach</li>
+            <li><strong>Set to Array conversion</strong>: Correctly converted a Set to an Array</li>
+            <li><strong>Set operations</strong>: Successfully implemented:
+                <ul>
+                    <li>Union: combining all elements from both sets</li>
+                    <li>Intersection: elements common to both sets</li>
+                    <li>Difference: elements in set A but not in set B</li>
+                    <li>Symmetric difference: elements in either set but not in both</li>
+                </ul>
+            </li>
+        </ul>
+        <p>This confirms that the Goja interpreter correctly implements Set objects in JavaScript, including all standard methods and operations. The output format for arrays is slightly different from standard JavaScript (using square brackets with space-separated values), but the functionality is correct.</p>
+    </section>
+
+    <a href="../index.html" class="back-link">← Back to All Programs</a>
+
+    <footer>
+        <p>&copy; 2025 JavaScript Testing with Goja Interpreter Project</p>
+        <p>Created on April 22, 2025</p>
+    </footer>
+</body>
+</html>

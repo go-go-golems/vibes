@@ -1,0 +1,9 @@
+Test results for 14_recursion.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Factorial of 5: 120
+Fibonacci of 7: 13
+Sum of array [1, 2, 3, 4, 5]: 15
+Flattened array: [1 2 3 4 5 6]

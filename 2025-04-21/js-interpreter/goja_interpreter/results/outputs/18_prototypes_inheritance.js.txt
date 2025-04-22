@@ -1,0 +1,13 @@
+Test results for 18_prototypes_inheritance.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Animal name: Generic Animal
+Animal speaks: Generic Animal makes a noise.
+Dog name: Rex
+Dog breed: German Shepherd
+Dog speaks: Rex barks.
+dog instanceof Dog: true
+dog instanceof Animal: true
+Person greeting: Hello, my name is John

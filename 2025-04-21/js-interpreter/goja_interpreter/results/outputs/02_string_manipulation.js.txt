@@ -1,0 +1,13 @@
+Test results for 02_string_manipulation.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Original: Hello, World!
+Length: 13
+Uppercase: HELLO, WORLD!
+Lowercase: hello, world!
+Substring: Hello
+Replaced: Hello, JavaScript!
+Split: [Hello World!]
+Trimmed: trim me

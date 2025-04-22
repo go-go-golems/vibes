@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KB - Knowledge Base for Code</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --code-bg: #f8f9fa;
+            --code-border: #e9ecef;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background-color: var(--secondary-color);
+            padding: 1rem 0;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+        
+        section {
+            padding: 3rem 0;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--secondary-color);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+        
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--secondary-color);
+        }
+        
+        .command {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .command-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .architecture-diagram {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            display: block;
+            border: 1px solid var(--code-border);
+            border-radius: 4px;
+        }
+        
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 5px 0;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>KB - Knowledge Base for Code</h1>
+            <p>A local code search and RAG system for your codebase</p>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#components">Components</a></li>
+                <li><a href="#commands">Commands</a></li>
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#download">Download</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <section id="overview">
+        <div class="container">
+            <h2>Overview</h2>
+            <p>KB (Knowledge Base for Code) is a powerful tool for indexing, searching, and querying your codebase. It combines the power of Bleve for text and vector indexing, tree-sitter for language-aware chunking, and provides a simple CLI for interacting with your code knowledge base.</p>
+            
+            <p>With KB, you can:</p>
+            <ul>
+                <li>Index your code repositories for quick searching</li>
+                <li>Search for code by text or semantic similarity</li>
+                <li>Ask natural language questions about your codebase</li>
+                <li>View detailed information about code chunks</li>
+            </ul>
+        </div>
+    </section>
+    
+    <section id="architecture">
+        <div class="container">
+            <h2>Architecture</h2>
+            <p>KB follows a modular architecture that separates concerns and allows for easy extension and customization.</p>
+            
+            <div class="architecture-diagram">
+                <pre>
+┌─────────────────────────────────────────────────────────────┐
+│                         KB CLI                               │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+┌───────────────────────────┼─────────────────────────────────┐
+│                           │                                  │
+│  ┌─────────────┐    ┌─────▼──────┐    ┌──────────────┐      │
+│  │    Index    │◄───┤   Store    │◄───┤    Search    │      │
+│  └─────┬───────┘    └─────┬──────┘    └──────┬───────┘      │
+│        │                  │                   │              │
+│        │            ┌─────▼──────┐            │              │
+│        └───────────►│   Model    │◄───────────┘              │
+│                     └─────┬──────┘                           │
+│                           │                                  │
+│                     ┌─────▼──────┐                           │
+│                     │   Embed    │                           │
+│                     └────────────┘                           │
+│                                                              │
+│                     ┌────────────┐                           │
+│                     │    RAG     │                           │
+│                     └────────────┘                           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+                </pre>
+            </div>
+            
+            <p>The main components of the KB architecture are:</p>
+            
+            <ul>
+                <li><strong>CLI</strong>: The command-line interface for interacting with KB</li>
+                <li><strong>Store</strong>: Manages the Bleve index and provides CRUD operations for code chunks</li>
+                <li><strong>Index</strong>: Handles the indexing of code repositories using tree-sitter for language-aware chunking</li>
+                <li><strong>Model</strong>: Defines the data structures used throughout the system</li>
+                <li><strong>Embed</strong>: Generates vector embeddings for code chunks</li>
+                <li><strong>Search</strong>: Provides text and vector similarity search capabilities</li>
+                <li><strong>RAG</strong>: Implements Retrieval Augmented Generation for answering questions about the codebase</li>
+            </ul>
+        </div>
+    </section>
+    
+    <section id="components">
+        <div class="container">
+            <h2>Key Components</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Mock Embeddings</h3>
+                    <p>KB uses a mock embeddings system that generates deterministic vector embeddings based on text content. This allows for vector similarity search without requiring a real machine learning model.</p>
+                    <pre><code>// Generate a mock embedding vector
+func (e *MockEmbedder) Embed(text string) ([]float32, error) {
+    // Create a deterministic hash of the text
+    hash := md5.Sum([]byte(text))
+    
+    // Use the hash to seed a random number generator
+    r := rand.New(rand.NewSource(int64(binary.BigEndian.Uint64(hash[:]))))
+    
+    // Generate a normalized random vector
+    vec := make([]float32, e.dimension)
+    var sum float32 = 0
+    for i := 0; i < e.dimension; i++ {
+        vec[i] = r.Float32()*2 - 1
+        sum += vec[i] * vec[i]
+    }
+    
+    // Normalize the vector
+    magnitude := float32(math.Sqrt(float64(sum)))
+    for i := 0; i < e.dimension; i++ {
+        vec[i] /= magnitude
+    }
+    
+    return vec, nil
+}</code></pre>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Mock Tree-Sitter Queries</h3>
+                    <p>KB implements a mock tree-sitter parser that simulates language-aware chunking for multiple programming languages. This allows for intelligent code chunking without requiring the actual tree-sitter library.</p>
+                    <pre><code>// Parse a file into chunks
+func (p *MockParser) ParseFile(filePath string) ([]*model.Chunk, error) {
+    // Read the file
+    content, err := ioutil.ReadFile(filePath)
+    if err != nil {
+        return nil, fmt.Errorf("failed to read file: %w", err)
+    }
+    
+    // Determine the language based on file extension
+    ext := filepath.Ext(filePath)
+    var language string
+    switch ext {
+    case ".go":
+        language = "go"
+    case ".py":
+        language = "python"
+    case ".ts", ".js":
+        language = "typescript"
+    case ".cpp", ".hpp", ".cc", ".h":
+        language = "cpp"
+    default:
+        language = "generic"
+    }
+    
+    // Parse the content based on the language
+    return p.parseContent(filePath, language, string(content))
+}</code></pre>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>Bleve Indexing</h3>
+                    <p>KB uses Bleve v2.4+ for text and vector indexing/search. This provides powerful full-text search capabilities and efficient vector similarity search.</p>
+                    <pre><code>// Create a new Bleve index mapping
+func NewIndexMapping(dimension int) (*mapping.IndexMappingImpl, error) {
+    // Create a new index mapping
+    indexMapping := bleve.NewIndexMapping()
+    
+    // Create a document mapping for chunks
+    chunkMapping := bleve.NewDocumentMapping()
+    
+    // Add field mappings
+    textFieldMapping := bleve.NewTextFieldMapping()
+    textFieldMapping.Store = true
+    textFieldMapping.Index = true
+    
+    keywordFieldMapping := bleve.NewKeywordFieldMapping()
+    keywordFieldMapping.Store = true
+    keywordFieldMapping.Index = true
+    
+    numericFieldMapping := bleve.NewNumericFieldMapping()
+    numericFieldMapping.Store = true
+    numericFieldMapping.Index = true
+    
+    // Add field mappings to the document mapping
+    chunkMapping.AddFieldMappingsAt("id", keywordFieldMapping)
+    chunkMapping.AddFieldMappingsAt("file_path", textFieldMapping)
+    chunkMapping.AddFieldMappingsAt("language", keywordFieldMapping)
+    chunkMapping.AddFieldMappingsAt("symbol_type", keywordFieldMapping)
+    chunkMapping.AddFieldMappingsAt("symbol_name", textFieldMapping)
+    chunkMapping.AddFieldMappingsAt("start_line", numericFieldMapping)
+    chunkMapping.AddFieldMappingsAt("end_line", numericFieldMapping)
+    chunkMapping.AddFieldMappingsAt("code", textFieldMapping)
+    chunkMapping.AddFieldMappingsAt("doc", textFieldMapping)
+    
+    // Add the document mapping to the index mapping
+    indexMapping.AddDocumentMapping("chunk", chunkMapping)
+    
+    return indexMapping, nil
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="commands">
+        <div class="container">
+            <h2>Commands</h2>
+            <p>KB provides a set of commands for interacting with your code knowledge base:</p>
+            
+            <div class="command">
+                <div class="command-title">init</div>
+                <p>Initialize the knowledge base by creating the configuration file and Bleve index.</p>
+                <pre><code>kb init --path ~/.kb/index --dim 768</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">add</div>
+                <p>Add a repository to track for indexing.</p>
+                <pre><code>kb add --path /path/to/your/repo</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">index</div>
+                <p>Parse and index code files from tracked repositories.</p>
+                <pre><code>kb index --langs go,python,typescript</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">embed</div>
+                <p>Generate vector embeddings for indexed chunks.</p>
+                <pre><code>kb embed --model bge-large --dim 768</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">search</div>
+                <p>Perform full-text search on indexed code chunks.</p>
+                <pre><code>kb search --query "implement vector similarity" --top 10</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">sim</div>
+                <p>Perform nearest-neighbor vector search on indexed code chunks.</p>
+                <pre><code>kb sim --query "calculate cosine similarity between vectors" --k 5</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">ask</div>
+                <p>Use RAG (Retrieval Augmented Generation) to answer questions about your codebase.</p>
+                <pre><code>kb ask --question "How does the indexing process work?" --model gpt-4o</code></pre>
+            </div>
+            
+            <div class="command">
+                <div class="command-title">show</div>
+                <p>Display detailed information about a code chunk.</p>
+                <pre><code>kb show --id chunk123
+kb show --file /path/to/file.go --line 42</code></pre>
+            </div>
+        </div>
+    </section>
+    
+    <section id="usage">
+        <div class="container">
+            <h2>Usage Example</h2>
+            <p>Here's a typical workflow for using KB:</p>
+            
+            <ol>
+                <li>
+                    <p><strong>Initialize the knowledge base:</strong></p>
+                    <pre><code>kb init --path ~/.kb/index --dim 768</code></pre>
+                </li>
+                <li>
+                    <p><strong>Add repositories to track:</strong></p>
+                    <pre><code>kb add --path ~/projects/my-go-project
+kb add --path ~/projects/my-python-project</code></pre>
+                </li>
+                <li>
+                    <p><strong>Index the repositories:</strong></p>
+                    <pre><code>kb index</code></pre>
+                </li>
+                <li>
+                    <p><strong>Generate embeddings:</strong></p>
+                    <pre><code>kb embed</code></pre>
+                </li>
+                <li>
+                    <p><strong>Search for code:</strong></p>
+                    <pre><code>kb search --query "database connection"</code></pre>
+                </li>
+                <li>
+                    <p><strong>Ask questions about your code:</strong></p>
+                    <pre><code>kb ask --question "How do I connect to the database in this codebase?"</code></pre>
+                </li>
+            </ol>
+            
+            <h3>Example Output</h3>
+            <p>When you run a search command, you'll get output like this:</p>
+            <pre>
+Found 3 results for query: database connection
+
+1. db/connection.go (function:NewConnection) - Lines 15-42
+2. models/database.go (struct:DBConfig) - Lines 10-25
+3. utils/db_helper.go (function:ConnectToDB) - Lines 5-30
+            </pre>
+            
+            <p>When you ask a question, you'll get an answer with citations:</p>
+            <pre>
+Using model: gpt-4o (max tokens: 1024)
+
+To connect to the database in this codebase, you need to use the `NewConnection` function from the `db/connection.go` file. This function takes a `DBConfig` struct that contains the connection parameters.
+
+Here's how you can use it:
+
+```go
+import (
+    "myapp/db"
+    "myapp/models"
+)
+
+func main() {
+    config := models.DBConfig{
+        Host:     "localhost",
+        Port:     5432,
+        User:     "username",
+        Password: "password",
+        DBName:   "mydb",
+    }
+    
+    conn, err := db.NewConnection(config)
+    if err != nil {
+        panic(err)
+    }
+    defer conn.Close()
+    
+    // Use the connection...
+}
+```
+
+Citations:
+1. db/connection.go (function:NewConnection) - Lines 15-42
+2. models/database.go (struct:DBConfig) - Lines 10-25
+            </pre>
+        </div>
+    </section>
+    
+    <section id="download">
+        <div class="container">
+            <h2>Download</h2>
+            <p>You can download the KB system as a zip file containing the source code and documentation:</p>
+            <p><a href="kb-project.zip" style="display: inline-block; background-color: var(--primary-color); color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Download KB Project</a></p>
+            
+            <h3>Installation</h3>
+            <p>To install KB, follow these steps:</p>
+            <ol>
+                <li>Download and extract the zip file</li>
+                <li>Navigate to the extracted directory</li>
+                <li>Build the project: <code>go build -o kb ./cmd/kb</code></li>
+                <li>Move the binary to your PATH: <code>sudo mv kb /usr/local/bin/</code></li>
+            </ol>
+            
+            <h3>Requirements</h3>
+            <ul>
+                <li>Go 1.18 or higher</li>
+                <li>Bleve v2.4+</li>
+            </ul>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <p>KB - Knowledge Base for Code &copy; 2025</p>
+            <p>A local code search and RAG system for your codebase</p>
+        </div>
+    </footer>
+</body>
+</html>

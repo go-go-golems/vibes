@@ -1,0 +1,258 @@
+Below is a **Go‑centric, “single‑binary” specification** for a *local* code‑knowledge‑base that uses
+
+* **Bleve v2.4+** for *text + vector* indexing / search,  
+* **tree‑sitter** for language‑aware chunking, and  
+* the **go‑go‑golems / glazed** command framework for a *uniform* CLI/TUI.
+
+---
+
+## 1 Domain Model & Schemas
+
+```go
+// pkg/model/chunk.go
+package model
+
+// Chunk is the atomic unit indexed in Bleve.
+type Chunk struct {
+	ID           string    `json:"id"`            // ULID = file‑hash + byte‑range
+	FilePath     string    `json:"file_path"`     // absolute or repo‑relative
+	Language     string    `json:"lang"`          // "go", "py", …
+	SymbolType   string    `json:"symbol_type"`   // "function", "method", "class", …
+	SymbolName   string    `json:"symbol_name"`   // "NewServer"
+	Doc          string    `json:"doc"`           // docstring / comment header
+	Code         string    `json:"code"`          // source slice
+	StartLine    int       `json:"start_line"`
+	EndLine      int       `json:"end_line"`
+	Tokens       int       `json:"tokens"`        // for RAG budgeting
+	Embedding    []float32 `json:"embedding"`     // N‑dim vector
+	IndexedAtUTC time.Time `json:"indexed_at"`
+	Hash         string    `json:"hash"`          // SHA‑256 of code slice
+}
+```
+
+### 1.1 Bleve Mapping (text + vector)
+
+```go
+func BuildChunkMapping(dim int) mapping.DocumentMapping {
+	chunk := bleve.NewDocumentMapping()
+
+	// keyword fields
+	for _, f := range []string{"id", "file_path", "lang", "symbol_type", "symbol_name", "hash"} {
+		fd := bleve.NewTextFieldMapping()
+		fd.Analyzer = keyword.Name
+		chunk.AddFieldMappingsAt(f, fd)
+	}
+
+	// full‑text fields
+	for _, f := range []string{"doc", "code"} {
+		fd := bleve.NewTextFieldMapping()
+		fd.Analyzer = standard.Name       // ok for code comments too
+		chunk.AddFieldMappingsAt(f, fd)
+	}
+
+	// numeric
+	tokensField := bleve.NewNumericFieldMapping()
+	chunk.AddFieldMappingsAt("tokens", tokensField)
+
+	// vector (Bleve v2.4+ HNSW segment, FAISS‑backed) citeturn0search6
+	vec := bleve.NewVectorFieldMapping(dim)
+	chunk.AddFieldMappingsAt("embedding", vec)
+
+	return chunk
+}
+```
+
+---
+
+## 2 CLI Surface — verbs & flags (glazed)
+
+> **Binary name:** `kb`  
+> **Pattern:** `kb <verb> [subverb] [flags]`  
+> **All verbs are Glazed commands**—conforming to  
+> <https://github.com/go-go-golems/glazed/blob/main/prompto/glazed/create-command-tutorial.md> citeturn0search1
+
+| Verb (sub‑verb) | Purpose | Key Flags | Primary Packages |
+|-----------------|---------|-----------|------------------|
+| **init**        | scaffold `kb.yaml`, create Bleve index dir | `--path`, `--dim` | `pkg/config`, `pkg/index` |
+| **add**         | register a repo/path to track | `--lang=go,ts` | `pkg/config` |
+| **index**       | walk tracked roots → Tree‑sitter → JSON docs (no embeddings) | `--changed‑only` | `pkg/ts`, `pkg/store` |
+| **embed**       | compute vectors for docs w/out `embedding` | `--model`, `--batch`, `--dim` | `pkg/embed` |
+| **search**      | full‑text search (`bleve.Query`) | `--query`, `--top` | `pkg/search` |
+| **sim**         | nearest‑neighbor vector search | `--query`, `--k` | `pkg/search` |
+| **ask**         | RAG: retrieve (text + vector) → LLM answer | `--model`, `--max‑tokens` | `pkg/rag` |
+| **show**        | pretty‑print code slice with context | `--id` or `--file:line` | `pkg/show` |
+| **tui**         | BubbleTea interactive browser/chat | `--theme` | `pkg/tui` |
+
+### 2.1 Glazed Command Skeleton (example: `index`)
+
+```go
+func NewIndexCmd(store *store.Store) *glazed.Command {
+	cmd := glazed.NewCommand("index").
+		WithShort("Walk sources and index chunks").
+		WithFlags(
+			glazed.BoolFlag("changed-only", 'c', "Only files whose hash changed", false),
+			glazed.StringSliceFlag("lang", 'l', "Override languages", nil),
+		).
+		WithRun(func(ctx context.Context, gctx *glazed.Context) error {
+			opts := index.Options{
+				ChangedOnly: gctx.Bool("changed-only"),
+				Langs:       gctx.StringSlice("lang"),
+			}
+			return index.Run(ctx, store, opts)
+		})
+	return cmd
+}
+```
+
+*Each verb lives in `cmd/` and registers itself into `glazed.Root`.  
+Tests stub the Store (memory Bleve) & tree‑sitter parser.*
+
+---
+
+## 3 Control‑Flow for Core Verbs
+
+### 3.1 `index`
+
+```
+tracked roots → filepath.WalkDir
+           ↓ (language sniff)
+          tree‑sitter parse
+           ↓
+    Node visitors (per lang):
+        FunctionDecl,
+        MethodDecl,
+        ClassDecl …
+           ↓
+    build Chunk struct
+           ↓
+    if hash differs ↴
+        store.JSON.Upsert(chunk)
+        bleve.Index(ID, chunk)
+```
+
+### 3.2 `embed`
+
+```
+bleve search "embedding:NULL" → doc IDs
+        ↓ batched
+    embedder.Encode(code|doc)
+        ↓
+    chunk.Embedding = vec
+        ↓
+    bleve.Index(ID, chunk)  // update vector field
+```
+
+### 3.3 `search` / `sim`
+
+```
+if --vector
+    bleve.NewVectorQuery(vec,k)
+else
+    bleve.NewMatchQuery(query)
+render results (glazed table→json|md|…)
+```
+
+### 3.4 `ask`
+
+```
+1. build hybrid query (Match+Vector k=8)
+2. fetch topN chunks, join code+doc
+3. craft RAG prompt
+4. call LLM (local/OpenAI)
+5. stream answer (citations=chunk.ID)
+```
+
+TUI streams tokens, sidebar lists retrieved files.
+
+---
+
+## 4 tree‑sitter Integration Details
+
+| Step | Mechanics | Go Libs |
+|------|-----------|---------|
+| Load parser | `github.com/smacker/go-tree-sitter` + language bindings (`tree-sitter-go`, `tree-sitter-python`, …) | |
+| Walk syntax | For each root node, query patterns (S‑expressions) such as:<br/>`(function_declaration name: (identifier) @name body: (block) @body)` | |
+| Slice source | Use byte ranges from node to extract code; compute `StartLine/EndLine` via newline counting | |
+| Doc / Comment | For Go: preceding `comment` nodes; for Python: `string` if first node in `body`; attach to `Doc` | |
+| Token count | `tiktoken` or rumal library; stores to `Tokens` | |
+| Chunk → Schema | Fill `Chunk`; ULID = SHA‑256(path) + offset; lang = parser lang id | |
+| Navigation | On `show --id`: open file in `$PAGER` with `--line=N`; TUI uses `syntax-highlighting` lib | |
+
+---
+
+## 5 Package‑level Public APIs
+
+```go
+// pkg/index
+type Indexer interface {
+	IndexPaths(ctx context.Context, roots []string, opts Options) error
+}
+type Options struct {
+	ChangedOnly bool
+	Langs       []string
+}
+
+// pkg/embed
+type Embedder interface {
+	Encode(ctx context.Context, texts []string) ([][]float32, error)
+}
+
+// pkg/store  // Bleve wrapper
+type Store struct {
+	Index bleve.Index
+	Dim   int
+}
+func Open(path string, dim int) (*Store, error)
+func (s *Store) Upsert(ctx context.Context, c *model.Chunk) error
+func (s *Store) SearchText(ctx context.Context, q string, k int) ([]model.Chunk, error)
+func (s *Store) SearchVector(ctx context.Context, v []float32, k int) ([]model.Chunk, error)
+
+// pkg/rag
+type RAGClient struct {
+	Store     *store.Store
+	Embedder  embed.Embedder
+	LLM       llm.Client
+}
+func (r *RAGClient) Ask(ctx context.Context, question string) (Answer, error)
+```
+
+---
+
+## 6 Config (`kb.yaml`, created by `kb init`)
+
+```yaml
+index_path: ~/.kb/index
+dimension: 768
+embedder:
+  provider: "bge-large"
+  endpoint: "http://localhost:8000/encode"
+languages: ["go", "python", "ts", "cpp"]
+repos:
+  - ~/code/myapp
+  - ~/code/llm-lib
+llm:
+  provider: openai
+  model: gpt-4o
+```
+
+---
+
+## 7 Extending to TUI
+
+* BubbleTea app lives in `pkg/tui`, using  
+  `glazed.ViewTable` for results, `lipgloss` for styling.  
+* Hot‑keys:  
+  * `/` → text search, `?` → vector search,  
+  * `ENTER` → open code pane,  
+  * `c` → chat (RAG ask).
+
+---
+
+### References  
+* Bleve feature list, field type `vector` and FAISS integration citeturn0search0turn0search6  
+* Glazed command tutorial for morphological CLI verbs citeturn0search1  
+* Bleve mapping docs for custom `TypeField` & mappings citeturn0search2
+
+---
+
+This spec gives you **concrete data structures, control‑flow, and Glazed‑compatible command surfaces** to start coding immediately. Let me know if you’d like sample unit tests, an embedding stub, or a first pass at the `index` implementation!
