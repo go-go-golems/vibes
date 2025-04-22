@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Planning Example - GoAgent Framework</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>GoAgent</h1>
+                <p>A powerful LLM agent framework for Go</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../guide/index.html">Guide</a></li>
+                    <li><a href="../tutorial/index.html">Tutorials</a></li>
+                    <li><a href="../examples/index.html" class="active">Examples</a></li>
+                    <li><a href="../api/index.html">API Reference</a></li>
+                    <li><a href="https://github.com/goagent/framework" class="github-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="example-header">
+        <div class="container">
+            <h1>Travel Planning Agent Example</h1>
+            <p>This example demonstrates how to build an agent that can plan travel itineraries with flights, hotels, and attractions.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="example-section">
+            <h2>Overview</h2>
+            <p>The Travel Planning Agent uses the Plan-and-Execute pattern to create detailed travel itineraries. It first plans the steps needed to create a complete itinerary, then executes each step sequentially using specialized travel tools.</p>
+            
+            <p>This example showcases:</p>
+            <ul>
+                <li>Using the Plan-and-Execute agent pattern for complex planning tasks</li>
+                <li>Integrating multiple specialized tools (flight search, hotel search, attractions)</li>
+                <li>Breaking down a complex task into manageable steps</li>
+                <li>Generating a comprehensive travel itinerary</li>
+            </ul>
+        </section>
+
+        <section class="example-section">
+            <h2>Implementation</h2>
+            
+            <div class="example-code">
+                <h3>Setting Up the Travel Planning Agent</h3>
+                <pre><code class="language-go">// SetupTravelPlanningAgent creates an agent for planning travel trips
+func SetupTravelPlanningAgent() (*agent.PlanAndExecuteAgent, error) {
+    // Create mock LLMs for planner and executor
+    plannerLLM := llm.NewMockLLM()
+    executorLLM := llm.NewMockLLM()
+    
+    // Create a Plan-and-Execute agent
+    planExecAgent := agent.NewPlanAndExecuteAgent(plannerLLM, executorLLM, 10)
+    
+    // Create and add tools
+    flightSearchTool := &MockFlightSearchTool{
+        name:        "search_flights",
+        description: "Search for flights between cities",
+        flights:     make(map[string][]FlightResult),
+    }
+    
+    hotelSearchTool := &MockHotelSearchTool{
+        name:        "search_hotels",
+        description: "Search for hotels in a city",
+        hotels:      make(map[string][]HotelResult),
+    }
+    
+    attractionsTool := &MockAttractionsTool{
+        name:        "find_attractions",
+        description: "Find attractions in a city",
+        attractions: make(map[string][]AttractionResult),
+    }
+    
+    // Add mock data
+    addMockTravelData(flightSearchTool, hotelSearchTool, attractionsTool)
+    
+    // Add tools to the agent
+    planExecAgent.AddTool(flightSearchTool)
+    planExecAgent.AddTool(hotelSearchTool)
+    planExecAgent.AddTool(attractionsTool)
+    
+    // Add responses to the mock LLMs for the travel planning scenario
+    addTravelPlanningResponses(plannerLLM, executorLLM)
+    
+    return planExecAgent, nil
+}</code></pre>
+            </div>
+            
+            <div class="example-code">
+                <h3>Mock Travel Tools</h3>
+                <pre><code class="language-go">// FlightResult represents a flight search result
+type FlightResult struct {
+    Airline     string    `json:"airline"`
+    FlightNo    string    `json:"flight_no"`
+    Departure   string    `json:"departure"`
+    Arrival     string    `json:"arrival"`
+    DepartureAt time.Time `json:"departure_at"`
+    ArrivalAt   time.Time `json:"arrival_at"`
+    Price       float64   `json:"price"`
+}
+
+// MockFlightSearchTool is a mock implementation of a flight search tool
+type MockFlightSearchTool struct {
+    name        string
+    description string
+    flights     map[string][]FlightResult
+}
+
+func (t *MockFlightSearchTool) Name() string {
+    return t.name
+}
+
+func (t *MockFlightSearchTool) Description() string {
+    return t.description
+}
+
+func (t *MockFlightSearchTool) Execute(ctx context.Context, input string) (string, error) {
+    var params struct {
+        From string `json:"from"`
+        To   string `json:"to"`
+        Date string `json:"date"`
+    }
+    
+    if err := json.Unmarshal([]byte(input), &params); err != nil {
+        return "", fmt.Errorf("invalid input: %w", err)
+    }
+    
+    key := fmt.Sprintf("%s-%s-%s", params.From, params.To, params.Date)
+    results, ok := t.flights[key]
+    if !ok {
+        return "No flights found", nil
+    }
+    
+    resultJSON, err := json.MarshalIndent(results, "", "  ")
+    if err != nil {
+        return "", err
+    }
+    
+    return string(resultJSON), nil
+}
+
+func (t *MockFlightSearchTool) Parameters() map[string]types.ParameterSchema {
+    return map[string]types.ParameterSchema{
+        "from": {
+            Type:        "string",
+            Description: "Departure city",
+            Required:    true,
+        },
+        "to": {
+            Type:        "string",
+            Description: "Arrival city",
+            Required:    true,
+        },
+        "date": {
+            Type:        "string",
+            Description: "Departure date (YYYY-MM-DD)",
+            Required:    true,
+        },
+    }
+}</code></pre>
+            </div>
+            
+            <div class="example-code">
+                <h3>Running the Travel Planning Agent</h3>
+                <pre><code class="language-go">// Set up the travel planning agent
+agent, err := examples.SetupTravelPlanningAgent()
+if err != nil {
+    fmt.Printf("Error setting up travel planning agent: %v\n", err)
+    return
+}
+
+// Run the agent
+ctx := context.Background()
+result, err := agent.Run(ctx, "Plan a 7-day trip to Europe, visiting Paris and Rome. Include flights, hotels, and must-see attractions.")
+if err != nil {
+    fmt.Printf("Error running travel planning agent: %v\n", err)
+    return
+}
+
+// Print the result
+fmt.Println(result)</code></pre>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Example Output</h2>
+            
+            <div class="example-result">
+                <h3>Travel Planning Result</h3>
+                <pre><code># 7-Day Europe Trip: Paris & Rome Itinerary
+
+## Flight Details
+
+**Outbound: New York to Paris**
+- Delta Airlines DL456
+- June 15, 2025, 9:45 PM - June 16, 2025, 11:15 AM
+- Price: $790.75
+
+**Connection: Paris to Rome**
+- Alitalia AZ789
+- June 20, 2025, 10:15 AM - 12:30 PM
+- Price: $210.25
+
+## Accommodations
+
+**Paris (June 16-19)**
+- Cozy Parisian Inn
+- 45 Rue de Rivoli, Paris
+- 3-star hotel, $150/night
+- Features: Free WiFi, Breakfast Included
+
+**Rome (June 20-23)**
+- Roman Retreat
+- 78 Via Veneto, Rome
+- 4-star hotel, $220/night
+- Features: Pool, Restaurant, Historic Building
+
+## Day-by-Day Itinerary
+
+### Day 1 (June 16) - Arrival in Paris
+- Arrive at Charles de Gaulle Airport (CDG) at 11:15 AM
+- Check-in at Cozy Parisian Inn
+- Afternoon: Rest and explore the neighborhood
+- Evening: Dinner at a local café
+
+### Day 2 (June 17) - Paris Exploration I
+- Morning: Visit the Eiffel Tower (4.7/5 rating)
+- Lunch at Le Jules Verne restaurant in the Eiffel Tower (4.5/5 rating)
+- Afternoon: Explore surrounding areas and Seine River
+
+### Day 3 (June 18) - Paris Exploration II
+- Full day at the Louvre Museum (4.8/5 rating)
+- Evening: Stroll along the Champs-Élysées
+
+### Day 4 (June 19) - Paris to Rome
+- Morning: Check-out from Cozy Parisian Inn
+- 10:15 AM: Flight from Paris (CDG) to Rome (FCO)
+- Arrive in Rome at 12:30 PM
+- Check-in at Roman Retreat
+- Afternoon: Rest and explore the neighborhood
+
+### Day 5 (June 20) - Rome Exploration I
+- Full day at the Colosseum and Roman Forum (4.8/5 rating)
+- Evening: Dinner in Trastevere district
+
+### Day 6 (June 21) - Rome Exploration II
+- Full day at Vatican Museums (4.7/5 rating)
+- Visit St. Peter's Basilica
+- Evening: Dinner near Piazza Navona
+
+### Day 7 (June 22) - Final Day in Rome
+- Morning: Shopping and souvenir hunting
+- Afternoon: Relax at hotel pool
+- Evening: Farewell dinner
+
+## Total Budget Estimate
+- Flights: $1,001.00
+- Hotels: $1,110.00 (3 nights in Paris + 3 nights in Rome)
+- Daily expenses (food, attractions, transportation): ~$150/day = $1,050
+- **Total estimate: $3,161.00**
+
+This itinerary provides a balanced experience of both cities, allowing you to see the major attractions while also having time to relax and enjoy the local atmosphere.</code></pre>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Execution Trace</h2>
+            
+            <div class="example-trace">
+                <h3>Agent Planning and Execution Process</h3>
+                <div class="trace-viewer">
+                    <div class="trace-event">
+                        <div class="trace-event-type">plan</div>
+                        <div class="trace-event-data">[
+  "Search for flights from New York to Paris for the first day of the trip",
+  "Search for hotels in Paris for 3 nights",
+  "Find attractions to visit in Paris",
+  "Search for flights from Paris to Rome for the fourth day",
+  "Search for hotels in Rome for 3 nights",
+  "Find attractions to visit in Rome",
+  "Create a day-by-day itinerary for the entire trip"
+]</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.000Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">step_execution</div>
+                        <div class="trace-event-data">{
+  "step": "Search for flights from New York to Paris for the first day of the trip",
+  "tool": "search_flights",
+  "input": "{\"from\": \"New York\", \"to\": \"Paris\", \"date\": \"2025-06-15\"}",
+  "result": "[\n  {\n    \"airline\": \"Air France\",\n    \"flight_no\": \"AF123\",\n    \"departure\": \"JFK\",\n    \"arrival\": \"CDG\",\n    \"departure_at\": \"2025-06-15T18:30:00Z\",\n    \"arrival_at\": \"2025-06-16T08:00:00Z\",\n    \"price\": 850.5\n  },\n  {\n    \"airline\": \"Delta\",\n    \"flight_no\": \"DL456\",\n    \"departure\": \"JFK\",\n    \"arrival\": \"CDG\",\n    \"departure_at\": \"2025-06-15T21:45:00Z\",\n    \"arrival_at\": \"2025-06-16T11:15:00Z\",\n    \"price\": 790.75\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.100Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">step_execution</div>
+                        <div class="trace-event-data">{
+  "step": "Search for hotels in Paris for 3 nights",
+  "tool": "search_hotels",
+  "input": "{\"city\": \"Paris\", \"stars\": 3}",
+  "result": "[\n  {\n    \"name\": \"Hotel de Luxe\",\n    \"address\": \"123 Champs-Élysées, Paris\",\n    \"stars\": 5,\n    \"price\": 350,\n    \"features\": \"Spa, Restaurant, City View\"\n  },\n  {\n    \"name\": \"Cozy Parisian Inn\",\n    \"address\": \"45 Rue de Rivoli, Paris\",\n    \"stars\": 3,\n    \"price\": 150,\n    \"features\": \"Free Wifi, Breakfast Included\"\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.200Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">step_execution</div>
+                        <div class="trace-event-data">{
+  "step": "Find attractions to visit in Paris",
+  "tool": "find_attractions",
+  "input": "{\"city\": \"Paris\"}",
+  "result": "[\n  {\n    \"name\": \"Eiffel Tower\",\n    \"description\": \"Iconic iron tower built in 1889\",\n    \"category\": \"landmark\",\n    \"rating\": 4.7\n  },\n  {\n    \"name\": \"Louvre Museum\",\n    \"description\": \"World's largest art museum and historic monument\",\n    \"category\": \"museum\",\n    \"rating\": 4.8\n  },\n  {\n    \"name\": \"Le Jules Verne\",\n    \"description\": \"Upscale French restaurant in the Eiffel Tower\",\n    \"category\": \"restaurant\",\n    \"rating\": 4.5\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.300Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">step_execution</div>
+                        <div class="trace-event-data">{
+  "step": "Search for flights from Paris to Rome for the fourth day",
+  "tool": "search_flights",
+  "input": "{\"from\": \"Paris\", \"to\": \"Rome\", \"date\": \"2025-06-20\"}",
+  "result": "[\n  {\n    \"airline\": \"Alitalia\",\n    \"flight_no\": \"AZ789\",\n    \"departure\": \"CDG\",\n    \"arrival\": \"FCO\",\n    \"departure_at\": \"2025-06-20T10:15:00Z\",\n    \"arrival_at\": \"2025-06-20T12:30:00Z\",\n    \"price\": 210.25\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.400Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">step_execution</div>
+                        <div class="trace-event-data">{
+  "step": "Search for hotels in Rome for 3 nights",
+  "tool": "search_hotels",
+  "input": "{\"city\": \"Rome\", \"stars\": 3}",
+  "result": "[\n  {\n    \"name\": \"Roman Retreat\",\n    \"address\": \"78 Via Veneto, Rome\",\n    \"stars\": 4,\n    \"price\": 220,\n    \"features\": \"Pool, Restaurant, Historic Building\"\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.500Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">step_execution</div>
+                        <div class="trace-event-data">{
+  "step": "Find attractions to visit in Rome",
+  "tool": "find_attractions",
+  "input": "{\"city\": \"Rome\"}",
+  "result": "[\n  {\n    \"name\": \"Colosseum\",\n    \"description\": \"Ancient amphitheater built in 70-80 AD\",\n    \"category\": \"landmark\",\n    \"rating\": 4.8\n  },\n  {\n    \"name\": \"Vatican Museums\",\n    \"description\": \"Museums displaying works from the extensive collection of the Catholic Church\",\n    \"category\": \"museum\",\n    \"rating\": 4.7\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.600Z</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Key Takeaways</h2>
+            <ul>
+                <li>The Plan-and-Execute pattern is well-suited for complex planning tasks that benefit from upfront planning.</li>
+                <li>By separating the planning and execution phases, the agent can create a coherent plan before taking any actions.</li>
+                <li>Specialized tools for different aspects of travel planning (flights, hotels, attractions) allow the agent to gather all necessary information.</li>
+                <li>The final output combines all the gathered information into a comprehensive and well-structured travel itinerary.</li>
+            </ul>
+            
+            <div class="cta-buttons centered">
+                <a href="code.html" class="btn primary">Next Example: Code Exploration</a>
+                <a href="../tutorial/travel_agent.html" class="btn secondary">Build Your Own Travel Planning Agent</a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GoAgent</h2>
+                    <p>A powerful LLM agent framework for Go</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="../guide/index.html">Guide</a></li>
+                            <li><a href="../tutorial/index.html">Tutorials</a></li>
+                            <li><a href="../examples/index.html">Examples</a></li>
+                            <li><a href="../api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-column">
+                        <h3>Community</h3>
+                        <ul>
+                            <li><a href="https://github.com/goagent/framework">GitHub</a></li>
+                            <li><a href="https://github.com/goagent/framework/issues">Issues</a></li>
+                            <li><a href="https://github.com/goagent/framework/discussions">Discussions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GoAgent Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

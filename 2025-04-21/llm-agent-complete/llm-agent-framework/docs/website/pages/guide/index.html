@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide - GoAgent Framework</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>GoAgent</h1>
+                <p>A powerful LLM agent framework for Go</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../guide/index.html" class="active">Guide</a></li>
+                    <li><a href="../tutorial/index.html">Tutorials</a></li>
+                    <li><a href="../examples/index.html">Examples</a></li>
+                    <li><a href="../api/index.html">API Reference</a></li>
+                    <li><a href="https://github.com/goagent/framework" class="github-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="doc-container">
+            <div class="doc-sidebar">
+                <ul>
+                    <li><a href="#introduction" class="active">Introduction</a></li>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#core-concepts">Core Concepts</a></li>
+                    <li><a href="#agent-patterns">Agent Patterns</a></li>
+                    <li><a href="#llm-integration">LLM Integration</a></li>
+                    <li><a href="#tools">Tools</a></li>
+                    <li><a href="#memory">Memory</a></li>
+                    <li><a href="#tracing">Tracing</a></li>
+                    <li><a href="#advanced-usage">Advanced Usage</a></li>
+                </ul>
+            </div>
+            <div class="doc-content">
+                <h1>GoAgent Framework Guide</h1>
+                
+                <section id="introduction">
+                    <h2>Introduction</h2>
+                    <p>GoAgent is a flexible, extensible framework for building LLM-powered agents in Go. It provides the building blocks for creating intelligent agents that can perform complex tasks by leveraging large language models (LLMs) and custom tools.</p>
+                    
+                    <p>This guide will walk you through the core concepts of the framework and show you how to build your own agents.</p>
+                </section>
+                
+                <section id="installation">
+                    <h2>Installation</h2>
+                    <p>To install the GoAgent framework, use the <code>go get</code> command:</p>
+                    
+                    <pre><code class="language-bash">go get github.com/goagent/framework</code></pre>
+                    
+                    <p>The framework requires Go 1.18 or later.</p>
+                </section>
+                
+                <section id="core-concepts">
+                    <h2>Core Concepts</h2>
+                    <p>The GoAgent framework is built around several core concepts:</p>
+                    
+                    <h3>Agents</h3>
+                    <p>Agents are the central components that orchestrate the interaction between LLMs, tools, and memory. They implement specific reasoning patterns like ReAct or Plan-and-Execute.</p>
+                    
+                    <h3>LLMs</h3>
+                    <p>Large Language Models (LLMs) provide the reasoning capabilities for agents. The framework includes interfaces for integrating with various LLM providers.</p>
+                    
+                    <h3>Tools</h3>
+                    <p>Tools are functions that agents can use to interact with the external world or perform specific tasks. Examples include web search, file operations, and API calls.</p>
+                    
+                    <h3>Memory</h3>
+                    <p>Memory systems allow agents to store and retrieve information across interactions. The framework supports vector-based memory for semantic retrieval.</p>
+                    
+                    <h3>Tracing</h3>
+                    <p>Tracing provides visibility into agent execution, capturing thoughts, actions, and results for debugging and analysis.</p>
+                </section>
+                
+                <section id="agent-patterns">
+                    <h2>Agent Patterns</h2>
+                    <p>The framework supports multiple agent patterns, each with its own approach to problem-solving:</p>
+                    
+                    <h3>ReAct Pattern</h3>
+                    <p>The ReAct (Reasoning + Acting) pattern interleaves reasoning and action steps. The agent thinks about what to do, takes an action, observes the result, and repeats until it reaches a conclusion.</p>
+                    
+                    <pre><code class="language-go">// Create a ReAct agent
+reactAgent := agent.NewReActAgent(llmModel, 10)
+
+// Add tools
+reactAgent.AddTool(webSearch)
+reactAgent.AddTool(calculator)
+
+// Run the agent
+result, err := reactAgent.Run(ctx, "What is the population of France plus Germany?")</code></pre>
+                    
+                    <h3>Plan-and-Execute Pattern</h3>
+                    <p>The Plan-and-Execute pattern first creates a plan with multiple steps, then executes each step sequentially. This is useful for complex tasks that benefit from upfront planning.</p>
+                    
+                    <pre><code class="language-go">// Create a Plan-and-Execute agent
+planExecAgent := agent.NewPlanAndExecuteAgent(plannerLLM, executorLLM, 10)
+
+// Add tools
+planExecAgent.AddTool(webSearch)
+planExecAgent.AddTool(calculator)
+
+// Run the agent
+result, err := planExecAgent.Run(ctx, "Plan a trip to Paris for 3 days.")</code></pre>
+                </section>
+                
+                <section id="llm-integration">
+                    <h2>LLM Integration</h2>
+                    <p>The framework provides a flexible interface for integrating with different LLM providers:</p>
+                    
+                    <pre><code class="language-go">// LLM interface
+type LLM interface {
+    // Generate generates a response to the given messages
+    Generate(ctx context.Context, messages []types.Message) (string, error)
+    
+    // GenerateWithStream generates a response with streaming
+    GenerateWithStream(ctx context.Context, messages []types.Message) (&lt;-chan string, error)
+    
+    // GenerateEmbedding generates an embedding for the given text
+    GenerateEmbedding(ctx context.Context, text string) ([]float32, error)
+}</code></pre>
+                    
+                    <p>The framework includes a mock LLM implementation for testing, and you can implement this interface to connect to any LLM provider:</p>
+                    
+                    <pre><code class="language-go">// Create a mock LLM
+mockLLM := llm.NewMockLLM()
+
+// Add responses for testing
+mockLLM.AddResponse("What is 2+2?", "2+2 equals 4")</code></pre>
+                </section>
+                
+                <section id="tools">
+                    <h2>Tools</h2>
+                    <p>Tools are functions that agents can use to perform specific tasks. The framework provides a simple interface for creating custom tools:</p>
+                    
+                    <pre><code class="language-go">// Tool interface
+type Tool interface {
+    // Name returns the name of the tool
+    Name() string
+    
+    // Description returns the description of the tool
+    Description() string
+    
+    // Execute executes the tool with the given input
+    Execute(ctx context.Context, input string) (string, error)
+    
+    // Parameters returns the parameters schema for the tool
+    Parameters() map[string]types.ParameterSchema
+}</code></pre>
+                    
+                    <p>Here's an example of implementing a simple calculator tool:</p>
+                    
+                    <pre><code class="language-go">type CalculatorTool struct{}
+
+func (t *CalculatorTool) Name() string {
+    return "calculator"
+}
+
+func (t *CalculatorTool) Description() string {
+    return "Perform mathematical calculations"
+}
+
+func (t *CalculatorTool) Execute(ctx context.Context, input string) (string, error) {
+    var params struct {
+        Expression string `json:"expression"`
+    }
+    
+    if err := json.Unmarshal([]byte(input), &params); err != nil {
+        return "", fmt.Errorf("invalid input: %w", err)
+    }
+    
+    // Use a math expression evaluator library to calculate the result
+    result, err := evaluateExpression(params.Expression)
+    if err != nil {
+        return "", err
+    }
+    
+    return fmt.Sprintf("%v", result), nil
+}
+
+func (t *CalculatorTool) Parameters() map[string]types.ParameterSchema {
+    return map[string]types.ParameterSchema{
+        "expression": {
+            Type:        "string",
+            Description: "The mathematical expression to evaluate",
+            Required:    true,
+        },
+    }
+}</code></pre>
+                </section>
+                
+                <section id="memory">
+                    <h2>Memory</h2>
+                    <p>Memory systems allow agents to store and retrieve information across interactions. The framework supports vector-based memory for semantic retrieval:</p>
+                    
+                    <pre><code class="language-go">// Memory interface
+type Memory interface {
+    // Add adds a memory entry
+    Add(ctx context.Context, entry types.MemoryEntry) error
+    
+    // Search searches for memory entries similar to the query
+    Search(ctx context.Context, query string, limit int) ([]types.MemoryEntry, error)
+    
+    // Get gets a memory entry by ID
+    Get(ctx context.Context, id string) (types.MemoryEntry, error)
+}</code></pre>
+                    
+                    <p>Using memory in an agent:</p>
+                    
+                    <pre><code class="language-go">// Create a vector memory
+vectorMem, err := memory.NewSimpleVectorMemory(llmModel)
+if err != nil {
+    // Handle error
+}
+
+// Add a memory entry
+err = vectorMem.Add(ctx, types.MemoryEntry{
+    Content: "The capital of France is Paris.",
+    Metadata: map[string]string{
+        "source": "geography_knowledge",
+        "topic":  "capitals",
+    },
+})
+
+// Set the memory for an agent
+agent.SetMemory(vectorMem)</code></pre>
+                </section>
+                
+                <section id="tracing">
+                    <h2>Tracing</h2>
+                    <p>Tracing provides visibility into agent execution, capturing thoughts, actions, and results for debugging and analysis:</p>
+                    
+                    <pre><code class="language-go">// Tracer interface
+type Tracer interface {
+    // StartSpan starts a new span
+    StartSpan(ctx context.Context, name string) (context.Context, types.Span)
+    
+    // LogEvent logs an event
+    LogEvent(ctx context.Context, event types.Event)
+    
+    // GetEvents returns all events
+    GetEvents() []interface{}
+}</code></pre>
+                    
+                    <p>Accessing trace events after agent execution:</p>
+                    
+                    <pre><code class="language-go">// Run the agent
+result, err := agent.Run(ctx, "What is the capital of France?")
+
+// Get the trace events
+events := agent.BaseAgent.GetTracer().GetEvents()
+
+// Save the events to a file
+data, _ := json.MarshalIndent(events, "", "  ")
+os.WriteFile("trace.json", data, 0644)</code></pre>
+                </section>
+                
+                <section id="advanced-usage">
+                    <h2>Advanced Usage</h2>
+                    
+                    <h3>Streaming Responses</h3>
+                    <p>For long-running tasks, you can use streaming responses to get incremental updates:</p>
+                    
+                    <pre><code class="language-go">// Run the agent with streaming
+responseChan, err := agent.RunWithStream(ctx, "Research the history of artificial intelligence")
+if err != nil {
+    // Handle error
+}
+
+// Process streaming responses
+for response := range responseChan {
+    switch response.Type {
+    case "thinking":
+        fmt.Printf("Thinking: %s\n", response.Content)
+    case "tool_call":
+        fmt.Printf("Calling tool: %s\n", response.ToolCall.Name)
+    case "tool_result":
+        fmt.Printf("Tool result: %s\n", response.ToolResult.Output)
+    case "final":
+        fmt.Printf("Final answer: %s\n", response.Content)
+    case "error":
+        fmt.Printf("Error: %s\n", response.Content)
+    }
+}</code></pre>
+                    
+                    <h3>Parallel Tool Execution</h3>
+                    <p>For efficiency, you can execute tools in parallel:</p>
+                    
+                    <pre><code class="language-go">// Create a tool executor with parallel execution
+toolExecutor := tools.NewToolExecutor(tools.WithParallelExecution(true))
+
+// Add tools
+toolExecutor.AddTool(webSearch)
+toolExecutor.AddTool(calculator)
+
+// Execute multiple tools in parallel
+results, err := toolExecutor.ExecuteMultiple(ctx, map[string]string{
+    "web_search": `{"query": "population of France"}`,
+    "calculator": `{"expression": "67 + 83"}`,
+})</code></pre>
+                </section>
+                
+                <div class="doc-nav">
+                    <a href="../tutorial/index.html" class="next">Next: Tutorials</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GoAgent</h2>
+                    <p>A powerful LLM agent framework for Go</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="../guide/index.html">Guide</a></li>
+                            <li><a href="../tutorial/index.html">Tutorials</a></li>
+                            <li><a href="../examples/index.html">Examples</a></li>
+                            <li><a href="../api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-column">
+                        <h3>Community</h3>
+                        <ul>
+                            <li><a href="https://github.com/goagent/framework">GitHub</a></li>
+                            <li><a href="https://github.com/goagent/framework/issues">Issues</a></li>
+                            <li><a href="https://github.com/goagent/framework/discussions">Discussions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GoAgent Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

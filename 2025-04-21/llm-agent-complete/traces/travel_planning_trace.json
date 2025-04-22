@@ -1,0 +1,20 @@
+[
+  {
+    "name": "PlanAndExecuteAgent.Run",
+    "span_id": "79062a99-72bc-4f0f-ac2c-7dd4e0d5a6ff",
+    "timestamp": 1745267662819990141,
+    "type": "span_start"
+  },
+  {
+    "type": "plan",
+    "data": null,
+    "timestamp": 1745267662819999792
+  },
+  {
+    "duration": 15546,
+    "name": "PlanAndExecuteAgent.Run",
+    "span_id": "79062a99-72bc-4f0f-ac2c-7dd4e0d5a6ff",
+    "timestamp": 1745267662820005687,
+    "type": "span_end"
+  }
+]

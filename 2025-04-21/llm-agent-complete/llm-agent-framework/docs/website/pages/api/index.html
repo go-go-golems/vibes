@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - GoAgent Framework</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>GoAgent</h1>
+                <p>A powerful LLM agent framework for Go</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../guide/index.html">Guide</a></li>
+                    <li><a href="../tutorial/index.html">Tutorials</a></li>
+                    <li><a href="../examples/index.html">Examples</a></li>
+                    <li><a href="../api/index.html" class="active">API Reference</a></li>
+                    <li><a href="https://github.com/goagent/framework" class="github-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="doc-container">
+            <div class="doc-sidebar">
+                <ul>
+                    <li><a href="#agent" class="active">Agent</a></li>
+                    <li><a href="#llm">LLM</a></li>
+                    <li><a href="#tools">Tools</a></li>
+                    <li><a href="#memory">Memory</a></li>
+                    <li><a href="#tracing">Tracing</a></li>
+                    <li><a href="#types">Types</a></li>
+                </ul>
+            </div>
+            <div class="doc-content">
+                <h1>API Reference</h1>
+                <p>This page provides detailed documentation for all the components of the GoAgent framework.</p>
+                
+                <section id="agent">
+                    <h2>Agent</h2>
+                    <p>The agent package provides implementations of different agent patterns.</p>
+                    
+                    <h3>BaseAgent</h3>
+                    <pre><code class="language-go">// BaseAgent provides common functionality for all agent types
+type BaseAgent struct {
+    tools  []tools.Tool
+    memory memory.Memory
+    tracer tracing.Tracer
+}
+
+// AddTool adds a tool to the agent
+func (a *BaseAgent) AddTool(tool tools.Tool)
+
+// SetMemory sets the memory for the agent
+func (a *BaseAgent) SetMemory(mem memory.Memory)
+
+// SetTracer sets the tracer for the agent
+func (a *BaseAgent) SetTracer(tracer tracing.Tracer)
+
+// GetTools returns the tools available to the agent
+func (a *BaseAgent) GetTools() []tools.Tool
+
+// GetMemory returns the memory used by the agent
+func (a *BaseAgent) GetMemory() memory.Memory
+
+// GetTracer returns the tracer used by the agent
+func (a *BaseAgent) GetTracer() tracing.Tracer</code></pre>
+                    
+                    <h3>ReActAgent</h3>
+                    <pre><code class="language-go">// ReActAgent implements the ReAct (Reasoning + Acting) pattern
+type ReActAgent struct {
+    BaseAgent
+    llm         llm.LLM
+    maxSteps    int
+}
+
+// NewReActAgent creates a new ReAct agent
+func NewReActAgent(llmModel llm.LLM, maxSteps int) *ReActAgent
+
+// Run runs the agent with the given input
+func (a *ReActAgent) Run(ctx context.Context, input string) (string, error)
+
+// RunWithStream runs the agent with the given input and returns a stream of responses
+func (a *ReActAgent) RunWithStream(ctx context.Context, input string) (<-chan types.AgentResponse, error)</code></pre>
+                    
+                    <h3>PlanAndExecuteAgent</h3>
+                    <pre><code class="language-go">// PlanAndExecuteAgent implements the Plan-and-Execute pattern
+type PlanAndExecuteAgent struct {
+    BaseAgent
+    plannerLLM  llm.LLM
+    executorLLM llm.LLM
+    maxSteps    int
+}
+
+// NewPlanAndExecuteAgent creates a new Plan-and-Execute agent
+func NewPlanAndExecuteAgent(plannerLLM, executorLLM llm.LLM, maxSteps int) *PlanAndExecuteAgent
+
+// Run runs the agent with the given input
+func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, error)
+
+// RunWithStream runs the agent with the given input and returns a stream of responses
+func (a *PlanAndExecuteAgent) RunWithStream(ctx context.Context, input string) (<-chan types.AgentResponse, error)</code></pre>
+                </section>
+                
+                <section id="llm">
+                    <h2>LLM</h2>
+                    <p>The llm package provides interfaces and implementations for interacting with large language models.</p>
+                    
+                    <h3>LLM Interface</h3>
+                    <pre><code class="language-go">// LLM interface defines methods for interacting with large language models
+type LLM interface {
+    // Generate generates a response to the given messages
+    Generate(ctx context.Context, messages []types.Message) (string, error)
+    
+    // GenerateWithStream generates a response with streaming
+    GenerateWithStream(ctx context.Context, messages []types.Message) (<-chan string, error)
+    
+    // GenerateEmbedding generates an embedding for the given text
+    GenerateEmbedding(ctx context.Context, text string) ([]float32, error)
+}</code></pre>
+                    
+                    <h3>MockLLM</h3>
+                    <pre><code class="language-go">// MockLLM is a mock implementation of the LLM interface for testing
+type MockLLM struct {
+    responses map[string]string
+}
+
+// NewMockLLM creates a new mock LLM
+func NewMockLLM() *MockLLM
+
+// AddResponse adds a response for a specific input
+func (m *MockLLM) AddResponse(input, response string)
+
+// Generate generates a response to the given messages
+func (m *MockLLM) Generate(ctx context.Context, messages []types.Message) (string, error)
+
+// GenerateWithStream generates a response with streaming
+func (m *MockLLM) GenerateWithStream(ctx context.Context, messages []types.Message) (<-chan string, error)
+
+// GenerateEmbedding generates an embedding for the given text
+func (m *MockLLM) GenerateEmbedding(ctx context.Context, text string) ([]float32, error)</code></pre>
+                </section>
+                
+                <section id="tools">
+                    <h2>Tools</h2>
+                    <p>The tools package provides interfaces and implementations for tools that agents can use.</p>
+                    
+                    <h3>Tool Interface</h3>
+                    <pre><code class="language-go">// Tool interface defines methods for tools that agents can use
+type Tool interface {
+    // Name returns the name of the tool
+    Name() string
+    
+    // Description returns the description of the tool
+    Description() string
+    
+    // Execute executes the tool with the given input
+    Execute(ctx context.Context, input string) (string, error)
+    
+    // Parameters returns the parameters schema for the tool
+    Parameters() map[string]types.ParameterSchema
+}</code></pre>
+                    
+                    <h3>ToolExecutor</h3>
+                    <pre><code class="language-go">// ToolExecutor executes tools
+type ToolExecutor struct {
+    tools            map[string]Tool
+    parallelExecution bool
+}
+
+// NewToolExecutor creates a new tool executor
+func NewToolExecutor(opts ...ToolExecutorOption) *ToolExecutor
+
+// WithParallelExecution sets whether to execute tools in parallel
+func WithParallelExecution(parallel bool) ToolExecutorOption
+
+// AddTool adds a tool to the executor
+func (e *ToolExecutor) AddTool(tool Tool)
+
+// Execute executes a tool with the given name and input
+func (e *ToolExecutor) Execute(ctx context.Context, name, input string) (string, error)
+
+// ExecuteMultiple executes multiple tools in parallel
+func (e *ToolExecutor) ExecuteMultiple(ctx context.Context, inputs map[string]string) (map[string]string, error)</code></pre>
+                </section>
+                
+                <section id="memory">
+                    <h2>Memory</h2>
+                    <p>The memory package provides interfaces and implementations for agent memory systems.</p>
+                    
+                    <h3>Memory Interface</h3>
+                    <pre><code class="language-go">// Memory interface defines methods for agent memory systems
+type Memory interface {
+    // Add adds a memory entry
+    Add(ctx context.Context, entry types.MemoryEntry) error
+    
+    // Search searches for memory entries similar to the query
+    Search(ctx context.Context, query string, limit int) ([]types.MemoryEntry, error)
+    
+    // Get gets a memory entry by ID
+    Get(ctx context.Context, id string) (types.MemoryEntry, error)
+}</code></pre>
+                    
+                    <h3>SimpleVectorMemory</h3>
+                    <pre><code class="language-go">// SimpleVectorMemory is a simple implementation of the Memory interface using vector embeddings
+type SimpleVectorMemory struct {
+    llm       llm.LLM
+    entries   []types.MemoryEntry
+    embeddings [][]float32
+}
+
+// NewSimpleVectorMemory creates a new simple vector memory
+func NewSimpleVectorMemory(llmModel llm.LLM) (*SimpleVectorMemory, error)
+
+// Add adds a memory entry
+func (m *SimpleVectorMemory) Add(ctx context.Context, entry types.MemoryEntry) error
+
+// Search searches for memory entries similar to the query
+func (m *SimpleVectorMemory) Search(ctx context.Context, query string, limit int) ([]types.MemoryEntry, error)
+
+// Get gets a memory entry by ID
+func (m *SimpleVectorMemory) Get(ctx context.Context, id string) (types.MemoryEntry, error)</code></pre>
+                </section>
+                
+                <section id="tracing">
+                    <h2>Tracing</h2>
+                    <p>The tracing package provides interfaces and implementations for tracing agent execution.</p>
+                    
+                    <h3>Tracer Interface</h3>
+                    <pre><code class="language-go">// Tracer interface defines methods for tracing agent execution
+type Tracer interface {
+    // StartSpan starts a new span
+    StartSpan(ctx context.Context, name string) (context.Context, types.Span)
+    
+    // LogEvent logs an event
+    LogEvent(ctx context.Context, event types.Event)
+    
+    // GetEvents returns all events
+    GetEvents() []interface{}
+}</code></pre>
+                    
+                    <h3>SimpleTracer</h3>
+                    <pre><code class="language-go">// SimpleTracer is a simple implementation of the Tracer interface
+type SimpleTracer struct {
+    events []interface{}
+    mu     sync.Mutex
+}
+
+// NewSimpleTracer creates a new simple tracer
+func NewSimpleTracer() *SimpleTracer
+
+// StartSpan starts a new span
+func (t *SimpleTracer) StartSpan(ctx context.Context, name string) (context.Context, types.Span)
+
+// LogEvent logs an event
+func (t *SimpleTracer) LogEvent(ctx context.Context, event types.Event)
+
+// GetEvents returns all events
+func (t *SimpleTracer) GetEvents() []interface{}</code></pre>
+                </section>
+                
+                <section id="types">
+                    <h2>Types</h2>
+                    <p>The types package provides common types used throughout the framework.</p>
+                    
+                    <h3>Message</h3>
+                    <pre><code class="language-go">// Message represents a message in a conversation
+type Message struct {
+    Role    string `json:"role"`
+    Content string `json:"content"`
+}</code></pre>
+                    
+                    <h3>MemoryEntry</h3>
+                    <pre><code class="language-go">// MemoryEntry represents an entry in memory
+type MemoryEntry struct {
+    ID       string            `json:"id"`
+    Content  string            `json:"content"`
+    Metadata map[string]string `json:"metadata"`
+    Created  time.Time         `json:"created"`
+}</code></pre>
+                    
+                    <h3>ParameterSchema</h3>
+                    <pre><code class="language-go">// ParameterSchema represents the schema for a parameter
+type ParameterSchema struct {
+    Type        string `json:"type"`
+    Description string `json:"description"`
+    Required    bool   `json:"required"`
+}</code></pre>
+                    
+                    <h3>AgentResponse</h3>
+                    <pre><code class="language-go">// AgentResponse represents a response from an agent
+type AgentResponse struct {
+    Type      string    `json:"type"`
+    Content   string    `json:"content"`
+    ToolCall  *ToolCall `json:"tool_call,omitempty"`
+    ToolResult *ToolResult `json:"tool_result,omitempty"`
+}</code></pre>
+                    
+                    <h3>Event</h3>
+                    <pre><code class="language-go">// Event represents an event in the tracing system
+type Event struct {
+    Type      string      `json:"type"`
+    Timestamp time.Time   `json:"timestamp"`
+    Data      interface{} `json:"data"`
+}</code></pre>
+                    
+                    <h3>Span</h3>
+                    <pre><code class="language-go">// Span represents a span in the tracing system
+type Span interface {
+    // End ends the span
+    End()
+}</code></pre>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GoAgent</h2>
+                    <p>A powerful LLM agent framework for Go</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="../guide/index.html">Guide</a></li>
+                            <li><a href="../tutorial/index.html">Tutorials</a></li>
+                            <li><a href="../examples/index.html">Examples</a></li>
+                            <li><a href="../api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-column">
+                        <h3>Community</h3>
+                        <ul>
+                            <li><a href="https://github.com/goagent/framework">GitHub</a></li>
+                            <li><a href="https://github.com/goagent/framework/issues">Issues</a></li>
+                            <li><a href="https://github.com/goagent/framework/discussions">Discussions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GoAgent Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

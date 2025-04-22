@@ -1,0 +1,225 @@
+[
+  {
+    "name": "ReActAgent.Run",
+    "span_id": "60e04723-b7f5-40c8-8c79-e1a214d7abcf",
+    "timestamp": 1745267662820171521,
+    "type": "span_start"
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820226022
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820227967
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820233482
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820249550
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820264327
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820265092
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820272506
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820273182
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820288775
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820289464
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820304193
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820304817
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820321838
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820322513
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820360600
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820409965
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820439697
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820440548
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820475150
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820475842
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820505873
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820506545
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820550066
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820550784
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820590380
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820591034
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820648447
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820649117
+  },
+  {
+    "type": "thought",
+    "data": "",
+    "timestamp": 1745267662820725941
+  },
+  {
+    "type": "tool_execution",
+    "data": {
+      "input": "",
+      "result": "Error: tool not found: ",
+      "tool": ""
+    },
+    "timestamp": 1745267662820727348
+  },
+  {
+    "duration": 556118,
+    "name": "ReActAgent.Run",
+    "span_id": "60e04723-b7f5-40c8-8c79-e1a214d7abcf",
+    "timestamp": 1745267662820727639,
+    "type": "span_end"
+  }
+]

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Example - GoAgent Framework</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>GoAgent</h1>
+                <p>A powerful LLM agent framework for Go</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../guide/index.html">Guide</a></li>
+                    <li><a href="../tutorial/index.html">Tutorials</a></li>
+                    <li><a href="../examples/index.html" class="active">Examples</a></li>
+                    <li><a href="../api/index.html">API Reference</a></li>
+                    <li><a href="https://github.com/goagent/framework" class="github-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="example-header">
+        <div class="container">
+            <h1>Research Agent Example</h1>
+            <p>This example demonstrates how to build an agent that can research information and write comprehensive articles.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="example-section">
+            <h2>Overview</h2>
+            <p>The Research Agent uses the ReAct pattern to gather information on a topic and synthesize it into a coherent article. It leverages web search tools to find relevant information and a file writing tool to save the final article.</p>
+            
+            <p>This example showcases:</p>
+            <ul>
+                <li>Using the ReAct agent pattern for research tasks</li>
+                <li>Integrating web search tools</li>
+                <li>Storing and retrieving information with vector memory</li>
+                <li>Generating coherent long-form content</li>
+            </ul>
+        </section>
+
+        <section class="example-section">
+            <h2>Implementation</h2>
+            
+            <div class="example-code">
+                <h3>Setting Up the Research Agent</h3>
+                <pre><code class="language-go">// SetupResearchAgent creates an agent for researching information and writing articles
+func SetupResearchAgent() (*agent.ReActAgent, error) {
+    // Create a mock LLM
+    mockLLM := llm.NewMockLLM()
+    
+    // Create a ReAct agent
+    reactAgent := agent.NewReActAgent(mockLLM, 10)
+    
+    // Create and add tools
+    webSearch := tools.NewWebSearchTool()
+    
+    // Add some mock search results
+    webSearch.AddSearchResults("climate change impacts", []tools.SearchResult{
+        {
+            Title:   "Climate Change Impacts - IPCC Report 2025",
+            URL:     "https://example.com/ipcc-report-2025",
+            Snippet: "The latest IPCC report shows accelerating impacts of climate change across all continents.",
+        },
+        {
+            Title:   "How Climate Change Affects Biodiversity",
+            URL:     "https://example.com/climate-biodiversity",
+            Snippet: "Research indicates that climate change is causing significant biodiversity loss worldwide.",
+        },
+    })
+    
+    webSearch.AddSearchResults("renewable energy solutions", []tools.SearchResult{
+        {
+            Title:   "Advances in Solar Technology 2025",
+            URL:     "https://example.com/solar-tech-2025",
+            Snippet: "New solar panel designs have achieved 35% efficiency, making them more viable than ever.",
+        },
+        {
+            Title:   "Wind Energy Growth Worldwide",
+            URL:     "https://example.com/wind-energy-growth",
+            Snippet: "Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries.",
+        },
+    })
+    
+    // Create a file tool for writing content
+    fileTool := &MockFileTool{
+        name:        "write_file",
+        description: "Write content to a file",
+        files:       make(map[string]string),
+    }
+    
+    // Add tools to the agent
+    reactAgent.AddTool(webSearch)
+    reactAgent.AddTool(fileTool)
+    
+    // Create and set up vector memory
+    vectorMem, err := memory.NewSimpleVectorMemory(mockLLM)
+    if err != nil {
+        return nil, err
+    }
+    
+    // Add some initial memories
+    err = vectorMem.Add(context.Background(), types.MemoryEntry{
+        Content: "Climate change is causing rising sea levels and more extreme weather events.",
+        Metadata: map[string]string{
+            "source": "previous_research",
+            "topic":  "climate_change",
+        },
+    })
+    if err != nil {
+        return nil, err
+    }
+    
+    // Set the memory
+    reactAgent.SetMemory(vectorMem)
+    
+    // Add responses to the mock LLM for the research scenario
+    addResearchResponses(mockLLM)
+    
+    return reactAgent, nil
+}</code></pre>
+            </div>
+            
+            <div class="example-code">
+                <h3>Running the Research Agent</h3>
+                <pre><code class="language-go">// Set up the research agent
+agent, err := examples.SetupResearchAgent()
+if err != nil {
+    fmt.Printf("Error setting up research agent: %v\n", err)
+    return
+}
+
+// Run the agent
+ctx := context.Background()
+result, err := agent.Run(ctx, "Research the latest information on climate change impacts and write a comprehensive article about it.")
+if err != nil {
+    fmt.Printf("Error running research agent: %v\n", err)
+    return
+}
+
+// Print the result
+fmt.Println(result)</code></pre>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Example Output</h2>
+            
+            <div class="example-result">
+                <h3>Research Result</h3>
+                <p>I've researched the latest information on climate change impacts and written a comprehensive article titled "The Accelerating Impact of Climate Change and the Promise of Renewable Energy." The article covers the latest findings from the 2025 IPCC report, which shows accelerating impacts across all continents, and discusses how climate change is causing significant biodiversity loss worldwide. It also explores recent advances in renewable energy solutions, including new solar panel designs achieving 35% efficiency and wind energy capacity growing by 25% in the past year. The article has been saved as 'climate_change_article.md'.</p>
+            </div>
+            
+            <div class="example-result">
+                <h3>Generated Article</h3>
+                <pre><code># The Accelerating Impact of Climate Change and the Promise of Renewable Energy
+
+## Introduction
+
+Climate change continues to be one of the most pressing challenges facing our planet. According to the latest IPCC Report 2025, the impacts of climate change are accelerating across all continents, affecting ecosystems, human health, and economic stability. This article explores the latest findings on climate change impacts and examines how renewable energy solutions are evolving to address this global crisis.
+
+## Recent Climate Change Impacts
+
+The latest IPCC report provides compelling evidence that climate change impacts are intensifying worldwide. These impacts include:
+
+- Rising global temperatures leading to more frequent and severe heatwaves
+- Increasing sea levels threatening coastal communities
+- More extreme weather events, including hurricanes, floods, and droughts
+- Accelerating loss of biodiversity and ecosystem disruption
+
+Research indicates that climate change is causing significant biodiversity loss worldwide. As temperatures rise and habitats change, many species are unable to adapt quickly enough, leading to population declines and potential extinctions. This loss of biodiversity has profound implications for ecosystem stability and resilience.
+
+## Renewable Energy Solutions
+
+Addressing climate change requires a transition away from fossil fuels toward renewable energy sources. Recent advances in renewable energy technology offer promising solutions:
+
+### Solar Energy
+
+New solar panel designs have achieved 35% efficiency, making them more viable than ever. This represents a significant improvement over previous generations of solar technology, which typically operated at 15-20% efficiency. Higher efficiency means more energy can be generated from the same amount of sunlight, reducing the cost per kilowatt-hour and making solar energy increasingly competitive with fossil fuels.
+
+### Wind Energy
+
+Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries. This rapid growth demonstrates the increasing economic viability of wind power as a clean energy solution. Improvements in turbine design, materials, and grid integration have all contributed to making wind energy one of the fastest-growing renewable energy sectors.
+
+## Conclusion
+
+The latest research on climate change impacts underscores the urgency of transitioning to a low-carbon economy. While the challenges are significant, advances in renewable energy technology provide hope that we can mitigate the worst effects of climate change. By accelerating the deployment of solar, wind, and other renewable energy sources, we can reduce greenhouse gas emissions while creating new economic opportunities.
+
+Addressing climate change will require coordinated action at all levels—from individual choices to international agreements. The latest scientific findings and technological advances give us the knowledge and tools we need to create a more sustainable future.</code></pre>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Execution Trace</h2>
+            
+            <div class="example-trace">
+                <h3>Agent Reasoning Process</h3>
+                <div class="trace-viewer">
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">I need to gather information about the latest climate change impacts. Let me search for recent information.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.000Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "web_search",
+  "input": "{\"query\": \"climate change impacts\"}",
+  "result": "[\n  {\n    \"title\": \"Climate Change Impacts - IPCC Report 2025\",\n    \"url\": \"https://example.com/ipcc-report-2025\",\n    \"snippet\": \"The latest IPCC report shows accelerating impacts of climate change across all continents.\"\n  },\n  {\n    \"title\": \"How Climate Change Affects Biodiversity\",\n    \"url\": \"https://example.com/climate-biodiversity\",\n    \"snippet\": \"Research indicates that climate change is causing significant biodiversity loss worldwide.\"\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.100Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">I've found some information about climate change impacts, including a reference to the latest IPCC report and information about biodiversity impacts. Let me search for information about renewable energy solutions as well, since that's an important part of addressing climate change.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.200Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "web_search",
+  "input": "{\"query\": \"renewable energy solutions\"}",
+  "result": "[\n  {\n    \"title\": \"Advances in Solar Technology 2025\",\n    \"url\": \"https://example.com/solar-tech-2025\",\n    \"snippet\": \"New solar panel designs have achieved 35% efficiency, making them more viable than ever.\"\n  },\n  {\n    \"title\": \"Wind Energy Growth Worldwide\",\n    \"url\": \"https://example.com/wind-energy-growth\",\n    \"snippet\": \"Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries.\"\n  }\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.300Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">Now I have information about both climate change impacts and renewable energy solutions. I can write a comprehensive article that covers the latest findings on climate change impacts and discusses potential solutions through renewable energy. Let me write the article.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.400Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "write_file",
+  "input": "{\"filename\": \"climate_change_article.md\", \"content\": \"# The Accelerating Impact of Climate Change and the Promise of Renewable Energy\\n\\n## Introduction\\n\\nClimate change continues to be one of the most pressing challenges facing our planet. According to the latest IPCC Report 2025, the impacts of climate change are accelerating across all continents, affecting ecosystems, human health, and economic stability. This article explores the latest findings on climate change impacts and examines how renewable energy solutions are evolving to address this global crisis.\\n\\n## Recent Climate Change Impacts\\n\\nThe latest IPCC report provides compelling evidence that climate change impacts are intensifying worldwide. These impacts include:\\n\\n- Rising global temperatures leading to more frequent and severe heatwaves\\n- Increasing sea levels threatening coastal communities\\n- More extreme weather events, including hurricanes, floods, and droughts\\n- Accelerating loss of biodiversity and ecosystem disruption\\n\\nResearch indicates that climate change is causing significant biodiversity loss worldwide. As temperatures rise and habitats change, many species are unable to adapt quickly enough, leading to population declines and potential extinctions. This loss of biodiversity has profound implications for ecosystem stability and resilience.\\n\\n## Renewable Energy Solutions\\n\\nAddressing climate change requires a transition away from fossil fuels toward renewable energy sources. Recent advances in renewable energy technology offer promising solutions:\\n\\n### Solar Energy\\n\\nNew solar panel designs have achieved 35% efficiency, making them more viable than ever. This represents a significant improvement over previous generations of solar technology, which typically operated at 15-20% efficiency. Higher efficiency means more energy can be generated from the same amount of sunlight, reducing the cost per kilowatt-hour and making solar energy increasingly competitive with fossil fuels.\\n\\n### Wind Energy\\n\\nWind energy capacity has grown by 25% in the past year, with significant installations in developing countries. This rapid growth demonstrates the increasing economic viability of wind power as a clean energy solution. Improvements in turbine design, materials, and grid integration have all contributed to making wind energy one of the fastest-growing renewable energy sectors.\\n\\n## Conclusion\\n\\nThe latest research on climate change impacts underscores the urgency of transitioning to a low-carbon economy. While the challenges are significant, advances in renewable energy technology provide hope that we can mitigate the worst effects of climate change. By accelerating the deployment of solar, wind, and other renewable energy sources, we can reduce greenhouse gas emissions while creating new economic opportunities.\\n\\nAddressing climate change will require coordinated action at all levels—from individual choices to international agreements. The latest scientific findings and technological advances give us the knowledge and tools we need to create a more sustainable future.\"}",
+  "result": "File 'climate_change_article.md' written successfully"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.500Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">I have successfully researched information about climate change impacts and renewable energy solutions, and written a comprehensive article about these topics. The article covers the latest findings from the IPCC report, discusses biodiversity loss due to climate change, and explores recent advances in solar and wind energy technology.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.600Z</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Key Takeaways</h2>
+            <ul>
+                <li>The ReAct pattern is well-suited for research tasks that require gathering and synthesizing information.</li>
+                <li>Vector memory allows the agent to incorporate prior knowledge and context into its reasoning.</li>
+                <li>By breaking down the research process into discrete steps (search, analyze, write), the agent can produce coherent and comprehensive content.</li>
+                <li>The tracing system provides visibility into the agent's reasoning process, making it easier to debug and improve.</li>
+            </ul>
+            
+            <div class="cta-buttons centered">
+                <a href="travel.html" class="btn primary">Next Example: Travel Planning</a>
+                <a href="../tutorial/research_agent.html" class="btn secondary">Build Your Own Research Agent</a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GoAgent</h2>
+                    <p>A powerful LLM agent framework for Go</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="../guide/index.html">Guide</a></li>
+                            <li><a href="../tutorial/index.html">Tutorials</a></li>
+                            <li><a href="../examples/index.html">Examples</a></li>
+                            <li><a href="../api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-column">
+                        <h3>Community</h3>
+                        <ul>
+                            <li><a href="https://github.com/goagent/framework">GitHub</a></li>
+                            <li><a href="https://github.com/goagent/framework/issues">Issues</a></li>
+                            <li><a href="https://github.com/goagent/framework/discussions">Discussions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GoAgent Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoAgent - LLM Agent Framework for Go</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>GoAgent</h1>
+                <p>A powerful LLM agent framework for Go</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="pages/guide/index.html">Guide</a></li>
+                    <li><a href="pages/tutorial/index.html">Tutorials</a></li>
+                    <li><a href="pages/examples/index.html">Examples</a></li>
+                    <li><a href="pages/api/index.html">API Reference</a></li>
+                    <li><a href="https://github.com/goagent/framework" class="github-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Build Intelligent Agents with Go</h2>
+                <p>GoAgent is a flexible, extensible framework for building LLM-powered agents in Go. Create agents that can research, plan, and solve complex problems.</p>
+                <div class="cta-buttons">
+                    <a href="pages/guide/index.html" class="btn primary">Get Started</a>
+                    <a href="pages/examples/index.html" class="btn secondary">View Examples</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="images/agent-diagram.svg" alt="GoAgent Framework Diagram">
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="images/icon-patterns.svg" alt="Agent Patterns">
+                    </div>
+                    <h3>Multiple Agent Patterns</h3>
+                    <p>Implement ReAct, Plan-and-Execute, and other agent patterns to solve different types of problems.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="images/icon-memory.svg" alt="Memory Systems">
+                    </div>
+                    <h3>Vector Memory</h3>
+                    <p>Store and retrieve information using vector embeddings for context-aware agents.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="images/icon-tools.svg" alt="Tool Integration">
+                    </div>
+                    <h3>Tool Integration</h3>
+                    <p>Easily extend your agents with custom tools to interact with external systems.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="images/icon-tracing.svg" alt="Tracing">
+                    </div>
+                    <h3>Execution Tracing</h3>
+                    <p>Debug and analyze agent behavior with detailed execution traces.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="examples-preview">
+        <div class="container">
+            <h2>Example Applications</h2>
+            <div class="examples-grid">
+                <div class="example-card">
+                    <h3>Research Agent</h3>
+                    <p>Create agents that can research topics and write comprehensive articles.</p>
+                    <pre><code class="language-go">agent, _ := examples.SetupResearchAgent()
+result, _ := agent.Run(ctx, "Research climate change impacts")</code></pre>
+                    <a href="pages/examples/research.html" class="btn secondary">Learn More</a>
+                </div>
+                <div class="example-card">
+                    <h3>Travel Planning</h3>
+                    <p>Build agents that can plan detailed travel itineraries with flights, hotels, and attractions.</p>
+                    <pre><code class="language-go">agent, _ := examples.SetupTravelPlanningAgent()
+result, _ := agent.Run(ctx, "Plan a trip to Europe")</code></pre>
+                    <a href="pages/examples/travel.html" class="btn secondary">Learn More</a>
+                </div>
+                <div class="example-card">
+                    <h3>Code Explorer</h3>
+                    <p>Develop agents that can explore and analyze codebases to understand their structure.</p>
+                    <pre><code class="language-go">agent, _ := examples.SetupCodeExplorationAgent()
+result, _ := agent.Run(ctx, "Explore this codebase")</code></pre>
+                    <a href="pages/examples/code.html" class="btn secondary">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="getting-started">
+        <div class="container">
+            <h2>Getting Started</h2>
+            <div class="code-example">
+                <pre><code class="language-bash"># Install the framework
+go get github.com/goagent/framework</code></pre>
+                <pre><code class="language-go">package main
+
+import (
+    "context"
+    "fmt"
+    "github.com/goagent/framework/goagent/agent"
+    "github.com/goagent/framework/goagent/llm"
+    "github.com/goagent/framework/goagent/tools"
+)
+
+func main() {
+    // Create a mock LLM
+    mockLLM := llm.NewMockLLM()
+    
+    // Create a ReAct agent
+    reactAgent := agent.NewReActAgent(mockLLM, 10)
+    
+    // Add a tool
+    webSearch := tools.NewWebSearchTool()
+    reactAgent.AddTool(webSearch)
+    
+    // Run the agent
+    ctx := context.Background()
+    result, _ := reactAgent.Run(ctx, "Search for information about Go programming")
+    
+    fmt.Println(result)
+}</code></pre>
+            </div>
+            <div class="cta-buttons centered">
+                <a href="pages/guide/index.html" class="btn primary">Read the Full Guide</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GoAgent</h2>
+                    <p>A powerful LLM agent framework for Go</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="pages/guide/index.html">Guide</a></li>
+                            <li><a href="pages/tutorial/index.html">Tutorials</a></li>
+                            <li><a href="pages/examples/index.html">Examples</a></li>
+                            <li><a href="pages/api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-column">
+                        <h3>Community</h3>
+                        <ul>
+                            <li><a href="https://github.com/goagent/framework">GitHub</a></li>
+                            <li><a href="https://github.com/goagent/framework/issues">Issues</a></li>
+                            <li><a href="https://github.com/goagent/framework/discussions">Discussions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GoAgent Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="js/main.js"></script>
+</body>
+</html>
