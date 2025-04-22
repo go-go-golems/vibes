@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Filling Co-Pilot</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .chat-message {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .user-message {
+            background-color: #e0f2fe;
+            text-align: right;
+        }
+        .assistant-message {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-4">Form Filling Co-Pilot</h1>
+        <p class="mb-6">This is a static demonstration of the Form Filling Co-Pilot application.</p>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">About This Project</h2>
+            <p class="mb-4">This application demonstrates a chat-based form filling assistant built with:</p>
+            <ul class="list-disc pl-6 mb-4">
+                <li>Frontend: Next.js with assistant-ui library</li>
+                <li>Backend: Golang with Gin framework</li>
+                <li>Features: Chat interface, form filling assistance, form submission</li>
+            </ul>
+            <p>The assistant helps users fill out forms by guiding them through the process in a conversational manner.</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Form Interface</h2>
+                <img src="form-interface.webp" alt="Form Interface" class="w-full rounded-md mb-4">
+                <p class="text-sm text-gray-600">The form interface allows users to enter their information directly.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Chat Interface</h2>
+                <img src="chat-interface.webp" alt="Chat Interface" class="w-full rounded-md mb-4">
+                <p class="text-sm text-gray-600">The chat interface allows users to interact with an AI assistant to fill out the form.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Filled Form</h2>
+                <img src="filled-form.webp" alt="Filled Form" class="w-full rounded-md mb-4">
+                <p class="text-sm text-gray-600">Example of a form filled out with user information.</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">Form Submission</h2>
+                <img src="form-submission.webp" alt="Form Submission" class="w-full rounded-md mb-4">
+                <p class="text-sm text-gray-600">The form can be submitted to the backend for processing.</p>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-xl font-semibold mb-4">Architecture</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Frontend</h3>
+                    <ul class="list-disc pl-6">
+                        <li>Next.js framework</li>
+                        <li>assistant-ui library for chat interface</li>
+                        <li>Tailwind CSS for styling</li>
+                        <li>React Hook Form for form handling</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Backend</h3>
+                    <ul class="list-disc pl-6">
+                        <li>Golang programming language</li>
+                        <li>Gin web framework</li>
+                        <li>RESTful API endpoints</li>
+                        <li>Mock AI response generation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mt-8">
+            <h2 class="text-xl font-semibold mb-4">Chat Demo</h2>
+            <div class="border rounded-md p-4 mb-4 h-64 overflow-y-auto">
+                <div class="chat-message assistant-message">
+                    <p>Hello! I'm here to help you fill out the form. What's your name?</p>
+                </div>
+                <div class="chat-message user-message">
+                    <p>My name is John Doe</p>
+                </div>
+                <div class="chat-message assistant-message">
+                    <p>Great! I'll fill in your name as John Doe. What's your email address?</p>
+                </div>
+                <div class="chat-message user-message">
+                    <p>john.doe@example.com</p>
+                </div>
+                <div class="chat-message assistant-message">
+                    <p>Thanks! I've added your email. What city do you live in?</p>
+                </div>
+                <div class="chat-message user-message">
+                    <p>New York</p>
+                </div>
+                <div class="chat-message assistant-message">
+                    <p>Perfect! And do you have any project ideas you'd like to share?</p>
+                </div>
+                <div class="chat-message user-message">
+                    <p>I'd like to build an AI-powered form assistant</p>
+                </div>
+                <div class="chat-message assistant-message">
+                    <p>That sounds like a great project! I've filled in all your information. Would you like to submit the form now?</p>
+                </div>
+            </div>
+            <div class="flex">
+                <input type="text" placeholder="Type your message..." class="flex-1 rounded-l-md border border-gray-300 p-2 text-sm" disabled>
+                <button class="rounded-r-md bg-blue-500 px-4 py-2 text-sm text-white" disabled>Send</button>
+            </div>
+        </div>
+        
+        <footer class="mt-8 text-center text-gray-600 text-sm">
+            <p>Form Filling Co-Pilot - Built with assistant-ui and Golang</p>
+        </footer>
+    </div>
+</body>
+</html>
