@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .box { fill: #ffffff; stroke: #2563eb; stroke-width: 2; }
+    .arrow { fill: none; stroke: #2563eb; stroke-width: 2; }
+    .label { font-family: sans-serif; font-size: 14px; fill: #1f2937; text-anchor: middle; }
+    .title { font-family: sans-serif; font-size: 16px; font-weight: bold; fill: #2563eb; text-anchor: middle; }
+  </style>
+  
+  <!-- Title -->
+  <text x="200" y="30" class="title">GoAgent Framework Architecture</text>
+  
+  <!-- Agent Box -->
+  <rect x="150" y="50" width="100" height="50" rx="5" class="box"/>
+  <text x="200" y="80" class="label">Agent</text>
+  
+  <!-- LLM Box -->
+  <rect x="50" y="150" width="80" height="40" rx="5" class="box"/>
+  <text x="90" y="175" class="label">LLM</text>
+  
+  <!-- Tools Box -->
+  <rect x="160" y="150" width="80" height="40" rx="5" class="box"/>
+  <text x="200" y="175" class="label">Tools</text>
+  
+  <!-- Memory Box -->
+  <rect x="270" y="150" width="80" height="40" rx="5" class="box"/>
+  <text x="310" y="175" class="label">Memory</text>
+  
+  <!-- Tracing Box -->
+  <rect x="150" y="230" width="100" height="40" rx="5" class="box"/>
+  <text x="200" y="255" class="label">Tracing</text>
+  
+  <!-- Arrows -->
+  <path d="M 200 100 L 200 120 L 90 120 L 90 150" class="arrow" marker-end="url(#arrowhead)"/>
+  <path d="M 200 100 L 200 150" class="arrow" marker-end="url(#arrowhead)"/>
+  <path d="M 200 100 L 200 120 L 310 120 L 310 150" class="arrow" marker-end="url(#arrowhead)"/>
+  <path d="M 200 190 L 200 230" class="arrow" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrowhead marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+    </marker>
+  </defs>
+</svg>

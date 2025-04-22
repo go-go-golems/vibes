@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Exploration Example - GoAgent Framework</title>
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>GoAgent</h1>
+                <p>A powerful LLM agent framework for Go</p>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                    <li><a href="../guide/index.html">Guide</a></li>
+                    <li><a href="../tutorial/index.html">Tutorials</a></li>
+                    <li><a href="../examples/index.html" class="active">Examples</a></li>
+                    <li><a href="../api/index.html">API Reference</a></li>
+                    <li><a href="https://github.com/goagent/framework" class="github-link">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="example-header">
+        <div class="container">
+            <h1>Code Exploration Agent Example</h1>
+            <p>This example demonstrates how to build an agent that can explore and analyze codebases to understand their structure and functionality.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="example-section">
+            <h2>Overview</h2>
+            <p>The Code Exploration Agent uses the ReAct pattern to explore a codebase, analyze its structure, and explain how different components interact. It can read files, search for specific patterns, and analyze code dependencies.</p>
+            
+            <p>This example showcases:</p>
+            <ul>
+                <li>Using the ReAct agent pattern for code exploration tasks</li>
+                <li>Integrating file reading and code analysis tools</li>
+                <li>Exploring and understanding code structure and dependencies</li>
+                <li>Generating comprehensive explanations of code functionality</li>
+            </ul>
+        </section>
+
+        <section class="example-section">
+            <h2>Implementation</h2>
+            
+            <div class="example-code">
+                <h3>Setting Up the Code Exploration Agent</h3>
+                <pre><code class="language-go">// SetupCodeExplorationAgent creates an agent for exploring and analyzing codebases
+func SetupCodeExplorationAgent() (*agent.ReActAgent, error) {
+    // Create a mock LLM
+    mockLLM := llm.NewMockLLM()
+    
+    // Create a ReAct agent
+    reactAgent := agent.NewReActAgent(mockLLM, 15)
+    
+    // Create and add tools
+    fileReaderTool := &MockFileReaderTool{
+        name:        "read_file",
+        description: "Read the content of a file",
+        files:       make(map[string]string),
+    }
+    
+    fileSearchTool := &MockFileSearchTool{
+        name:        "search_files",
+        description: "Search for files in a directory",
+        fileSystem:  make(map[string][]string),
+    }
+    
+    codeAnalysisTool := &MockCodeAnalysisTool{
+        name:        "analyze_code",
+        description: "Analyze code structure and dependencies",
+        analyses:    make(map[string]CodeAnalysisResult),
+    }
+    
+    // Add mock code data
+    addMockCodeData(fileReaderTool, fileSearchTool, codeAnalysisTool)
+    
+    // Add tools to the agent
+    reactAgent.AddTool(fileReaderTool)
+    reactAgent.AddTool(fileSearchTool)
+    reactAgent.AddTool(codeAnalysisTool)
+    
+    // Add responses to the mock LLM for the code exploration scenario
+    addCodeExplorationResponses(mockLLM)
+    
+    return reactAgent, nil
+}</code></pre>
+            </div>
+            
+            <div class="example-code">
+                <h3>Mock Code Data</h3>
+                <pre><code class="language-go">func addMockCodeData(fileReaderTool *MockFileReaderTool, fileSearchTool *MockFileSearchTool, codeAnalysisTool *MockCodeAnalysisTool) {
+    // Add mock files
+    fileReaderTool.files["/project/main.go"] = `package main
+
+import (
+	"fmt"
+	"github.com/example/project/utils"
+)
+
+func main() {
+	fmt.Println("Hello, World!")
+	result := utils.Calculate(10, 20)
+	fmt.Printf("Result: %d\n", result)
+}
+`
+    
+    fileReaderTool.files["/project/utils/math.go"] = `package utils
+
+// Calculate adds two numbers and returns the result
+func Calculate(a, b int) int {
+	return a + b
+}
+
+// Multiply multiplies two numbers and returns the result
+func Multiply(a, b int) int {
+	return a * b
+}
+`
+    
+    fileReaderTool.files["/project/utils/strings.go"] = `package utils
+
+import "strings"
+
+// Concat concatenates two strings with a separator
+func Concat(a, b, sep string) string {
+	return a + sep + b
+}
+
+// ToUpper converts a string to uppercase
+func ToUpper(s string) string {
+	return strings.ToUpper(s)
+}
+`
+    
+    // Add mock file system
+    fileSearchTool.fileSystem["/project"] = []string{
+        "main.go",
+        "go.mod",
+        "go.sum",
+        "README.md",
+    }
+    
+    fileSearchTool.fileSystem["/project/utils"] = []string{
+        "math.go",
+        "strings.go",
+    }
+    
+    // Add mock code analyses
+    codeAnalysisTool.analyses["/project/main.go"] = CodeAnalysisResult{
+        Functions: []string{"main"},
+        Classes:   []string{},
+        Imports:   []string{"fmt", "github.com/example/project/utils"},
+        Dependencies: map[string]string{
+            "utils": "github.com/example/project/utils",
+        },
+    }
+    
+    codeAnalysisTool.analyses["/project/utils/math.go"] = CodeAnalysisResult{
+        Functions: []string{"Calculate", "Multiply"},
+        Classes:   []string{},
+        Imports:   []string{},
+        Dependencies: map[string]string{},
+    }
+    
+    codeAnalysisTool.analyses["/project/utils/strings.go"] = CodeAnalysisResult{
+        Functions: []string{"Concat", "ToUpper"},
+        Classes:   []string{},
+        Imports:   []string{"strings"},
+        Dependencies: map[string]string{
+            "strings": "strings",
+        },
+    }
+}</code></pre>
+            </div>
+            
+            <div class="example-code">
+                <h3>Running the Code Exploration Agent</h3>
+                <pre><code class="language-go">// Set up the code exploration agent
+agent, err := examples.SetupCodeExplorationAgent()
+if err != nil {
+    fmt.Printf("Error setting up code exploration agent: %v\n", err)
+    return
+}
+
+// Run the agent
+ctx := context.Background()
+result, err := agent.Run(ctx, "Explore the codebase in the /project directory and explain how the main.go file interacts with other components.")
+if err != nil {
+    fmt.Printf("Error running code exploration agent: %v\n", err)
+    return
+}
+
+// Print the result
+fmt.Println(result)</code></pre>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Example Output</h2>
+            
+            <div class="example-result">
+                <h3>Code Exploration Result</h3>
+                <pre><code>After exploring the codebase, I can explain how main.go interacts with other components:
+
+1. The main.go file is the entry point of the application and contains the main function that gets executed when the program runs.
+
+2. Main.go has two import dependencies:
+   - The standard library package "fmt" for printing to the console
+   - A custom package "github.com/example/project/utils" which contains utility functions
+
+3. The utils package is organized into two files:
+   - math.go: Contains mathematical utility functions
+   - strings.go: Contains string manipulation utility functions
+
+4. In the main function, main.go specifically interacts with the utils package by calling the Calculate function from math.go:
+   ```go
+   result := utils.Calculate(10, 20)
+   ```
+   This function takes two integers (10 and 20), adds them together, and returns the result.
+
+5. The Calculate function is defined in utils/math.go as:
+   ```go
+   func Calculate(a, b int) int {
+       return a + b
+   }
+   ```
+
+6. While main.go doesn't currently use any functions from utils/strings.go, those functions (Concat and ToUpper) are available for use if needed in the future.
+
+The codebase follows a simple modular structure where utility functions are separated into their own package and organized by functionality (math vs. strings), promoting code reusability and maintainability. The main.go file serves as the orchestrator that imports and uses these utility functions to perform its tasks.</code></pre>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Execution Trace</h2>
+            
+            <div class="example-trace">
+                <h3>Agent Reasoning Process</h3>
+                <div class="trace-viewer">
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">I need to explore the codebase to understand how main.go interacts with other components. First, let me see what files are in the /project directory.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.000Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "search_files",
+  "input": "{\"directory\": \"/project\"}",
+  "result": "[\n  \"main.go\",\n  \"go.mod\",\n  \"go.sum\",\n  \"README.md\"\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.100Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">Now I can see the files in the /project directory. Let me first look at the content of main.go to understand its structure and dependencies.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.200Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "read_file",
+  "input": "{\"filename\": \"/project/main.go\"}",
+  "result": "package main\n\nimport (\n\t\"fmt\"\n\t\"github.com/example/project/utils\"\n)\n\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n\tresult := utils.Calculate(10, 20)\n\tfmt.Printf(\"Result: %d\\n\", result)\n}"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.300Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">I can see that main.go imports a package called "github.com/example/project/utils" and uses a function called Calculate from it. Let me check if there's a utils directory in the project.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.400Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "search_files",
+  "input": "{\"directory\": \"/project/utils\"}",
+  "result": "[\n  \"math.go\",\n  \"strings.go\"\n]"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.500Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">Great, I found the utils directory with two files: math.go and strings.go. Since main.go is using a Calculate function, it's likely in the math.go file. Let me check the content of math.go.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.600Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "read_file",
+  "input": "{\"filename\": \"/project/utils/math.go\"}",
+  "result": "package utils\n\n// Calculate adds two numbers and returns the result\nfunc Calculate(a, b int) int {\n\treturn a + b\n}\n\n// Multiply multiplies two numbers and returns the result\nfunc Multiply(a, b int) int {\n\treturn a * b\n}"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.700Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">Now I understand that main.go is using the Calculate function from the utils package, which is defined in math.go. The Calculate function simply adds two numbers and returns the result. Let me also check the content of strings.go to see if there are any other functions that might be relevant.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.800Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "read_file",
+  "input": "{\"filename\": \"/project/utils/strings.go\"}",
+  "result": "package utils\n\nimport \"strings\"\n\n// Concat concatenates two strings with a separator\nfunc Concat(a, b, sep string) string {\n\treturn a + sep + b\n}\n\n// ToUpper converts a string to uppercase\nfunc ToUpper(s string) string {\n\treturn strings.ToUpper(s)\n}"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:22.900Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">thought</div>
+                        <div class="trace-event-data">Now I have a good understanding of the codebase. Let me use the analyze_code tool to get a more structured view of the main.go file and its dependencies.</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:23.000Z</div>
+                    </div>
+                    <div class="trace-event">
+                        <div class="trace-event-type">tool_execution</div>
+                        <div class="trace-event-data">{
+  "tool": "analyze_code",
+  "input": "{\"filename\": \"/project/main.go\"}",
+  "result": "{\n  \"functions\": [\n    \"main\"\n  ],\n  \"classes\": [],\n  \"imports\": [\n    \"fmt\",\n    \"github.com/example/project/utils\"\n  ],\n  \"dependencies\": {\n    \"utils\": \"github.com/example/project/utils\"\n  }\n}"
+}</div>
+                        <div class="trace-event-timestamp">2025-04-21T20:34:23.100Z</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="example-section">
+            <h2>Key Takeaways</h2>
+            <ul>
+                <li>The ReAct pattern is effective for code exploration tasks, allowing the agent to iteratively discover and analyze code components.</li>
+                <li>Specialized tools for file reading, searching, and code analysis enable the agent to navigate and understand complex codebases.</li>
+                <li>The agent can identify dependencies and interactions between different components of a codebase.</li>
+                <li>The final output provides a clear explanation of how different parts of the code interact, which can be valuable for documentation or onboarding new developers.</li>
+            </ul>
+            
+            <div class="cta-buttons centered">
+                <a href="../guide/index.html" class="btn primary">Back to Guide</a>
+                <a href="../tutorial/code_explorer.html" class="btn secondary">Build Your Own Code Explorer</a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GoAgent</h2>
+                    <p>A powerful LLM agent framework for Go</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-links-column">
+                        <h3>Documentation</h3>
+                        <ul>
+                            <li><a href="../guide/index.html">Guide</a></li>
+                            <li><a href="../tutorial/index.html">Tutorials</a></li>
+                            <li><a href="../examples/index.html">Examples</a></li>
+                            <li><a href="../api/index.html">API Reference</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-links-column">
+                        <h3>Community</h3>
+                        <ul>
+                            <li><a href="https://github.com/goagent/framework">GitHub</a></li>
+                            <li><a href="https://github.com/goagent/framework/issues">Issues</a></li>
+                            <li><a href="https://github.com/goagent/framework/discussions">Discussions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GoAgent Framework. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>
