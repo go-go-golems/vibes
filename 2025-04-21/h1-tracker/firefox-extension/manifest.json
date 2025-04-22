@@ -1,0 +1,31 @@
+{
+  "manifest_version": 2,
+  "name": "H1 Tracker",
+  "version": "1.0",
+  "description": "Tracks H1 headings on web pages and sends them to a local server",
+  "icons": {
+    "48": "icons/h1-tracker-48.png",
+    "96": "icons/h1-tracker-96.png"
+  },
+  "permissions": [
+    "activeTab",
+    "notifications",
+    "http://localhost:8080/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "browser_action": {
+    "default_icon": {
+      "48": "icons/h1-tracker-48.png",
+      "96": "icons/h1-tracker-96.png"
+    },
+    "default_title": "H1 Tracker"
+  }
+}

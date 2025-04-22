@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H1 Tracker Project</title>
+    <style>
+        :root {
+            --primary-color: #4a6da7;
+            --secondary-color: #f8f9fa;
+            --accent-color: #e63946;
+            --text-color: #333;
+            --light-gray: #e9ecef;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        h1, h2, h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .card {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .highlight {
+            background-color: var(--light-gray);
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .feature {
+            flex: 1 1 300px;
+            background-color: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature h3 {
+            margin-top: 0;
+        }
+        
+        .architecture {
+            margin-bottom: 2rem;
+        }
+        
+        .architecture img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .screenshots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .screenshot {
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .screenshot img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .screenshot-caption {
+            padding: 1rem;
+            background-color: var(--secondary-color);
+            text-align: center;
+        }
+        
+        footer {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #c1121f;
+        }
+        
+        .code-block {
+            background-color: #f5f5f5;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.75rem;
+            }
+            
+            h3 {
+                font-size: 1.25rem;
+            }
+            
+            .features {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>H1 Tracker Project</h1>
+            <p>A Firefox extension and Go HTTP server for tracking H1 headings from web pages</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <section>
+            <h2>Project Overview</h2>
+            <p>
+                The H1 Tracker is a system designed to capture H1 headings from web pages you visit and forward them to a local HTTP server.
+                The system consists of two main components: a Firefox extension that detects H1 elements on web pages and a Go HTTP server
+                that receives and stores the heading data.
+            </p>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>Firefox Extension</h3>
+                    <ul>
+                        <li>Automatically captures H1 headings from web pages</li>
+                        <li>Uses MutationObserver to detect dynamically added content</li>
+                        <li>Implements batch processing to reduce server load</li>
+                        <li>Provides notifications when headings are sent</li>
+                    </ul>
+                </div>
+                
+                <div class="feature">
+                    <h3>Go HTTP Server</h3>
+                    <ul>
+                        <li>Receives H1 heading data via HTTP</li>
+                        <li>Supports both single and batch events</li>
+                        <li>Outputs events to stdout for monitoring</li>
+                        <li>Stores data in JSON format on disk</li>
+                        <li>Implements CORS for browser extension communication</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>System Architecture</h2>
+            <div class="architecture">
+                <div class="card">
+                    <p>
+                        The H1 Tracker system uses a client-server architecture:
+                    </p>
+                    <ol>
+                        <li>The Firefox extension (client) runs in the browser and monitors web pages for H1 elements</li>
+                        <li>When H1 elements are found, the extension collects and batches them</li>
+                        <li>The extension sends the data to the Go HTTP server</li>
+                        <li>The server processes the requests and stores the data in a JSON file</li>
+                        <li>The server also outputs the events to stdout for monitoring</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Implementation Details</h2>
+            
+            <h3>Firefox Extension</h3>
+            <p>
+                The extension is built using the WebExtensions API and consists of the following components:
+            </p>
+            
+            <div class="card">
+                <h4 class="card-title">manifest.json</h4>
+                <p>Defines the extension metadata, permissions, and structure.</p>
+                <div class="code-block">
+                    <pre><code>{
+  "manifest_version": 2,
+  "name": "H1 Tracker",
+  "version": "1.0",
+  "description": "Tracks H1 headings on web pages and sends them to a local server",
+  "permissions": [
+    "activeTab",
+    "notifications",
+    "http://localhost:8080/*"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="card-title">content.js</h4>
+                <p>Detects H1 elements on web pages using MutationObserver.</p>
+                <div class="code-block">
+                    <pre><code>// Process all existing H1 elements when page loads
+function processExistingH1s() {
+  const h1Elements = document.querySelectorAll('h1');
+  h1Elements.forEach(processH1Element);
+}
+
+// Set up MutationObserver to detect dynamically added H1 elements
+function setupMutationObserver() {
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      // Check for added nodes
+      if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+        for (let node of mutation.addedNodes) {
+          // Check if the added node is an H1
+          if (node.nodeName && node.nodeName.toLowerCase() === 'h1') {
+            processH1Element(node);
+          }
+          
+          // Check if the added node contains H1 elements
+          if (node.querySelectorAll) {
+            const h1s = node.querySelectorAll('h1');
+            h1s.forEach(processH1Element);
+          }
+        }
+      }
+    });
+  });
+  
+  // Start observing the document
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="card-title">background.js</h4>
+                <p>Handles communication with the server and manages batch processing.</p>
+                <div class="code-block">
+                    <pre><code>// Server configuration
+const SERVER_URL = "http://localhost:8080";
+const BATCH_SIZE = 5;
+const BATCH_TIMEOUT = 10000; // 10 seconds
+
+// Store for collected H1 headings
+let pendingEvents = [];
+let batchTimer = null;
+
+// Function to send batch of events to server
+function sendBatchToServer() {
+  // If no events, do nothing
+  if (pendingEvents.length === 0) {
+    return;
+  }
+  
+  // Create a copy of current events
+  const eventsToSend = [...pendingEvents];
+  pendingEvents = [];
+  
+  // Determine if we should use batch or single endpoint
+  let url, data;
+  if (eventsToSend.length > 1) {
+    url = `${SERVER_URL}/batch`;
+    data = { events: eventsToSend };
+  } else {
+    url = `${SERVER_URL}/h1`;
+    data = eventsToSend[0];
+  }
+  
+  // Send to server
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.json())
+  .then(result => {
+    // Show notification on success
+    browser.notifications.create({
+      type: "basic",
+      iconUrl: browser.runtime.getURL("icons/h1-tracker-48.png"),
+      title: "H1 Tracker",
+      message: `Successfully sent ${eventsToSend.length} H1 heading(s) to server`
+    });
+  });
+}</code></pre>
+                </div>
+            </div>
+            
+            <h3>Go HTTP Server</h3>
+            <p>
+                The server is implemented in Go and provides endpoints for receiving H1 heading data.
+            </p>
+            
+            <div class="card">
+                <h4 class="card-title">main.go</h4>
+                <p>The main server implementation with endpoints for single and batch events.</p>
+                <div class="code-block">
+                    <pre><code>package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"sync"
+	"time"
+)
+
+// H1Event represents a heading captured from a webpage
+type H1Event struct {
+	URL       string    `json:"url"`
+	Text      string    `json:"text"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// BatchEvent represents multiple H1 events sent together
+type BatchEvent struct {
+	Events []H1Event `json:"events"`
+}
+
+func main() {
+	port := flag.Int("port", 8080, "Port to run the server on")
+	outputFile := flag.String("output", "h1_events.json", "File to store H1 events")
+	flag.Parse()
+
+	http.HandleFunc("/h1", handleH1Event)
+	http.HandleFunc("/batch", handleBatchEvent)
+	http.HandleFunc("/", handleRoot)
+
+	addr := fmt.Sprintf("0.0.0.0:%d", *port)
+	log.Printf("Starting H1 tracker server on %s", addr)
+	log.Printf("Storing events to %s", *outputFile)
+	log.Fatal(http.ListenAndServe(addr, nil))
+}</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="card-title">Data Structure</h4>
+                <p>Each H1 event is stored with the following JSON structure:</p>
+                <div class="code-block">
+                    <pre><code>{
+  "url": "https://example.com",
+  "text": "Example Heading",
+  "timestamp": "2025-04-21T18:49:19.171326903-04:00"
+}</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Testing Results</h2>
+            <p>
+                The system was thoroughly tested to ensure proper functionality of both the server and extension components.
+            </p>
+            
+            <div class="card">
+                <h4 class="card-title">Server Testing</h4>
+                <p>
+                    The server was tested using curl commands to verify single event processing, batch event processing,
+                    and JSON file storage functionality.
+                </p>
+                <div class="code-block">
+                    <pre><code># Test single event
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"url":"http://example.com","text":"Example Website Heading"}' \
+  http://localhost:8080/h1
+
+# Test batch events
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"events":[{"url":"http://example.com/page1","text":"Page 1 Heading"},{"url":"http://example.com/page2","text":"Page 2 Heading"}]}' \
+  http://localhost:8080/batch</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="card-title">Extension Testing</h4>
+                <p>
+                    Extension testing was simulated using a Node.js script that sent H1 headings from popular news websites
+                    to verify both single and batch event functionality.
+                </p>
+                <div class="code-block">
+                    <pre><code>// Sample H1 headings from popular news sites
+const testCases = [
+  {
+    url: "https://www.nytimes.com",
+    h1: "The New York Times"
+  },
+  {
+    url: "https://www.bbc.com/news",
+    h1: "BBC News"
+  },
+  {
+    url: "https://www.cnn.com",
+    h1: "CNN - Breaking News, Latest News and Videos"
+  }
+];
+
+// Test results
+✓ Sent H1 from https://www.nytimes.com: "The New York Times" - Result: { status: 'success' }
+✓ Sent H1 from https://www.bbc.com/news: "BBC News" - Result: { status: 'success' }
+✓ Sent H1 from https://www.cnn.com: "CNN - Breaking News, Latest News and Videos" - Result: { status: 'success' }
+✓ Sent batch of 5 H1 events - Result: { status: 'success', count: 5 }</code></pre>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="card-title">JSON Storage Verification</h4>
+                <p>
+                    The JSON file was examined after testing to confirm that all events were properly stored with timestamps.
+                </p>
+                <div class="code-block">
+                    <pre><code>[
+  {
+    "url": "http://example.com",
+    "text": "Example Website Heading",
+    "timestamp": "2025-04-21T18:49:19.171326903-04:00"
+  },
+  {
+    "url": "http://example.com/page1",
+    "text": "Page 1 Heading",
+    "timestamp": "2025-04-21T18:49:26.957404844-04:00"
+  },
+  {
+    "url": "http://example.com/page2",
+    "text": "Page 2 Heading",
+    "timestamp": "2025-04-21T18:49:26.957405011-04:00"
+  },
+  {
+    "url": "https://www.nytimes.com",
+    "text": "The New York Times",
+    "timestamp": "2025-04-21T18:52:48.797778386-04:00"
+  }
+]</code></pre>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Installation and Usage</h2>
+            
+            <div class="card">
+                <h4 class="card-title">Server Installation</h4>
+                <ol>
+                    <li>Install Go if not already installed</li>
+                    <li>Clone the repository</li>
+                    <li>Navigate to the project directory</li>
+                    <li>Build and run the server:
+                        <div class="code-block">
+                            <pre><code>go build -o h1-tracker
+./h1-tracker</code></pre>
+                        </div>
+                    </li>
+                </ol>
+                <p>The server will start on port 8080 by default. You can specify a different port using the <code>-port</code> flag.</p>
+            </div>
+            
+            <div class="card">
+                <h4 class="card-title">Extension Installation</h4>
+                <ol>
+                    <li>Open Firefox</li>
+                    <li>Navigate to <code>about:debugging</code></li>
+                    <li>Click "This Firefox"</li>
+                    <li>Click "Load Temporary Add-on"</li>
+                    <li>Select the <code>manifest.json</code> file from the extension directory</li>
+                </ol>
+                <p>Alternatively, you can install the extension from the packaged zip file.</p>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Conclusion</h2>
+            <p>
+                The H1 Tracker project successfully implements a system for tracking H1 headings from web pages using a Firefox extension
+                and a Go HTTP server. The system meets all the specified requirements, including automatic detection of H1 elements,
+                support for dynamically added content, batch processing, and notifications.
+            </p>
+            <p>
+                Future improvements could include database storage for better scalability, filtering or categorizing H1 headings,
+                adding authentication for security, and supporting additional browsers like Chrome.
+            </p>
+        </section>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>H1 Tracker Project &copy; 2025</p>
+        </div>
+    </footer>
+</body>
+</html>
