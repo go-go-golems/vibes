@@ -1,0 +1,68 @@
+# Example animation with horizontal movement
+title: "NEON WAVE"
+duration: 3.0
+size:
+  width: 80
+  height: 20
+background: "#000000"
+frames:
+  - text: "NEON WAVE"
+    position:
+      x: 5
+      y: 10
+    color: "#FF00FF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 10
+      y: 10
+    color: "#00FFFF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 15
+      y: 10
+    color: "#FF00FF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 20
+      y: 10
+    color: "#00FFFF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 25
+      y: 10
+    color: "#FF00FF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 30
+      y: 10
+    color: "#00FFFF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 35
+      y: 10
+    color: "#FF00FF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 40
+      y: 10
+    color: "#00FFFF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 35
+      y: 10
+    color: "#FF00FF"
+    duration: 0.3
+  - text: "NEON WAVE"
+    position:
+      x: 30
+      y: 10
+    color: "#00FFFF"
+    duration: 0.3
