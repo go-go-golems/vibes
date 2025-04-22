@@ -1,0 +1,11 @@
+Test results for 01_basic_arithmetic.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Addition: 15
+Subtraction: 5
+Multiplication: 50
+Division: 2
+Modulus: 0
+Exponentiation: 100000

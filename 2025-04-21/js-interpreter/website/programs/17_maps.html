@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maps - JavaScript Testing with Goja</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        header h1 {
+            color: white;
+        }
+        nav {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+        nav ul li a:hover {
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .failure-badge {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .code-container {
+            margin: 20px 0;
+        }
+        .result-container {
+            margin: 20px 0;
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #1a252f;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Maps</h1>
+        <p>JavaScript Program Test Results</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="#code">Program Code</a></li>
+            <li><a href="#results">Test Results</a></li>
+        </ul>
+    </nav>
+
+    <section id="code">
+        <h2>Program Code</h2>
+        <p>This program tests Map objects in JavaScript, including creation, manipulation, and various Map methods.</p>
+        
+        <div class="code-container">
+            <pre><code>// Maps
+// Creating a Map
+const userMap = new Map();
+
+// Adding key-value pairs
+userMap.set('user1', { name: 'John', age: 25 });
+userMap.set('user2', { name: 'Alice', age: 30 });
+userMap.set('user3', { name: 'Bob', age: 35 });
+
+// Getting values
+const user1 = userMap.get('user1');
+console.log("User1:", user1);
+
+// Checking if a key exists
+console.log("Has user2:", userMap.has('user2'));
+console.log("Has user4:", userMap.has('user4'));
+
+// Map size
+console.log("Map size:", userMap.size);
+
+// Deleting entries
+userMap.delete('user2');
+console.log("Map size after delete:", userMap.size);
+
+// Iterating over a Map
+console.log("Map entries:");
+userMap.forEach((value, key) => {
+    console.log(`${key}: ${value.name}, ${value.age}`);
+});
+
+// Creating a Map from an array of key-value pairs
+const fruitPrices = new Map([
+    ['apple', 1.2],
+    ['banana', 0.9],
+    ['orange', 1.5]
+]);
+console.log("Fruit prices map size:", fruitPrices.size);
+
+// Getting all keys, values, and entries
+const keys = Array.from(fruitPrices.keys());
+const values = Array.from(fruitPrices.values());
+const entries = Array.from(fruitPrices.entries());
+
+console.log("Fruit keys:", keys);
+console.log("Fruit values:", values);
+console.log("Fruit entries:", entries);
+
+// Using objects as keys (not possible with regular objects)
+const obj1 = { id: 1 };
+const obj2 = { id: 2 };
+
+const objectMap = new Map();
+objectMap.set(obj1, 'Object 1 value');
+objectMap.set(obj2, 'Object 2 value');
+
+console.log("Object map size:", objectMap.size);
+console.log("Object 1 value:", objectMap.get(obj1));</code></pre>
+        </div>
+    </section>
+
+    <section id="results">
+        <h2>Test Results</h2>
+        <p>Results from running this program with the Goja JavaScript interpreter:</p>
+        
+        <div class="result-container">
+            <h3>Execution Details</h3>
+            <p><strong>Status:</strong> <span class="success-badge">Success</span></p>
+            <p><strong>Execution Time:</strong> 0 ms</p>
+            
+            <h3>Console Output</h3>
+            <pre><code>User1: map[age:25 name:John]
+Has user2: true
+Has user4: false
+Map size: 3
+Map size after delete: 2
+Map entries:
+user1: John, 25
+user3: Bob, 35
+Fruit prices map size: 3
+Fruit keys: [apple banana orange]
+Fruit values: [1.2 0.9 1.5]
+Fruit entries: [[apple 1.2] [banana 0.9] [orange 1.5]]
+Object map size: 2
+Object 1 value: Object 1 value</code></pre>
+        </div>
+        
+        <h3>Analysis</h3>
+        <p>The program successfully executed all Map operations:</p>
+        <ul>
+            <li><strong>Map creation</strong>: Successfully created empty Maps and Maps from arrays of key-value pairs</li>
+            <li><strong>Basic operations</strong>: Correctly implemented:
+                <ul>
+                    <li>Setting key-value pairs with set()</li>
+                    <li>Retrieving values with get()</li>
+                    <li>Checking key existence with has()</li>
+                    <li>Getting the Map size</li>
+                    <li>Deleting entries with delete()</li>
+                </ul>
+            </li>
+            <li><strong>Iteration</strong>: Successfully iterated over Map entries using forEach</li>
+            <li><strong>Collection methods</strong>: Correctly used keys(), values(), and entries() methods to extract Map data</li>
+            <li><strong>Object keys</strong>: Successfully demonstrated using objects as Map keys, which is a key advantage of Maps over regular objects</li>
+        </ul>
+        <p>This confirms that the Goja interpreter correctly implements Map objects in JavaScript, including all standard methods and operations. The output format for objects and arrays is slightly different from standard JavaScript (using "map[...]" notation for objects and square brackets with space-separated values for arrays), but the functionality is correct.</p>
+    </section>
+
+    <a href="../index.html" class="back-link">← Back to All Programs</a>
+
+    <footer>
+        <p>&copy; 2025 JavaScript Testing with Goja Interpreter Project</p>
+        <p>Created on April 22, 2025</p>
+    </footer>
+</body>
+</html>

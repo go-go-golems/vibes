@@ -1,0 +1,14 @@
+Test results for 03_array_operations.js
+Execution Time: 1 ms
+Status: true
+
+Output:
+Original array: [1 2 3 4 5]
+Mapped (x2): [2 4 6 8 10]
+Filtered (even): [2 4]
+Reduced (sum): 15
+Found (>3): 4
+Every (>0): true
+Some (>4): true
+Joined: 1-2-3-4-5
+Reversed: [5 4 3 2 1]

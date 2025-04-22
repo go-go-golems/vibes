@@ -1,0 +1,9 @@
+Test results for 04_conditionals.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Number: 15
+If-else result: Greater than 10
+Ternary result: Odd
+Switch result: Wednesday

@@ -1,0 +1,12 @@
+Test results for 13_closures_scope.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Initial value: 0
+After increment: 1
+After increment again: 2
+After decrement: 1
+Double 5: 10
+Triple 5: 15
+I'm from outer

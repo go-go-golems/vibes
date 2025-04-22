@@ -1,0 +1,15 @@
+Test results for 11_regex.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Contains 'fox': true
+Contains 'dog': true
+Fox match: [fox]
+Dog matches: [dog dog]
+Replaced text: The quick brown fox jumps over the lazy cat. The cat was not amused.
+First name: John
+Last name: Doe
+Digits: [123 456]
+Long words: [quick brown jumps amused]
+Split parts count: 14

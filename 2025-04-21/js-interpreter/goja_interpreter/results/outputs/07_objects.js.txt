@@ -1,0 +1,12 @@
+Test results for 07_objects.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Person object: map[address:map[city:Anytown country:USA street:123 Main St] email:john.doe@example.com firstName:John fullName:0x756760 lastName:Doe]
+First name: John
+City: Anytown
+Full name: John Doe
+Object keys: [firstName lastName address fullName email]
+Address values: [123 Main St Anytown USA]
+Address entries: [[street 123 Main St] [city Anytown] [country USA]]

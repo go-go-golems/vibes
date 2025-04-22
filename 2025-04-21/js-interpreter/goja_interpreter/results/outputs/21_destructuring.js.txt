@@ -1,0 +1,19 @@
+Test results for 21_destructuring.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+First color: red
+Second color: green
+Rest of colors: [blue yellow purple]
+Third color: blue
+Third with default: default
+After swap: 2 1
+Name: Alice
+Age: 30
+Hobby (default): Reading
+Full name: Alice
+Profession: Engineer
+City: Boston
+Country: USA
+Alice is 30 years old and works as a Engineer

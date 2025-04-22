@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototypes and Inheritance - JavaScript Testing with Goja</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        header h1 {
+            color: white;
+        }
+        nav {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+        nav ul li a:hover {
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .failure-badge {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .code-container {
+            margin: 20px 0;
+        }
+        .result-container {
+            margin: 20px 0;
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #1a252f;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Prototypes and Inheritance</h1>
+        <p>JavaScript Program Test Results</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="#code">Program Code</a></li>
+            <li><a href="#results">Test Results</a></li>
+        </ul>
+    </nav>
+
+    <section id="code">
+        <h2>Program Code</h2>
+        <p>This program tests prototypes and inheritance in JavaScript, including prototype chains, constructor functions, and ES6 classes.</p>
+        
+        <div class="code-container">
+            <pre><code>// Prototypes and inheritance
+// Constructor function
+function Animal(name) {
+    this.name = name;
+}
+
+// Adding method to prototype
+Animal.prototype.speak = function() {
+    return `${this.name} makes a sound`;
+};
+
+// Creating an instance
+const animal = new Animal('Generic Animal');
+console.log(animal.speak());
+
+// Inheritance with constructor functions
+function Dog(name, breed) {
+    // Call parent constructor
+    Animal.call(this, name);
+    this.breed = breed;
+}
+
+// Set up prototype chain
+Dog.prototype = Object.create(Animal.prototype);
+Dog.prototype.constructor = Dog;
+
+// Override method
+Dog.prototype.speak = function() {
+    return `${this.name} barks`;
+};
+
+// Add new method
+Dog.prototype.fetch = function() {
+    return `${this.name} fetches the ball`;
+};
+
+// Create instance of derived class
+const dog = new Dog('Rex', 'German Shepherd');
+console.log(dog.name);
+console.log(dog.breed);
+console.log(dog.speak());
+console.log(dog.fetch());
+
+// ES6 class syntax
+class Bird extends Animal {
+    constructor(name, wingspan) {
+        super(name);
+        this.wingspan = wingspan;
+    }
+    
+    speak() {
+        return `${this.name} chirps`;
+    }
+    
+    fly() {
+        return `${this.name} flies with wingspan of ${this.wingspan}cm`;
+    }
+}
+
+const bird = new Bird('Sparrow', 25);
+console.log(bird.name);
+console.log(bird.wingspan);
+console.log(bird.speak());
+console.log(bird.fly());
+
+// Checking prototype chain
+console.log("dog instanceof Dog:", dog instanceof Dog);
+console.log("dog instanceof Animal:", dog instanceof Animal);
+console.log("bird instanceof Bird:", bird instanceof Bird);
+console.log("bird instanceof Animal:", bird instanceof Animal);</code></pre>
+        </div>
+    </section>
+
+    <section id="results">
+        <h2>Test Results</h2>
+        <p>Results from running this program with the Goja JavaScript interpreter:</p>
+        
+        <div class="result-container">
+            <h3>Execution Details</h3>
+            <p><strong>Status:</strong> <span class="success-badge">Success</span></p>
+            <p><strong>Execution Time:</strong> 0 ms</p>
+            
+            <h3>Console Output</h3>
+            <pre><code>Generic Animal makes a sound
+Rex
+German Shepherd
+Rex barks
+Rex fetches the ball
+Sparrow
+25
+Sparrow chirps
+Sparrow flies with wingspan of 25cm
+dog instanceof Dog: true
+dog instanceof Animal: true
+bird instanceof Bird: true
+bird instanceof Animal: true</code></pre>
+        </div>
+        
+        <h3>Analysis</h3>
+        <p>The program successfully demonstrated prototypes and inheritance in JavaScript:</p>
+        <ul>
+            <li><strong>Constructor functions</strong>: Successfully created an Animal constructor function and added methods to its prototype</li>
+            <li><strong>Prototype inheritance</strong>: Correctly implemented inheritance between Dog and Animal using:
+                <ul>
+                    <li>Calling the parent constructor with Animal.call(this, name)</li>
+                    <li>Setting up the prototype chain with Object.create</li>
+                    <li>Fixing the constructor property</li>
+                    <li>Overriding methods (speak) and adding new methods (fetch)</li>
+                </ul>
+            </li>
+            <li><strong>ES6 classes</strong>: Successfully implemented inheritance using the class syntax:
+                <ul>
+                    <li>Extending the parent class with extends keyword</li>
+                    <li>Calling the parent constructor with super()</li>
+                    <li>Overriding methods and adding new ones</li>
+                </ul>
+            </li>
+            <li><strong>Prototype chain verification</strong>: Correctly verified the prototype chain using instanceof operator</li>
+        </ul>
+        <p>This confirms that the Goja interpreter correctly implements prototypes and inheritance in JavaScript, including both the traditional prototype-based approach and the newer ES6 class syntax. The behavior matches what would be expected in a standard JavaScript environment.</p>
+    </section>
+
+    <a href="../index.html" class="back-link">← Back to All Programs</a>
+
+    <footer>
+        <p>&copy; 2025 JavaScript Testing with Goja Interpreter Project</p>
+        <p>Created on April 22, 2025</p>
+    </footer>
+</body>
+</html>

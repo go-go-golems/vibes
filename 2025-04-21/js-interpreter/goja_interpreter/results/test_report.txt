@@ -1,0 +1,355 @@
+JavaScript Test Report
+=====================
+
+Date: Tue, 22 Apr 2025 08:30:07 EDT
+Directory: /home/ubuntu/js_programs
+
+Results:
+--------
+
+File: 01_basic_arithmetic.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Addition: 15
+Subtraction: 5
+Multiplication: 50
+Division: 2
+Modulus: 0
+Exponentiation: 100000
+
+
+File: 02_string_manipulation.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Original: Hello, World!
+Length: 13
+Uppercase: HELLO, WORLD!
+Lowercase: hello, world!
+Substring: Hello
+Replaced: Hello, JavaScript!
+Split: [Hello World!]
+Trimmed: trim me
+
+
+File: 03_array_operations.js
+Status: SUCCESS
+Execution Time: 1 ms
+Output:
+-------
+Original array: [1 2 3 4 5]
+Mapped (x2): [2 4 6 8 10]
+Filtered (even): [2 4]
+Reduced (sum): 15
+Found (>3): 4
+Every (>0): true
+Some (>4): true
+Joined: 1-2-3-4-5
+Reversed: [5 4 3 2 1]
+
+
+File: 04_conditionals.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Number: 15
+If-else result: Greater than 10
+Ternary result: Odd
+Switch result: Wednesday
+
+
+File: 05_loops.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+For loop sum: 10
+While loop sum: 10
+Do-while loop sum: 10
+For...of loop sum: 15
+Object properties: [name age job]
+
+
+File: 06_functions.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Add: 8
+Subtract: 6
+Multiply: 18
+Divide: 4
+Divide (default param): 8
+Sum: 15
+IIFE result: 16
+
+
+File: 07_objects.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Person object: map[address:map[city:Anytown country:USA street:123 Main St] email:john.doe@example.com firstName:John fullName:0x756760 lastName:Doe]
+First name: John
+City: Anytown
+Full name: John Doe
+Object keys: [firstName lastName address fullName email]
+Address values: [123 Main St Anytown USA]
+Address entries: [[street 123 Main St] [city Anytown] [country USA]]
+
+
+File: 08_error_handling.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Result: +Inf
+This won't be printed
+Finally block always executes
+Access denied: Age must be at least 18
+Type error: Cannot read property 'name' of undefined
+
+
+File: 09_date_operations.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Current timestamp: 1745325007675
+Date components: 2025 4 22
+Time components: 8 30 7
+Specific date: 2023-01-15 00:00:00 -0500 EST
+Date from string: 2023-05-20 14:30:00 -0400 EDT
+Date from timestamp: 2022-12-31 19:00:00 -0500 EST
+Tomorrow: 2025-04-23 08:30:07.675 -0400 EDT
+Next month: 2025-05-22 08:30:07.675 -0400 EDT
+Date string: Tue Apr 22 2025
+ISO string: 2025-04-22T12:30:07.675Z
+Locale string: 04/22/2025, 08:30:07
+
+
+File: 10_math_operations.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Constants - PI: 3.141592653589793 E: 2.718281828459045
+Basic operations - abs: 5 floor: 3 ceil: 4 round: 5 trunc: 6
+Powers and roots - sqrt: 4 cbrt: 3 pow: 8
+Trigonometric - sin: 1 cos: 1 tan: 1
+Min/Max - min: 1 max: 8 random: 0.6046602879796196
+Logarithmic - log: 2.302585092994046 log10: 2 log2: 3
+
+
+File: 11_regex.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Contains 'fox': true
+Contains 'dog': true
+Fox match: [fox]
+Dog matches: [dog dog]
+Replaced text: The quick brown fox jumps over the lazy cat. The cat was not amused.
+First name: John
+Last name: Doe
+Digits: [123 456]
+Long words: [quick brown jumps amused]
+Split parts count: 14
+
+
+File: 12_json_operations.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+JSON string: {"name":"Alice","age":28,"isEmployed":true,"skills":["JavaScript","HTML","CSS"],"address":{"city":"San Francisco","country":"USA"}}
+Pretty JSON:
+{
+  "name": "Alice",
+  "age": 28,
+  "isEmployed": true,
+  "skills": [
+    "JavaScript",
+    "HTML",
+    "CSS"
+  ],
+  "address": {
+    "city": "San Francisco",
+    "country": "USA"
+  }
+}
+Parsed object name: Alice
+Parsed object skills: [JavaScript HTML CSS]
+Filtered JSON: {"name":"Alice","isEmployed":true,"skills":["JavaScript","HTML","CSS"],"address":{"city":"San Francisco","country":"USA"}}
+Revived skills: [JAVASCRIPT HTML CSS]
+
+
+File: 13_closures_scope.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Initial value: 0
+After increment: 1
+After increment again: 2
+After decrement: 1
+Double 5: 10
+Triple 5: 15
+I'm from outer
+
+
+File: 14_recursion.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Factorial of 5: 120
+Fibonacci of 7: 13
+Sum of array [1, 2, 3, 4, 5]: 15
+Flattened array: [1 2 3 4 5 6]
+
+
+File: 15_promises.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Promise resolved: Operation successful
+Chain result: Next step
+All promises resolved: [First Second Third]
+First promise resolved: First
+
+
+File: 16_sets.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Set1: [1 2 3 4 5]
+Set2: [3 4 5 6 7]
+Set with duplicates: [1 2 3]
+Set1 size: 5
+Set1 has 3: true
+Set1 has 10: false
+After adding: [1 2 3 4]
+After deleting: [1 3 4]
+Union: [1 2 3 4 5 6 7]
+Intersection: [3 4 5]
+Difference (set1 - set2): [1 2]
+Symmetric difference: [1 2 6 7]
+
+
+File: 17_maps.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Map size: 5
+Map has 'key1': true
+Value for 'key2': value2
+Value for non-existent key: <nil>
+Map keys:
+key1
+key2
+3
+map[id:1]
+0x756760
+Map values:
+value1
+value2
+value3
+value4
+value5
+Map entries:
+key1 -> value1
+key2 -> value2
+3 -> value3
+map[id:1] -> value4
+0x756760 -> value5
+Updated value: updated value
+After deletion, has 'key2': false
+Keys array: [key1 3 map[id:1] 0x756760]
+Values array: [updated value value3 value4 value5]
+Entries array: [[key1 updated value] [3 value3] [map[id:1] value4] [0x756760 value5]]
+
+
+File: 18_prototypes_inheritance.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Animal name: Generic Animal
+Animal speaks: Generic Animal makes a noise.
+Dog name: Rex
+Dog breed: German Shepherd
+Dog speaks: Rex barks.
+dog instanceof Dog: true
+dog instanceof Animal: true
+Person greeting: Hello, my name is John
+
+
+File: 19_generators.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+Generator result 1: 1
+Generator result 2: 2
+Generator result 3: 3
+Generator done: true
+Parameterized generator values:
+5
+6
+7
+8
+First 6 Fibonacci numbers: [0 1 1 2 3 5]
+Generator delegation results:
+B1
+A1
+A2
+B2
+
+
+File: 20_sorting_searching.js
+Status: SUCCESS
+Execution Time: 1 ms
+Output:
+-------
+Original array: [64 34 25 12 22 11 90]
+Bubble sorted: [11 12 22 25 34 64 90]
+Quick sorted: [11 12 22 25 34 64 90]
+Binary search for 25: Found at index 3
+Linear search for 25: Found at index 2
+
+
+File: 21_destructuring.js
+Status: SUCCESS
+Execution Time: 0 ms
+Output:
+-------
+First color: red
+Second color: green
+Rest of colors: [blue yellow purple]
+Third color: blue
+Third with default: default
+After swap: 2 1
+Name: Alice
+Age: 30
+Hobby (default): Reading
+Full name: Alice
+Profession: Engineer
+City: Boston
+Country: USA
+Alice is 30 years old and works as a Engineer
+
+
+Summary:
+--------
+Total files: 21
+Successful: 21
+Failed: 0

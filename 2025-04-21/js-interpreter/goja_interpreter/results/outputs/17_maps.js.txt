@@ -1,0 +1,32 @@
+Test results for 17_maps.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Map size: 5
+Map has 'key1': true
+Value for 'key2': value2
+Value for non-existent key: <nil>
+Map keys:
+key1
+key2
+3
+map[id:1]
+0x756760
+Map values:
+value1
+value2
+value3
+value4
+value5
+Map entries:
+key1 -> value1
+key2 -> value2
+3 -> value3
+map[id:1] -> value4
+0x756760 -> value5
+Updated value: updated value
+After deletion, has 'key2': false
+Keys array: [key1 3 map[id:1] 0x756760]
+Values array: [updated value value3 value4 value5]
+Entries array: [[key1 updated value] [3 value3] [map[id:1] value4] [0x756760 value5]]

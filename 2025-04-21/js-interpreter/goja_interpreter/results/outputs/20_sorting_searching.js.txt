@@ -1,0 +1,10 @@
+Test results for 20_sorting_searching.js
+Execution Time: 1 ms
+Status: true
+
+Output:
+Original array: [64 34 25 12 22 11 90]
+Bubble sorted: [11 12 22 25 34 64 90]
+Quick sorted: [11 12 22 25 34 64 90]
+Binary search for 25: Found at index 3
+Linear search for 25: Found at index 2

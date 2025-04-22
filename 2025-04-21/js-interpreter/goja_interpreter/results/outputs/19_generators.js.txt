@@ -1,0 +1,20 @@
+Test results for 19_generators.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Generator result 1: 1
+Generator result 2: 2
+Generator result 3: 3
+Generator done: true
+Parameterized generator values:
+5
+6
+7
+8
+First 6 Fibonacci numbers: [0 1 1 2 3 5]
+Generator delegation results:
+B1
+A1
+A2
+B2

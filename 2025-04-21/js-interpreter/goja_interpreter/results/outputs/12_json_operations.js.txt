@@ -1,0 +1,25 @@
+Test results for 12_json_operations.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+JSON string: {"name":"Alice","age":28,"isEmployed":true,"skills":["JavaScript","HTML","CSS"],"address":{"city":"San Francisco","country":"USA"}}
+Pretty JSON:
+{
+  "name": "Alice",
+  "age": 28,
+  "isEmployed": true,
+  "skills": [
+    "JavaScript",
+    "HTML",
+    "CSS"
+  ],
+  "address": {
+    "city": "San Francisco",
+    "country": "USA"
+  }
+}
+Parsed object name: Alice
+Parsed object skills: [JavaScript HTML CSS]
+Filtered JSON: {"name":"Alice","isEmployed":true,"skills":["JavaScript","HTML","CSS"],"address":{"city":"San Francisco","country":"USA"}}
+Revived skills: [JAVASCRIPT HTML CSS]

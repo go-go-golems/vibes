@@ -1,0 +1,30 @@
+KB System Demonstration
+======================
+
+1. Showing help information
+-------------------------
+
+2. Initializing the knowledge base
+-------------------------------
+
+3. Adding a repository to track
+----------------------------
+
+4. Indexing the repository
+-----------------------
+
+5. Generating embeddings
+----------------------
+
+6. Searching for code by text
+---------------------------
+
+7. Searching for code by similarity
+--------------------------------
+
+8. Asking a question about the code
+--------------------------------
+
+9. Showing details of a code chunk
+-------------------------------
+

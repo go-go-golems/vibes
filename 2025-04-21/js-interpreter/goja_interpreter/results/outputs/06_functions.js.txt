@@ -1,0 +1,12 @@
+Test results for 06_functions.js
+Execution Time: 0 ms
+Status: true
+
+Output:
+Add: 8
+Subtract: 6
+Multiply: 18
+Divide: 4
+Divide (default param): 8
+Sum: 15
+IIFE result: 16
