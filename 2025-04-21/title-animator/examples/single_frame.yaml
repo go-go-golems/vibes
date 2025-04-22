@@ -1,0 +1,14 @@
+# Single frame example
+title: "SIMPLE TEST"
+duration: 1.0
+size:
+  width: 80
+  height: 20
+background: "#000000"
+frames:
+  - text: "SIMPLE TEST"
+    position:
+      x: 30
+      y: 10
+    color: "#FF00FF"
+    duration: 1.0

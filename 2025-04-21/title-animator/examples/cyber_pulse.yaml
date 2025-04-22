@@ -1,0 +1,68 @@
+# Example animation with pulsing effect
+title: "CYBER PULSE"
+duration: 3.0
+size:
+  width: 80
+  height: 20
+background: "#000000"
+frames:
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF00FF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF33FF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF66FF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF99FF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FFCCFF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FFFFFF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FFCCFF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF99FF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF66FF"
+    duration: 0.2
+  - text: "CYBER PULSE"
+    position:
+      x: 30
+      y: 10
+    color: "#FF33FF"
+    duration: 0.2

@@ -1,0 +1,44 @@
+# Example YAML DSL for Title Animator
+title: "NEON VIBES"
+duration: 3.0  # Duration in seconds
+size:
+  width: 80
+  height: 20
+background: "#000000"
+frames:
+  - text: "NEON VIBES"
+    position:
+      x: 10
+      y: 10
+    color: "#FF00FF"
+    duration: 0.5
+  - text: "NEON VIBES"
+    position:
+      x: 15
+      y: 10
+    color: "#00FFFF"
+    duration: 0.5
+  - text: "NEON VIBES"
+    position:
+      x: 20
+      y: 10
+    color: "#FF00FF"
+    duration: 0.5
+  - text: "NEON VIBES"
+    position:
+      x: 25
+      y: 10
+    color: "#00FFFF"
+    duration: 0.5
+  - text: "NEON VIBES"
+    position:
+      x: 30
+      y: 10
+    color: "#FF00FF"
+    duration: 0.5
+  - text: "NEON VIBES"
+    position:
+      x: 25
+      y: 10
+    color: "#00FFFF"
+    duration: 0.5
