@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackboard Systems: Architecture, Implementation, and Applications</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <!-- Hero Section -->
+    <div class="hero-pattern text-white py-20">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 flex flex-col items-start">
+                    <h1 class="text-5xl font-bold leading-tight mb-4">Blackboard Systems</h1>
+                    <h2 class="text-2xl mb-6">Architecture, Implementation, and Applications</h2>
+                    <p class="text-xl mb-8">A comprehensive guide to understanding and implementing blackboard systems, with a focus on the Hearsay-II architecture.</p>
+                    <a href="#implementation" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
+                        View Implementation
+                    </a>
+                </div>
+                <div class="md:w-1/2 p-4">
+                    <img src="images/localhost_2025-04-21_23-33-56_4628.webp" alt="Blackboard System Interface" class="rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white py-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-gray-800">Blackboard Systems</div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="#introduction" class="text-gray-600 hover:text-blue-600 transition duration-300">Introduction</a>
+                    <a href="#architecture" class="text-gray-600 hover:text-blue-600 transition duration-300">Architecture</a>
+                    <a href="#hearsay" class="text-gray-600 hover:text-blue-600 transition duration-300">Hearsay-II</a>
+                    <a href="#implementation" class="text-gray-600 hover:text-blue-600 transition duration-300">Implementation</a>
+                    <a href="#applications" class="text-gray-600 hover:text-blue-600 transition duration-300">Applications</a>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-600 hover:text-blue-600 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- Introduction Section -->
+        <section id="introduction" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-500 pb-2">Introduction to Blackboard Systems</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <p class="mb-4 text-gray-700">
+                        Blackboard systems are a type of artificial intelligence architecture that enables collaborative problem-solving by multiple specialized knowledge sources. The blackboard serves as a shared workspace where these knowledge sources can post partial solutions and build upon each other's contributions.
+                    </p>
+                    <p class="mb-4 text-gray-700">
+                        The blackboard metaphor comes from the image of experts standing around a blackboard, working together to solve a problem. Each expert has specialized knowledge and can contribute to the solution when they recognize that their expertise is relevant.
+                    </p>
+                    <p class="mb-4 text-gray-700">
+                        This architecture is particularly useful for problems that:
+                    </p>
+                    <ul class="list-disc pl-6 mb-4 text-gray-700">
+                        <li>Require diverse types of knowledge</li>
+                        <li>Have no clear algorithmic solution</li>
+                        <li>Benefit from incremental and opportunistic problem-solving</li>
+                        <li>Need to integrate multiple perspectives or expertise</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Key Components of Blackboard Systems</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-blue-600">The Blackboard</h4>
+                            <p class="text-gray-700">A shared repository of problems, partial solutions, and data that is visible to all knowledge sources.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-600">Knowledge Sources</h4>
+                            <p class="text-gray-700">Independent modules with specialized expertise that can recognize when they can contribute to the solution.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-blue-600">Control Component</h4>
+                            <p class="text-gray-700">Manages the problem-solving process by selecting which knowledge source should be activated next.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-500 pb-2">Blackboard Architecture</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Structure and Organization</h3>
+                    <p class="mb-4 text-gray-700">
+                        The blackboard is typically organized into multiple levels of abstraction or different knowledge areas. Each level represents a different conceptual distance from the raw input data to the final solution.
+                    </p>
+                    <p class="mb-4 text-gray-700">
+                        Knowledge sources are specialized modules that can read from and write to the blackboard. They are triggered when they recognize patterns or conditions on the blackboard that match their expertise.
+                    </p>
+                    <p class="mb-4 text-gray-700">
+                        The control component decides which knowledge source to activate next based on the current state of the blackboard and the potential contributions of each knowledge source. This decision-making process can use various strategies, including:
+                    </p>
+                    <ul class="list-disc pl-6 mb-4 text-gray-700">
+                        <li>Priority-based selection</li>
+                        <li>Focus of attention mechanisms</li>
+                        <li>Bidding systems where knowledge sources compete for activation</li>
+                        <li>Goal-directed reasoning</li>
+                    </ul>
+                </div>
+                <div>
+                    <img src="images/blackboard-architecture.webp" alt="Blackboard Architecture Diagram" class="rounded-lg shadow-md mb-4">
+                    <div class="bg-blue-100 p-4 rounded-lg">
+                        <h4 class="font-bold text-blue-800 mb-2">Advantages of Blackboard Architecture</h4>
+                        <ul class="list-disc pl-6 text-gray-700">
+                            <li>Modularity: Knowledge sources can be developed independently</li>
+                            <li>Flexibility: New knowledge sources can be added without changing existing ones</li>
+                            <li>Opportunistic problem-solving: The system can adapt its strategy based on the current state</li>
+                            <li>Incremental development: The system can be built and improved gradually</li>
+                            <li>Explanation capability: The sequence of knowledge source activations provides a trace of the reasoning process</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hearsay-II Section -->
+        <section id="hearsay" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-500 pb-2">The Hearsay-II System</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <p class="mb-4 text-gray-700">
+                        Hearsay-II is one of the most influential blackboard systems, developed at Carnegie Mellon University in the 1970s for speech recognition. It pioneered many of the concepts that are now standard in blackboard architectures.
+                    </p>
+                    <p class="mb-4 text-gray-700">
+                        In Hearsay-II, the blackboard was organized into multiple levels of abstraction, from low-level acoustic parameters to high-level semantic interpretations:
+                    </p>
+                    <ul class="list-disc pl-6 mb-4 text-gray-700">
+                        <li><strong>Parameter Level:</strong> Raw acoustic features</li>
+                        <li><strong>Segment Level:</strong> Phonetic segments</li>
+                        <li><strong>Syllable Level:</strong> Syllable hypotheses</li>
+                        <li><strong>Word Level:</strong> Word hypotheses</li>
+                        <li><strong>Phrase Level:</strong> Phrase structures</li>
+                    </ul>
+                    <p class="mb-4 text-gray-700">
+                        Knowledge sources in Hearsay-II included:
+                    </p>
+                    <ul class="list-disc pl-6 mb-4 text-gray-700">
+                        <li><strong>SEG:</strong> Segment Creator (creates segments from parameters)</li>
+                        <li><strong>POM:</strong> Phone to Syllable (creates syllables from segments)</li>
+                        <li><strong>MOW:</strong> Syllable to Word (creates words from syllables)</li>
+                        <li><strong>PARSE:</strong> Syntax Parser (creates phrases from words)</li>
+                        <li><strong>PREDICT:</strong> Word Predictor (predicts next words based on context)</li>
+                        <li><strong>RPOL:</strong> Hypothesis Rater (evaluates the credibility of hypotheses)</li>
+                    </ul>
+                </div>
+                <div>
+                    <img src="images/localhost_2025-04-21_23-34-28_3610.webp" alt="Hearsay-II Levels of Abstraction" class="rounded-lg shadow-md mb-4">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Hearsay-II Control Mechanism</h3>
+                        <p class="mb-4 text-gray-700">
+                            Hearsay-II used a sophisticated control mechanism based on a focus of attention and a bidding system:
+                        </p>
+                        <ol class="list-decimal pl-6 mb-4 text-gray-700">
+                            <li>Knowledge sources would "bid" to work on specific parts of the blackboard</li>
+                            <li>Bids included a numeric rating of the expected value of the contribution</li>
+                            <li>The control component would select the highest-rated bid</li>
+                            <li>The focus of attention would shift to the area being worked on</li>
+                            <li>This process would repeat until a solution was found or no more progress could be made</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Implementation Section -->
+        <section id="implementation" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-500 pb-2">Our Blackboard System Implementation</h2>
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">System Architecture</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="mb-4 text-gray-700">
+                            Our implementation is a modern recreation of the Hearsay-II architecture using contemporary technologies:
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 text-gray-700">
+                            <li><strong>Backend:</strong> Go with SQLite for persistence</li>
+                            <li><strong>Frontend:</strong> TypeScript with React and Tailwind CSS</li>
+                            <li><strong>Communication:</strong> REST API, WebSockets, and Server-Sent Events (SSE)</li>
+                        </ul>
+                        <p class="mb-4 text-gray-700">
+                            The system follows the classic blackboard architecture with three main components:
+                        </p>
+                        <ol class="list-decimal pl-6 mb-4 text-gray-700">
+                            <li><strong>Blackboard:</strong> A shared data structure that stores hypotheses at different levels of abstraction</li>
+                            <li><strong>Knowledge Sources:</strong> Specialized agents that can read from and write to the blackboard</li>
+                            <li><strong>Controller:</strong> Manages the activation of knowledge sources based on their bids</li>
+                        </ol>
+                    </div>
+                    <div>
+                        <img src="images/system-architecture.webp" alt="System Architecture Diagram" class="rounded-lg shadow-md">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Backend Implementation</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-blue-600 mb-2">Database Schema</h4>
+                        <p class="mb-4 text-gray-700">
+                            The SQLite database stores the state of the blackboard, including:
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 text-gray-700">
+                            <li>Hypotheses at different levels (parameter, segment, syllable, word, phrase)</li>
+                            <li>Knowledge sources and their status</li>
+                            <li>Activity logs for tracking system behavior</li>
+                            <li>Focus control information</li>
+                            <li>Bid queue for knowledge source activation</li>
+                        </ul>
+                        <h4 class="font-bold text-blue-600 mb-2">Core Components</h4>
+                        <p class="mb-4 text-gray-700">
+                            The Go backend is organized into several packages:
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 text-gray-700">
+                            <li><strong>database:</strong> Handles SQLite connection and operations</li>
+                            <li><strong>models:</strong> Defines data structures for the system</li>
+                            <li><strong>blackboard:</strong> Implements the central blackboard functionality</li>
+                            <li><strong>control:</strong> Manages the control flow and knowledge source activation</li>
+                            <li><strong>agents:</strong> Implements the mock knowledge sources</li>
+                            <li><strong>api:</strong> Provides REST endpoints for frontend communication</li>
+                            <li><strong>websocket:</strong> Handles real-time updates via WebSockets</li>
+                            <li><strong>sse:</strong> Implements Server-Sent Events for real-time updates</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="code mb-4">
+                            <pre>// Blackboard structure
+type Blackboard struct {
+    mu              sync.RWMutex
+    db              *sql.DB
+    eventHandlers   []EventHandler
+    cycle           int
+}
+
+// Hypothesis structure
+type Hypothesis struct {
+    ID         string
+    Content    string
+    Confidence float64
+    TimeRange  string
+    Locked     bool
+    Owner      string
+}
+
+// Knowledge Source structure
+type KnowledgeSource struct {
+    ID                string
+    Name              string
+    Status            string
+    LastAction        string
+    BidValue          float64
+    ActivationPattern string
+}</pre>
+                        </div>
+                        <div class="code">
+                            <pre>// Controller implementation
+func (c *Controller) cycle() {
+    // Get current state
+    state := c.bb.GetState()
+    
+    // Collect bids from knowledge sources
+    var bids []bid
+    for id, ks := range c.knowledgeSources {
+        canActivate, bidValue := ks.CanActivate(state)
+        if canActivate {
+            bids = append(bids, bid{
+                ksID:  id,
+                value: bidValue,
+            })
+        }
+    }
+    
+    // Sort bids by value (highest first)
+    sort.Slice(bids, func(i, j int) bool {
+        return bids[i].value > bids[j].value
+    })
+    
+    // Activate highest bidding knowledge source
+    if len(bids) > 0 {
+        highestBid := bids[0]
+        ks := c.knowledgeSources[highestBid.ksID]
+        
+        // Activate the knowledge source
+        ks.Activate(c.bb)
+    }
+    
+    // Increment cycle counter
+    c.bb.IncrementCycle()
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Mock Agents Implementation</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="mb-4 text-gray-700">
+                            We implemented six mock agents based on the Hearsay-II knowledge sources:
+                        </p>
+                        <ol class="list-decimal pl-6 mb-4 text-gray-700">
+                            <li><strong>SEG (Segment Creator):</strong> Creates segments from parameters</li>
+                            <li><strong>POM (Phone to Syllable):</strong> Creates syllables from segments</li>
+                            <li><strong>MOW (Syllable to Word):</strong> Creates words from syllables</li>
+                            <li><strong>PARSE (Syntax Parser):</strong> Creates phrases from words</li>
+                            <li><strong>PREDICT (Word Predictor):</strong> Predicts next words based on context</li>
+                            <li><strong>RPOL (Hypothesis Rater):</strong> Evaluates the credibility of hypotheses</li>
+                        </ol>
+                        <p class="mb-4 text-gray-700">
+                            Each agent implements the KnowledgeSource interface:
+                        </p>
+                        <ul class="list-disc pl-6 mb-4 text-gray-700">
+                            <li><strong>ID():</strong> Returns the agent's identifier</li>
+                            <li><strong>CanActivate():</strong> Determines if the agent can contribute and provides a bid value</li>
+                            <li><strong>Activate():</strong> Performs the agent's action on the blackboard</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="code mb-4">
+                            <pre>// KnowledgeSource interface
+type KnowledgeSource interface {
+    ID() string
+    CanActivate(state models.BlackboardState) (bool, float64)
+    Activate(bb *blackboard.Blackboard) error
+}
+
+// Example agent implementation
+func (a *SegmentCreator) Activate(bb *blackboard.Blackboard) error {
+    // Get current state
+    state := bb.GetState()
+    
+    // Find a high-confidence parameter to work with
+    var selectedParam *models.Hypothesis
+    for _, param := range state.Parameter {
+        if param.Confidence > 0.9 && !param.Locked {
+            selectedParam = &param
+            break
+        }
+    }
+    
+    // Lock the parameter
+    bb.LockHypothesis(selectedParam.ID, a.id)
+    
+    // Create a new segment
+    segmentID := fmt.Sprintf("SEG-%03d", a.nextSegmentID)
+    a.nextSegmentID++
+    
+    // Generate segment content
+    content := "[DH-AH]"
+    
+    // Create segment hypothesis
+    segment := models.Hypothesis{
+        ID:         segmentID,
+        Content:    content,
+        Confidence: 0.7 + rand.Float64()*0.2,
+        TimeRange:  selectedParam.TimeRange + "+100ms",
+        Locked:     false,
+    }
+    
+    // Add the hypothesis to the blackboard
+    bb.AddHypothesis(segment)
+    
+    // Unlock the parameter
+    bb.UnlockHypothesis(selectedParam.ID)
+    
+    return nil
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Frontend Implementation</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <p class="mb-4 text-gray-700">
+                            The frontend is built with React, TypeScript, and Tailwind CSS, providing a modern and responsive user interface for the blackboard system.
+                        </p>
+                        <h4 class="font-bold text-blue-600 mb-2">Key Features</h4>
+                        <ul class="list-disc pl-6 mb-4 text-gray-700">
+                            <li>Real-time updates using Server-Sent Events (SSE)</li>
+                            <li>Visual representation of the blackboard at different levels</li>
+                            <li>Display of knowledge sources and their status</li>
+                            <li>Activity log showing system events</li>
+                            <li>Focus control and bid queue visualization</li>
+                            <li>Responsive design for different screen sizes</li>
+                        </ul>
+                        <h4 class="font-bold text-blue-600 mb-2">Components</h4>
+                        <ul class="list-disc pl-6 mb-4 text-gray-700">
+                            <li><strong>App:</strong> Main application component</li>
+                            <li><strong>HypothesisView:</strong> Displays individual hypotheses</li>
+                            <li><strong>KnowledgeSourceCard:</strong> Shows knowledge source information</li>
+                            <li><strong>ActivityLog:</strong> Displays system activity</li>
+                            <li><strong>FocusControl:</strong> Shows focus and priorities</li>
+                            <li><strong>BidQueue:</strong> Displays current bids</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="code mb-4">
+                            <pre>// Custom hook for blackboard state
+export const useBlackboardState = () => {
+  const [state, setState] = useState<BlackboardState | null>(null);
+  
+  useEffect(() => {
+    // Fetch initial state
+    const fetchInitialState = async () => {
+      const response = await fetch('/api/blackboard');
+      const data = await response.json();
+      setState(data);
+    };
+
+    fetchInitialState();
+
+    // Set up SSE connection for real-time updates
+    const eventSource = new EventSource('/events');
+    
+    eventSource.onmessage = (event) => {
+      const eventData = JSON.parse(event.data);
+      
+      // Handle different event types
+      switch (eventData.type) {
+        case 'hypothesis_added':
+        case 'hypothesis_updated':
+          // Update state with new hypothesis
+          break;
+        
+        case 'knowledge_source_updated':
+          // Update knowledge source
+          break;
+        
+        case 'activity_log_added':
+          // Add new activity log entry
+          break;
+      }
+    };
+    
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  return { state };
+};</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">System in Action</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <img src="images/blackboard-main.png" alt="Blackboard System Main View" class="rounded-lg shadow-md mb-4">
+                        <p class="text-sm text-gray-600 text-center">Main view of the blackboard system showing hypotheses at different levels</p>
+                    </div>
+                    <div>
+                        <img src="images/knowledge-sources.png" alt="Knowledge Sources View" class="rounded-lg shadow-md mb-4">
+                        <p class="text-sm text-gray-600 text-center">Knowledge sources panel showing agent status and bid values</p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <img src="images/activity-log.png" alt="System Activity Log" class="rounded-lg shadow-md mb-4 mx-auto">
+                    <p class="text-sm text-gray-600 text-center">Activity log showing the sequence of knowledge source activations</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section id="applications" class="mb-16">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-500 pb-2">Applications of Blackboard Systems</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Speech Recognition</h3>
+                    <p class="mb-4 text-gray-700">
+                        The original application of the Hearsay-II system. Blackboard architectures are well-suited for speech recognition because they can integrate multiple levels of analysis, from acoustic features to semantic interpretation.
+                    </p>
+                    <p class="text-gray-700">
+                        Modern speech recognition systems still use concepts from blackboard architectures, though they are often combined with machine learning approaches.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Image Understanding</h3>
+                    <p class="mb-4 text-gray-700">
+                        Blackboard systems have been used for image understanding tasks, where different knowledge sources can analyze different aspects of an image, from low-level features to high-level semantic content.
+                    </p>
+                    <p class="text-gray-700">
+                        Examples include the VISIONS system for scene analysis and medical image interpretation systems.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Intelligent Tutoring</h3>
+                    <p class="mb-4 text-gray-700">
+                        Blackboard architectures have been used in intelligent tutoring systems, where different knowledge sources can represent different aspects of the tutoring process, such as domain knowledge, student modeling, and pedagogical strategies.
+                    </p>
+                    <p class="text-gray-700">
+                        The BB1 system is an example of a blackboard-based intelligent tutoring system.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Autonomous Vehicles</h3>
+                    <p class="mb-4 text-gray-700">
+                        Blackboard architectures have been used in autonomous vehicle control systems, where different knowledge sources can handle different aspects of vehicle control, such as perception, planning, and execution.
+                    </p>
+                    <p class="text-gray-700">
+                        The NAVLAB system at Carnegie Mellon University used a blackboard architecture for autonomous navigation.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Multi-Agent Systems</h3>
+                    <p class="mb-4 text-gray-700">
+                        Blackboard architectures provide a natural framework for multi-agent systems, where different agents can collaborate by sharing information through a common blackboard.
+                    </p>
+                    <p class="text-gray-700">
+                        Modern multi-agent systems often use blackboard-like mechanisms for coordination and communication.
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Modern Applications</h3>
+                    <p class="mb-4 text-gray-700">
+                        While pure blackboard architectures are less common today, their concepts have influenced many modern systems:
+                    </p>
+                    <ul class="list-disc pl-6 text-gray-700">
+                        <li>Microservices architectures</li>
+                        <li>Event-driven systems</li>
+                        <li>Publish-subscribe patterns</li>
+                        <li>Complex event processing</li>
+                        <li>Hybrid AI systems combining symbolic and neural approaches</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion Section -->
+        <section id="conclusion">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-500 pb-2">Conclusion</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <p class="mb-4 text-gray-700">
+                    Blackboard systems represent a powerful architectural pattern for solving complex problems that require diverse types of knowledge and opportunistic problem-solving strategies. While they originated in the 1970s with systems like Hearsay-II, their concepts continue to influence modern software architecture and artificial intelligence systems.
+                </p>
+                <p class="mb-4 text-gray-700">
+                    Our implementation demonstrates how the blackboard architecture can be realized using modern technologies like Go, SQLite, React, and TypeScript. The system successfully recreates the key components of the Hearsay-II architecture, including the multi-level blackboard, specialized knowledge sources, and the control mechanism based on bidding and focus of attention.
+                </p>
+                <p class="text-gray-700">
+                    As AI continues to evolve, the principles of blackboard systems—modularity, flexibility, and collaborative problem-solving—remain relevant for building systems that can integrate multiple types of knowledge and reasoning approaches.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold">Blackboard Systems</h3>
+                    <p class="text-gray-400">Architecture, Implementation, and Applications</p>
+                </div>
+                <div>
+                    <p class="text-gray-400">© 2025 Blackboard Systems Project</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple script for mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.querySelector('button');
+            const menuItems = document.querySelector('.md\\:flex');
+            
+            if (menuButton && menuItems) {
+                menuButton.addEventListener('click', function() {
+                    menuItems.classList.toggle('hidden');
+                    menuItems.classList.toggle('flex');
+                    menuItems.classList.toggle('flex-col');
+                    menuItems.classList.toggle('absolute');
+                    menuItems.classList.toggle('top-16');
+                    menuItems.classList.toggle('right-4');
+                    menuItems.classList.toggle('bg-white');
+                    menuItems.classList.toggle('p-4');
+                    menuItems.classList.toggle('shadow-md');
+                    menuItems.classList.toggle('rounded-lg');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+/* Tailwind CSS for the blackboard website */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+.hero-pattern {
+    background-color: #1a202c;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%232d3748' fill-opacity='0.4'%3E%3Cpath fill-rule='evenodd' d='M11 0l5 20H6l5-20zm42 31a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM0 72h40v4H0v-4zm0-8h31v4H0v-4zm20-16h20v4H20v-4zM0 56h40v4H0v-4zm63-25a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM53 41a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-30 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-28-8a5 5 0 0 0-10 0h10zm10 0a5 5 0 0 1-10 0h10zM56 5a5 5 0 0 0-10 0h10zm10 0a5 5 0 0 1-10 0h10zm-3 46a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM21 0l5 20H16l5-20zm43 64v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zM36 13h4v4h-4v-4zm4 4h4v4h-4v-4zm-4 4h4v4h-4v-4zm8-8h4v4h-4v-4z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #1a202c;
+    color: #e2e8f0;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-pattern {
+        padding: 2rem 1rem;
+    }
+    
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Image styling */
+.screenshot {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Knowledge source card styling */
+.knowledge-source-card {
+    border-left: 4px solid #3182ce;
+    background-color: #ebf8ff;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+.knowledge-source-card.active {
+    border-left-color: #38a169;
+    background-color: #f0fff4;
+}
+
+.knowledge-source-card.waiting {
+    border-left-color: #d69e2e;
+    background-color: #fffff0;
+}
+
+/* Hypothesis styling */
+.hypothesis {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hypothesis-locked {
+    background-color: #f7fafc;
+    border-color: #cbd5e0;
+}
+
+.confidence-badge {
+    background-color: #2b6cb0;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Activity log styling */
+.activity-log {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.activity-log-time {
+    color: #4a5568;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.activity-log-source {
+    color: #2b6cb0;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+/* Focus control styling */
+.focus-control {
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.focus-badge {
+    background-color: #2b6cb0;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.priority-bar {
+    height: 0.5rem;
+    background-color: #e2e8f0;
+    border-radius: 9999px;
+    margin-bottom: 0.5rem;
+}
+
+.priority-fill {
+    height: 100%;
+    background-color: #3182ce;
+    border-radius: 9999px;
+}
