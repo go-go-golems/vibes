@@ -1,0 +1,7 @@
+- [Building a Normalized Graph Store with Redux Toolkit](https://claude.ai/chat/91c62e3f-cdf8-487e-a713-08c7d75c75eb)
+- [LLM Agent Orchestrator UX](https://claude.ai/chat/20bb0cb1-69aa-4bcc-bcbe-4409b7329700)
+- [Generative DSL for Generative UI Elements](https://claude.ai/chat/8536bf81-7eed-42eb-81de-dfd0089dfb7e)
+- [LLM Agent Monitoring Dashboard](https://claude.ai/chat/353ceff1-8eae-49ec-b0d5-b601776dc022)
+- [Goal Decision Hierarchy + More Agent Views](https://claude.ai/chat/c49f7ab6-2764-45af-a3b6-1a5f38d3dac1)
+- [Prompt Template Library Monitor](https://claude.ai/chat/a3e50b53-e90d-4882-a329-4eadee80cb8d)
+- [Bank Transactions Manager](https://claude.ai/chat/92ea3ec6-0993-44eb-910b-d97727936c50)
