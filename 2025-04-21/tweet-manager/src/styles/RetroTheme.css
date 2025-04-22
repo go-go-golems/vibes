@@ -1,0 +1,257 @@
+/* Retro vintage DEC PDP11 inspired theme with magenta color scheme */
+
+:root {
+  --primary-color: #e83e8c; /* Magenta primary color */
+  --secondary-color: #6c757d;
+  --background-color: #1a1a1a; /* Dark background */
+  --panel-color: #2a2a2a; /* Slightly lighter than background */
+  --text-color: #f0f0f0; /* Light text for dark background */
+  --accent-color: #9c27b0; /* Purple accent */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --border-radius: 0.25rem;
+  --font-family-mono: 'Courier New', Courier, monospace;
+  --font-family-sans: 'VT323', 'Press Start 2P', monospace;
+}
+
+/* Global styles */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family-mono);
+  margin: 0;
+  padding: 0;
+}
+
+/* Import retro fonts */
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap');
+
+/* Navbar styling */
+.navbar {
+  background-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand {
+  font-family: var(--font-family-sans);
+  font-size: 1.5rem;
+  color: var(--text-color) !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.nav-link {
+  color: var(--text-color) !important;
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+/* Card styling for tweets */
+.tweet-card {
+  background-color: var(--panel-color);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tweet-card .card-header {
+  background-color: rgba(232, 62, 140, 0.2); /* Semi-transparent magenta */
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.tweet-card .card-footer {
+  background-color: rgba(232, 62, 140, 0.1); /* Lighter semi-transparent magenta */
+  border-top: 1px solid var(--primary-color);
+}
+
+/* Button styling */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-outline-secondary {
+  color: var(--text-color);
+  border-color: var(--secondary-color);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+/* Form controls */
+.form-control {
+  background-color: #333;
+  border: 1px solid var(--primary-color);
+  color: var(--text-color);
+}
+
+.form-control:focus {
+  background-color: #444;
+  color: var(--text-color);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem rgba(232, 62, 140, 0.25);
+}
+
+.input-group-text {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: 1px solid var(--primary-color);
+}
+
+/* Badge styling */
+.badge {
+  font-family: var(--font-family-mono);
+}
+
+.badge-primary {
+  background-color: var(--primary-color);
+}
+
+/* Modal styling */
+.modal-content {
+  background-color: var(--panel-color);
+  border: 1px solid var(--primary-color);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--primary-color);
+}
+
+/* List group styling */
+.list-group-item {
+  background-color: var(--panel-color);
+  color: var(--text-color);
+  border: 1px solid rgba(232, 62, 140, 0.3);
+}
+
+.list-group-item.active {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Dropdown styling */
+.dropdown-menu {
+  background-color: var(--panel-color);
+  border: 1px solid var(--primary-color);
+}
+
+.dropdown-item {
+  color: var(--text-color);
+}
+
+.dropdown-item:hover {
+  background-color: rgba(232, 62, 140, 0.2);
+}
+
+.dropdown-divider {
+  border-top: 1px solid rgba(232, 62, 140, 0.3);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* Retro terminal effects */
+.terminal-effect {
+  position: relative;
+}
+
+.terminal-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  pointer-events: none;
+}
+
+/* Blinking cursor effect */
+.cursor-blink::after {
+  content: "|";
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Active button styling */
+.btn.active {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border-color: var(--primary-color);
+}
+
+/* Container styling */
+.container {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--border-radius);
+  box-shadow: 0 0 20px rgba(232, 62, 140, 0.3);
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+}

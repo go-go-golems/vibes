@@ -1,0 +1,198 @@
+[
+  {
+    "authors": [
+      {
+        "id": "user_1",
+        "username": "techguru",
+        "display_name": "Tech Guru",
+        "profile_image": "https://randomuser.me/api/portraits/men/1.jpg",
+        "is_muted": 0,
+        "is_blocked": 0
+      },
+      {
+        "id": "user_2",
+        "username": "newsreporter",
+        "display_name": "News Reporter",
+        "profile_image": "https://randomuser.me/api/portraits/women/2.jpg",
+        "is_muted": 0,
+        "is_blocked": 0
+      },
+      {
+        "id": "user_3",
+        "username": "comedyking",
+        "display_name": "Comedy King",
+        "profile_image": "https://randomuser.me/api/portraits/men/3.jpg",
+        "is_muted": 0,
+        "is_blocked": 0
+      },
+      {
+        "id": "user_4",
+        "username": "politicalanalyst",
+        "display_name": "Political Analyst",
+        "profile_image": "https://randomuser.me/api/portraits/women/4.jpg",
+        "is_muted": 0,
+        "is_blocked": 0
+      },
+      {
+        "id": "user_5",
+        "username": "sportsfan",
+        "display_name": "Sports Fan",
+        "profile_image": "https://randomuser.me/api/portraits/men/5.jpg",
+        "is_muted": 0,
+        "is_blocked": 0
+      }
+    ],
+    "tweets": [
+      {
+        "id": "tweet_1",
+        "author_id": "user_1",
+        "content": "Just got my hands on the new M3 MacBook Pro. The performance is absolutely mind-blowing! #Apple #Tech",
+        "timestamp": "2025-04-20T14:23:10.000Z",
+        "likes": 1245,
+        "retweets": 328,
+        "quotes": 42,
+        "replies": 89,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Tech", "Apple"]
+      },
+      {
+        "id": "tweet_2",
+        "author_id": "user_2",
+        "content": "Breaking: Major climate agreement reached at UN summit. Countries pledge to reduce emissions by 50% by 2030. #ClimateAction #News",
+        "timestamp": "2025-04-20T16:45:22.000Z",
+        "likes": 3782,
+        "retweets": 1205,
+        "quotes": 156,
+        "replies": 342,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["News", "Important"]
+      },
+      {
+        "id": "tweet_3",
+        "author_id": "user_3",
+        "content": "My wife said I was immature. So I told her to get out of my pillow fort.",
+        "timestamp": "2025-04-20T18:12:05.000Z",
+        "likes": 9254,
+        "retweets": 2341,
+        "quotes": 421,
+        "replies": 532,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Funny"]
+      },
+      {
+        "id": "tweet_4",
+        "author_id": "user_4",
+        "content": "Analysis: The new healthcare bill has significant implications for rural communities. Here's what you need to know. (1/5)",
+        "timestamp": "2025-04-20T19:34:18.000Z",
+        "likes": 2145,
+        "retweets": 876,
+        "quotes": 134,
+        "replies": 267,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Politics", "Healthcare"]
+      },
+      {
+        "id": "tweet_5",
+        "author_id": "user_5",
+        "content": "What a game! That last-minute goal was absolutely incredible. The championship is going to be decided on the final day! #Sports #Football",
+        "timestamp": "2025-04-20T21:56:30.000Z",
+        "likes": 5432,
+        "retweets": 1432,
+        "quotes": 267,
+        "replies": 389,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Sports"]
+      },
+      {
+        "id": "tweet_6",
+        "author_id": "user_1",
+        "content": "The future of AI is not about replacing humans, but augmenting our capabilities. We need to focus on human-AI collaboration. #AI #FutureTech",
+        "timestamp": "2025-04-21T08:12:45.000Z",
+        "likes": 3421,
+        "retweets": 1243,
+        "quotes": 187,
+        "replies": 276,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Tech", "AI"]
+      },
+      {
+        "id": "tweet_7",
+        "author_id": "user_2",
+        "content": "Exclusive: Interview with the CEO of the fastest-growing startup in the renewable energy sector. 'We're just getting started,' he says.",
+        "timestamp": "2025-04-21T10:23:17.000Z",
+        "likes": 1876,
+        "retweets": 654,
+        "quotes": 98,
+        "replies": 143,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Business", "Energy"]
+      },
+      {
+        "id": "tweet_8",
+        "author_id": "user_3",
+        "content": "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+        "timestamp": "2025-04-21T12:45:33.000Z",
+        "likes": 8765,
+        "retweets": 2134,
+        "quotes": 387,
+        "replies": 456,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Funny", "Joke"]
+      },
+      {
+        "id": "tweet_9",
+        "author_id": "user_4",
+        "content": "The economic indicators are pointing to a strong recovery in the manufacturing sector. This could have major implications for job growth.",
+        "timestamp": "2025-04-21T14:56:22.000Z",
+        "likes": 1543,
+        "retweets": 567,
+        "quotes": 87,
+        "replies": 132,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Economics", "Jobs"]
+      },
+      {
+        "id": "tweet_10",
+        "author_id": "user_5",
+        "content": "The transfer window is heating up! Rumors suggest a record-breaking deal might be announced this week. #TransferNews #Football",
+        "timestamp": "2025-04-21T16:34:11.000Z",
+        "likes": 4321,
+        "retweets": 1234,
+        "quotes": 234,
+        "replies": 345,
+        "is_flagged": 0,
+        "flag_type": null,
+        "is_bookmarked": 0,
+        "bookmark_note": null,
+        "tags": ["Sports", "Football"]
+      }
+    ]
+  }
+]
