@@ -1,0 +1,285 @@
+/* src/App.css */
+.app-container {
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: 'Arial', sans-serif;
+  background-color: #ffebf3; /* Light pink background for kawaii theme */
+}
+
+h1 {
+  margin-bottom: 0.5rem;
+  color: #ff69b4; /* Hot pink for kawaii theme */
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.canvas-container {
+  width: 100%;
+  height: 1200px;
+  margin: 2rem 0;
+  border: 2px solid #ffb6c1; /* Light pink border */
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff5f8; /* Very light pink background */
+  box-shadow: 0 3px 10px rgba(255, 105, 180, 0.2);
+  background-image: radial-gradient(circle, #ffb6c1 1px, rgba(0, 0, 0, 0) 1px);
+  background-size: 20px 20px;
+}
+
+.info-panel {
+  margin: 2rem auto;
+  padding: 1rem;
+  max-width: 400px;
+  border: 2px solid #ffb6c1;
+  border-radius: 12px;
+  background-color: #fff;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
+}
+
+.info-panel h3 {
+  margin-top: 0;
+  color: #ff69b4;
+  border-bottom: 1px solid #ffb6c1;
+  padding-bottom: 0.5rem;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.legend {
+  margin: 2rem auto;
+  padding: 1rem;
+  max-width: 400px;
+  border: 2px solid #ffb6c1;
+  border-radius: 12px;
+  background-color: #fff;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
+}
+
+.legend h3 {
+  margin-top: 0;
+  color: #ff69b4;
+  border-bottom: 1px solid #ffb6c1;
+  padding-bottom: 0.5rem;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  border: 1px solid #ffb6c1;
+  border-radius: 4px;
+}
+
+/* Node specific styles */
+.node-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  border: 2px solid #ffb6c1;
+  border-radius: 10px;
+  border-left-width: 4px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.node-wrapper[aria-selected='true'] {
+  border-color: #ff69b4;
+  box-shadow: 0 0 12px rgba(255, 105, 180, 0.6);
+}
+
+.node-content {
+  display: flex;
+  padding: 10px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.node-details {
+  flex-grow: 1;
+  color: #333;
+  overflow: hidden;
+}
+
+.node-details h1 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #ff69b4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-details p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Remove default reaflow node fill/stroke when using foreignObject */
+.reaflow-node {
+  fill: transparent !important;
+  stroke: transparent !important;
+}
+
+/* Node Stats */
+.node-stats {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  grid-row: 2 / span 1;
+  grid-column: 1 / span 2;
+  align-self: end;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 8px;
+  font-size: 12px;
+  color: #555;
+}
+
+.node-stats > li > span {
+  display: block;
+  text-transform: capitalize;
+  font-size: 10px;
+  color: #ff69b4;
+}
+
+.node-stats > li > strong {
+  font-size: 13px;
+}
+
+/* Node Icon */
+.node-icon {
+  grid-row: 1 / span 1;
+  grid-column: 2 / span 1;
+  font-size: 24px;
+  line-height: 1;
+  text-align: center;
+  align-self: start;
+}
+
+/* Add Button */
+.add-button {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 50%);
+  z-index: 10;
+}
+
+.add-button button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #ffb6c1;
+  background-color: #fff;
+  color: #ff69b4;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+}
+
+.add-button button:hover {
+  background-color: #ffebf3;
+  transform: scale(1.1);
+}
+
+.add-button button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error Badge */
+.node-error-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 8px;
+  height: 8px;
+  background-color: #ff4081;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+/* Control Buttons */
+.control-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.control-buttons button {
+  padding: 8px 16px;
+  border: 2px solid #ffb6c1;
+  border-radius: 20px;
+  background-color: #fff;
+  color: #ff69b4;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+}
+
+.control-buttons button:hover {
+  background-color: #ffebf3;
+  transform: scale(1.05);
+}
+
+.zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.zoom-controls button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #ffb6c1;
+  background-color: #fff;
+  color: #ff69b4;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(255, 105, 180, 0.3);
+}
+
+.zoom-controls button:hover {
+  background-color: #ffebf3;
+  transform: scale(1.1);
+}
+
+.zoom-level {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid #ffb6c1;
+  background-color: #fff;
+  color: #ff69b4;
+  font-size: 12px;
+  font-weight: bold;
+}
