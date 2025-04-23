@@ -1,0 +1,44 @@
+# UsenetScraper DSL
+version: 1.0
+
+# Connection settings
+connection:
+  server: news.eternal-september.org  # Public Usenet server
+  port: 119
+  ssl: false
+  timeout: 30
+  retries: 3
+
+# Define what to scrape
+sources:
+  - group: alt.test
+    max_posts: 5
+    since: 1d
+
+# Processing pipeline
+transformations:
+  - id: extract_header
+    field: subject
+    pattern: '\[(.*?)\]'
+    store_as: category
+    
+  - id: clean_body
+    field: body
+    operations:
+      - strip_quotes
+      - remove_signatures
+      - normalize_whitespace
+    store_as: clean_body
+
+# Output configuration
+output:
+  format: json
+  file: usenet_data.json
+  fields:
+    - id
+    - author
+    - date
+    - subject
+    - category
+    - clean_body
+  pretty: true

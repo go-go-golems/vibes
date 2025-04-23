@@ -1,0 +1,181 @@
+# UsenetScraper DSL Specification
+
+## Overview
+The UsenetScraper DSL is a YAML-based domain-specific language designed for configuring and executing Usenet newsgroup scraping operations. This specification defines the structure, syntax, and semantics of the DSL.
+
+## Version
+- `version`: Specifies the version of the DSL schema (required)
+  - Type: string
+  - Example: `1.0`
+
+## Connection Settings
+- `connection`: Defines the Usenet server connection parameters (required)
+  - `server`: Usenet server hostname or IP address (required)
+    - Type: string
+    - Example: `news.example.com`
+  - `port`: Server port number (required)
+    - Type: integer
+    - Default: `119` (standard NNTP port)
+    - Example: `119` or `563` (for NNTPS)
+  - `ssl`: Whether to use SSL/TLS encryption (optional)
+    - Type: boolean
+    - Default: `false`
+    - Example: `true`
+  - `timeout`: Connection timeout in seconds (optional)
+    - Type: integer
+    - Default: `30`
+    - Example: `60`
+  - `retries`: Number of connection retry attempts (optional)
+    - Type: integer
+    - Default: `3`
+    - Example: `5`
+  - `auth`: Authentication credentials (optional)
+    - `username`: Usenet account username (required if auth is specified)
+      - Type: string
+      - Supports environment variables: `${ENV_VAR_NAME}`
+      - Example: `${USENET_USER}` or `myusername`
+    - `password`: Usenet account password (required if auth is specified)
+      - Type: string
+      - Supports environment variables: `${ENV_VAR_NAME}`
+      - Example: `${USENET_PASS}` or `mypassword`
+
+## Scraping Sources
+- `sources`: List of Usenet groups to scrape (required, at least one source)
+  - Type: array of source objects
+  - Each source object contains:
+    - `group`: Usenet group name (required)
+      - Type: string
+      - Example: `alt.binaries.multimedia`
+    - `max_posts`: Maximum number of posts to retrieve (optional)
+      - Type: integer
+      - Default: `100`
+      - Example: `50`
+    - `since`: Time range to scrape (optional)
+      - Type: string
+      - Format: Number followed by time unit (m=minutes, h=hours, d=days, w=weeks)
+      - Default: `1d` (one day)
+      - Example: `2d` (two days), `12h` (twelve hours)
+    - `filter`: Filtering criteria (optional)
+      - Type: string
+      - Format: `field: 'pattern'`
+      - Supported fields: `subject`, `from`, `message-id`, `date`
+      - Example: `subject: 'scraping'`
+    - `concurrent`: Number of concurrent connections for this group (optional)
+      - Type: integer
+      - Default: `1`
+      - Example: `3`
+    - `rate_limit`: Rate limiting for requests (optional)
+      - Type: string
+      - Format: Number of requests per time unit
+      - Example: `10/minute` or `100/hour`
+
+## Transformation Pipeline
+- `transformations`: List of data transformations to apply (optional)
+  - Type: array of transformation objects
+  - Each transformation object contains:
+    - `id`: Unique identifier for the transformation (required)
+      - Type: string
+      - Example: `extract_header`
+    - `field`: The post field to transform (required)
+      - Type: string
+      - Supported values: `subject`, `body`, `author`, `date`, or any previously created field
+      - Example: `subject`
+    - `pattern`: Regular expression pattern for extraction (required for extraction operations)
+      - Type: string
+      - Example: `'\[(.*?)\]'`
+    - `store_as`: Name of the field to store the result (required)
+      - Type: string
+      - Example: `category`
+    - `operations`: List of operations to perform (for clean operations)
+      - Type: array of strings
+      - Supported operations:
+        - `strip_quotes`: Remove quoted text
+        - `remove_signatures`: Remove email signatures
+        - `normalize_whitespace`: Normalize whitespace characters
+        - `strip_html`: Remove HTML tags
+        - `lowercase`: Convert text to lowercase
+        - `trim`: Remove leading/trailing whitespace
+      - Example: `[strip_quotes, remove_signatures]`
+    - `model`: Machine learning model for classification (for classify operations)
+      - Type: string
+      - Supported values: `simple_bayes`, `keyword_match`, `custom`
+      - Example: `simple_bayes`
+    - `categories`: List of categories for classification (for classify operations)
+      - Type: array of strings
+      - Example: `[question, announcement, discussion]`
+    - `replace`: String replacement configuration (for replace operations)
+      - `from`: String or pattern to replace
+      - `to`: Replacement string
+      - Example: `{from: 'foo', to: 'bar'}`
+    - `split`: String splitting configuration (for split operations)
+      - `delimiter`: Character or pattern to split on
+      - Example: `{delimiter: ','}`
+    - `join`: String joining configuration (for join operations)
+      - `fields`: List of fields to join
+      - `delimiter`: Character to join with
+      - Example: `{fields: [field1, field2], delimiter: ' '}`
+
+## Output Configuration
+- `output`: Defines how scraped data should be saved (required)
+  - `format`: Output format (required)
+    - Type: string
+    - Supported values: `json`, `csv`, `xml`, `sqlite`
+    - Example: `json`
+  - `file`: Output file path (required)
+    - Type: string
+    - Example: `usenet_data.json`
+  - `fields`: List of fields to include in output (optional)
+    - Type: array of strings
+    - Default: all available fields
+    - Example: `[id, author, date, subject, body]`
+  - `pretty`: Whether to format output for human readability (optional)
+    - Type: boolean
+    - Default: `false`
+    - Example: `true`
+  - `append`: Whether to append to existing file (optional)
+    - Type: boolean
+    - Default: `false`
+    - Example: `true`
+  - `batch_size`: Number of records to write at once (optional)
+    - Type: integer
+    - Default: `100`
+    - Example: `50`
+
+## Logging Configuration
+- `logging`: Defines logging behavior (optional)
+  - `level`: Logging level (optional)
+    - Type: string
+    - Supported values: `debug`, `info`, `warning`, `error`
+    - Default: `info`
+    - Example: `debug`
+  - `file`: Log file path (optional)
+    - Type: string
+    - Default: stdout
+    - Example: `usenet_scraper.log`
+  - `format`: Log format (optional)
+    - Type: string
+    - Supported values: `text`, `json`
+    - Default: `text`
+    - Example: `json`
+
+## Web Interface Configuration
+- `web_interface`: Web interface settings (optional)
+  - `enabled`: Whether to enable the web interface (optional)
+    - Type: boolean
+    - Default: `false`
+    - Example: `true`
+  - `port`: Web interface port (optional)
+    - Type: integer
+    - Default: `8080`
+    - Example: `9000`
+  - `host`: Web interface host (optional)
+    - Type: string
+    - Default: `localhost`
+    - Example: `0.0.0.0`
+  - `auth`: Web interface authentication (optional)
+    - `username`: Web interface username
+      - Type: string
+      - Example: `admin`
+    - `password`: Web interface password
+      - Type: string
+      - Example: `password`
