@@ -1,0 +1,35 @@
+config:
+    auth:
+        token: XXX
+    organization: github
+project:
+    name: Sample Project
+    description: A sample project created with the GitHub Project Management tool
+    public: true
+    columns:
+        - name: To Do
+        - name: In Progress
+        - name: Done
+issues:
+    - title: Main Feature
+      body: Implement the main feature for our project
+      status: To Do
+      sub_issues:
+        - title: Sub-task 1
+          body: Implement the first part of the main feature
+          status: To Do
+        - title: Sub-task 2
+          body: Implement the second part of the main feature
+          status: In Progress
+          sub_issues:
+            - title: Sub-sub-task 1
+              body: Implement a specific component of sub-task 2
+              status: To Do
+      comments:
+        - body: This is a high priority item
+    - title: Documentation
+      body: Create comprehensive documentation for the project
+      status: In Progress
+      labels:
+        - name: documentation
+          color: 0075ca
