@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162224605441717@naggum.no.html",
+  "id": "3162224605441717@naggum.no",
+  "title": "Re: ACL bug (was: Re: Series 2.1 released)",
+  "content": "\nSubject: Re: ACL bug (was: Re: Series 2.1 released)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/16\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162224605441717@naggum.no>\n\n* Lieven Marchand <mal@bewoner.dma.be>\n| The problem is in the closure that gets stored in the gen-fn field of\n| the series struct. It goes wrong for every use of MASK. Anyway, the\n| patch had to work at that level too, so I had to make sure my changes\n| to defS MASK had the correct effect.\n\n  I'm curious about all this work you're putting in.  have you bothered to\n  alert bugs@franz.com with a test case so they could fix it and you could\n  do something more useful with your life?\n\n#:Erik\n\n",
+  "date": "2000-03-16",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161625123385591@naggum.no.html",
+  "id": "3161625123385591@naggum.no",
+  "title": "Re: Eureka! Lexical bindings can be guaranteed!",
+  "content": "\nSubject: Re: Eureka! Lexical bindings can be guaranteed!\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161625123385591@naggum.no>\n\n* Jon S Anthony <jsa@synquiry.com>\n| Third, you can always inline those functions where you think the extra\n| call overhead might actually make a difference (better to actually check\n| this with the (typically good) profilers provided first).\n\n  inlining user functions is frequently a very hazardous business, and some\n  implementations do not heed inline declarations for user functions.\n\n| Fourth, if push comes to shove, you could use macros to \"compile away\"\n| these definitions while maintaining the power of their abstraction.\n\n  compiler macros provide the best of both worlds, and can be quite the\n  tool to optimize code beyond belief without being force into macro land.\n\n#:Erik\n\n",
+  "date": "2000-03-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

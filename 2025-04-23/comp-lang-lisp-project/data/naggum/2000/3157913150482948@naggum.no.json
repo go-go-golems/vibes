@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157913150482948@naggum.no.html",
+  "id": "3157913150482948@naggum.no",
+  "title": "Re: reading/writing bytes smaller than 8 bits?",
+  "content": "\nSubject: Re: reading/writing bytes smaller than 8 bits?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/26\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157913150482948@naggum.no>\n\n* gat@jpl.nasa.gov (Erann Gat)\n| Nothing prevents a vendor from issuing a proposal that includes\n| proprietary technology or trademarks.  Politics often prevents such\n| proposals from being adopted.  That's why they tend to be rare, and also\n| why it is entirely justified to ask the question.\n\n  well, if they tend to be rare, I'd have expected some _justification_ for\n  the implicit expectation that this was one of those rare cases.\n\n  however, to zoom out a bit, if people in the Common Lisp community wonder\n  why there's so (comparatively) little communal development activity, do\n  consider the responses received to the work that _is_ being done when it\n  is published.  as far as I have seen, the response is generally \"thanks.\n  now where's the rest?\", no matter how much you do.  it almost sounds like\n  a Norwegian tax collector, one of nature's strongest de-motivating forces.\n\n#:Erik\n\n",
+  "date": "2000-01-26",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

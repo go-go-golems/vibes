@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164297272958870@naggum.no.html",
+  "id": "3164297272958870@naggum.no",
+  "title": "Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164297272958870@naggum.no>\n\n* Courageous <jkraska1@san.rr.com>\n| I know this is possible one way or the other, for I have seen automatic\n| deep copy implemented via code generation in C++.\n\n  I'm sorry, but you have been tricked.  just because it exists for C++ is\n  not in any way, shape, or form an argument for the _correctness_ of the\n  implementation or the algorithm or even the concept to begin with.\n\n| I'm pretty new at lisp; however, so I'm not sure what language-specific\n| pitfalls I will encounter yet.\n\n  you encountered a language-specific pitfall and fell headlong into it\n  when you believed that C++ had an automatic solution.  you will get out\n  of this sorry state of affairs when you realize that such automated tools\n  are not able to do their job.  the key to understand this is that even in\n  a class for which \"deep copy\" makes non-zero sense, you don't _always_\n  want to deep copy _everything_, and if you fail to implement it right,\n  you will in fact destroy valuable information in the copying process.\n\n#:Erik\n\n",
+  "date": "2000-04-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

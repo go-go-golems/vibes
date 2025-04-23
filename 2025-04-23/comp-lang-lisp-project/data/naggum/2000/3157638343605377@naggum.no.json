@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157638343605377@naggum.no.html",
+  "id": "3157638343605377@naggum.no",
+  "title": "Re: [Q]: Recursion help",
+  "content": "\nSubject: Re: [Q]: Recursion help\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/23\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157638343605377@naggum.no>\n\n* Dirt <pip3@inam3.com>\n| >Here's something to try for you with your implementation:\n| >\n| >> (eq 7391827918273091 7391827918273091)\n| >NIL\n| >> (eq 2.0 2.0)\n| >NIL\n| >>\n| \n| Yea, I tried that out and it didn't work just like you said. Thanks\n| for pointing this out to me guys.\n\n  note that (EQL 2.0 2.0) => T, but (EQL 2 2.0) => NIL.\n\n#:Erik\n\n",
+  "date": "2000-01-23",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

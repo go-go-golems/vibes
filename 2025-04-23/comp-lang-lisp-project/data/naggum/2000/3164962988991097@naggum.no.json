@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164962988991097@naggum.no.html",
+  "id": "3164962988991097@naggum.no",
+  "title": "Re: R: newbie question about symbols",
+  "content": "\nSubject: Re: R: newbie question about symbols\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/17\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164962988991097@naggum.no>\n\n* \"Vanna\" <vgalaffu@tiscalinet.it>\n| we will try to explain more clearly what we would like to do:\n| we deal with a package where are defined some functions that receive some\n| symbols and compare these symbols with other internal symbols;\n\n  that's not what you would _like_ to do, it's exactly what you do, and as\n  an explanation, it's useless for those who want to help you.  what you\n  would like to do is, as a guess, to refer to symbols without a pacakge\n  because you have failed to understand the package system.  this is not\n  that uncommon, but insisting that the package system is broken is only\n  half as common.\n\n  instead of using symbols internal in a given package, use keywords.\n\n| (defparameter *somesymbols* '(FOO1 FOO2 FOO3))\n\n(defparameter *somesymbols* '(:FOO1 :FOO2 :FOO3))\n\n| (search-symbol 'FOO1)\n\n(search-symbol :FOO1)\n=> T\n\n| We are wondering why it is so difficult to deal with symbols defined in\n| different packages, we think that this problem is common to many other\n| Lisp users that want to take advantage of using different packages.\n\n  this arrogance has blocked your progress both in solving the problem and\n  in recognizing the difficulties you have experienced.  you have to let go\n  of the idea that you're doing something right if it doesn't work, and at\n  the very least investigate your options.\n\n#:Erik\n\n",
+  "date": "2000-04-17",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

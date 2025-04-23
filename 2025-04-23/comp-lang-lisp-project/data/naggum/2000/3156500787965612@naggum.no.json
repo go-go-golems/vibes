@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3156500787965612@naggum.no.html",
+  "id": "3156500787965612@naggum.no",
+  "title": "Re: format directive \"~{...~}\"",
+  "content": "\nSubject: Re: format directive \"~{...~}\"\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/10\nNewsgroups: comp.lang.lisp\nMessage-ID: <3156500787965612@naggum.no>\n\n* \"David J. Cooper\" <dcooper8@genworks.com>\n| Now I am wondering if there is a way to use this or a similar directive\n| to put something before all but the first element in the list, as in:\n:\n| that is, I want an extra space *before* all but the *first*  element in\n| the argument list, so that the rest of the elements line up under the\n| first one which has a parenthesis to the left of it.\n\n  PPRINT-LOGICAL-BLOCK can handle this requirement easily.  its FORMAT\n  interface is documented in section 22.3.5.2 of the standard.\n\n  for a list like (one two three) to be formatted nicely, this suffices:\n\n(format nil \"~:<~@{~S~^~:@_~}~:>\" '(one two three))\n\n  untangling this example is left as an exercise for the reader...\n  \n#:Erik\n\n",
+  "date": "2000-01-10",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

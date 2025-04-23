@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161562827781681@naggum.no.html",
+  "id": "3161562827781681@naggum.no",
+  "title": "Re: newbie Lisp question",
+  "content": "\nSubject: Re: newbie Lisp question\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161562827781681@naggum.no>\n\n* Pierre R. Mai\n| Backquote only works for putting together lists, it doesn't know\n| anything about symbols or other data-structures.\n\n  backquote works on sequences, which includes vectors and lists.\n\n#:Erik\n\n",
+  "date": "2000-03-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

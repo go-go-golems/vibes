@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163944702587593@naggum.no.html",
+  "id": "3163944702587593@naggum.no",
+  "title": "Re: more questions about threads...",
+  "content": "\nSubject: Re: more questions about threads...\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163944702587593@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| I'm not sure what if anything this says, except that solaris has fast\n| thread creation perhaps. I'd kind of expect their thread impl to be\n| pretty good because their market is big multiprocessor machines.\n\n  I'd also expect Sun to want a \"favorable demo\" effect that shows this.\n  Linux has made fork exceptionally fast (my experience is that PIDs are\n  used up about three times faster under Linux than under SunOS 4.1.3_U1,\n  with equivalent work being performed on the systems), and has implemented\n  the performance sensitive parts of vfork in fork.  ironically, it now\n  appears that threads have to do _more_ work than processes because they\n  _share_ the memory and a bunch of other stuff that fork splits off into\n  objects with distinct identity.\n\n#:Erik\n\n",
+  "date": "2000-04-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

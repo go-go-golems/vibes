@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163949210384068@naggum.no.html",
+  "id": "3163949210384068@naggum.no",
+  "title": "Re: more questions about threads...",
+  "content": "\nSubject: Re: more questions about threads...\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163949210384068@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| I doubt performance of sunos 4.1.3 says anything about recent solaris\n| as that was before all the multiprocessor support in sunos 5 (I'm not\n| even sure how much code they share, probably very little).\n\n  note that I was talking about the consumption of PIDs, not performance.\n  this has to do with the number of scripts and invoked interpreters and\n  such, which may or may not impact performance.  what I was suggesting was\n  that Linux is very heavily script-and-interpreters-oriented, while BSD-\n  based Unices have traditionally been less so than AT&T-based Unices, for\n  whatever this is worth.  in any case, I would expect Linux to be faster\n  at forking _because_ it is used so much more.  Linux was heavily into\n  this mode of thinking long before it had SMP support.\n\n#:Erik\n\n",
+  "date": "2000-04-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

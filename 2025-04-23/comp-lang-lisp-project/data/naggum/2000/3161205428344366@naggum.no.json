@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161205428344366@naggum.no.html",
+  "id": "3161205428344366@naggum.no",
+  "title": "Re: [executables] was: why Haskell hasn't replaced CL yet?",
+  "content": "\nSubject: Re: [executables] was: why Haskell hasn't replaced CL yet?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161205428344366@naggum.no>\n\n* not.for.email@not.for.spam\n| Lisp programming is entirely different.  You can see what you're doing,\n| and can see its effects, before you commit to doing it that way.  Lisp\n| programming involves learning how to do what you want to do while you do\n| it.  Civil engineering requires learning everything before you do\n| anything.  Civil engineering uses the waterfall paradigm.\n\n  your belief system is severely misguided, and also self-reinforcing in a\n  sense that will make it impossible for you ever to graduate into serious\n  software development of the Really Important Application kind.\n\n| That paradigm has been shown to be a failure in software development.\n| Thus programming is not at all like civil engineering.  The point I was\n| refuting was that Lisp programming is like civil engineering.  It's not.\n\n  I'm sorry to burst your bubble, Mr. not.for.email@not.for.spam, but the\n  waterfall paradigm works just fine at the coarse development level.\n  since you apparently only build Really Unimportant Applications, where\n  there _is_ no coarse development level, only the details level that you\n  keep describing with very good accuracy, you're missing the point: that\n  there is _more_ than the nitty-gritty details level.\n\n  but I give up.  people who aren't equipped to understand big pictures\n  will only get increasingly hostile and adamant that only their small\n  pictures exist when you try to force them to open their eyes.\n\n#:Erik\n\n",
+  "date": "2000-03-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

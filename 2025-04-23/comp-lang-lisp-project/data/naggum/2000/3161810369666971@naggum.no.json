@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161810369666971@naggum.no.html",
+  "id": "3161810369666971@naggum.no",
+  "title": "Re: Feature allocation",
+  "content": "\nSubject: Re: Feature allocation\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/12\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161810369666971@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| #+(or :cmu :sbcl)\n| (cl:eval-when (load eval compile)\n|   (cl:pushnew :pittsburgh cl:*features*))\n| \n| OK?\n\n  it seems counterintuitive and random, as in \"project code name\".\n\n  what is it _really_ supposed to identify?\n\n#:Erik\n\n",
+  "date": "2000-03-12",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

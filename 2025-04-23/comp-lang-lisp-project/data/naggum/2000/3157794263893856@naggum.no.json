@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157794263893856@naggum.no.html",
+  "id": "3157794263893856@naggum.no",
+  "title": "Re: CL for WindowsNT?",
+  "content": "\nSubject: Re: CL for WindowsNT?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/25\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157794263893856@naggum.no>\n\n* \"Jonathan Coupe\" <jonathan@meanwhile.freeserve.co.uk>\n| ACL isn't really freeware, it's a very limited demo of a commercial product.\n| The main limitation is that the amount of memory you can use is *tiny*.\n\n  facts are useful, grumpy opinions not.  the heap space is limited to\n  about 35M.  this has been comfortably roomy for any educational and trial\n  use of the version, which was the stated purpose, which being a mere demo\n  version was not.  in other words, you're refusing to consider the\n  purposes for which it was given away and are instead complaining about\n  not having your will.  you should say that up front, so people can see\n  that the complaints come from someone who only wants stuff for free and\n  has no respect for those who give things away.  ungrateful people like\n  you make it harder to argue for a commercial enterprise to give stuff\n  away that people can make reasonable use of.\n\n  I'm deeply concerned that the more people complain about free versions\n  out of greed or stupidity, the less likely they are to continue to be\n  made available.  think long-range, and help _motivate_ the vendor to make\n  stuff available that is usable to you.  OK?\n\n#:Erik\n\n",
+  "date": "2000-01-25",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

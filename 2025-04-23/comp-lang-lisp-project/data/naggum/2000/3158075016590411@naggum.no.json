@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3158075016590411@naggum.no.html",
+  "id": "3158075016590411@naggum.no",
+  "title": "Re: Copyrighted header files (was: reading/writing...)",
+  "content": "\nSubject: Re: Copyrighted header files (was: reading/writing...)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3158075016590411@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| Itchy question: What happens when the specification is (partly) expressed\n| in a copyrighted C header file?  Even if you type yourself every byte,\n| it'll be essentially the same thing.\n\n  invoke \"fair use\" and claim that you cannot copyright numerical constants.\n\n  copyright does not cover reproducing functional equivalence, so you could\n  argue that you're not reproducing more than you have to in order to use\n  the specification for its intended purpose (which by law is prevented\n  from being \"to screw the readers\" :).\n\n#:Erik\n\n",
+  "date": "2000-01-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

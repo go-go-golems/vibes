@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162300918453715@naggum.no.html",
+  "id": "3162300918453715@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/17\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162300918453715@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| Is there a useful, fast, check that that (write-sequence x y) will write\n| (length x) bytes on y if all is well for LispWorks / Liquid ...?\n\n  yes.  make the buffer and the stream have type (unsigned-byte 8), and\n  avoid the character abstraction which you obviously can't trust, anyway.\n\n#:Erik\n\n",
+  "date": "2000-03-17",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

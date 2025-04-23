@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160459010404972@naggum.no.html",
+  "id": "3160459010404972@naggum.no",
+  "title": "Re: Good data-structure for characters in editor buffer?",
+  "content": "\nSubject: Re: Good data-structure for characters in editor buffer?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/25\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160459010404972@naggum.no>\n\n* cbarry@2xtreme.net (Christopher R. Barry)\n| What's an ideal data-structure for storing the characters of an editor\n| buffer?\n\n  a string or, more probably, a region of foreign-allocated memory.  you\n  will have to engage in your own memory management stuff with such editor\n  buffers no matter what you do, as the operations you want to perform on\n  one are highly specialized and you would waste a lot of memory and CPU\n  time on more general data structures.\n\n  however, that said, you would want to think hard about how to store the\n  results of the operations on the buffer efficiently.  it is not the text\n  that is the problem.\n\n#:Erik\n\n",
+  "date": "2000-02-25",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

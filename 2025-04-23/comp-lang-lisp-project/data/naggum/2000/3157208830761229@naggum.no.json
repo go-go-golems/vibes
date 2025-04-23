@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157208830761229@naggum.no.html",
+  "id": "3157208830761229@naggum.no",
+  "title": "Re: Speed, Faster... Faster... Slower?",
+  "content": "\nSubject: Re: Speed, Faster... Faster... Slower?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157208830761229@naggum.no>\n\n* Tony <TonyNOToSPAM@chice.force9.co.uk.invalid>\n| Some of the data is contained in simple-vectors, other bits\n| in arrays, within the structures, but the use of arrays is\n| wastefull in this situation as the ultimate size is unknown.\n\n  well, you _could_ use adjustable vectors with fill pointers if such is\n  your concern.  Common Lisp knows that the tradeoff that people made with\n  lists carried a performance penalty.  look at VECTOR-PUSH and VECTOR-POP\n  for ways to deal with unknown sizes and still get O(1) access times.\n\n#:Erik\n\n",
+  "date": "2000-01-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

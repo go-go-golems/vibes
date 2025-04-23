@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163239343709562@naggum.no.html",
+  "id": "3163239343709562@naggum.no",
+  "title": "Re: Summary of Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Summary of Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163239343709562@naggum.no>\n\n* Anthony Cartmell\n| The \"Lisp\" code I write in ICAD is much more like C/C++ in that we\n| construct long relatively-shallow list structures.  Thus adding code is\n| mostly inserting into lists, and dangling parens are useful and don't\n| occur in long sequences (perhaps three or four closes maximum in a row).\n\n  you have previously given an example like this:\n\n(list a\n      (list b c d)\n      (list 0\n            (list e f g\n                  (list h))))\n\n  I didn't understand why you did this, as I would typically have written\n  it very differently, and much more compactly:\n\n`(,a (,b ,c ,d) (0 (,e ,f ,g (,h))))\n\n  for what it's worth, I don't think editing this structure is hard, even\n  in vi-clones, which do sport the % command to move to the other paren.\n\n  on the other hand, I think a fair summary of the situation is that as you\n  grow used to Lisp and the parens lose importance and \"disappear\", you\n  seek tools that help you reduce the importance of the parens, too.\n\n#:Erik\n\n",
+  "date": "2000-03-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

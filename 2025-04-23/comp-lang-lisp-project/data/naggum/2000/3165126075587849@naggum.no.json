@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165126075587849@naggum.no.html",
+  "id": "3165126075587849@naggum.no",
+  "title": "Re: how to validate input?",
+  "content": "\nSubject: Re: how to validate input?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/19\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165126075587849@naggum.no>\n\n* Friedrich Dominicus <Friedrich.Dominicus@inka.de>\n| I have written the same with a loop but it looks IMO more ugly.\n\n  it's quite strange, but people who have been trained to write iteration\n  using tail recursion tend to write the most amazingly ugly loops, and it\n  isn't a question of lack of training in writing loops, it's conceptual.\n  (yet another case of Scheme hurting people.)\n\n| (defun get-input ()\n| (let ((line))\n|   (do ((exit nil))\n|       (exit line)\n|     (format t \"Please give me a number (e for Exit): \")\n|     (setf line (read))\n|     (if (numberp line)\n|         (progn \n|           (setf exit t)\n|           line)\n|       (when (y-or-n-p \"Not a number, really exit?\")\n|         (setf exit t)\n|         (setf line nil))))))\n\n(format t \"please enter a number: \")\n(do ((input (read nil nil nil) (read nil nil nil)))\n    ((or (null input) (numberp input)) input)\n  (format t \"not a number, try again: \"))\n\n  I'd use a different input function that read, but that's your call.\n\n#:Erik\n\n",
+  "date": "2000-04-19",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

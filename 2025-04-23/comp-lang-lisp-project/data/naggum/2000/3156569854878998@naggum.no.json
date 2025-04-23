@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3156569854878998@naggum.no.html",
+  "id": "3156569854878998@naggum.no",
+  "title": "Re: Would you please criticize this routine?",
+  "content": "\nSubject: Re: Would you please criticize this routine?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/11\nNewsgroups: comp.lang.lisp\nMessage-ID: <3156569854878998@naggum.no>\n\n* Shin <fxn@retemail.es>\n| Should read:\n| \n|     (do* ((to-filter result (rest to-filter))\n|           (p (first to-filter) (first to-filter)))\n|       ((< upper-bound p) (cons 2 result))\n|       (rplacd to-filter\n|          (delete-if (lambda (a) (zerop (mod a p))) (rest to-filter))))))\n\n  I'd highly recommend (setf (rest to-filter) ...) over RPLACD, or at least\n  using CDR instead of REST if you use RPLACD.\n\n#:Erik\n\n",
+  "date": "2000-01-11",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

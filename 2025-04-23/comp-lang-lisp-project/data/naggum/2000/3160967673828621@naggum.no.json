@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160967673828621@naggum.no.html",
+  "id": "3160967673828621@naggum.no",
+  "title": "Re: [executables] was: why Haskell hasn't replaced CL yet?",
+  "content": "\nSubject: Re: [executables] was: why Haskell hasn't replaced CL yet?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/02\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160967673828621@naggum.no>\n\n* Samuel A. Falvo II\n| But doing things in this manner takes advantage of the fact that the OS\n| already has the code for the Lisp environment already in memory, which\n| causes us to measure the process instantiation time of the environment, NOT\n| the load-time of the environment.\n\n  this is amazingly misguided.  the load-time of the environment is related\n  to such tasks as mapping pages of memory, handling shared libraries\n  (which is _very_ expensive), and running a bunch of initilization code.\n  _none_ of this is magically remembered from one instantiation of the\n  system to the next.  (and doing so would be a veritable _disaster_.)\n\n| 2) The test you perform is guaranteed to be under \"light load\".  If the\n|    system is in real-world use, I can guarantee you that test would take longer\n|    than a second (potentially up to a minute depending on the tasks being\n|    performed).\n\n  this is getting _really_ silly, but it goes to show that some people will\n  do just about anything to deny the fact that Allegro Common Lisp starts\n  up real fast on modern computers.  which sort of proves my point...\n\n| Umm...C compiles to assembly language.  You can still call the C library\n| using assembly.\n\n  look, are you for _real_?  Common Lisp compiles to assembly, damnit!\n\n| You deride C as if it's the antichrist.\n\n  oh, shut up and return to your home planet.  I do no such thing.\n\n#:Erik\n\n",
+  "date": "2000-03-02",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

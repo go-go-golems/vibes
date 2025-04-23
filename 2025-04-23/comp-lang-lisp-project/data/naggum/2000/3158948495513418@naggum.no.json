@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3158948495513418@naggum.no.html",
+  "id": "3158948495513418@naggum.no",
+  "title": "Re: looking up entries in a table of ranges",
+  "content": "\nSubject: Re: looking up entries in a table of ranges\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/07\nNewsgroups: comp.lang.lisp\nMessage-ID: <3158948495513418@naggum.no>\n\n* Jason Kantz\n| I need to make a table that returns an entry for a value in a given\n| range.  And I'm wondering if a more experienced programmer can comment\n| on whether this is a common data structure with a common name.\n\n  looks like a sorted association list to me.\n\n(assoc 50.0 '((10.0 . \"this stuff\")\n\t      (40.0 . \"this other stuff\")\n\t      (100.0 . \"yet some other stuff\"))\n       :test #'<=)\n=> (100.0 . \"yet some other stuff\")\n\n  FIND would allow you to use a sequence of more complex objects and use\n  :KEY to extract the slot you want to look at.\n\n  in any case, I would expect such a function to be called FIND-foo, foo\n  being the object you're looking for.  whether you implement it as a\n  general function traversing a list or a function with a fast TYPECASE\n  dispatch on ranges is largely immaterial, though.\n\n#:Erik\n\n",
+  "date": "2000-02-07",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

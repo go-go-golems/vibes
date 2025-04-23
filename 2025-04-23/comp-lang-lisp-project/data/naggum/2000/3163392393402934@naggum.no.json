@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163392393402934@naggum.no.html",
+  "id": "3163392393402934@naggum.no",
+  "title": "Re: Threads",
+  "content": "\nSubject: Re: Threads\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/30\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163392393402934@naggum.no>\n\n* Andrew Cooke <andrew@andrewcooke.free-online.co.uk>\n| - If I understood an earlier topic correctly, assigning a value to a\n| dynamic scoped variable using let copies the original value to a safe\n| place for the scope of the let before replacing it.  In a multi-threaded\n| environment this implies that the value will change for all threads - is\n| that correct?\n\n  let doesn't assign values, it creates a new binding.  how it is actually\n  implemented underneath has _some_ implications for the rest of the\n  system, but no matter how it is implemented, you should not assume that\n  the implementation violates the semantics.  this implies that the new\n  binding is local to the process (thread), since the other processes\n  (threads) are not in the dynamic scope of the new binding.\n\n#:Erik\n\n",
+  "date": "2000-03-30",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

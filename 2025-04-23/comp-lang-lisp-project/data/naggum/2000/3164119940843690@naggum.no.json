@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164119940843690@naggum.no.html",
+  "id": "3164119940843690@naggum.no",
+  "title": "Re: Loop Syntax",
+  "content": "\nSubject: Re: Loop Syntax\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/07\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164119940843690@naggum.no>\n\n* \"Jeffrey P. Sandys\" <sandysj@asme.org>\n| Should loop keywords have the colon prefix keyword syntax?\n\n  a very good question.  only the symbol-name of the loop keywords are used\n  by the macro function, so you're free to use keyword symbols.  it might\n  look odd to some people, but I find serious merit in using a distinct\n  syntax for this as long as we can't use a more Lispy syntax to begin with.\n\n#:Erik\n\n",
+  "date": "2000-04-07",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

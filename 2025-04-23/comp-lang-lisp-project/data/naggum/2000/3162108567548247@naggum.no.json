@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162108567548247@naggum.no.html",
+  "id": "3162108567548247@naggum.no",
+  "title": "Re: stupid question regarding #",
+  "content": "\nSubject: Re: stupid question regarding #\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/15\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162108567548247@naggum.no>\n\n* Richard James Panturis Giuly <rgiuly@surfsouth.com>\n| In the context of lisp, what is the pronunciation of the # symbol?  That\n| is, what do you call it?\n\n  in the ANSI standard, it is called \"number sign\", which is the official\n  nomenclature of the standards bodies, or \"sharpsign\".\n\n#:Erik\n\n",
+  "date": "2000-03-15",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

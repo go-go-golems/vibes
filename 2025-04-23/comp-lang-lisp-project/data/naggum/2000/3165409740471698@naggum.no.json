@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165409740471698@naggum.no.html",
+  "id": "3165409740471698@naggum.no",
+  "title": "Re: [specialized arrays] which lisp has them?",
+  "content": "\nSubject: Re: [specialized arrays] which lisp has them?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/22\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165409740471698@naggum.no>\n\n* \"Sunil Mishra\" <smishra@arslogica.com>\n| I remember reading the announcement for matlisp. Apparently it provides OO\n| facilities for working with matrices using the BLAS and LAPACK libraries,\n| high performance matrix algebra libraries orginally written in Fortran.\n| Therefore the requirements.\n\n  well, from that follows the requirements _in the FFI_, but not the native\n  representation.  I see no reason whatsoever to require the native Common\n  Lisp system to represent arrays or matrices like this, but it is obvious\n  that the ability to access arrays or matrices represented like this from\n  Common Lisp when they were declared/created/whatever from or in the FFI,\n  is a requirement of the system as a whole.\n\n#:Erik\n\n",
+  "date": "2000-04-22",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

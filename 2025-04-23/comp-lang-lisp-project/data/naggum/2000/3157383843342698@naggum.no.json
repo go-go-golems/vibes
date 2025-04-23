@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157383843342698@naggum.no.html",
+  "id": "3157383843342698@naggum.no",
+  "title": "Re: Transmeta's Crusoe as a host for neo-Lispm, or not?",
+  "content": "\nSubject: Re: Transmeta's Crusoe as a host for neo-Lispm, or not?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/20\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157383843342698@naggum.no>\n\n* \"Joe Marshall\" <jmarshall@alum.mit.edu>\n| Current processors are `C machines'.\n\n  this belongs in comp.arch, I guess, but isn't this why Merced is a flop\n  so far -- that is, since it _isn't_ a traditional \"C processor\"?\n\n#:Erik\n\n",
+  "date": "2000-01-20",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

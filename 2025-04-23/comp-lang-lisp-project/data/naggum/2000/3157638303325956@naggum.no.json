@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157638303325956@naggum.no.html",
+  "id": "3157638303325956@naggum.no",
+  "title": "Re: [Q]: Recursion help",
+  "content": "\nSubject: Re: [Q]: Recursion help\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/23\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157638303325956@naggum.no>\n\n* Dirt <pip3@inam3.com>\n| So, it is safe to recommend to my professor that we should be taught\n| to use '=' to compare numbers rather than 'eq'?\n\n  your professor should never teach EQ in the first place.  EQ should be\n  discovered by good students on their own.  novices should always use EQL\n  for typeless object comparison, and try not to think about EQ.\n\n  = signals an error for non-numbers.  this is often a major pain.  EQL\n  yields false if the objects are of different types.  this can sometimes\n  be exactly what you want.  = yields true for _numeric_ equality, which\n  can sometimes be very expensive to compute, but is often worth the cost,\n  except when you control the types of both objects and you would have to\n  be a real klutz to introduce that cost wantonly.  therefore, EQL will\n  tell you about suboptimal programming practices if it yields false on two\n  numbers that appear \"alike\", and this fact alone will teach most students\n  better programming practices.\n\n#:Erik\n\n",
+  "date": "2000-01-23",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

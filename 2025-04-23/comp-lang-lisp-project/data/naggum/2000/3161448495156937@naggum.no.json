@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161448495156937@naggum.no.html",
+  "id": "3161448495156937@naggum.no",
+  "title": "Re: Eureka! Lexical bindings can be guaranteed!",
+  "content": "\nSubject: Re: Eureka! Lexical bindings can be guaranteed!\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/07\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161448495156937@naggum.no>\n\n* David Hanley <djh@ncgr.org>\n| It seems possible (to me) to write some lisp macros to produce a typed\n| version of the language...\n\n  before you reinvent the wheel, please investigate the THE special form\n  and how it behaves in interpreted and compiled code under various\n  optimization settings.  you might be _very_ surprised.\n\n  few Common Lisp programmers seem to know about the THE form, however.\n\n#:Erik\n\n",
+  "date": "2000-03-07",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

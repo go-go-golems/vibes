@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161342090902304@naggum.no.html",
+  "id": "3161342090902304@naggum.no",
+  "title": "Re: That place.. (was: How to make a mutually recursive macro and   function)",
+  "content": "\nSubject: Re: That place.. (was: How to make a mutually recursive macro and   function)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/06\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161342090902304@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| And even less amazing than that some believe call/cc is useless\n\n  and who would that be?  why exaggerate a technical argument into rampant\n  stupidity?\n\n  _nobody_ who understands it believes call/cc is _useless_.  that's not\n  just way too strong a word, it's missing the point _entirely_.  given a\n  particular choice of function calling model, call/cc is very definitely\n  elegant and the right implementation choice.  the question is whether\n  that model is _productive_ in a much greater context than just whatever\n  you can cram into a thin, elegant specification.\n\n  no model is _useless_, either, as Scheme's model has certainly explored\n  territory that otherwise would not be explored.  all in all, a valuable\n  contribution to computer science.  that doesn't mean we have to _do_ it\n  that way in practical implementations.  research is _supposed_ to produce\n  a lot of \"known dead ends\" so other researchers and practitioners alike\n  know where _not_ to go.  in this particular instance, Scheme's function\n  call model is where you must _not_ go.\n\n  that it's time to discard a model doesn't mean it's useless in every or\n  even many respects, but there might well be some particular respect in\n  which some jerk would find it completely useless and extrapolate from\n  that to the general case.  I find such arguments completely useless and\n  excessively disrespectful towards the research activity that led to it.\n\n  in short: being wrong is _not_ being useless.  being stupid is, however.\n\n#:Erik\n\n",
+  "date": "2000-03-06",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

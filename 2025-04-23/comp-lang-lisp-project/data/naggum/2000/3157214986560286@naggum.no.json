@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157214986560286@naggum.no.html",
+  "id": "3157214986560286@naggum.no",
+  "title": "Re: XLISP, XLISP-PLUS and XLISP-STAT",
+  "content": "\nSubject: Re: XLISP, XLISP-PLUS and XLISP-STAT\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157214986560286@naggum.no>\n\n* Robert Posey <muddy@raytheon.com>\n| Since there doesn't seem to be a dominate vendor/provider of a LISP\n| system, I doubt there is a lot of support for migration like there is for\n| VC++ or Gcc.\n\n  there is.  Common Lisp vendors take very good care of their customers,\n  and if they can help you overcome your association with another vendor,\n  they are likely to take very good care of you while in transition.\n  that's why competition is so great.\n\n  however, related to the question to which you assume you have the same\n  answer you would have for VC++ and GCC: you don't _need_ much help to\n  migrate from one Common Lisp implementation to another.  that's one thing\n  that is really great about the language: it's actually complete enough to\n  do useful things in the language itself.  imagine that!\n\n#:Erik\n\n",
+  "date": "2000-01-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

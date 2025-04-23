@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162910141905443@naggum.no.html",
+  "id": "3162910141905443@naggum.no",
+  "title": "Re: Common Lisp interpretation by emacs",
+  "content": "\nSubject: Re: Common Lisp interpretation by emacs\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162910141905443@naggum.no>\n\n* Barry Margolin <barmar@bbnplanet.com>\n| #1 and #2 don't seem to be related to the dialect of Lisp that Emacs\n| happens to be written in.\n\n  I prefixed what I wrote with \"what I have wanted that can't be done in\n  the current Emacs are:\", so I assume you ignored that context instead of\n  merely overlooking it, but it is in fact crucial, even to your supposed\n  counter-argument.  Emacs Lisp has some _fundemental_ limitations that\n  Common Lisp the language and its several implementations don't have.\n  obviously, however, you _could_ do anything in any language given enough\n  effort and resources, but whether you want to is _usually_ a matter of\n  convenience and pragmatics for most people -- the absence of available\n  resources is usually an argument against \"can\".  if you will, Emacs Lisp\n  makes certain tasks prohibitively inconvenient and/or impractical.  for\n  me, that matters a lot.  if it doesn't matter to you, I expect a free\n  implementation soon.\n\n| #3 doesn't depend on ANSI CL, but just the fact that most CL\n| implementations also include foreign function interfaces; but there's no\n| good reason why a similar FFI couldn't be included in Emacs Lisp.\n\n  then you should have no objection to \"then go do it\", right?\n  I promise that I'll listen to your argument _after_ you have done it.\n\n#:Erik\n\n",
+  "date": "2000-03-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

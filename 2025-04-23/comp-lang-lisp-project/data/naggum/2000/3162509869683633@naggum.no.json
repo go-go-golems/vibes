@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162509869683633@naggum.no.html",
+  "id": "3162509869683633@naggum.no",
+  "title": "Re: Search & Replace in sequences",
+  "content": "\nSubject: Re: Search & Replace in sequences\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/20\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162509869683633@naggum.no>\n\n* Rudolf Schlatte\n| This works ok and the program does not have to run fast or anything, but\n| all this repeated string-building just feels wrong for me.  Are there\n| more concise ways of writing this?\n\n  yes, use with-output-to-string and write characters and strings to the\n  string stream with stream primitives like write-char and write-string.\n  the underlying buffering mechanism is very well optimized for growing\n  strings, which is what you are doing in an excessively expensive way.\n\n  C and Perl don't have string streams, so every C and Perl programmer\n  thinks in-memory string processing is more efficient than streams and\n  that you always benefit from doing your own buffering algorithm.  neither\n  is, was, or will become true.  languages shape the way we think, or don't.\n\n#:Erik\n\n",
+  "date": "2000-03-20",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

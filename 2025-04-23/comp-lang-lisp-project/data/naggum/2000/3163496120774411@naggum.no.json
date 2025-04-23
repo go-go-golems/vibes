@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163496120774411@naggum.no.html",
+  "id": "3163496120774411@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/31\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163496120774411@naggum.no>\n\n* \"Anthony Cartmell\" <AJCartmell@csi.com>\n| um, excuse me, as far as I can tell Lisp code is made of many short, deeply\n| nested lists per file.\n\n  that's, um, interesting.  whence this shallow opinion that \"Lisp code\" is\n  sufficiently homogeneous to warrant such a blanket generalization?\n\n| If I am wrong about Lisp source code's general form please enlighten me!\n\n  there seems to be so much to enlighten you about that it is instead much\n  more relevant at this point to use that fact to discredit your opinions.\n  this is regrettable, but your lack of insight into the topics you spend\n  so much time talking about renders any further discussion moot.\n\n#:Erik\n\n",
+  "date": "2000-03-31",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

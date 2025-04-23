@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164020402912136@naggum.no.html",
+  "id": "3164020402912136@naggum.no",
+  "title": "Re: setf functions",
+  "content": "\nSubject: Re: setf functions\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/06\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164020402912136@naggum.no>\n\n* Marco Antoniotti <marcoxa@parades.rm.cnr.it>\n| What about this?\n| \n| (defun (setf global-pointer-position) (new-x new-y object)\n|   (setf (values (display-x object) (display-y object))\n|         (values new-x new-y)))\n| \n| It does not work in CMUCL, but I believe it should (modulo my\n| understanding on the CLHS)\n\n  that would mean the call would have to be\n\n(setf (global-pointer-position new-y object) new-x)\n\n  this is not what we want.\n\n#:Erik\n\n",
+  "date": "2000-04-06",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3156569413180279@naggum.no.html",
+  "id": "3156569413180279@naggum.no",
+  "title": "Re: format directive \"~{...~}\"",
+  "content": "\nSubject: Re: format directive \"~{...~}\"\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/11\nNewsgroups: comp.lang.lisp\nMessage-ID: <3156569413180279@naggum.no>\n\n* Shin <fxn@retemail.es>\n| USER(1): (format nil \"(~{~a~^,~% ~}))\" (list 'one 'two 'three))\n| \"(ONE,\n|  TWO,\n|  THREE))\"\n\n  for this to work, you would need to do ~& first, and it will fail to\n  produce the correct output if any forms are nested.  using the\n  pretty-printer interface will work in such cases.\n\n#:Erik\n\n",
+  "date": "2000-01-11",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160693945479201@naggum.no.html",
+  "id": "3160693945479201@naggum.no",
+  "title": "Re: [executables] was: why Haskell hasn't replaced CL yet?",
+  "content": "\nSubject: Re: [executables] was: why Haskell hasn't replaced CL yet?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160693945479201@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| So I'd like to turn this around: why does anyone *care* about a sub-1Mb\n| standalone application any more?\n\n  that's simple, Tim: because they want to keep their myths alive and well.\n  \"Lisp is big and slow\" is not a fact, it's a religious belief.  you can't\n  turn people's religions around with facts.  if people deep down trust\n  that this is the reason Lisp doesn't win, they'll return to it every time\n  Lisp doesn't win, true or not, supported by evidence or not -- it's just\n  how they \"feel\", anyway.\n\n  most people have only one _real_ desire in their life: to feel safe in\n  the correctness of their beliefs.  the only way to make this happen is to\n  hand them something obviously better and correct to believe in while you\n  burn down whatever it was they considered safe thoroughly.\n\n  consider this a theory of the ecology of ideas, where the winning ideas\n  are like predators sneaking up on whoever feels smugly safe.  there will\n  be a lot of screaming and shouting while the stale ideas are killed and\n  their proponents act like scared monkeys, but afterwards, you won't have\n  a problem with stale ideas resurfacing.  sadly, the Lisp community has\n  not been willing to kill off the idiotic ideas with sufficient force, and\n  when I try, a whole bunch of monkeys scream so much it's time to call the\n  Discovery Channel crew and film them.\n\n#:Erik\n\n",
+  "date": "2000-02-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

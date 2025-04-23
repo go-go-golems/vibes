@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162358302244558@naggum.no.html",
+  "id": "3162358302244558@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162358302244558@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| Which is precisely what I want to avoid unfortunately, as it means that\n| either this code or the code that calls it has to deal with the issue of\n| copying strings too and from arrays of (UNSIGNED-BYTE 8)s, which simply\n| brings back the same problem somewhere else.\n\n  in this case, I'd talk to my vendor or dig deep in the implementation to\n  find a way to transmogrify an (unsigned-byte 8) vector to a character\n  vector by smashing the type codes instead of copying the data.  (this is\n  just like change-class for vectors.)  barring bivalent streams that can\n  accept either kind of vector (coming soon to an implementation near you),\n  having to deal with annoyingly stupid or particular external requirements\n  means it's OK to be less than nice at the interface level, provided it's\n  done safely.\n\n#:Erik\n\n",
+  "date": "2000-03-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

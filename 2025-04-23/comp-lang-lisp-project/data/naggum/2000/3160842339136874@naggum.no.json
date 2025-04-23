@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160842339136874@naggum.no.html",
+  "id": "3160842339136874@naggum.no",
+  "title": "Re: setq Question.",
+  "content": "\nSubject: Re: setq Question.\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160842339136874@naggum.no>\n\n* npak@kazbek.ispras.ru (Nick V. Pakoulin)\n| Will the binding created by setq become dynamic or lexical?\n\n  setq doesn't create bindings, it modifies bindings.  the binding modified\n  by a top-level setq is the symbol-value slot of the symbol.  if this\n  symbol was previously unbound (i.e., it had no value), you might be\n  confused about the resulting behavior into believing that something\n  happened other than merely setting the symbols-value slot of the symbol,\n  but nothing else actually happened.\n\n| I've looked about `setq' in the standard but there is nothing about it.\n| I tried CLISP and it looks like it makes variables in this case to be\n| dynamic.\n\n  no, you're confusing an unbound variable with the creation of a binding.\n\n  we've recently been through this, as well as several times in the past.\n  some will tell you that this is a major big deal with Common Lisp --\n  don't listen to them.  just note that the semantics of a top-level setq\n  is well-defined, but confusing to people who don't realize that setting a\n  free variable, whether the symbol is declared special or not, is\n  operationally identical to setting the symbol-value slot of the symbol,\n  and setting a lexical variable is not affecting the symbol-value slot of\n  any symbol.\n\n  the ultimate advice, however: it is not a good idea to use free variables\n  without declaring them special or knowing _exactly_ what's going on.\n\n#:Erik\n\n",
+  "date": "2000-02-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

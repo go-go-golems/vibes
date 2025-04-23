@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160029562363276@naggum.no.html",
+  "id": "3160029562363276@naggum.no",
+  "title": "Re: character Comparison",
+  "content": "\nSubject: Re: character Comparison\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/20\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160029562363276@naggum.no>\n\n* \"Chris H\" <newsgroupNOJUNK@NOJUNKhome.com>\n| how do I check if  character 'a' is in word 'banada'\n| \n| is any thing like substring() function ?\n\n  yes.  FIND, POSITION, SEARCH, CHAR, SUBSEQ, etc.\n\n  note that most operations on characters and strings in Common Lisp are\n  simply special cases of operations on elements and sequences.  many\n  C-based programmers are frustrated because they think that Common Lisp\n  has few string-handling functions.  Common Lisp has few string-only\n  functions, so remember to look for sequence and array functions, too.\n\n#:Erik\n\n",
+  "date": "2000-02-20",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

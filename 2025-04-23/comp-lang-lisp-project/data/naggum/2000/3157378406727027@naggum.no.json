@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157378406727027@naggum.no.html",
+  "id": "3157378406727027@naggum.no",
+  "title": "Re: how to append an item to a list ?",
+  "content": "\nSubject: Re: how to append an item to a list ?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/20\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157378406727027@naggum.no>\n\n* Arseny Slobodjuck\n| Actually i need something like push, but unlike push it have to insert\n| new item to the end of list.\n\n  if you don't need a list, consider VECTOR-PUSH.\n\n| So, i need an equivalent to \n| \n|        (setq a (concatenate 'list a (list b)))\n\n(append a (list b))\n\n|       (rplacd (last a) (list b))\n\n(setf (setf tail (cdr tail)) (cons b nil))\n\n  is better, once you keep two variables to point into the list:\n\n(setf tail (cons nil nil))\n(setf head (cdr tail))\n\n  you might want to do this in a structure or class to capture it in a\n  unit, but most of the time, you can use this technique in a short piece\n  of code without the overhead of extra datatypes and their accessors.\n\n  however, the most common way to do this is to collect the items in a list\n  in reverse, and then reverse the list (destructively, with NREVERSE).\n  this won't work if you need access to the list elements along the way, in\n  which case only the HEAD/TAIL approach outlined above will do.\n\n#:Erik\n\n",
+  "date": "2000-01-20",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160705423828335@naggum.no.html",
+  "id": "3160705423828335@naggum.no",
+  "title": "Re: question on sort",
+  "content": "\nSubject: Re: question on sort\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160705423828335@naggum.no>\n\n* Philip Nikolayev <nikolay@is02.fas.harvard.edu>\n| Is there a way to sort (with sort) a list of pairs of numbers by the\n| value of the first element of each pair?\n\n  yes.  (sort <sequence> <predicate> :key #'first) will use first to\n  extract the value from each element of the sequence before comparing.\n\n#:Erik\n\n",
+  "date": "2000-02-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

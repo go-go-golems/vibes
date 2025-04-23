@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164963670328673@naggum.no.html",
+  "id": "3164963670328673@naggum.no",
+  "title": "Re: On the quality of this newsgroup, was: Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: On the quality of this newsgroup, was: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/17\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164963670328673@naggum.no>\n\n* Ian Upright <ian@oneaccordinc.com>\n| As a Smalltalker who doesn't read this newsgroup very often, I was quite\n| irritated by Mr. Naggum's absurd and highly inflamitory opinions.\n\n  I'm glad you agree that being quite irritated at other people's absurd\n  and highly inflammatory opinions is perfectly acceptable.\n\n| Are all Lisper's f***ing belligerent ass*****?  ;-)\n\n  no, but all visiting smalltalkers might perhaps be, based on the usual\n  sample of one to support generalizations.  smiley or no smiley, such\n  flaws in methodology or complete lack of methodological thinking is at\n  the core of my criticism.  people who lack the ability, or who have never\n  been trained, to think methodologically, make mistakes that nothing short\n  of fixing their methodology can change.  most intelligent people pick up\n  on this relatively fast when required to.  morons think they have a right\n  to make even less methodolically sound claims when criticized.\n\n| I still don't understand what the problem is.\n\n  well, that's odd, since you illustrated it well when you took it for\n  granted that certain object types in Smalltalk are simply not copied.\n\n#:Erik\n\n",
+  "date": "2000-04-17",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162290151959539@naggum.no.html",
+  "id": "3162290151959539@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/17\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162290151959539@naggum.no>\n\n* Pekka P. Pirinen\n| Who replaced #:Erik with a bad imitation?\n\n  geez...\n\n| You've read a different standard than I, since many places actually say\n| \"of type CHARACTER or a subtype\" -- superfluously, since the glossary\n| entry for \"subtype\" says \"Every type is a subtype of itself.\"\n\n  sigh.  this is so incredibly silly it isn't worth responding to.\n\n| I suspect it was removed because it was realized that there would have to\n| be many types of STRING (at least 8-byte and 16-byte), and hence there\n| wasn't a single subtype of CHARACTER that would be associated with\n| strings.  Whatever the reason, we can only go by what the standard says.\n\n  the STRING type is a union type, and there are no other union types in\n  Common Lisp.  this should give you a pretty powerful hint, if you can get\n  away from your \"bad imitation\" attitude problem and actually listen, but\n  I guess that is not very likely at this time.\n\n#:Erik\n\n",
+  "date": "2000-03-17",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

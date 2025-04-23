@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162357232406441@naggum.no.html",
+  "id": "3162357232406441@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162357232406441@naggum.no>\n\n* Barry Margolin <barmar@bbnplanet.com>\n| I'm still not following you.  Are you saying that characters with\n| implementation-defined attributes (e.g. bits or fonts) might not satisfy\n| (typep c 'character)?\n\n  no.  I'm saying that even as this _is_ the case, the standard does not\n  require a string to be able to hold and return such a character intact.\n\n#:Erik\n\n",
+  "date": "2000-03-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

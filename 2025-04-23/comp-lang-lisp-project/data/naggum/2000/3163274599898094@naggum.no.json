@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163274599898094@naggum.no.html",
+  "id": "3163274599898094@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163274599898094@naggum.no>\n\n* \"Anthony Cartmell\" <AJCartmell@csi.com>\n| Sorry for the \"newbie\" question, but I thought that the indentation was\n| based on the list structure, and not the other way round.\n\n  well, this gets a little complicated.  the indentation is automatically\n  produced for you based on the list structure by the editor.  the list\n  structure, however, becomes visually apparent to us humans through\n  indentation.  new Lispers look at the list structure and think they\n  understand the indentation.  old Lispers look at the indentation and\n  understand the list structure.  new Lispers count parentheses and swear.\n  old Lispers reindent their code and immediately spot mistakes and just\n  clean them up.  the whole Lisp enlightenment experience is about making a\n  fundamental swap between syntax and indentation.  (at least one language\n  has made this switch permanent: python.  I'm not sure this is a good\n  thing.)\n\n| If the parens were based on the indentation then we wouldn't even need to\n| use them.\n\n  this is very naive.  _some_ redundancy is a fundamental characteristic of\n  _all_ successful communication, between computers as well as humans.\n\n| My whole reason for using dangling parens in my code is to show which\n| open-paren each close-paren closes by its indentation.  I don't\n| understand why this is such a bad layout style.\n\n  that's because you have never let yourself get immersed in indentation.\n  you don't need to see the parentheses.  (if you start seeing fnords,\n  alert your local illuminati.)\n\n#:Erik\n\n",
+  "date": "2000-03-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

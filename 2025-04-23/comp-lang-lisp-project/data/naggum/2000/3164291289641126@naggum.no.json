@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164291289641126@naggum.no.html",
+  "id": "3164291289641126@naggum.no",
+  "title": "Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164291289641126@naggum.no>\n\n* Courageous <jkraska1@san.rr.com>\n| I have a CLOS object which may contain an arbitrary graph of other\n| objects.  This graph may be cyclic.  I'm looking for an easy way to deep\n| copy the object.\n\n  the only easy way out is to write a copier that knows what it's doing.\n  any easier way out would violate \"as simple as possible, but no simpler\".\n\n| I've been told that generic deep copy might be implementing by writing\n| the object to a stream, and then reading back from that stream.\n\n  you've been told that?  what a joker that must have been!  how do you\n  think you would proceed to implement readers and writers for the objects?\n  do you think _they_ come in generic versions that do everything right?\n\n  (for the languages where you may use a generic version that does it wrong\n  most of the time, which you usuallyq observe if you try, there _is_ the\n  merit to this language design that most \"modern programmers\" (= dummies)\n  are a lot happier when they something out and see it fail, then do it\n  \"right\" (= less _obviously_ wrong), than to know it would fail and know\n  they had to do it right from the start.)\n\n  implementing a mechanism that avoids descending into cyclic structures is\n  amazingly easy.  detection is easy with the rabbit and the hare algorithm.\n  a hash table of copied objects avoids all possible problems to begin with.\n\n#:Erik\n\n",
+  "date": "2000-04-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

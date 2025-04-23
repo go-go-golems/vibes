@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164356890914970@naggum.no.html",
+  "id": "3164356890914970@naggum.no",
+  "title": "Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/10\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164356890914970@naggum.no>\n\n* Philip Lijnzaad <lijnzaad@ebi.ac.uk>\n| On 09 Apr 2000 17:48:09 +0000, \n| \"Erik\" == Erik Naggum <erik@naggum.no> writes:\n| \n| Erik> implementing a mechanism that avoids descending into cyclic structures is\n| Erik> amazingly easy.  \n| \n| if slightly non-obvious at first. For those confused, you have two parts of\n| your function step through the elements of a list, one going in single steps,\n| the other in steps of two. If they ever end up in the same element, the list\n| must have been circular.\n| \n| Erik> detection is easy with the rabbit and the hare algorithm.\n| \n| Is this an optimized version of the tortoise and the hare algorithm? \n\n  yes (my silly mistake).  you just described it in the above paragraph, so\n  you must know it under a different name, but the key is to realize that\n  it only _detects_ a circularity, after it has happened -- there is no\n  guarantee that you find the first such element.\n\n#;Erik\n\n",
+  "date": "2000-04-10",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

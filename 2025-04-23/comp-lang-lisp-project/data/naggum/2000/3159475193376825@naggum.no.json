@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159475193376825@naggum.no.html",
+  "id": "3159475193376825@naggum.no",
+  "title": "Re: emacs lisp help",
+  "content": "\nSubject: Re: emacs lisp help\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159475193376825@naggum.no>\n\n* Robert Monfera <monfera@fisec.com>\n| Would it be possible to solve it by introducing packages into Emacs?\n\n  I wrote the basics of package support in Emacs Lisp.  what we have right\n  now, however, is only proper support for uninterned symbols.  anything\n  more would require rather massive changes that were deemed inappropriate\n  at the time.  [sorry for the response time.]\n\n#:Erik\n\n",
+  "date": "2000-02-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

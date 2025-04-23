@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163280668120222@naggum.no.html",
+  "id": "3163280668120222@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163280668120222@naggum.no>\n\n* ds26@goldshoe.gte.com (Dorai Sitaram)\n| Anyway, converting between the dangling and clumped styles is\n| automatable.  An Elisp programmer should be able to implement the\n| following pseudocode in a few minutes:\n| \n| Dangling-to-clumped:\n|   While there is a line with only right parens,\n|   join that line with the previous line.  \n|   Reindent.\n\n  watch this code die a horrible flaming death:\n\n(foo a                          ; mumble\n     b                          ; frotz\n     c                          ; fnord\n     )\n\n#:Erik\n\n",
+  "date": "2000-03-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

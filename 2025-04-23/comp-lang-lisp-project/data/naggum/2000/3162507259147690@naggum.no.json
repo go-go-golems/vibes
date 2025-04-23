@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162507259147690@naggum.no.html",
+  "id": "3162507259147690@naggum.no",
+  "title": "Re: Macro question (bizarre)",
+  "content": "\nSubject: Re: Macro question (bizarre)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/20\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162507259147690@naggum.no>\n\n* Tom Breton <tob@world.std.com>\n| I would not call that economical.  You're spending the more important\n| resource, coding time/effort/attention, handling the multiple values.\n| \"Can I use them here, or have they degraded?\"  \"Why did my code stop\n| working?  Could this prog1 be the problem?  It couldn't possibly be,\n| the logic's exactly the same.  (pull hair out while poring over code)\"\n\n  I'm sensing fire, burned children, and fear.  being economical can either\n  be conscious and achieved by thinking, as in the unskilled programmer who\n  makes the best choices late, or automated and achived by emotion and gut\n  feeling, as in the highly skilled who makes the best choices early.  you\n  seem to think that writing efficient, economical code is something you do\n  on a conscious basis after you have done something \"clean\" that is stupid\n  and uneconomical according to the resource expenditure measures that you\n  attemt to introduce later.  this is the incompetent's credo, and I for\n  one do not subscribe to it.\n\n#:Erik\n\n",
+  "date": "2000-03-20",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

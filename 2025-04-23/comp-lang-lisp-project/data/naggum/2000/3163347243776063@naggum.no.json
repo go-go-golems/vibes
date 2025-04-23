@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163347243776063@naggum.no.html",
+  "id": "3163347243776063@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163347243776063@naggum.no>\n\n* \"Anthony Cartmell\" <AJCartmell@csi.com>\n| Lisp (as I now understand) uses many deep nested lists, and large-multiple\n| consecutive close parens are very common.  Lisp does not tend to use long\n| list forms (except perhaps cond and case) so inserting removing items in\n| lists is not often done, and dangling parens therefore have little use.\n\n  um, excuse me, but what do you think Lisp code is made of?  there is no\n  point at all to make the artificial differences you seem to want to make.\n\n#:Erik\n\n",
+  "date": "2000-03-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

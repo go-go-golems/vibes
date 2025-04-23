@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163690457188144@naggum.no.html",
+  "id": "3163690457188144@naggum.no",
+  "title": "Re: Alternatives to EVAL",
+  "content": "\nSubject: Re: Alternatives to EVAL\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/02\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163690457188144@naggum.no>\n\n* \"David E. Young\" <youngde@mindspring.com>\n| I've read that if EVAL is used explicitly within a program, it probably\n| indicates poor design.\n\n  the probability is not 1.0, however.  using EVAL in servers or programs\n  that accept input from users or agents of users for the express purpose\n  of evaluation in the Lisp world is good design -- reinventing your own\n  EVAL at this point is poor design.\n\n#:Erik\n\n",
+  "date": "2000-04-02",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

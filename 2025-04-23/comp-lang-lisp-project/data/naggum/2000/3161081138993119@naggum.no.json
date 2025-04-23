@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161081138993119@naggum.no.html",
+  "id": "3161081138993119@naggum.no",
+  "title": "Re: Dynamic bindings and lightweight processes",
+  "content": "\nSubject: Re: Dynamic bindings and lightweight processes\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/03\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161081138993119@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| I think the wrongness is to assume that SYMBOL-VALUE gets at the `slot in\n| the symbol', which is something I used to think.  In fact it gets at the\n| current dynamic binding -- there is no portable way to get at the slot in\n| the symbol -- and indeed there may *be* no distinct symbol slot, but just\n| a top-level binding.\n\n  if the current dynamic value of a special variable and symbol-value of\n  the symbol _differ_ (modify one, don't see the difference in the other),\n  you have a seriously non-conforming implementation, so _the_ portable way\n  to get at the slot in the symbol cannot be any different than the current\n  dynamic value.  please don't confuse this issue beyond necessity.\n\n  there are two ways to do this dynamic binding thing: shallow and deep\n  binding.  shallow binding stuffs the old value away, typically on the\n  same stack that unwind-protect uses, and stores the new value in the\n  symbol-value slot.  deep binding basically pushes symbols on an alist (or\n  something very similar) and traverses it to get the current value.  in a\n  multiprocessing setting, there are multiple stacks, and at least one of\n  them is used to store the process-local value of symbol-value slots of\n  process-bound special variables.\n\n  this is actuall fairly well documented in each of the Common Lisp systems\n  that support multiprocessing.\n\n#:Erik\n\n",
+  "date": "2000-03-03",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

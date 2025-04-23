@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161072346725257@naggum.no.html",
+  "id": "3161072346725257@naggum.no",
+  "title": "Re: Dynamic bindings and lightweight processes",
+  "content": "\nSubject: Re: Dynamic bindings and lightweight processes\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/03\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161072346725257@naggum.no>\n\n* \"Simon Katz\" <skatz@nomistech.com>\n| What's really going on here?\n\n  the special bindings of a process are re-bound during the context switch.\n\n  (however, if you don't _bind_ special variables in such a multiprocessing\n  environment, only set it, this mechanism is defeated.)\n\n| How do other Lisps that support lightweight processes compare?\n\n  they seem to do the same thing all over the place.\n\n#:Erik\n\n",
+  "date": "2000-03-03",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

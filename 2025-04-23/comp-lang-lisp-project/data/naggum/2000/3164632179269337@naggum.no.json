@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164632179269337@naggum.no.html",
+  "id": "3164632179269337@naggum.no",
+  "title": "Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164632179269337@naggum.no>\n\n* tom__98@my-deja.com\n| Unlike equality, where it matters if you compare too much, for the\n| semantics of a deep copy, it doesn't matter if you copy too much--it will\n| simply be inefficient.\n\n  when object identity matters, copying too much is destroying information.\n  such destruction can lead to very serious errors that are impossible to\n  trace after the fact.  if you don't get it right, you're hosed.  if you\n  don't even recognize that you can get this wrong, you're hosed a priori.\n  such is the tragic case for that hack we've been trying to teach there's\n  more to life than his C++ wonderworld.\n\n  (do we really _need_ to educate people at this level in this newsgroup?)\n\n#:Erik\n\n",
+  "date": "2000-04-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

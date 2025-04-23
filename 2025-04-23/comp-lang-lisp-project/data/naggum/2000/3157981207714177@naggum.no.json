@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157981207714177@naggum.no.html",
+  "id": "3157981207714177@naggum.no",
+  "title": "Re: Would COMPILER-MACRO cut it?",
+  "content": "\nSubject: Re: Would COMPILER-MACRO cut it?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/27\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157981207714177@naggum.no>\n\n* Christopher Browne\n| Using floats for something that is inherently rational seems to me to\n| be fundamentally irrational.  (And there are too many puns there to\n| feel comfortable...)\n\n  the machine representation of a floating point number _is_ a rational!\n  specifically, M*2^E, for Mantissa (an integer) and Exponent (an integer),\n  usually with a separate sign, but that's beside the point.  contrary to\n  common beliefs, floating point numbers _are_ exact, they just aren't the\n  numbers we'd _like_ to be exact, because we stupidly cling to decimal\n  instead of hexadecimal or octal.\n\n| The *problem* with using floats for financial operations is that this\n| causes you to enter into all the numerical stability issues that are\n| rampant in FP math.\n\n  this is sheer nonsense.  the reason we run into numerical stability\n  issues in floating point arithmetic operations is that we're asking the\n  system to find the representable (exact) number that is closest to the\n  (exact, but unrepresentable) result of a computation.  as long as the\n  result is representable, floating point arithmetic cannot but remain\n  exact and stable.\n\n| <ick-mode>\n| Common Lisp probably needs to have a BCD numeric representation for\n| this purpose.\n| </ick-mode>\n\n  supporting BCD numeric representation only makes sense when the hardware\n  also supports it.  for all common, relevant purposes, arbitrary-precision\n  integers suffice.\n\n#:Erik\n\n",
+  "date": "2000-01-27",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

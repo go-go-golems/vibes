@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159560513225052@naggum.no.html",
+  "id": "3159560513225052@naggum.no",
+  "title": "Re: continuations and cl",
+  "content": "\nSubject: Re: continuations and cl\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/14\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159560513225052@naggum.no>\n\n* Marc Hoffman\n| So I was wondering why call/cc is not implemented.\n\n  because the Common Lisp crowd doesn't want you to implement manually all\n  the control flow mechanisms that CALL/CC is used to implement, and that\n  is because there is no desire to pare the language down to \"essentials\"\n  or Scheme's ascetic/anorectic notions of \"elegance\".\n\n  I think CALL/CC is on par with giving people access to the basic building\n  blocks of a function call, without actual support for function calls.\n  sure, you _can_ do a lot of nifty stuff with those building blocks, but\n  _should_ you?  \"because I can\" is seldom a good answer.\n\n#:Erik\n\n",
+  "date": "2000-02-14",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163496610594768@naggum.no.html",
+  "id": "3163496610594768@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/31\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163496610594768@naggum.no>\n\n* \"Anthony Cartmell\" <AJCartmell@csi.com>\n| Perhaps you could explain to me how Emacs does indentation of Lisp code?\n| I'm really interested, especially if it doesn't look at the parens.\n\n  you're not getting it, are you?  Emacs looks at the parens to indent, the\n  reader of the indented code subsequently does _not_ look at the parens.\n  unless you are Emacs, parens are nearly irrelevant.  if you _are_ Emacs,\n  try M-x doctor.\n\n#:Erik\n\n",
+  "date": "2000-03-31",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

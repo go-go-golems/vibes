@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162852050149389@naggum.no.html",
+  "id": "3162852050149389@naggum.no",
+  "title": "Re: Common Lisp interpretation by emacs",
+  "content": "\nSubject: Re: Common Lisp interpretation by emacs\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162852050149389@naggum.no>\n\n* Christopher R. Barry\n| Just learn to live with and love and improve the Emacs we have now,\n| since a CL one just isn't happening, and would take a lot of work to\n| make much more spectacular than our current Emacs even if it did.\n\n  regrettably, I have come to the same conclusion -- this won't fly if it\n  doesn't have a very significant advantage over the current Emacs, and\n  that means user-visible features, not just programmability in a much\n  better language.  with two major disincentives operating against any\n  Common Lisp project, the chances of sufficient popularity are also very\n  slim.  the two disincentives are primarily the close-minded attitude and\n  open hostility of the Open Source crowd towards anything that is not\n  sufficiently \"open\" -- i.e., \"philosophically impure\" in their eyes --\n  which detracts effort and would-be programmers alike, and secondarily\n  that the pool of people was already so small initially that it certainly\n  has no critical mass by the time the primary disincentive has eroded\n  popular enthusiasm.\n  \n#:Erik\n\n",
+  "date": "2000-03-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

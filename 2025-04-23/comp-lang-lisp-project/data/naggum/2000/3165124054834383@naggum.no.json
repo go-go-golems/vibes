@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165124054834383@naggum.no.html",
+  "id": "3165124054834383@naggum.no",
+  "title": "Re: getting a full symbol name",
+  "content": "\nSubject: Re: getting a full symbol name\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/19\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165124054834383@naggum.no>\n\n* Barry Margolin <barmar@genuity.net>\n| If you bind *PACKAGE* to NIL, ...\n\n  ... you are violating a system-wide invariant.  just don't do it.\n\n#:Erik\n\n",
+  "date": "2000-04-19",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

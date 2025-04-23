@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165303464872531@naggum.no.html",
+  "id": "3165303464872531@naggum.no",
+  "title": "Re: How does Lisp implement Primitive, Structured and User-defined data   types?",
+  "content": "\nSubject: Re: How does Lisp implement Primitive, Structured and User-defined data   types?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/21\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165303464872531@naggum.no>\n\n* Courageous <jkraska1@san.rr.com>\n| That's the point: once you've read the standard, you'll realize that for\n| *Lisp*, there is no answer.  Only a particular vendors solution.  But\n| that isn't Lisp, now, is it?\n\n  I'm disappointed.  I was waiting for a \"Lisp is not like that, Erik\".\n\n  I must assume from past experience that you won't ever understand that\n  giving somebody the standard is not an answer to implementation issues,\n  but will now proceed to call yourself \"victim\" and me \"abuser\" for\n  pointing this out to you, and _blame_ me for your lack of understanding.\n\n  instead of _actually_ going down that route, I'll just summarize it for\n  us all: Joe Kraska will never relinquish the genuinely bad idea of giving\n  someone the whole standard when they ask for _common_ implementations of\n  certain aspects of Common Lisp, but will forever think his was a highly\n  meritorious suggestion which was undeservedly bashed.  it is still wrong.\n\n  now, refrain from following up, Joe Kraska.  we know what you will say.\n\n#:Erik\n\n",
+  "date": "2000-04-21",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

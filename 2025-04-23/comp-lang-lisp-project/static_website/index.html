@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>comp.lang.lisp Archive Browser Project</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold">(comp.lang.lisp) Archive Browser</h1>
+            <p class="mt-2">A modern interface for exploring Lisp discussions from the past</p>
+        </div>
+    </header>
+
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <ul class="flex space-x-6 py-4">
+                <li><a href="#overview" class="text-blue-600 hover:text-blue-800 font-medium">Overview</a></li>
+                <li><a href="#features" class="text-blue-600 hover:text-blue-800 font-medium">Features</a></li>
+                <li><a href="#implementation" class="text-blue-600 hover:text-blue-800 font-medium">Implementation</a></li>
+                <li><a href="#data-collection" class="text-blue-600 hover:text-blue-800 font-medium">Data Collection</a></li>
+                <li><a href="#frontend" class="text-blue-600 hover:text-blue-800 font-medium">Frontend</a></li>
+                <li><a href="#download" class="text-blue-600 hover:text-blue-800 font-medium">Download</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <section id="overview" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Project Overview</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="mb-4">
+                    This project creates a modern, searchable interface for browsing the comp.lang.lisp Usenet newsgroup archives. 
+                    The comp.lang.lisp newsgroup has been a valuable resource for Lisp programmers since the early days of the internet, 
+                    containing discussions about Common Lisp programming, concepts, and ideas.
+                </p>
+                <p class="mb-4">
+                    The project consists of two main components:
+                </p>
+                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                    <li>A scraper that collects posts from Erik Naggum's comp.lang.lisp archive</li>
+                    <li>A React-based frontend with search functionality for browsing the collected data</li>
+                </ol>
+                <p>
+                    The goal is to make these valuable discussions more accessible to modern Lisp programmers and enthusiasts.
+                </p>
+            </div>
+        </section>
+
+        <section id="features" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Features</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">Data Collection</h3>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>Scrapes posts from Erik Naggum's comp.lang.lisp archive</li>
+                            <li>Extracts metadata (author, date, subject, references)</li>
+                            <li>Organizes posts into threads</li>
+                            <li>Preserves message content and formatting</li>
+                            <li>Stores data in structured JSON format</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">Frontend Interface</h3>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>Thread listing with titles, dates, and post counts</li>
+                            <li>Full-text search across thread titles and content</li>
+                            <li>Light/dark/system theme options</li>
+                            <li>Favorite/star functionality for threads</li>
+                            <li>Responsive design for desktop and mobile</li>
+                            <li>Built with React and Tailwind CSS</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Implementation Details</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Project Structure</h3>
+                <pre class="bg-gray-100 p-4 rounded-md overflow-x-auto mb-6"><code class="language-bash">comp_lang_lisp_project/
+├── data/                      # Scraped and processed data
+│   ├── naggum/                # Raw data from Erik Naggum's archive
+│   ├── combined/              # Combined data from all sources
+│   └── processed/             # Processed data for frontend use
+├── frontend/                  # React frontend application
+│   └── comp-lang-lisp-browser/
+│       ├── public/            # Static assets and data files
+│       └── src/               # React components and application code
+├── limited_scraper_updated.py # Script to collect sample data
+├── process_data.py            # Script to process and structure data
+└── static_website/            # Static website for project documentation</code></pre>
+                
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Technologies Used</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-medium mb-2 text-gray-700">Backend/Scraping</h4>
+                        <ul class="list-disc pl-6 space-y-1">
+                            <li>Python 3.10</li>
+                            <li>BeautifulSoup4 for HTML parsing</li>
+                            <li>Requests for HTTP requests</li>
+                            <li>JSON for data storage</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-medium mb-2 text-gray-700">Frontend</h4>
+                        <ul class="list-disc pl-6 space-y-1">
+                            <li>React with TypeScript</li>
+                            <li>Tailwind CSS v3 for styling</li>
+                            <li>Vite for development and building</li>
+                            <li>Heroicons and Lucide for icons</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="data-collection" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Data Collection Process</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Sources</h3>
+                <p class="mb-4">
+                    After researching various archives of comp.lang.lisp, we focused on Erik Naggum's archive 
+                    (https://www.xach.com/naggum/articles/) which contains 5,121 articles from 1994-2004.
+                </p>
+                
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Scraping Approach</h3>
+                <p class="mb-4">
+                    The scraper navigates through the archive's year pages and collects individual articles. 
+                    For each article, it extracts:
+                </p>
+                <ul class="list-disc pl-6 mb-4 space-y-1">
+                    <li>Message ID</li>
+                    <li>Subject/Title</li>
+                    <li>Author information</li>
+                    <li>Date</li>
+                    <li>Content</li>
+                    <li>References to other messages</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Data Processing</h3>
+                <p class="mb-4">
+                    After collection, the data is processed to:
+                </p>
+                <ul class="list-disc pl-6 mb-4 space-y-1">
+                    <li>Group messages into threads based on subject and references</li>
+                    <li>Extract and normalize dates for consistent formatting</li>
+                    <li>Create a structured dataset for the frontend</li>
+                    <li>Generate statistics about the collection</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Sample Scraper Code</h3>
+                <pre class="bg-gray-100 p-4 rounded-md overflow-x-auto"><code class="language-python">def parse_article_page(html, article_url):
+    """Parse an article page and extract its content."""
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    # Extract article metadata and content
+    article_id = os.path.basename(article_url).replace('.html', '')
+    
+    article = {
+        'url': article_url,
+        'id': article_id,
+        'title': soup.title.string if soup.title else "No title",
+        'content': '',
+        'date': '',
+        'author': 'Erik Naggum',
+        'references': [],
+        'source': 'naggum'
+    }
+    
+    # Extract content
+    pre_tag = soup.find('pre')
+    if pre_tag:
+        content = pre_tag.get_text()
+        article['content'] = content
+        
+        # Extract date from content
+        date_match = re.search(r'Date:\s+(\d{4}/\d{2}/\d{2})', content)
+        if date_match:
+            date_str = date_match.group(1)
+            try:
+                # Convert YYYY/MM/DD to YYYY-MM-DD
+                date_parts = date_str.split('/')
+                article['date'] = f"{date_parts[0]}-{date_parts[1]}-{date_parts[2]}"
+            except:
+                article['date'] = date_str
+        
+        # Extract subject from content
+        subject_match = re.search(r'Subject:\s+(.*?)$', content, re.MULTILINE)
+        if subject_match:
+            article['title'] = subject_match.group(1).strip()
+        
+        # Extract references
+        references_match = re.search(r'References:\s+(.*?)$', content, re.MULTILINE)
+        if references_match:
+            refs = references_match.group(1).strip()
+            article['references'] = [ref.strip() for ref in refs.split(',')]
+    
+    return article</code></pre>
+            </div>
+        </section>
+
+        <section id="frontend" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Frontend Implementation</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">User Interface</h3>
+                <p class="mb-4">
+                    The frontend provides a clean, modern interface for browsing the comp.lang.lisp archives:
+                </p>
+                <div class="mb-6 border rounded-lg overflow-hidden">
+                    <img src="images/frontend_screenshot.png" alt="Frontend Screenshot" class="w-full">
+                </div>
+                
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Key Components</h3>
+                <ul class="list-disc pl-6 mb-4 space-y-2">
+                    <li><strong>Thread Listing:</strong> Displays threads with titles, authors, dates, and post counts</li>
+                    <li><strong>Search:</strong> Allows searching across thread titles and content</li>
+                    <li><strong>Theme Switcher:</strong> Toggles between light, dark, and system themes</li>
+                    <li><strong>Favorites:</strong> Allows users to star/favorite threads for later reference</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold mb-3 text-gray-700">Sample Frontend Code</h3>
+                <pre class="bg-gray-100 p-4 rounded-md overflow-x-auto"><code class="language-typescript">const ThreadItem: React.FC<{
+  thread: Thread;
+  isFavorite: boolean;
+  onToggleFavorite: (threadId: string) => void;
+}> = ({ thread, isFavorite, onToggleFavorite }) => {
+  return (
+    <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white">{thread.title}</h2>
+          <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+            <span>@eriknaggum</span>
+            <span className="mx-2">•</span>
+            <span>{new Date(thread.last_post_date).toLocaleDateString()}</span>
+            <span className="mx-2">•</span>
+            <div className="flex items-center">
+              <ChatBubbleLeftIcon className="h-4 w-4 mr-1" />
+              <span>{thread.post_count}</span>
+            </div>
+          </div>
+          {thread.posts.length > 0 && (
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+              {thread.posts[0].content.split('\n').slice(5).join(' ').substring(0, 200)}...
+            </p>
+          )}
+        </div>
+        <button 
+          onClick={() => onToggleFavorite(thread.id)}
+          className="ml-4 text-gray-400 hover:text-yellow-500 focus:outline-none"
+        >
+          {isFavorite ? (
+            <StarIconSolid className="h-6 w-6 text-yellow-500" />
+          ) : (
+            <StarIcon className="h-6 w-6" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};</code></pre>
+            </div>
+        </section>
+
+        <section id="download" class="mb-12">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Download Project Files</h2>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <p class="mb-6">
+                    You can download the complete project, including all source code, data, and documentation:
+                </p>
+                <div class="flex justify-center">
+                    <a href="comp_lang_lisp_project.zip" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Project Files (ZIP)
+                    </a>
+                </div>
+                
+                <h3 class="text-xl font-semibold mt-8 mb-3 text-gray-700">Running the Project Locally</h3>
+                <p class="mb-4">
+                    To run the project locally, follow these steps:
+                </p>
+                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                    <li>Extract the downloaded ZIP file</li>
+                    <li>Navigate to the frontend directory: <code class="bg-gray-100 px-2 py-1 rounded">cd comp_lang_lisp_project/frontend/comp-lang-lisp-browser</code></li>
+                    <li>Install dependencies: <code class="bg-gray-100 px-2 py-1 rounded">npm install</code></li>
+                    <li>Start the development server: <code class="bg-gray-100 px-2 py-1 rounded">npm run dev</code></li>
+                    <li>Open your browser to <code class="bg-gray-100 px-2 py-1 rounded">http://localhost:5173</code></li>
+                </ol>
+                
+                <h3 class="text-xl font-semibold mt-6 mb-3 text-gray-700">Running the Scraper</h3>
+                <p class="mb-4">
+                    If you want to collect more data or update the existing dataset:
+                </p>
+                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                    <li>Navigate to the project root: <code class="bg-gray-100 px-2 py-1 rounded">cd comp_lang_lisp_project</code></li>
+                    <li>Run the scraper: <code class="bg-gray-100 px-2 py-1 rounded">python3 limited_scraper_updated.py</code></li>
+                    <li>Process the data: <code class="bg-gray-100 px-2 py-1 rounded">python3 process_data.py</code></li>
+                </ol>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <p class="text-center">
+                comp.lang.lisp Archive Browser Project &copy; 2025
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163690209543717@naggum.no.html",
+  "id": "3163690209543717@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/02\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163690209543717@naggum.no>\n\n* \"Anthony Cartmell\" <AJCartmell@csi.com>\n| Thanks for agreeing with me when I say that in Emacs the indentation is\n| based on the parens.\n\n  such has never been disputed.  you're amazingly exasperating, you know that?\n\n| So Andy is wrong when he said that I don't understand how Emacs indents\n| Lisp.\n\n  well, I'm sorry, but you don't.  as commonly used, \"based on\" indicates a\n  necessary condition but _not_ a sufficient one, and this is indeed the\n  case in this situation, as has been pointed out to you.\n\n#:Erik\n\n",
+  "date": "2000-04-02",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

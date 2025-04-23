@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164150875655283@naggum.no.html",
+  "id": "3164150875655283@naggum.no",
+  "title": "Re: basic question (probably w/ no good answer)",
+  "content": "\nSubject: Re: basic question (probably w/ no good answer)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/08\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164150875655283@naggum.no>\n\n* Dave Bakhash <cadet@alum.mit.edu>\n| My guess: don't close off the LET, but keep things nested, even\n| though those final expressions don't need to be inside the LET.\n\n  my rule of thumb: unless you use a binding form for its progn value,\n  i.e., in situations where you may use only one form, move the subforms\n  that don't need the bindings out of the binding form.  this makes it\n  clear when the scope of the bindings cease to exist, reducing the amount\n  of work a reader of the code would have to go through to figure out that\n  the bindings _don't_ affect these forms, and it makes it clear that the\n  binding form does not return a useful value, but is there for side\n  effect.  clues like this can make reading code a lot easier.\n\n  this is likely a matter of some personal taste.\n\n#:Erik\n\n",
+  "date": "2000-04-08",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

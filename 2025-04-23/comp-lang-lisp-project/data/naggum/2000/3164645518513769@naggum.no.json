@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164645518513769@naggum.no.html",
+  "id": "3164645518513769@naggum.no",
+  "title": "Re: How To make '(--a) equals 'a",
+  "content": "\nSubject: Re: How To make '(--a) equals 'a\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164645518513769@naggum.no>\n\n* David <tiand8@cs.man.ac.uk>\n| I am a beginner in Lisp. Recently I have been doing a programming\n| exercise in Lisp which is to build a test-tree using a so-called ID3\n| algorithm in A.I. one of the smaller tasks to solve this problem is to\n| make \"not not a\" (ie. '(--a) ) equals \"a\"; where \"a\" is any atom in\n| Lisp. This is trivial in Maths, but to make this equivalence work in Lisp\n| seems very tricky to me. My main difficulty is that I don't know how to\n| separate '(--a) into \"-\", \"-\" and \"a\". once I know how to do this the\n| problem is straight forward.\n\n  if you use a richer character set, you can use the ¬ operator (found in\n  ISO 8859-1, or \"ISO Latin 1\", also known among Microsoft victims as \"the\n  ANSI character set\"), and you can teach your Common Lisp reader to make\n  that a single-character operator that either returns itself or returns\n  the \"not\" operator already in the language, listifying its argument like\n  quote (') does.\n\n(defun not-reader (stream char)\n  (list 'not (read stream nil nil t)))\n\n(set-macro-character #\\¬ #'not-reader nil)\n\n'¬¬a\n=> (not (not a))\n\n  simplifying this expression can now be done at the semantic level, which\n  basically entails walking over your expressions looking for not forms and\n  replacing the form with the cadadr of the form.\n\n  the normal evaluation rules in Common Lisp makes (not (not a)) the\n  canonical true boolean value, t, for any non-nil a, and nil for nil.\n\n  don't know if this answered your question, it's kind of vague.\n\n#:Erik\n\n",
+  "date": "2000-04-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

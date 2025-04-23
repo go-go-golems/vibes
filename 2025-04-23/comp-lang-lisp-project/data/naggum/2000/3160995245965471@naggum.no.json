@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160995245965471@naggum.no.html",
+  "id": "3160995245965471@naggum.no",
+  "title": "Re: setq Question.",
+  "content": "\nSubject: Re: setq Question.\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/02\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160995245965471@naggum.no>\n\n* npak@kazbek.ispras.ru (Nick V. Pakoulin)\n| May be I don't understand something fundamentally simple, but what about this\n| piece of code (CLISP):\n\n  yeah, what about it?\n\n  the reason I *hate* examples is that they communicate exactly _nothing_\n  in the vast majority of cases.  the set of possible questions you are\n  asking is virtually unbounded.\n\n  I assume you are confused about what the function boundp returns, but at\n  what point your understanding is solid is inherently uknowable with just\n  your example to go on, and any good answer would have to start off from\n  where you last had a reasonably solid understanding of the issues.  don't\n  assume that people have time to figure out what you're trying to ask them\n  about.\n\n  please try to rephrase your questions, and don't use a single line of\n  code as an example -- nothing good ever comes from stuffing things into a\n  Lisp system and looking confused at the answer, anyway.  either you know\n  what you're doing, or you set out to learn.  chances are then very good\n  you will have answered your own question in the process of asking it well.\n\n#:Erik\n\n",
+  "date": "2000-03-02",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

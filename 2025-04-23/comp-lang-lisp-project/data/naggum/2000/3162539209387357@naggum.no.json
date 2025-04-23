@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162539209387357@naggum.no.html",
+  "id": "3162539209387357@naggum.no",
+  "title": "Re: Macro question (bizarre)",
+  "content": "\nSubject: Re: Macro question (bizarre)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/20\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162539209387357@naggum.no>\n\n* Duane Rettig\n| Returning a list always requires consing; returning multiple values\n| (mostly) does not.\n\n* Tom Breton <tob@world.std.com>\n| Which is an optimization issue.\n\n  I think this is getting closer to the point.  \"optimization\" to you\n  obviously means anything that involves thinking about resource usage.\n  such is in my view an obviously invalid and useless abstraction, and does\n  a major disservice to the work involved in writing good software.\n\n  however, I do find it rather curious that you optimize your writing to\n  the point of being unreadable with random four-letter abbreviations.\n\n#:Erik\n\n",
+  "date": "2000-03-20",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

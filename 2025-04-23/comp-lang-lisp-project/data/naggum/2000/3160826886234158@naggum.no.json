@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160826886234158@naggum.no.html",
+  "id": "3160826886234158@naggum.no",
+  "title": "Re: (loop for ? in ? finally ?)",
+  "content": "\nSubject: Re: (loop for ? in ? finally ?)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160826886234158@naggum.no>\n\n* Bary Margolin\n| But if he can't find a place in the spec where it says what he must do,\n| he can do whatever he wants.\n\n* Fernando D. Mato Mira\n| Besides the fact that such an approach shows the true value of an spec w/o\n| a formal definition, or at least verbosely written in natural language to\n| accomplish the same effect that would mean:\n\n  standards are legal documents.  they follow the same principle as every\n  other legal document: that which it does not say is not covered.  laws\n  are defined similarly: if it isn't forbidden, you can do it.  (but in the\n  case of government agencies: if it isn't prescribed, you can't do it.)\n\n| 1. Implementors are free not to play by the same rules as everybody else.\n\n  so what would you need to stop them from doing this in your ideal world?\n  (I assume permissions and grants from gilds or government agencies.)\n\n  in this world, users and customers make informed choices and the market\n  has the role of the control mechanism.  not to be snotty or anything, but\n  it tends to come as a surprise to Europeans that the market can work\n  without serious government intervention and licenses to produce goods.\n  which is why the new EU standard for condoms specifies one size for the\n  entire continent, ignoring well-known physiological differences between\n  regions, and why we have an EU standard for the \"curvature\" of bananas.\n\n#:Erik\n\n",
+  "date": "2000-02-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161640508185948@naggum.no.html",
+  "id": "3161640508185948@naggum.no",
+  "title": "Re: Inline Functions (was: Eureka! Lexical bindings can be guaranteed!)",
+  "content": "\nSubject: Re: Inline Functions (was: Eureka! Lexical bindings can be guaranteed!)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/10\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161640508185948@naggum.no>\n\n* Coby Beck\n| What are the hazards of inlining functions?\n\n1 version disparity upon redefinition\n2 reduced accuracy in reporting errors in the debugger\n3 code bloat\n\n#:Erik\n\n",
+  "date": "2000-03-10",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

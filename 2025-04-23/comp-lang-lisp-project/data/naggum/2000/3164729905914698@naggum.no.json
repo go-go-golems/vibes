@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164729905914698@naggum.no.html",
+  "id": "3164729905914698@naggum.no",
+  "title": "Re: How To make '(--a) equals 'a",
+  "content": "\nSubject: Re: How To make '(--a) equals 'a\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/14\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164729905914698@naggum.no>\n\n* William Deakin <willd@pindar.com>\n| You are unduly harsh on vi, as there are sufficient problems with `Numerical\n| Recipies in C' that are total not vi related,\n\n  could \"Numerical Recipes in Common Lisp\" be an idea?  as far as I can see\n  from the code in the C version, about 40% of it is directly related to\n  managing object types that don't fall naturally into the C domain, and it\n  appears that the significant reduction in object management alone would\n  make a Common Lisp implementation of much if not all of this interesting.\n\n#:Erik\n\n",
+  "date": "2000-04-14",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

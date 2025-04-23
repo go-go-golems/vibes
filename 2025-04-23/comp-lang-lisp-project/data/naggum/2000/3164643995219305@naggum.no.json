@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164643995219305@naggum.no.html",
+  "id": "3164643995219305@naggum.no",
+  "title": "Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164643995219305@naggum.no>\n\n* Tim Moore <moore@herschel.bricoworks.com>\n| Topics such as \"How do I do a deep copy in Lisp?\" cause blood pressures\n| to rise because Lispers know it's impossible, but that's because the\n| language is much richer and exposes one to situations where deep copy is\n| in fact quite hard if not impossible.\n\n  you're missing the point, as one would expect from a bystander.  it isn't\n  the _topic_ that cause any problems.  it's the dimwits who come here and\n  ask for advice, and resoundingly _reject_ the advice they get from\n  well-meaning, highly educated people who try to teach pigs to sing, which\n  we know wastes your time and annoys the pig (witness the \"practical\" line\n  that just _had_ to come our way) only they don't know the dimwits they\n  try to help _are_ pigs until after a while, and then they get annoyed\n  when the pig turns out to be severely limited in learning _ability_, too.\n\n#:Erik\n\n",
+  "date": "2000-04-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

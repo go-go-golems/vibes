@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159561340687049@naggum.no.html",
+  "id": "3159561340687049@naggum.no",
+  "title": "Re: Why no standard foreign language interface?",
+  "content": "\nSubject: Re: Why no standard foreign language interface?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/14\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159561340687049@naggum.no>\n\n* William Deakin <willd@pindar.com>\n| Ouch.  For two reasons really.  First the inherent evil in c++ library\n| naming.  It needs 'putting to the sword.'\n\n  I'm operating under the assumption that the name mangling thing is known\n  to the compiler, and that `extern \"C\"' means the functions can refer to\n  internal functions with mangled names, but export un-mangled names, that\n  mere mortals can predict.  the wrapper functions around \"native\" C++\n  functions can also do away with the braindamaged passing of pointers to\n  structuresd classes, and use real argument lists.  at least half of the\n  problem with interfacing to C++ is having to deal with the incredible\n  propensity of C++ programmers to make function calls \"efficient\" by using\n  pointers and references and whatnot in a very chaotic way.  such is what\n  happens to people when they don't have lambda lists and multiple return\n  values, but there's no reason to try to map such pain into the Common\n  Lisp world.\n\n#:Erik\n\n",
+  "date": "2000-02-14",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

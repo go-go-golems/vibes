@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164024042624368@naggum.no.html",
+  "id": "3164024042624368@naggum.no",
+  "title": "Re: more questions about threads...",
+  "content": "\nSubject: Re: more questions about threads...\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/06\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164024042624368@naggum.no>\n\n* David Hanley <djh@ncgr.org>\n| Not for every app.  I have an app which runs on a multiple CPU machine,\n| and needs to generate a number of images ( time intensive ).  I shoot off\n| a number of threads to work on the image ( one each ) and this makes the\n| whole thing happen a *lot* faster.\n\n  how do they communicate the results back to eachother or a master?\n\n#:Erik\n\n",
+  "date": "2000-04-06",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

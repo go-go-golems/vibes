@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162408282242844@naggum.no.html",
+  "id": "3162408282242844@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162408282242844@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| This doesn't work (unless I've misunderstood you) because I can't use\n| it for the string->unsigned-byte-array case, because the strings might\n| have big characters in them.\n\n  sigh.  so read (unsigned-byte 8), smash the type code so it's a string of\n  non-big characters, and do _whatever_ you need to do with the string,\n  then smash the type code and write (unsigned-byte 8) to whatever.\n\n| It looks to me like the outcome of all this is that there isn't a\n| portable CL way of ensuring what I need to be true is true, and that I\n| need to ask vendors for per-implementation answers, and meantime punt on\n| the issue until my code is more stable.  Which are fine answers from my\n| point of view, in case anyone thinks I'm making the standard `lisp won't\n| let me do x' complaint.\n\n  portable languages are for portable problems.  conversely, non-portable\n  problems may require non-portable solutions.  I don't have a problem with\n  that, but many seem to have.\n\n#:Erik\n\n",
+  "date": "2000-03-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164940958803214@naggum.no.html",
+  "id": "3164940958803214@naggum.no",
+  "title": "Re: setf & setq - revisiting",
+  "content": "\nSubject: Re: setf & setq - revisiting\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/17\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164940958803214@naggum.no>\n\n* ;; h e l m e r . . . <assemblage@my-deja.com>\n| i'm revisitng my initial question because i found something on a scheme\n| site that clarifies (i hope) and gives me very basic definitions,\n| probelm is, i have to make sure it's lisp too . . .\n\n  it isn't.  on top of it, it's completely bogus, because ...\n\n| [note i have taken these statements where sheme's 'define' = 'setf' in\n| lisp and similarly 'set!' = 'setq']\n\n  ... this is completely unfounded.\n\n  please forget comparing Scheme and Lisp for now, but feel free to try\n  again when you know both exceedingly well on their own merits.\n\n#:Erik\n\n",
+  "date": "2000-04-17",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

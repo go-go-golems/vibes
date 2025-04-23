@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3156362974458283@naggum.no.html",
+  "id": "3156362974458283@naggum.no",
+  "title": "Re: About the usage of throw/catch",
+  "content": "\nSubject: Re: About the usage of throw/catch\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/08\nNewsgroups: comp.lang.lisp\nMessage-ID: <3156362974458283@naggum.no>\n\n* Alexis ARNAUD <a-arna99@bat710.univ-lyon1.fr>\n| at my university, a computer scientist says the usage of throw/catch in\n| Lisp constitutes \"dirty programming\".\n\n  it continues to puzzle me that people who are willing to accept that in\n  any field worth studying, there will always be a limit to how much _one_\n  person can know, for simple logistical reasons: it takes too much time to\n  learn it all, like much longer than a human lifetime.  yet in computer\n  science, that which one person, typically less than 30 years of age,\n  doesn't know is somehow bad, unworthy, dirty, etc.  I'm inclined to\n  believe that such people are inherently unable to deal with complexity\n  beyond their own immediate grasp, and as such should not be dealing with\n  computer science in the first place, since the whole field is all about\n  managing complexity far beyond direct human capabilities, despite the\n  evidence we see from dummies who want to learn \"programming\" in 21 days.\n\n  ask your \"computer scientist\" whether the use of exceptions is also bad.\n  while you're at it, ask her if the RETURN statement in C is dirty, too.\n  and if the problem is that GOTO's are bad, what about WHILE?  WHILE is no\n  more than dressed-up version of GOTO.  THROW and CATCH are similarly a\n  form of GOTO that are not only dressed up, they have university degrees.\n\n#:Erik\n\n",
+  "date": "2000-01-08",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163935044643945@naggum.no.html",
+  "id": "3163935044643945@naggum.no",
+  "title": "Re: howto string->symbol",
+  "content": "\nSubject: Re: howto string->symbol\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163935044643945@naggum.no>\n\n* kp gores <gores@sip.medizin.uni-ulm.de>\n| well, i didn't test it. but i thought that pack A using pack B knows \n| about only the (external) symbols of B existing at the time of using and \n| not later created symbols.\n\n  as I suspected, but I am curious, from an educational vantage point --\n  it's an odd assumption to make, in my view, and I wonder how you came to\n  think this way.  here's how I think: when you let a package use another\n  package, you refer to the package, as opposed to the symbols of the\n  package with, say, a use-package-symbols operator, which is what import\n  does, essentially.  my goal is to find out how to explain the difference\n  between import and use-package very succinctly.  it is not enough to\n  argue that the name \"use-package\" is sufficient, unless one also argues\n  that people pay _real_ good attention to the names, but whether that is\n  feasible or not is the underlying concern.\n\n#:Erik\n\n",
+  "date": "2000-04-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}
