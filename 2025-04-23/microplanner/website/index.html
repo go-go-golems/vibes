@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-PLANNER Common Lisp Implementation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        .feature {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .feature-icon {
+            font-size: 2em;
+            margin-right: 20px;
+            color: #3498db;
+        }
+        .feature-content {
+            flex: 1;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav ul li {
+                margin: 5px 0;
+            }
+            .feature {
+                flex-direction: column;
+            }
+            .feature-icon {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Micro-PLANNER Common Lisp Implementation</h1>
+        <p>A modern implementation of the historically significant AI programming language</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#documentation">Documentation</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="#download">Download</a></li>
+        </ul>
+    </nav>
+
+    <section id="about">
+        <h2>About Micro-PLANNER</h2>
+        <p>
+            Micro-PLANNER is a historically significant programming language developed in the late 1960s and early 1970s at MIT. 
+            It was designed as a subset of Carl Hewitt's PLANNER language and was implemented by Gerry Sussman, Eugene Charniak, 
+            and Terry Winograd. Micro-PLANNER was notably used in Winograd's natural language understanding program SHRDLU, 
+            which demonstrated remarkable capabilities for its time in understanding and reasoning about a blocks world.
+        </p>
+        <p>
+            This project provides a modern Common Lisp implementation of Micro-PLANNER, capturing the essential features 
+            of the original language including pattern-directed invocation, assertions, goal-directed execution, and backtracking.
+        </p>
+    </section>
+
+    <section id="features">
+        <h2>Key Features</h2>
+        
+        <div class="feature">
+            <div class="feature-icon">📋</div>
+            <div class="feature-content">
+                <h3>Pattern Matching</h3>
+                <p>
+                    Powerful pattern matching system that allows variables to match any value, enabling flexible 
+                    knowledge representation and querying.
+                </p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">🗄️</div>
+            <div class="feature-content">
+                <h3>Assertion Database</h3>
+                <p>
+                    Knowledge is represented as assertions stored in a database, providing a foundation for 
+                    knowledge-based reasoning.
+                </p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-content">
+                <h3>Goal-Directed Execution</h3>
+                <p>
+                    Problems are represented as goals to be achieved, with the system automatically finding solutions 
+                    through pattern matching and theorem application.
+                </p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">🔄</div>
+            <div class="feature-content">
+                <h3>Backtracking</h3>
+                <p>
+                    Automatic exploration of alternative solutions through backtracking, allowing the system to 
+                    recover from dead ends and find all possible solutions.
+                </p>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <div class="feature-icon">📚</div>
+            <div class="feature-content">
+                <h3>Theorem Proving</h3>
+                <p>
+                    Define rules of inference as theorems that can be used to derive new knowledge from existing facts.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="installation">
+        <h2>Installation</h2>
+        <p>Prerequisites:</p>
+        <ul>
+            <li>SBCL (Steel Bank Common Lisp)</li>
+            <li>Quicklisp (optional, for dependency management)</li>
+        </ul>
+        
+        <p>Installation steps:</p>
+        <pre><code>git clone https://github.com/yourusername/microplanner-cl.git
+cd microplanner-cl
+sbcl --load system.lisp</code></pre>
+        
+        <p>Run the examples:</p>
+        <pre><code>sbcl --script run-simplified-examples.lisp</code></pre>
+        
+        <a href="#download" class="btn">Download Now</a>
+    </section>
+
+    <section id="documentation">
+        <h2>Documentation</h2>
+        <p>
+            Comprehensive documentation is available to help you get started with Micro-PLANNER:
+        </p>
+        <ul>
+            <li><a href="guide.html">Comprehensive Guide</a> - Detailed explanation of concepts, API reference, and usage patterns</li>
+            <li><a href="tutorial.html">Tutorial</a> - Step-by-step tutorial with practical examples</li>
+            <li><a href="api.html">API Reference</a> - Complete reference of all functions and their parameters</li>
+        </ul>
+    </section>
+
+    <section id="examples">
+        <h2>Examples</h2>
+        <p>Here's a simple example to get you started:</p>
+        
+        <pre><code>;; Load the Micro-PLANNER system
+(load "system.lisp")
+
+;; Clear any existing database
+(microplanner:clear-database)
+
+;; Make some assertions about blocks
+(microplanner:planner-assert '(block a))
+(microplanner:planner-assert '(block b))
+(microplanner:planner-assert '(on a table))
+(microplanner:planner-assert '(on b a))
+
+;; Find what's on the table
+(let* ((x-var (microplanner:? 'x))
+       (result (microplanner:goal `(on ,x-var table))))
+  (format t "Found on table: ~S~%" (cdr (assoc x-var result))))</code></pre>
+        
+        <p>More examples can be found in the <a href="examples.html">examples section</a> of the documentation.</p>
+    </section>
+
+    <section id="download">
+        <h2>Download</h2>
+        <p>
+            You can download the latest version of Micro-PLANNER Common Lisp implementation:
+        </p>
+        <a href="microplanner-cl.zip" class="btn">Download ZIP Archive</a>
+        <p>
+            Or clone the repository from GitHub:
+        </p>
+        <pre><code>git clone https://github.com/yourusername/microplanner-cl.git</code></pre>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Micro-PLANNER Common Lisp Implementation</p>
+        <p>Based on the original Micro-PLANNER developed at MIT in the early 1970s</p>
+    </footer>
+</body>
+</html>

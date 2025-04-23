@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-PLANNER Tutorial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav ul li {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Micro-PLANNER Tutorial</h1>
+        <p>Step-by-step guide to using the Common Lisp implementation</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="guide.html">Guide</a></li>
+            <li><a href="tutorial.html">Tutorial</a></li>
+            <li><a href="examples.html">Examples</a></li>
+            <li><a href="api.html">API Reference</a></li>
+        </ul>
+    </nav>
+
+    <div id="tutorial-content">
+        <h1>Micro-PLANNER Tutorial</h1>
+
+        <h2>Introduction to Micro-PLANNER</h2>
+        <p>
+            Micro-PLANNER is a historically significant AI programming language that pioneered pattern-directed invocation 
+            and goal-oriented problem solving. This tutorial will guide you through using our Common Lisp implementation 
+            of Micro-PLANNER, helping you understand its core concepts and how to apply them to solve problems.
+        </p>
+
+        <h2>Getting Started</h2>
+        
+        <h3>Installation</h3>
+        <p>
+            First, ensure you have SBCL (Steel Bank Common Lisp) installed on your system. Then follow these steps:
+        </p>
+        <ol>
+            <li>
+                Clone the repository:
+                <pre><code>git clone https://github.com/yourusername/microplanner-cl.git
+cd microplanner-cl</code></pre>
+            </li>
+            <li>
+                Load the system in SBCL:
+                <pre><code>sbcl --load system.lisp</code></pre>
+            </li>
+        </ol>
+
+        <h3>Your First Micro-PLANNER Program</h3>
+        <p>Let's start with a simple example to understand the basics:</p>
+        <pre><code>;; Load the Micro-PLANNER system
+(load "system.lisp")
+
+;; Clear any existing database
+(microplanner:clear-database)
+
+;; Make some assertions about blocks
+(microplanner:planner-assert '(block a))
+(microplanner:planner-assert '(block b))
+(microplanner:planner-assert '(on a table))
+(microplanner:planner-assert '(on b a))
+
+;; Find what's on the table
+(let* ((x-var (microplanner:? 'x))
+       (result (microplanner:goal `(on ,x-var table))))
+  (format t "Found on table: ~S~%" (cdr (assoc x-var result))))</code></pre>
+        <p>
+            Save this as <code>first-example.lisp</code> and run it with:
+        </p>
+        <pre><code>sbcl --load first-example.lisp</code></pre>
+        <p>
+            You should see output indicating that block 'a' is on the table.
+        </p>
+
+        <h2>Understanding Pattern Matching</h2>
+        <p>
+            Pattern matching is fundamental to Micro-PLANNER. Let's explore it in more detail:
+        </p>
+        <pre><code>;; Create some pattern variables
+(defvar *x-var* (microplanner:? 'x))
+(defvar *y-var* (microplanner:? 'y))
+
+;; Match a pattern against data
+(let ((result (microplanner:pattern-match 
+                `(father ,*x-var* ,*y-var*)
+                '(father john mary))))
+  (format t "x = ~S, y = ~S~%" 
+          (cdr (assoc *x-var* result))
+          (cdr (assoc *y-var* result))))</code></pre>
+        <p>
+            This will output: <code>x = JOHN, y = MARY</code>
+        </p>
+
+        <h2>Working with the Database</h2>
+        <p>
+            Micro-PLANNER stores knowledge as assertions in a database:
+        </p>
+        <pre><code>;; Clear the database
+(microplanner:clear-database)
+
+;; Add some assertions
+(microplanner:planner-assert '(person john))
+(microplanner:planner-assert '(person mary))
+(microplanner:planner-assert '(likes john pizza))
+(microplanner:planner-assert '(likes mary ice-cream))
+
+;; Find all people
+(let* ((person-var (microplanner:? 'person))
+       (results (microplanner:try-all 
+                  (microplanner:goal `(person ,person-var)))))
+  (format t "People in the database:~%")
+  (dolist (result results)
+    (format t "  ~S~%" (cdr (assoc person-var result)))))
+
+;; Find what John likes
+(let* ((likes-var (microplanner:? 'likes))
+       (result (microplanner:goal `(likes john ,likes-var))))
+  (format t "John likes: ~S~%" (cdr (assoc likes-var result))))
+
+;; Remove an assertion
+(microplanner:erase '(likes john pizza))
+
+;; Check if John still likes pizza
+(let* ((likes-var (microplanner:? 'likes))
+       (result (microplanner:goal `(likes john ,likes-var))))
+  (if result
+      (format t "John still likes: ~S~%" (cdr (assoc likes-var result)))
+      (format t "John doesn't like anything anymore.~%")))</code></pre>
+
+        <h2>Defining and Using Theorems</h2>
+        <p>
+            Theorems allow you to define rules for deriving new knowledge:
+        </p>
+        <pre><code>;; Clear the database
+(microplanner:clear-database)
+
+;; Add family relationships
+(microplanner:planner-assert '(father john mary))
+(microplanner:planner-assert '(father bob john))
+
+;; Define a theorem for grandparent relationship
+(let ((gp-var (microplanner:? 'gp))
+      (gc-var (microplanner:? 'gc))
+      (p-var (microplanner:? 'p)))
+  (microplanner:define-theorem 'grandparent-theorem
+    `(grandparent ,gp-var ,gc-var)
+    `(microplanner:try-one
+      (microplanner:goal '(father ,gp-var ,p-var))
+      (microplanner:goal '(father ,p-var ,gc-var)))
+    "A theorem to determine if someone is a grandparent"))
+
+;; Find who is Mary's grandparent
+(let* ((gp-var (microplanner:? 'gp))
+       (result (microplanner:goal `(grandparent ,gp-var mary))))
+  (if result
+      (format t "Mary's grandparent is: ~S~%" (cdr (assoc gp-var result)))
+      (format t "Mary has no grandparent in the database.~%")))</code></pre>
+
+        <h2>Backtracking and Control Flow</h2>
+        <p>
+            Micro-PLANNER uses backtracking to explore alternative solutions:
+        </p>
+        <pre><code>;; Clear the database
+(microplanner:clear-database)
+
+;; Add some cities and connections
+(microplanner:planner-assert '(city new-york))
+(microplanner:planner-assert '(city boston))
+(microplanner:planner-assert '(city philadelphia))
+(microplanner:planner-assert '(connection new-york boston))
+(microplanner:planner-assert '(connection boston philadelphia))
+
+;; Define a theorem for finding paths
+(let ((from-var (microplanner:? 'from))
+      (to-var (microplanner:? 'to))
+      (via-var (microplanner:? 'via)))
+  (microplanner:define-theorem 'path-direct
+    `(path ,from-var ,to-var)
+    `(microplanner:try-one
+      (microplanner:goal '(connection ,from-var ,to-var)))
+    "Direct path between cities")
+  
+  (microplanner:define-theorem 'path-indirect
+    `(path ,from-var ,to-var)
+    `(microplanner:try-one
+      (microplanner:goal '(connection ,from-var ,via-var))
+      (microplanner:goal '(path ,via-var ,to-var)))
+    "Indirect path between cities"))
+
+;; Find if there's a path from New York to Philadelphia
+(let* ((result (microplanner:goal '(path new-york philadelphia))))
+  (if result
+      (format t "There is a path from New York to Philadelphia.~%")
+      (format t "There is no path from New York to Philadelphia.~%")))
+
+;; Find all paths starting from New York
+(let* ((to-var (microplanner:? 'to))
+       (results (microplanner:try-all 
+                  (microplanner:goal `(path new-york ,to-var)))))
+  (format t "Paths from New York:~%")
+  (dolist (result results)
+    (format t "  To: ~S~%" (cdr (assoc to-var result)))))</code></pre>
+
+        <h2>Building a Simple Expert System</h2>
+        <p>
+            Let's build a simple medical diagnosis expert system:
+        </p>
+        <pre><code>;; Clear the database
+(microplanner:clear-database)
+
+;; Add symptoms and diseases
+(microplanner:planner-assert '(symptom fever))
+(microplanner:planner-assert '(symptom cough))
+(microplanner:planner-assert '(symptom headache))
+(microplanner:planner-assert '(symptom sore-throat))
+
+(microplanner:planner-assert '(disease cold (symptoms cough sore-throat)))
+(microplanner:planner-assert '(disease flu (symptoms fever headache cough)))
+
+;; Define a theorem for diagnosis
+(let ((disease-var (microplanner:? 'disease))
+      (symptoms-var (microplanner:? 'symptoms))
+      (patient-symptoms-var (microplanner:? 'patient-symptoms)))
+  (microplanner:define-theorem 'diagnose
+    `(diagnose ,patient-symptoms-var ,disease-var)
+    `(microplanner:try-one
+      (microplanner:goal '(disease ,disease-var (symptoms ,symptoms-var)))
+      ;; Check if all disease symptoms are in patient symptoms
+      (let ((all-present t))
+        (dolist (symptom ,symptoms-var)
+          (unless (member symptom ,patient-symptoms-var)
+            (setf all-present nil)))
+        (if all-present
+            (microplanner:succeed t)
+            (microplanner:fail))))
+    "Diagnose a disease based on symptoms"))
+
+;; Diagnose a patient with fever and cough
+(let* ((disease-var (microplanner:? 'disease))
+       (patient-symptoms '(fever cough))
+       (results (microplanner:try-all 
+                  (microplanner:goal `(diagnose ,patient-symptoms ,disease-var)))))
+  (format t "Possible diagnoses:~%")
+  (dolist (result results)
+    (format t "  ~S~%" (cdr (assoc disease-var result)))))</code></pre>
+
+        <h2>Advanced Topics</h2>
+        
+        <h3>Forward and Backward Chaining</h3>
+        <p>
+            Micro-PLANNER supports both forward and backward chaining:
+        </p>
+        <pre><code>;; Forward chaining example
+(microplanner:clear-database)
+
+;; Define a consequent: if X is a parent of Y, then Y is a child of X
+(let ((parent-var (microplanner:? 'parent))
+      (child-var (microplanner:? 'child)))
+  (microplanner:consequent
+    `(parent ,parent-var ,child-var)
+    (lambda (bindings proof)
+      (let ((parent (cdr (assoc parent-var bindings)))
+            (child (cdr (assoc child-var bindings))))
+        (microplanner:planner-assert `(child ,child ,parent))))))
+
+;; Add a parent relationship
+(microplanner:planner-assert '(parent john mary))
+
+;; Check if the child relationship was automatically added
+(let* ((parent-var (microplanner:? 'parent))
+       (result (microplanner:goal `(child mary ,parent-var))))
+  (if result
+      (format t "Mary is a child of: ~S~%" (cdr (assoc parent-var result)))
+      (format t "No child relationship found.~%")))</code></pre>
+
+        <h3>Debugging</h3>
+        <p>
+            Micro-PLANNER provides debugging tools to help understand the execution flow:
+        </p>
+        <pre><code>;; Enable debug mode
+(microplanner:enable-debug)
+
+;; Run a goal with debugging output
+(let* ((x-var (microplanner:? 'x))
+       (result (microplanner:goal `(block ,x-var))))
+  (format t "Result: ~S~%" result))
+
+;; Disable debug mode
+(microplanner:disable-debug)</code></pre>
+
+        <h2>Conclusion</h2>
+        <p>
+            This tutorial has introduced you to the basics of Micro-PLANNER in Common Lisp. You've learned about pattern matching, 
+            assertions, goals, theorems, and backtracking. With these tools, you can build knowledge-based systems that can reason 
+            about complex problems.
+        </p>
+        <p>
+            For more detailed information, refer to the comprehensive guide and API documentation included with this implementation.
+        </p>
+
+        <h2>Next Steps</h2>
+        <ul>
+            <li>Study the examples in the <code>examples.lisp</code> file</li>
+            <li>Try building your own knowledge-based system</li>
+            <li>Explore the original Micro-PLANNER papers to understand its historical context</li>
+            <li>Experiment with more complex theorems and pattern matching</li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Micro-PLANNER Common Lisp Implementation</p>
+        <p>Based on the original Micro-PLANNER developed at MIT in the early 1970s</p>
+    </footer>
+</body>
+</html>
