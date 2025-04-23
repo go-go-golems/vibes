@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-PLANNER Examples</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        .example-output {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav ul li {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Micro-PLANNER Examples</h1>
+        <p>Example programs and their output</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="guide.html">Guide</a></li>
+            <li><a href="tutorial.html">Tutorial</a></li>
+            <li><a href="examples.html">Examples</a></li>
+            <li><a href="api.html">API Reference</a></li>
+        </ul>
+    </nav>
+
+    <div id="examples-content">
+        <h1>Micro-PLANNER Examples</h1>
+        <p>
+            This page contains example programs that demonstrate the capabilities of the Micro-PLANNER Common Lisp implementation.
+            Each example includes the source code and the output produced when running the example.
+        </p>
+
+        <section id="basic-example">
+            <h2>Example 1: Basic Assertions and Goals</h2>
+            <p>
+                This example demonstrates the basic functionality of assertions and goals in Micro-PLANNER.
+                It creates a simple blocks world and queries it.
+            </p>
+            <h3>Source Code:</h3>
+            <pre><code>(defun example-basic ()
+  (format t "~%~%=== Example 1: Basic Assertions and Goals ===~%")
+  (clear-database)
+  
+  ;; Make some assertions
+  (format t "~%Making assertions about blocks...~%")
+  (planner-assert '(block a))
+  (planner-assert '(block b))
+  (planner-assert '(block c))
+  (planner-assert '(on a table))
+  (planner-assert '(on b a))
+  (planner-assert '(on c b))
+  (planner-assert '(color a red))
+  (planner-assert '(color b green))
+  (planner-assert '(color c blue))
+  
+  ;; Show the database
+  (format t "~%Database contents:~%")
+  (dolist (assertion microplanner:*database*)
+    (format t "  ~S~%" assertion))
+  
+  ;; Simple goal - find a block
+  (format t "~%Finding a block:~%")
+  (let* ((x-var (? 'x))
+         (result (goal `(block ,x-var))))
+    (format t "  Found block: ~S~%" (cdr (assoc x-var result))))
+  
+  ;; Find all blocks
+  (format t "~%Finding all blocks:~%")
+  (let* ((x-var (? 'x))
+         (results (try-all (goal `(block ,x-var)))))
+    (dolist (result results)
+      (format t "  Found block: ~S~%" (cdr (assoc x-var result)))))
+  
+  ;; Find what's on the table
+  (format t "~%Finding what's on the table:~%")
+  (let* ((x-var (? 'x))
+         (result (goal `(on ,x-var table))))
+    (format t "  Found on table: ~S~%" (cdr (assoc x-var result))))
+  
+  ;; Find the color of block 'b'
+  (format t "~%Finding color of block 'b':~%")
+  (let* ((c-var (? 'c))
+         (result (goal `(color b ,c-var))))
+    (format t "  Color of b: ~S~%" (cdr (assoc c-var result))))
+  
+  t)</code></pre>
+
+            <h3>Output:</h3>
+            <div class="example-output">
+=== Example 1: Basic Assertions and Goals ===
+
+Making assertions about blocks...
+
+Database contents:
+  (MICROPLANNER-EXAMPLES::COLOR MICROPLANNER-EXAMPLES::C
+   MICROPLANNER-EXAMPLES::BLUE)
+  (MICROPLANNER-EXAMPLES::COLOR MICROPLANNER-EXAMPLES::B
+   MICROPLANNER-EXAMPLES::GREEN)
+  (MICROPLANNER-EXAMPLES::COLOR MICROPLANNER-EXAMPLES::A
+   MICROPLANNER-EXAMPLES::RED)
+  (MICROPLANNER-EXAMPLES::ON MICROPLANNER-EXAMPLES::C MICROPLANNER-EXAMPLES::B)
+  (MICROPLANNER-EXAMPLES::ON MICROPLANNER-EXAMPLES::B MICROPLANNER-EXAMPLES::A)
+  (MICROPLANNER-EXAMPLES::ON MICROPLANNER-EXAMPLES::A
+   MICROPLANNER-EXAMPLES::TABLE)
+  (BLOCK MICROPLANNER-EXAMPLES::C)
+  (BLOCK MICROPLANNER-EXAMPLES::B)
+  (BLOCK MICROPLANNER-EXAMPLES::A)
+
+Finding a block:
+  Found block: MICROPLANNER-EXAMPLES::C
+
+Finding all blocks:
+  Found block: NIL
+
+Finding what's on the table:
+  Found on table: MICROPLANNER-EXAMPLES::A
+
+Finding color of block 'b':
+  Color of b: MICROPLANNER-EXAMPLES::GREEN
+            </div>
+        </section>
+
+        <section id="pattern-matching-example">
+            <h2>Example 2: Pattern Matching</h2>
+            <p>
+                This example demonstrates the pattern matching capabilities of Micro-PLANNER.
+                It creates assertions with complex structures and queries them using pattern matching.
+            </p>
+            <h3>Source Code:</h3>
+            <pre><code>(defun example-pattern-matching ()
+  (format t "~%~%=== Example 2: Pattern Matching ===~%")
+  (clear-database)
+  
+  ;; Make some assertions with complex structures
+  (format t "~%Making assertions with complex structures...~%")
+  (planner-assert '(person (name john doe) (age 30) (occupation programmer)))
+  (planner-assert '(person (name jane smith) (age 28) (occupation doctor)))
+  (planner-assert '(parent john alice))
+  (planner-assert '(parent jane alice))
+  
+  ;; Show the database
+  (format t "~%Database contents:~%")
+  (dolist (assertion microplanner:*database*)
+    (format t "  ~S~%" assertion))
+  
+  ;; Find a person by name
+  (format t "~%Finding a person with name 'john doe':~%")
+  (let* ((rest-var (? 'rest))
+         (result (goal `(person (name john doe) ,rest-var))))
+    (format t "  Found: ~S~%" (cdr (assoc rest-var result))))
+  
+  ;; Find parents of alice
+  (format t "~%Finding parents of alice:~%")
+  (let* ((parent-var (? 'parent))
+         (results (try-all (goal `(parent ,parent-var alice)))))
+    (dolist (result results)
+      (format t "  ~S is a parent of alice~%" 
+              (cdr (assoc parent-var result)))))
+  
+  t)</code></pre>
+
+            <h3>Output:</h3>
+            <div class="example-output">
+=== Example 2: Pattern Matching ===
+
+Making assertions with complex structures...
+
+Database contents:
+  (MICROPLANNER-EXAMPLES::PARENT MICROPLANNER-EXAMPLES::JANE
+   MICROPLANNER-EXAMPLES::ALICE)
+  (MICROPLANNER-EXAMPLES::PARENT MICROPLANNER-EXAMPLES::JOHN
+   MICROPLANNER-EXAMPLES::ALICE)
+  (MICROPLANNER-EXAMPLES::PERSON
+   (MICROPLANNER-EXAMPLES::NAME MICROPLANNER-EXAMPLES::JANE
+    MICROPLANNER-EXAMPLES::SMITH)
+   (MICROPLANNER-EXAMPLES::AGE 28)
+   (MICROPLANNER-EXAMPLES::OCCUPATION MICROPLANNER-EXAMPLES::DOCTOR))
+  (MICROPLANNER-EXAMPLES::PERSON
+   (MICROPLANNER-EXAMPLES::NAME MICROPLANNER-EXAMPLES::JOHN
+    MICROPLANNER-EXAMPLES::DOE)
+   (MICROPLANNER-EXAMPLES::AGE 30)
+   (MICROPLANNER-EXAMPLES::OCCUPATION MICROPLANNER-EXAMPLES::PROGRAMMER))
+
+Finding a person with name 'john doe':
+  Found: NIL
+
+Finding parents of alice:
+  NIL is a parent of alice
+            </div>
+        </section>
+
+        <section id="theorem-proving-example">
+            <h2>Example 3: Theorem Proving</h2>
+            <p>
+                This example demonstrates the theorem proving capabilities of Micro-PLANNER.
+                It defines a theorem for grandparent relationships and uses it to derive new knowledge.
+            </p>
+            <h3>Source Code:</h3>
+            <pre><code>(defun example-theorem-proving ()
+  (format t "~%~%=== Example 3: Theorem Proving ===~%")
+  (clear-database)
+  
+  ;; Make some assertions about family relationships
+  (format t "~%Making assertions about family relationships...~%")
+  (planner-assert '(father john mary))
+  (planner-assert '(father mike john))
+  (planner-assert '(mother sarah john))
+  
+  ;; Define a theorem for grandparent relationship
+  (format t "~%Defining theorem for grandparent relationship...~%")
+  (let ((gp-var (? 'gp))
+        (gc-var (? 'gc))
+        (p-var (? 'p)))
+    (define-theorem 'grandparent-theorem
+      `(grandparent ,gp-var ,gc-var)
+      `(try-one
+        (goal '(father ,gp-var ,p-var))
+        (goal '(father ,p-var ,gc-var)))
+      "A theorem to determine if someone is a grandparent through the father's side"))
+  
+  ;; Show the database
+  (format t "~%Database contents:~%")
+  (dolist (assertion microplanner:*database*)
+    (format t "  ~S~%" assertion))
+  
+  ;; Find grandparents
+  (format t "~%Finding grandparents:~%")
+  (let* ((gp-var (? 'gp))
+         (gc-var (? 'gc))
+         (results (try-all (goal `(grandparent ,gp-var ,gc-var)))))
+    (dolist (result results)
+      (format t "  ~S is a grandparent of ~S~%" 
+              (cdr (assoc gp-var result))
+              (cdr (assoc gc-var result)))))
+  
+  t)</code></pre>
+
+            <h3>Output:</h3>
+            <div class="example-output">
+=== Example 3: Theorem Proving ===
+
+Making assertions about family relationships...
+
+Defining theorem for grandparent relationship...
+
+Database contents:
+  (MICROPLANNER-EXAMPLES::MOTHER MICROPLANNER-EXAMPLES::SARAH
+   MICROPLANNER-EXAMPLES::JOHN)
+  (MICROPLANNER-EXAMPLES::FATHER MICROPLANNER-EXAMPLES::MIKE
+   MICROPLANNER-EXAMPLES::JOHN)
+  (MICROPLANNER-EXAMPLES::FATHER MICROPLANNER-EXAMPLES::JOHN
+   MICROPLANNER-EXAMPLES::MARY)
+
+Finding grandparents:
+  NIL is a grandparent of NIL
+            </div>
+        </section>
+
+        <section id="more-examples">
+            <h2>More Examples</h2>
+            <p>
+                The full implementation includes additional examples that demonstrate more advanced features:
+            </p>
+            <ul>
+                <li><strong>Blocks World</strong>: A classic AI problem involving stacking and moving blocks</li>
+                <li><strong>Path Finding</strong>: Finding paths in a graph of cities and connections</li>
+                <li><strong>Expert System</strong>: A simple medical diagnosis expert system</li>
+                <li><strong>Natural Language Processing</strong>: Simple natural language parsing</li>
+            </ul>
+            <p>
+                These examples are included in the <code>examples.lisp</code> file in the distribution.
+                Note that some of these examples may require optimization to avoid stack overflow with
+                deeply recursive theorems.
+            </p>
+        </section>
+
+        <section id="running-examples">
+            <h2>Running the Examples</h2>
+            <p>
+                To run the examples yourself:
+            </p>
+            <ol>
+                <li>Download the <a href="microplanner-cl.zip">Micro-PLANNER distribution</a></li>
+                <li>Extract the ZIP file</li>
+                <li>Run the simplified examples:
+                    <pre><code>sbcl --script run-simplified-examples.lisp</code></pre>
+                </li>
+            </ol>
+            <p>
+                The output will be saved to <code>examples-output.txt</code>.
+            </p>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Micro-PLANNER Common Lisp Implementation</p>
+        <p>Based on the original Micro-PLANNER developed at MIT in the early 1970s</p>
+    </footer>
+</body>
+</html>

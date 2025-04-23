@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-PLANNER API Reference</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .function-signature {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .function-description {
+            margin-bottom: 15px;
+        }
+        .parameter {
+            margin-left: 20px;
+            margin-bottom: 5px;
+        }
+        .parameter-name {
+            font-weight: bold;
+        }
+        .return-value {
+            margin-top: 10px;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav ul li {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Micro-PLANNER API Reference</h1>
+        <p>Complete reference documentation for the Common Lisp implementation</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="guide.html">Guide</a></li>
+            <li><a href="tutorial.html">Tutorial</a></li>
+            <li><a href="examples.html">Examples</a></li>
+            <li><a href="api.html">API Reference</a></li>
+        </ul>
+    </nav>
+
+    <div id="api-content">
+        <h1>Micro-PLANNER API Reference</h1>
+        <p>
+            This page provides a complete reference of all functions, macros, and variables in the Micro-PLANNER Common Lisp implementation.
+            Each entry includes the function signature, description, parameters, and return values.
+        </p>
+
+        <section id="core-functions">
+            <h2>Core Functions</h2>
+            
+            <div class="function">
+                <div class="function-signature">planner-assert (assertion &optional (db '*database*))</div>
+                <div class="function-description">Add an assertion to the database.</div>
+                <div class="parameter"><span class="parameter-name">assertion</span>: The assertion to add to the database.</div>
+                <div class="parameter"><span class="parameter-name">db</span>: (Optional) The database to add the assertion to. Defaults to *database*.</div>
+                <div class="return-value">Returns: The assertion that was added.</div>
+                <pre><code>(planner-assert '(block a))
+(planner-assert '(on a table))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">goal (pattern &optional (action nil action-provided-p))</div>
+                <div class="function-description">Establish a goal to prove pattern.</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern to match against the database or prove using theorems.</div>
+                <div class="parameter"><span class="parameter-name">action</span>: (Optional) A function to call with the bindings and proof if the goal succeeds.</div>
+                <div class="return-value">Returns: The bindings if the goal succeeds, nil otherwise.</div>
+                <pre><code>(let ((x-var (? 'x)))
+  (goal `(block ,x-var)))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">consequent (pattern &optional (action nil action-provided-p))</div>
+                <div class="function-description">Define a consequent (forward-chaining rule).</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern to match against assertions.</div>
+                <div class="parameter"><span class="parameter-name">action</span>: (Optional) A function to call with the bindings and proof when the pattern matches.</div>
+                <div class="return-value">Returns: The created theorem.</div>
+                <pre><code>(consequent
+  '(father ?f ?c)
+  (lambda (bindings proof)
+    (planner-assert `(parent ,(cdr (assoc '?f bindings)) 
+                            ,(cdr (assoc '?c bindings))))))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">antecedent (pattern condition &optional (action nil action-provided-p))</div>
+                <div class="function-description">Define an antecedent (backward-chaining rule).</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern to match against goals.</div>
+                <div class="parameter"><span class="parameter-name">condition</span>: The condition to prove when the pattern matches.</div>
+                <div class="parameter"><span class="parameter-name">action</span>: (Optional) A function to call with the bindings if the condition is proven.</div>
+                <div class="return-value">Returns: The created theorem.</div>
+                <pre><code>(antecedent
+  '(parent ?p ?c)
+  '(father ?p ?c))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">erase (pattern &optional (db '*database*))</div>
+                <div class="function-description">Remove assertions matching pattern from database.</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern to match against assertions to remove.</div>
+                <div class="parameter"><span class="parameter-name">db</span>: (Optional) The database to remove assertions from. Defaults to *database*.</div>
+                <div class="return-value">Returns: The removed assertions.</div>
+                <pre><code>(erase '(on a table))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">planner-repl ()</div>
+                <div class="function-description">Start a Micro-PLANNER REPL.</div>
+                <div class="return-value">Returns: nil when exited.</div>
+                <pre><code>(planner-repl)</code></pre>
+            </div>
+        </section>
+
+        <section id="pattern-matching">
+            <h2>Pattern Matching</h2>
+            
+            <div class="function">
+                <div class="function-signature">pattern-match (pattern data &optional (bindings nil))</div>
+                <div class="function-description">Match PATTERN against DATA with BINDINGS.</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern to match.</div>
+                <div class="parameter"><span class="parameter-name">data</span>: The data to match against.</div>
+                <div class="parameter"><span class="parameter-name">bindings</span>: (Optional) Initial bindings to use.</div>
+                <div class="return-value">Returns: Updated bindings if match succeeds, 'fail otherwise.</div>
+                <pre><code>(pattern-match '(on ?x table) '(on block-a table))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">? (var)</div>
+                <div class="function-description">Create a pattern variable.</div>
+                <div class="parameter"><span class="parameter-name">var</span>: The name of the variable.</div>
+                <div class="return-value">Returns: A pattern variable symbol.</div>
+                <pre><code>(? 'x) ; => ?X</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">?? (var)</div>
+                <div class="function-description">Create a segment pattern variable.</div>
+                <div class="parameter"><span class="parameter-name">var</span>: The name of the variable.</div>
+                <div class="return-value">Returns: A segment pattern variable symbol.</div>
+                <pre><code>(?? 'x) ; => ??X</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">constant (x)</div>
+                <div class="function-description">Declare X as a constant (not to be matched).</div>
+                <div class="parameter"><span class="parameter-name">x</span>: The value to declare as a constant.</div>
+                <div class="return-value">Returns: A constant declaration.</div>
+                <pre><code>(constant 'foo)</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">variable-p (x)</div>
+                <div class="function-description">Check if X is a pattern variable.</div>
+                <div class="parameter"><span class="parameter-name">x</span>: The value to check.</div>
+                <div class="return-value">Returns: True if X is a pattern variable, nil otherwise.</div>
+                <pre><code>(variable-p '?x) ; => T
+(variable-p 'foo) ; => NIL</code></pre>
+            </div>
+        </section>
+
+        <section id="database-management">
+            <h2>Database Management</h2>
+            
+            <div class="function">
+                <div class="function-signature">find-assertions (pattern &optional (db '*database*))</div>
+                <div class="function-description">Find all assertions matching pattern in database.</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern to match against assertions.</div>
+                <div class="parameter"><span class="parameter-name">db</span>: (Optional) The database to search. Defaults to *database*.</div>
+                <div class="return-value">Returns: A list of (assertion . bindings) pairs.</div>
+                <pre><code>(find-assertions '(on ?x table))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">clear-database (&optional (db '*database*))</div>
+                <div class="function-description">Clear the database.</div>
+                <div class="parameter"><span class="parameter-name">db</span>: (Optional) The database to clear. Defaults to *database*.</div>
+                <div class="return-value">Returns: nil.</div>
+                <pre><code>(clear-database)</code></pre>
+            </div>
+        </section>
+
+        <section id="theorem-proving">
+            <h2>Theorem Proving</h2>
+            
+            <div class="function">
+                <div class="function-signature">prove (goal &optional (depth 0))</div>
+                <div class="function-description">Try to prove a goal.</div>
+                <div class="parameter"><span class="parameter-name">goal</span>: The goal to prove.</div>
+                <div class="parameter"><span class="parameter-name">depth</span>: (Optional) The current recursion depth.</div>
+                <div class="return-value">Returns: Multiple values: success flag, bindings, and proof.</div>
+                <pre><code>(prove '(on ?x table))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">define-theorem (name pattern body &optional documentation)</div>
+                <div class="function-description">Define a new theorem.</div>
+                <div class="parameter"><span class="parameter-name">name</span>: The name of the theorem.</div>
+                <div class="parameter"><span class="parameter-name">pattern</span>: The pattern that the theorem can prove.</div>
+                <div class="parameter"><span class="parameter-name">body</span>: The body of the theorem (code to execute).</div>
+                <div class="parameter"><span class="parameter-name">documentation</span>: (Optional) Documentation string.</div>
+                <div class="return-value">Returns: The created theorem.</div>
+                <pre><code>(define-theorem 'grandparent-theorem
+  '(grandparent ?gp ?gc)
+  '(try-one
+    (goal '(father ?gp ?p))
+    (goal '(father ?p ?gc)))
+  "A theorem to determine if someone is a grandparent")</code></pre>
+            </div>
+        </section>
+
+        <section id="control-flow">
+            <h2>Control Flow</h2>
+            
+            <div class="function">
+                <div class="function-signature">try-all (form &body body)</div>
+                <div class="function-description">Try all possible solutions, executing BODY for each.</div>
+                <div class="parameter"><span class="parameter-name">form</span>: The form to evaluate for each solution.</div>
+                <div class="parameter"><span class="parameter-name">body</span>: The body to execute for each solution.</div>
+                <div class="return-value">Returns: A list of results from executing body for each solution.</div>
+                <pre><code>(try-all (goal '(block ?x))
+  (format t "Found block: ~S~%" (cdr (assoc '?x result))))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">try-one (form &body body)</div>
+                <div class="function-description">Try to find one solution, executing BODY if found.</div>
+                <div class="parameter"><span class="parameter-name">form</span>: The form to evaluate for a solution.</div>
+                <div class="parameter"><span class="parameter-name">body</span>: The body to execute if a solution is found.</div>
+                <div class="return-value">Returns: The result of executing body if a solution is found, nil otherwise.</div>
+                <pre><code>(try-one (goal '(on ?x table))
+  (format t "Found on table: ~S~%" (cdr (assoc '?x result))))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">fail ()</div>
+                <div class="function-description">Explicitly fail and trigger backtracking.</div>
+                <div class="return-value">Returns: Does not return normally; signals a backtrack-condition.</div>
+                <pre><code>(if (equal x y)
+    (fail)
+    (succeed t))</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">succeed (&optional value)</div>
+                <div class="function-description">Explicitly succeed with a value.</div>
+                <div class="parameter"><span class="parameter-name">value</span>: (Optional) The value to return.</div>
+                <div class="return-value">Returns: The provided value.</div>
+                <pre><code>(succeed t)</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">backtrack ()</div>
+                <div class="function-description">Trigger backtracking.</div>
+                <div class="return-value">Returns: Does not return normally; signals a backtrack-condition.</div>
+                <pre><code>(backtrack)</code></pre>
+            </div>
+        </section>
+
+        <section id="debugging">
+            <h2>Debugging</h2>
+            
+            <div class="function">
+                <div class="function-signature">enable-debug ()</div>
+                <div class="function-description">Enable debug mode.</div>
+                <div class="return-value">Returns: t.</div>
+                <pre><code>(enable-debug)</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">disable-debug ()</div>
+                <div class="function-description">Disable debug mode.</div>
+                <div class="return-value">Returns: nil.</div>
+                <pre><code>(disable-debug)</code></pre>
+            </div>
+        </section>
+
+        <section id="global-variables">
+            <h2>Global Variables</h2>
+            
+            <div class="function">
+                <div class="function-signature">*database*</div>
+                <div class="function-description">The assertion database.</div>
+                <pre><code>*database* ; => List of assertions</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">*theorems*</div>
+                <div class="function-description">The theorem database.</div>
+                <pre><code>*theorems* ; => List of theorems</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">*trail*</div>
+                <div class="function-description">The backtracking trail.</div>
+                <pre><code>*trail* ; => List of trail entries</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">*depth*</div>
+                <div class="function-description">Current recursion depth.</div>
+                <pre><code>*depth* ; => Integer</code></pre>
+            </div>
+            
+            <div class="function">
+                <div class="function-signature">*debug-mode*</div>
+                <div class="function-description">Debug mode flag.</div>
+                <pre><code>*debug-mode* ; => t or nil</code></pre>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Micro-PLANNER Common Lisp Implementation</p>
+        <p>Based on the original Micro-PLANNER developed at MIT in the early 1970s</p>
+    </footer>
+</body>
+</html>

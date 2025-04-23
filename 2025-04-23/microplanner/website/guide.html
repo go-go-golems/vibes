@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-PLANNER Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav {
+            background-color: #34495e;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            nav ul li {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Micro-PLANNER Guide</h1>
+        <p>Comprehensive documentation for the Common Lisp implementation</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="guide.html">Guide</a></li>
+            <li><a href="tutorial.html">Tutorial</a></li>
+            <li><a href="examples.html">Examples</a></li>
+            <li><a href="api.html">API Reference</a></li>
+        </ul>
+    </nav>
+
+    <div id="guide-content">
+        <h1>Micro-PLANNER Common Lisp Implementation Guide</h1>
+
+        <h2>Introduction</h2>
+        <p>
+            Micro-PLANNER is a historically significant programming language developed in the late 1960s and early 1970s at MIT. 
+            It was designed as a subset of Carl Hewitt's PLANNER language and was implemented by Gerry Sussman, Eugene Charniak, 
+            and Terry Winograd. Micro-PLANNER was notably used in Winograd's natural language understanding program SHRDLU, 
+            which demonstrated remarkable capabilities for its time in understanding and reasoning about a blocks world.
+        </p>
+        <p>
+            This document provides a comprehensive guide to a modern Common Lisp implementation of Micro-PLANNER, which we call 
+            MICROPLANNER-CL. This implementation captures the essential features of the original Micro-PLANNER, including 
+            pattern-directed invocation, assertions, goal-directed execution, and backtracking.
+        </p>
+
+        <h2>Historical Context</h2>
+        <p>
+            Micro-PLANNER was part of a paradigm shift in artificial intelligence programming. It combined procedural and logical 
+            approaches to knowledge representation and reasoning, offering a more flexible alternative to pure resolution-based 
+            theorem proving systems that were popular at the time.
+        </p>
+        <p>
+            Key innovations in Micro-PLANNER included:
+        </p>
+        <ol>
+            <li><strong>Pattern-directed invocation</strong>: Procedures could be triggered by patterns in data</li>
+            <li><strong>Assertions and goals</strong>: Knowledge could be represented as assertions, and problems as goals to be achieved</li>
+            <li><strong>Backtracking</strong>: Automatic exploration of alternative solutions</li>
+            <li><strong>Procedural embedding of knowledge</strong>: Knowledge could be represented procedurally rather than just declaratively</li>
+        </ol>
+        <p>
+            These features made Micro-PLANNER particularly well-suited for natural language understanding, planning, and other AI tasks 
+            that required flexible reasoning.
+        </p>
+
+        <h2>Core Concepts</h2>
+        
+        <h3>Pattern Matching</h3>
+        <p>
+            Pattern matching is at the heart of Micro-PLANNER. Patterns can contain variables (denoted by symbols starting with '?') 
+            that can match any value. For example, the pattern <code>(on ?x table)</code> can match assertions like <code>(on block-a table)</code>, 
+            binding the variable <code>?x</code> to <code>block-a</code>.
+        </p>
+
+        <h3>Assertions and the Database</h3>
+        <p>
+            Knowledge in Micro-PLANNER is represented as assertions stored in a database. Assertions are simply Lisp expressions 
+            that represent facts about the world. For example:
+        </p>
+        <pre><code>(planner-assert '(block a))
+(planner-assert '(on a table))
+(planner-assert '(color a red))</code></pre>
+
+        <h3>Goals and Theorem Proving</h3>
+        <p>
+            Problems are represented as goals to be achieved. A goal is a pattern that Micro-PLANNER tries to match against 
+            assertions in the database or prove using theorems. For example:
+        </p>
+        <pre><code>(goal '(on ?x table))  ; Find something that's on the table</code></pre>
+
+        <h3>Theorems</h3>
+        <p>
+            Theorems in Micro-PLANNER are procedures that can be used to prove goals that don't directly match assertions in the database. 
+            They can be thought of as rules of inference. For example:
+        </p>
+        <pre><code>(define-theorem 'grandparent-theorem
+  '(grandparent ?gp ?gc)
+  '(try-one
+    (goal '(father ?gp ?p))
+    (goal '(father ?p ?gc))))</code></pre>
+        <p>
+            This theorem states that to prove someone is a grandparent, we need to prove they are the father of someone who is in turn 
+            the father of the grandchild.
+        </p>
+
+        <h3>Backtracking</h3>
+        <p>
+            Micro-PLANNER uses backtracking to explore alternative solutions. If a particular path of reasoning fails, Micro-PLANNER 
+            automatically backtracks to try other alternatives. This is handled through the <code>try-all</code> and <code>try-one</code> 
+            constructs and the <code>fail</code> and <code>succeed</code> functions.
+        </p>
+
+        <h2>Installation</h2>
+        
+        <h3>Prerequisites</h3>
+        <ul>
+            <li>SBCL (Steel Bank Common Lisp)</li>
+            <li>Quicklisp (optional, for dependency management)</li>
+        </ul>
+
+        <h3>Installation Steps</h3>
+        <ol>
+            <li>
+                Clone the repository:
+                <pre><code>git clone https://github.com/yourusername/microplanner-cl.git
+cd microplanner-cl</code></pre>
+            </li>
+            <li>
+                Load the system in SBCL:
+                <pre><code>sbcl --load system.lisp</code></pre>
+            </li>
+            <li>
+                Run the examples:
+                <pre><code>sbcl --script run-simplified-examples.lisp</code></pre>
+            </li>
+        </ol>
+
+        <h2>Basic Usage</h2>
+        
+        <h3>Starting a REPL</h3>
+        <p>To start a Micro-PLANNER REPL:</p>
+        <pre><code>(microplanner:planner-repl)</code></pre>
+
+        <h3>Making Assertions</h3>
+        <p>To add facts to the database:</p>
+        <pre><code>(microplanner:planner-assert '(block a))
+(microplanner:planner-assert '(on a table))
+(microplanner:planner-assert '(color a red))</code></pre>
+
+        <h3>Creating Goals</h3>
+        <p>To find something that matches a pattern:</p>
+        <pre><code>(microplanner:goal '(on ?x table))</code></pre>
+        <p>This will return bindings for the variable <code>?x</code> if a match is found.</p>
+
+        <h3>Defining Theorems</h3>
+        <p>To define a rule of inference:</p>
+        <pre><code>(microplanner:define-theorem 'clear-theorem
+  '(clear ?x)
+  '(try-one
+    (microplanner:goal '(block ?x))
+    (let ((results (microplanner:try-all (microplanner:goal '(on ?y ?x)))))
+      (if results
+          (microplanner:fail)
+          (microplanner:succeed t))))
+  "A block is clear if nothing is on it")</code></pre>
+
+        <h3>Pattern Variables</h3>
+        <p>Pattern variables are created using the <code>?</code> function:</p>
+        <pre><code>(let ((x-var (microplanner:? 'x)))
+  (microplanner:goal `(block ,x-var)))</code></pre>
+
+        <h2>Advanced Usage</h2>
+        
+        <h3>Backtracking and Control Flow</h3>
+        <p>
+            Micro-PLANNER provides several constructs for controlling the flow of execution and backtracking:
+        </p>
+        <ul>
+            <li><code>try-all</code>: Try all possible solutions</li>
+            <li><code>try-one</code>: Try to find one solution</li>
+            <li><code>fail</code>: Explicitly fail and trigger backtracking</li>
+            <li><code>succeed</code>: Explicitly succeed with a value</li>
+            <li><code>backtrack</code>: Trigger backtracking</li>
+        </ul>
+        <p>Example:</p>
+        <pre><code>(microplanner:try-all
+  (microplanner:goal '(block ?x))
+  (format t "Found block: ~S~%" (cdr (assoc '?x result))))</code></pre>
+
+        <h3>Forward and Backward Chaining</h3>
+        <p>
+            Micro-PLANNER supports both forward and backward chaining through the <code>consequent</code> and <code>antecedent</code> functions:
+        </p>
+        <pre><code>;; Forward chaining: If we assert a father relationship, also assert a parent relationship
+(microplanner:consequent
+  '(father ?f ?c)
+  (lambda (bindings proof)
+    (microplanner:planner-assert `(parent ,(cdr (assoc '?f bindings)) ,(cdr (assoc '?c bindings))))))
+
+;; Backward chaining: To prove someone is a parent, try to prove they are a father
+(microplanner:antecedent
+  '(parent ?p ?c)
+  '(father ?p ?c))</code></pre>
+
+        <h2>API Reference</h2>
+        
+        <h3>Core Functions</h3>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>planner-assert</code></td>
+                <td>Add an assertion to the database</td>
+            </tr>
+            <tr>
+                <td><code>goal</code></td>
+                <td>Establish a goal to prove a pattern</td>
+            </tr>
+            <tr>
+                <td><code>consequent</code></td>
+                <td>Define a forward-chaining rule</td>
+            </tr>
+            <tr>
+                <td><code>antecedent</code></td>
+                <td>Define a backward-chaining rule</td>
+            </tr>
+            <tr>
+                <td><code>erase</code></td>
+                <td>Remove assertions matching a pattern from the database</td>
+            </tr>
+            <tr>
+                <td><code>planner-repl</code></td>
+                <td>Start a Micro-PLANNER REPL</td>
+            </tr>
+        </table>
+
+        <h3>Pattern Matching</h3>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>pattern-match</code></td>
+                <td>Match a pattern against data</td>
+            </tr>
+            <tr>
+                <td><code>?</code></td>
+                <td>Create a pattern variable</td>
+            </tr>
+            <tr>
+                <td><code>??</code></td>
+                <td>Create a segment pattern variable</td>
+            </tr>
+            <tr>
+                <td><code>constant</code></td>
+                <td>Declare a value as a constant (not to be matched)</td>
+            </tr>
+            <tr>
+                <td><code>variable-p</code></td>
+                <td>Check if a value is a pattern variable</td>
+            </tr>
+        </table>
+
+        <h3>Database Management</h3>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>find-assertions</code></td>
+                <td>Find all assertions matching a pattern</td>
+            </tr>
+            <tr>
+                <td><code>clear-database</code></td>
+                <td>Clear the database</td>
+            </tr>
+        </table>
+
+        <h3>Theorem Proving</h3>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>prove</code></td>
+                <td>Try to prove a goal</td>
+            </tr>
+            <tr>
+                <td><code>define-theorem</code></td>
+                <td>Define a new theorem</td>
+            </tr>
+        </table>
+
+        <h3>Control Flow</h3>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>try-all</code></td>
+                <td>Try all possible solutions</td>
+            </tr>
+            <tr>
+                <td><code>try-one</code></td>
+                <td>Try to find one solution</td>
+            </tr>
+            <tr>
+                <td><code>fail</code></td>
+                <td>Explicitly fail and trigger backtracking</td>
+            </tr>
+            <tr>
+                <td><code>succeed</code></td>
+                <td>Explicitly succeed with a value</td>
+            </tr>
+            <tr>
+                <td><code>backtrack</code></td>
+                <td>Trigger backtracking</td>
+            </tr>
+        </table>
+
+        <h3>Debugging</h3>
+        <table>
+            <tr>
+                <th>Function</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>enable-debug</code></td>
+                <td>Enable debug mode</td>
+            </tr>
+            <tr>
+                <td><code>disable-debug</code></td>
+                <td>Disable debug mode</td>
+            </tr>
+        </table>
+
+        <h2>Limitations and Future Work</h2>
+        <p>
+            This implementation of Micro-PLANNER in Common Lisp has some limitations compared to the original:
+        </p>
+        <ol>
+            <li><strong>Performance</strong>: The implementation is not optimized for performance and may encounter stack overflow errors with deeply recursive theorems.</li>
+            <li><strong>Segment Variables</strong>: Support for segment variables (matching multiple elements in a list) is limited.</li>
+            <li><strong>Integration</strong>: The original Micro-PLANNER was tightly integrated with Maclisp; this implementation is more standalone.</li>
+        </ol>
+        <p>
+            Future work could include:
+        </p>
+        <ol>
+            <li>Optimizing the implementation to handle more complex examples without stack overflow</li>
+            <li>Improving the pattern matching system to better support segment variables</li>
+            <li>Adding more advanced features from the original Micro-PLANNER</li>
+            <li>Developing more comprehensive examples and applications</li>
+        </ol>
+
+        <h2>Conclusion</h2>
+        <p>
+            MICROPLANNER-CL provides a modern Common Lisp implementation of the historically significant Micro-PLANNER language. 
+            While it has some limitations compared to the original, it captures the essential features that made Micro-PLANNER 
+            an important tool in early AI research.
+        </p>
+        <p>
+            By studying and using this implementation, you can gain insights into the foundations of AI programming and explore 
+            alternative approaches to knowledge representation and reasoning that complement modern techniques.
+        </p>
+
+        <h2>References</h2>
+        <ol>
+            <li>Hewitt, C. (1969). "PLANNER: A Language for Manipulating Models and Proving Theorems in Robots"</li>
+            <li>Sussman, G., Charniak, E., & Winograd, T. (1970). "Micro-PLANNER Reference Manual"</li>
+            <li>Winograd, T. (1972). "Understanding Natural Language"</li>
+            <li>Hewitt, C. (1973). "Actor Semantics of PLANNER-73"</li>
+            <li>Wikipedia. "Planner (programming language)". https://en.wikipedia.org/wiki/Planner_(programming_language)</li>
+        </ol>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Micro-PLANNER Common Lisp Implementation</p>
+        <p>Based on the original Micro-PLANNER developed at MIT in the early 1970s</p>
+    </footer>
+</body>
+</html>
