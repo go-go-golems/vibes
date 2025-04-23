@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160714423567167@naggum.no.html",
+  "id": "3160714423567167@naggum.no",
+  "title": "Re: another weird question",
+  "content": "\nSubject: Re: another weird question\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160714423567167@naggum.no>\n\n* Philip Nikolayev <nikolay@is02.fas.harvard.edu>\n| If I wanted to replace all the whole reals, such as 3.0, in a list with\n| their integer equivalents, while leaving all the other reals intact, is\n| there an easy way to do this?\n\n  consider a function f that accepts a number and returns the corresponding\n  integer if the number satisfies a predicate whole-real-p, or the number\n  unchanged if not.  apply this function to every element of the list with\n  a suitable mapping function.  you don't want this operation to destroy\n  the original list of values.\n\n#:Erik\n\n",
+  "date": "2000-02-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

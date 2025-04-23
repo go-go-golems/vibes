@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164396968656316@naggum.no.html",
+  "id": "3164396968656316@naggum.no",
+  "title": "Re: AllegroCL: How to write a huge list in one line",
+  "content": "\nSubject: Re: AllegroCL: How to write a huge list in one line\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/10\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164396968656316@naggum.no>\n\n* Unai Uribarri Rodriguez <zz99f029@opalo.etsiig.uniovi.es>\n| format splits the list into several lines.\n\n  format does what it's told to do, and it doesn't have free will (it only\n  feels like it until you learn its language), so you're blaming the wrong\n  guy, here.  so, what, _exactly_, were you telling format to do?\n\n| Is there any way to write a huge list to a file in an unique line?\n\n(format <stream> \"~{~A~^ ~}~%\" <huge-list>)\n\n#:Erik\n\n",
+  "date": "2000-04-10",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

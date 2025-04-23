@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163273489398038@naggum.no.html",
+  "id": "3163273489398038@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163273489398038@naggum.no>\n\n* Charles Hixson\n| Lots of Irritating Single Parenthesis.  I believe that there used to be a\n| dialect of Lisp where one could signal \"close all parenthesis back to the\n| root\" by using a ] character, but that seems to have disappeared.  I\n| guess that it may have been a bit error prone.\n\n* Pierre R. Mai\n| It turned out that this functionality belongs in the editor, and not the\n| language.  That's why ] will close all outstanding parentheses in many\n| Lisp modes.  This way you get the benefits, without the trouble.  ...\n\n  for what it's worth, I have found it significantly easier to write code\n  in Emacs with M-( and M-) rather than ( and ).  I guess I picked up that\n  habit when I wrote an SGML-mode that automatized the matching between\n  start- and end-tags and inserted every character of the element name in\n  _both_ the start- and the end-tag.  I generalized this to let, e.g., M-*\n  produce ** with the cursor between them, and applied it to \"\", `', {},\n  [], <>, «», ¡!, ¿?, and for that old Common Lisp reader, ||, as well as\n  comments with #||#.  in my view, it's a serious mistake to use paired\n  delimiters of any kind in a language without _actively_ supporting their\n  paired entry when writing.\n\n#:Erik\n\n",
+  "date": "2000-03-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162232362158363@naggum.no.html",
+  "id": "3162232362158363@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/16\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162232362158363@naggum.no>\n\n* Barry Margolin <barmar@bbnplanet.com>\n| Isn't (array character (*)) able to contain all character objects?\n\n  no.  specialized vectors whose elements are of type character (strings)\n  are allowed to store only values of a subtype of type character.  this is\n  so consistently repeated in the standard and so unique to strings that\n  I'm frankly amazed that anyone who has worked on the standard is having\n  such a hard time accepting it.  it was obviously intended to let strings\n  be as efficient as the old string-char concept allowed, while not denying\n  implementations the ability to retain bits and fonts if they so chose.\n\n  an implementation that stores characters in strings as if they have null\n  implementation-defined attributes regardless of their actual attributes\n  is actually fully conforming to the standard.  the result is that you\n  can't expect any attributes to survive string storage.  the consequences\n  are _undefined_ if you attempt to store a character with attributes in a\n  string that can't handle it.\n\n  the removal of the type string-char is the key to understanding this.\n\n#:Erik\n\n",
+  "date": "2000-03-16",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

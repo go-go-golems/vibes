@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163690604532935@naggum.no.html",
+  "id": "3163690604532935@naggum.no",
+  "title": "Re: Help required: Is there a way to split up one element into several?",
+  "content": "\nSubject: Re: Help required: Is there a way to split up one element into several?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/02\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163690604532935@naggum.no>\n\n* Paolo Amoroso <amoroso@mclink.it>\n| What is the purpose of the temporary package, i.e. the one which is bound\n| to *PACKAGE*? To avoid cluttering a useful package with symbols that are\n| interned just to get their names?\n\n  yes, that is precisely the reason I chose to set up a temporary package.\n\n#:Erik\n\n",
+  "date": "2000-04-02",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

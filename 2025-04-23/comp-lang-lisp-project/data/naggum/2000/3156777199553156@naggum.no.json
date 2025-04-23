@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3156777199553156@naggum.no.html",
+  "id": "3156777199553156@naggum.no",
+  "title": "Re: inspect",
+  "content": "\nSubject: Re: inspect\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3156777199553156@naggum.no>\n\n* Frode Vatvedt Fjeld <frodef@acm.org>\n| Are there functions to access the same information that I can dig up\n| interactively with INSPECT?\n\n  usually, but not necessarily.\n\n| For example, in ACL, I can (interactively) inspect a compiled function,\n| and retrieve its machine-code (vector) object through the function's CODE\n| cell. Is there some function I can use to obtain the same information\n| programmatically, like\n| \n|   (get-cell-or-something #'myfun 'code) => #<CODE vector object>\n\n  some of these slots are so low-level that there aren't any regular\n  CL-level code to access them.  however, the code for the inspector is\n  part of the source code offering that comes with a regular license.\n\n  it seems that you're digging so deep into Allegro CL that you would\n  benefit from Franz Inc's excellent support, and I think it's fair to pay\n  for a license.  I could argue that it's not in the best interest of the\n  continued existence free versions that people reverse-engineer a free\n  product -- it may turn out to be hostile to the commercial operation\n  whose profitability spawned the ability to give something away...\n\n  however, you should check out the results of (apropos \"_CODE\").\n\n#:Erik\n\n",
+  "date": "2000-01-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

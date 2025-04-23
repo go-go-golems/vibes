@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163345278914696@naggum.no.html",
+  "id": "3163345278914696@naggum.no",
+  "title": "Re: [Q]How to evaluate a string as lisp code?",
+  "content": "\nSubject: Re: [Q]How to evaluate a string as lisp code?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163345278914696@naggum.no>\n\n* \"David J. Cooper\" <dcooper@genworks.com>\n| Let's say your string is in the variable called string.\n| \n| (eval (read-from-string string))\n| \n| This will evaluate exactly one expression from the string.  You'll have\n| to do something more (probably with subseq or something) to read and\n| evaluate multiple expressions from a string.\n\n  note that read-from-string returns two values, the secondary of which is\n  the position from which you could continue to read from the string.\n\n#:Erik\n\n",
+  "date": "2000-03-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

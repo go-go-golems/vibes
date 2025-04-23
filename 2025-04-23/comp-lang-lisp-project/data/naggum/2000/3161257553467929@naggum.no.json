@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161257553467929@naggum.no.html",
+  "id": "3161257553467929@naggum.no",
+  "title": "Re: That place.. (was: How to make a mutually recursive macro and  function)",
+  "content": "\nSubject: Re: That place.. (was: How to make a mutually recursive macro and  function)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161257553467929@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| While we are at it, it's pretty amazing no implementor has added call/cc\n| yet.\n\n  maybe, but much less amazing than that some still believe in call/cc.\n\n#:Erik\n\n",
+  "date": "2000-03-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

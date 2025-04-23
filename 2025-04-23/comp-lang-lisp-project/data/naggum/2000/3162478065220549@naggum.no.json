@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162478065220549@naggum.no.html",
+  "id": "3162478065220549@naggum.no",
+  "title": "Re: Macro question (bizarre)",
+  "content": "\nSubject: Re: Macro question (bizarre)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/19\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162478065220549@naggum.no>\n\n* Tom Breton <tob@world.std.com>\n| OK, that basically touched the same points as Erik's, and my answer is\n| that I grant that values can do a little more than I said, on the\n| optimization front, but optimization should be a last resort.\n\n  but what kind of code do you have before you \"resort\" to optimization?\n  is this really a counter-argument to being _economical_?\n\n#:Erik\n\n",
+  "date": "2000-03-19",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

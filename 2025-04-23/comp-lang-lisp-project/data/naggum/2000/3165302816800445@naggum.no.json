@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165302816800445@naggum.no.html",
+  "id": "3165302816800445@naggum.no",
+  "title": "Re: [specialized arrays] which lisp has them?",
+  "content": "\nSubject: Re: [specialized arrays] which lisp has them?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/21\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165302816800445@naggum.no>\n\n* Tunc Simsek <simsek@tudor.EECS.Berkeley.EDU>\n| This is important because the recent tool matlisp relies on (simple-array\n| double-float (*)) and that the array must have C doubles contiguous in\n| memory.\n\n  could you explain why you rely on such low-level representational issues?\n\n#:Erik\n\n",
+  "date": "2000-04-21",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159635894939621@naggum.no.html",
+  "id": "3159635894939621@naggum.no",
+  "title": "Re: Are there any LISP development systems that are VC, or other GUI  IDE  like?",
+  "content": "\nSubject: Re: Are there any LISP development systems that are VC, or other GUI  IDE  like?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/15\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159635894939621@naggum.no>\n\n* Robert Posey <muddy@raytheon.com>\n| Sure you hear claims that it is capable of great things, but often very hard\n| to believe when you can't even exit the program.\n\n  you know, it is getting harder and harder to believe anything you say\n  when you make such silly complaints.  if you took the time to read the\n  stuff that is thrown in your face when you start up a default Emacs, if\n  not the first time you start it, at least the second time, when you have\n  sworn and gritted your teeth over not being able to exit the program the\n  first time, most of your silly complaints would simply vanish.\n\n  if I were you, I would be extremely hesitant to expose so much of my way\n  of dealing with things in general as you do on this Emacs topic, or,\n  worse, so much of your ability to learn from your experience.  it seems\n  that if you already know how to do something in some context, any other\n  way is so broken that you don't even want to figure out what it would be.\n  now, who would want a _programmer_ who thinks like that?\n\n| Another problem is the documentation is written from an Unix prospective,\n| this means you are constantly translating to windows terms.\n\n  this could be why I don't understand your basic problems -- they are\n  expressed in Windows terms that lose so much precision in their\n  translation into tech-speak that they come out as baseless whining.\n\n#:Erik\n\n",
+  "date": "2000-02-15",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163396794300015@naggum.no.html",
+  "id": "3163396794300015@naggum.no",
+  "title": "Re: When would it be better to use recursion than a loop?",
+  "content": "\nSubject: Re: When would it be better to use recursion than a loop?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/30\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163396794300015@naggum.no>\n\n* Flounder <japh@flashmail.com>\n| I come from a background of C/C++, perl, python, and more languages of\n| the sort.  I am currently learning Lisp on my own and am seeing that Lisp\n| programmers use recursion more than I have seen in the other languages\n| that I have programmed in so when is it best to use it and when would it\n| be best to use loops?  Maybe you could just give me some basic rules to\n| follow on how to decide which to use.\n\n  here's my rule of thumb: whenever the algorithm generates values from or\n  for each iteration, it is naturally recursive, and will most probably\n  find an elegant recursive expression, which, because it uses an optimized\n  storage of such values, namely the function call stack frame, will also\n  be more efficient than your hand-crafted storage unless you're very good\n  at what you're doing.  whenever the algorithm does _not_ generate values\n  from each iteration (as in: generates and consumes an equal amount of\n  values), it is in my not so humble opionion extremely unlikely that a\n  recursive implementation will make more sense than an iterative solution,\n  and not unlikely that a recursive solution will be more complex and will\n  also run slower unless you're careful.\n\n#:Erik\n\n",
+  "date": "2000-03-30",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

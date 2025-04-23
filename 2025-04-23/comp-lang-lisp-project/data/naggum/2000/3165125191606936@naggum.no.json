@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165125191606936@naggum.no.html",
+  "id": "3165125191606936@naggum.no",
+  "title": "Re: getting a full symbol name",
+  "content": "\nSubject: Re: getting a full symbol name\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/19\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165125191606936@naggum.no>\n\n* \"Marc Battyani\" <Marc_Battyani@csi.com>\n| what is the easiest way to get a full symbol name ie \"package::name\"?\n\n(let ((*package* (find-package :keyword))\n  (write-to-string object :readably t)))\n\n| is there a format directive for this?\n\n(defun fqsn (stream object colon-p atsign-p &rest format-args)\n  (declare (ignore colon-p atsign-p format-args))\n  (let ((*package* (find-package :keyword))\n    (write object :stream stream :readably t))))\n\n  now there is.  fqsn stands for fully qualified symbol name.\n\n(format nil \"~/fqsn/\" <symbol>)\n\n#:Erik\n\n",
+  "date": "2000-04-19",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

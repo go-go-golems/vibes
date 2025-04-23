@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165303001598092@naggum.no.html",
+  "id": "3165303001598092@naggum.no",
+  "title": "Re: getting a full symbol name",
+  "content": "\nSubject: Re: getting a full symbol name\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/21\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165303001598092@naggum.no>\n\n* Gareth McCaughan <Gareth.McCaughan@pobox.com>\n| Very elegant, but it doesn't work if the symbol you're passed is actually\n| a keyword!\n\n  yes, it does.\n\n#:Erik\n\n",
+  "date": "2000-04-21",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

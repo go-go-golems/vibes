@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159635132109700@naggum.no.html",
+  "id": "3159635132109700@naggum.no",
+  "title": "Re: Why no standard foreign language interface?",
+  "content": "\nSubject: Re: Why no standard foreign language interface?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/15\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159635132109700@naggum.no>\n\n* \"Harley Davis\" <nospam_hdavis@nospam.museprime.com>\n| Erik, could you say a few more words about when you've seen C++ programmer\n| inappropriately pass pointers to structs and classes?  I can't recall having\n| seen much of this to disapprove of, so I'm curious what your experience has\n| been.\n\n  it is not \"inappropriate\" for C++ programmers to pass pointers around --\n  they have no other mechanisms to use for non-trivial argument passing of\n  any kind.  what I consider inappropriate is trying to map such C++-style\n  pointer-passing directly into Common Lisp at the FFI level when we have\n  powerful lamba lists and multiple values, and therefore I favor writing\n  wrapper code in C/C++ that makes use of far simpler argument-passing\n  techniques that can be called with far more ease from Common Lisp.  and\n  since this is drudgery at best, it should be handled by automated tools.\n\n  (and before we have another stupid confusion, I'm _not_ saying (and never\n  have said) that writing such tools is trivial -- I'm saying that the\n  output of such automated tools will of necessity be trivial to make fit\n  _any_ form of FFI glue code that people invent in solitude, and that we\n  should re-focus on the tools, not on standardizing FFIs, which will be a\n  lot of meaningless work to tie vendors and developers into using an FFI\n  with a standard form that won't be able to handle all that interfacing to\n  C++ requires, anyway, simply because of the magnitude of the braindamage\n  in that language and what people do to survive it.)\n\n#:Erik\n\n",
+  "date": "2000-02-15",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

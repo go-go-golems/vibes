@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163275695429682@naggum.no.html",
+  "id": "3163275695429682@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163275695429682@naggum.no>\n\n* Duane Rettig <duane@franz.com>\n| I've seen most of the style arguments based on philosophy posted on this\n| thread, but there is one argument I have not yet seen.  [match the\n| results of the pretty printer.]\n\n  I like this argument.  I think we can sum it up like this:\n\n    there is no whitespace after an opening parenthesis.\n    there is no whitespace before a closing parenthesis.\n    this is the law.  if you break it, it is not pretty.\n\n#:Erik\n\n",
+  "date": "2000-03-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

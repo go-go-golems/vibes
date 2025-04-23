@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160379902079136@naggum.no.html",
+  "id": "3160379902079136@naggum.no",
+  "title": "Re: [constants] from a reader macro",
+  "content": "\nSubject: Re: [constants] from a reader macro\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160379902079136@naggum.no>\n\n* Michael Kappert <kap@iitb.fhg.de>\n| If you want the reader to return the same array every time it sees a @,\n| shouldn't FOO be defined something like\n| \n| (let ((my-array ()))\n|   (defun foo (stream char)\n|     (or my-array (setf my-array (make-array ... )))))\n\n  presuming that it will be called at least once, you could initialize the\n  binding with the value, or use what I prefer these days, load-time-value.\n\n#:Erik\n\n",
+  "date": "2000-02-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

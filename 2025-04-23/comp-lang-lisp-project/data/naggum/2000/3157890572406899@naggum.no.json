@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157890572406899@naggum.no.html",
+  "id": "3157890572406899@naggum.no",
+  "title": "Re: reading/writing bytes smaller than 8 bits?",
+  "content": "\nSubject: Re: reading/writing bytes smaller than 8 bits?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/26\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157890572406899@naggum.no>\n\n* Andrew Cooke <andrew@andrewcooke.free-online.co.uk>\n| Ouch!  Next week I'm planning to write code that generates binary files\n| to a certain standard (Midi music data).  I haven't checked the docs yet,\n| but this post implies that there is no way to generate files with a\n| specified binary format (at least that other people or other Lisps can\n| use with certainty).  Is that correct?  What do people do when they need\n| to write a formatted binary file?  Or does everyone use just Lisp\n| programs ;-) ?\n\n  locate your misplaced calm and _breathe_, mister, you're near hysterical.\n\n  if you know that the medium is an 8-bit medium, opening a stream for\n  writing to or reading from it as (UNSIGNED-BYTE 8) is guaranteed to\n  produce the expected results by virtue of the insanity of not doing so.\n\n  if you need control over the individual bits, you don't request a service\n  where you explicitly say \"do the smartest thing you can with my request\".\n\n  please realize that the Common Lisp community is more than 40 years old.\n  collectively, the community has already been where every clueless newbie\n  will be going for the next three years.  so relax, please.\n\n#:Erik\n\n",
+  "date": "2000-01-26",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

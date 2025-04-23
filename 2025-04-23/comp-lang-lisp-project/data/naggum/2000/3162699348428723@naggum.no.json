@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162699348428723@naggum.no.html",
+  "id": "3162699348428723@naggum.no",
+  "title": "Re: Setting logical hosts and translations for a directory hierarchy",
+  "content": "\nSubject: Re: Setting logical hosts and translations for a directory hierarchy\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/22\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162699348428723@naggum.no>\n\n* Paolo Amoroso <amoroso@mclink.it>\n| Since ACL is the most ANSI compliant, it's easy to get what I need. I have\n| added the following to ~/.clinit.cl:\n| \n| (setf (logical-pathname-translations \"clocc\")\n|       '((\"**;*.*.*\" \"/home/paolo/projects/clocc/\")\n|         (\";**;*.*.*\" \"/home/paolo/projects/clocc/\")))\n\n  although this works, you should really have matching wildcards in the\n  translation:\n\n(setf (logical-pathname-translations \"clocc\")\n  '((\"**;*.*.*\" \"/home/paolo/projects/clocc/**/*.*\")\n    (\";**;*.*.*\" \"/home/paolo/projects/clocc/**/*.*\")))\n\n  this yields the same results as the ones you have in Allegro CL, but they\n  may work better in the other CLs, too.\n\n#:Erik\n\n",
+  "date": "2000-03-22",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

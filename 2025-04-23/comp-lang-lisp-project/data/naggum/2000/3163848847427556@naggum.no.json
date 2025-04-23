@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163848847427556@naggum.no.html",
+  "id": "3163848847427556@naggum.no",
+  "title": "Re: howto string->symbol",
+  "content": "\nSubject: Re: howto string->symbol\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/04\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163848847427556@naggum.no>\n\n* kp gores <gores@sip.medizin.uni-ulm.de>\n| I probably have all  packages using \"SHARED\"  to re-use it??\n\n  why do you think you need to \"re-use\" those packages?\n\n| it seems like being a bad idea creating symbols which are shared over\n| packages!?\n\n  it might, but that depends on their purpose.\n\n#:Erik\n\n",
+  "date": "2000-04-04",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

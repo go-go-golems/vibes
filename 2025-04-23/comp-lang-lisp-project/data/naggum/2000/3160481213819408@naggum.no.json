@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160481213819408@naggum.no.html",
+  "id": "3160481213819408@naggum.no",
+  "title": "Re: (loop for ? in ? finally ?)",
+  "content": "\nSubject: Re: (loop for ? in ? finally ?)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/25\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160481213819408@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| Then why not just erasing every sentence saying \"is undefined\" or \"is\n| unspecified\"?\n\n  primarily because we're human readers in dire need of redundancy.\n\n  secondarily because sometimes a requirement may seem to or actually imply\n  a too broad claim and may therefore need to be abridged or partially\n  retracted.\n\n#:Erik\n\n",
+  "date": "2000-02-25",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

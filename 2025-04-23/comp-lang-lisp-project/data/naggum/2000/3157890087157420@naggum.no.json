@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157890087157420@naggum.no.html",
+  "id": "3157890087157420@naggum.no",
+  "title": "Re: reading/writing bytes smaller than 8 bits?",
+  "content": "\nSubject: Re: reading/writing bytes smaller than 8 bits?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/26\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157890087157420@naggum.no>\n\n* Marco Antoniotti <marcoxa@parades.rm.cnr.it>\n| Is this a X3J13 proposal or a Franz proprietary one?\n\n  how can _proposals_ be proprietary?  sheesh.\n\n  work on this topic was \"commissioned\" at the last X3J13 meeting, and\n  Franz accepted the responsibility to oversee the work if not write it.\n\n#:Erik\n\n",
+  "date": "2000-01-26",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

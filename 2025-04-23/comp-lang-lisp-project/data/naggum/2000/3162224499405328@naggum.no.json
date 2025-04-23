@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162224499405328@naggum.no.html",
+  "id": "3162224499405328@naggum.no",
+  "title": "Re: strings and characters",
+  "content": "\nSubject: Re: strings and characters\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/16\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162224499405328@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| Incidentally I should make this clearer, as it looks like I'm arguing\n| against fat strings.  Supporting several kinds of strings is *obviously*\n| sensible, I quibble about the compressing stuff being worth it.\n\n  compressing strings for in-memory representation of _arrays_ is nuts.\n  nobody has proposed it, and nobody ever will.  again, read the Unicode\n  technical report and decrease both your fear and your ignorance.\n\n#:Erik\n\n",
+  "date": "2000-03-16",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

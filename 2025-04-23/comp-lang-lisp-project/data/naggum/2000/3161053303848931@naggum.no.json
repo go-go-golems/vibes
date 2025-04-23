@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161053303848931@naggum.no.html",
+  "id": "3161053303848931@naggum.no",
+  "title": "Re: A modest proposal (long)",
+  "content": "\nSubject: Re: A modest proposal (long)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/03\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161053303848931@naggum.no>\n\n* \"Frank A. Adrian\" <fadrian@uswest.net>\n| In, other words, the inverse operation for defvar IS unintern.\n\n  unintern nukes the property list, the home package, and the functional\n  value of the symbol, as well as the identity of the symbol should there\n  be any hold-over pointers to it after re-interning.  defvar affects none\n  of these.  defvar also does not intern the symbol to begin with.  ergo,\n  unintern is in no way the inverse of defvar.  case dismissesd.\n\n  makunbound causes a subsequent defvar to initialize the value of the\n  variable, so clearly there is an inverse relationship right there.  since\n  there is no need or desire to nuke the _symbol_ (especially not with all\n  its other properties), we only need an inverse operation for the special\n  property of the symbol.  I have provided that as code for Allegro CL, as\n  a stepping stone to a supported language mechanism.\n\n#:Erik\n\n",
+  "date": "2000-03-03",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

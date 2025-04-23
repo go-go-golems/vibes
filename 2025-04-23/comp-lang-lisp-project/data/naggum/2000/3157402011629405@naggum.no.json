@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157402011629405@naggum.no.html",
+  "id": "3157402011629405@naggum.no",
+  "title": "Re: [Q]: Need help with cons",
+  "content": "\nSubject: Re: [Q]: Need help with cons\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/21\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157402011629405@naggum.no>\n\n* Dirt <pipe@rochester.rr<.>com>\n| Is there a way to create the following list using 'cons'\n| \n|      ( ( (a (b (x) d) ) ) )\n\n  sure.  (cons '((a (b (x) d))) nil)\n\n  you take your homework from there.\n\n#:Erik\n\n",
+  "date": "2000-01-21",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

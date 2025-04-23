@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164366538827789@naggum.no.html",
+  "id": "3164366538827789@naggum.no",
+  "title": "Re: list problem and NTH, READ, STRCAT",
+  "content": "\nSubject: Re: list problem and NTH, READ, STRCAT\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/10\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164366538827789@naggum.no>\n\n* Rahul Jain <rahul@rice.edu>\n| (defun do-this (lis1 lis2)\n|     (let ((both-lis (append lis1 lis2)))\n|          (do-something-with-both-lis ...)\n|          (reverse both-lis)))\n| \n| To a lisp-person, that's much easier to understand.\n\n  really?  I wonder what a \"lis\" is.  does lisp return t on it?  :)\n\n#:Erik\n\n",
+  "date": "2000-04-10",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

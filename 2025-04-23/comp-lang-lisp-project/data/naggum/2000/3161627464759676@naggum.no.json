@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161627464759676@naggum.no.html",
+  "id": "3161627464759676@naggum.no",
+  "title": "Re: [Q] Sorting a Hash",
+  "content": "\nSubject: Re: [Q] Sorting a Hash\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161627464759676@naggum.no>\n\n* Sandeep Koranne <koranne@natlab.research.philips.com>\n| Is it possible to sort a Hash based on a function on the values?\n\n  as others have indicated in indirect ways, this is not a well-defined\n  question, since the result of sorting a hash table would have to be\n  something other than a hash table.\n\n  so we need to know what kind of result you want in order to answer your\n  question.  e.g., yes, you can easily _print_ the (key value) pairs of a\n  hash table sorted on the key or on the value, but you would do that by\n  creating an intermediary sequence of keys or whatever, sort on that, and\n  then do the actual printing.\n\n#:Erik\n\n",
+  "date": "2000-03-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

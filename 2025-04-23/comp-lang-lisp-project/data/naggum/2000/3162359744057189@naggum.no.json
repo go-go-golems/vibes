@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162359744057189@naggum.no.html",
+  "id": "3162359744057189@naggum.no",
+  "title": "Re: Macro question (bizarre)",
+  "content": "\nSubject: Re: Macro question (bizarre)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162359744057189@naggum.no>\n\n* Tom Breton <tob@world.std.com>\n| Pardon my opinion, but multiple values are basically for when you have\n| code set in stone...\n\n  noted as opinion.\n\n| IOW, values is basically a backwards-compatibility thing.\n\n  it can definitely be used for this purpose, and may even have great value\n  used this way, but I must admit that I never thought of values like that.\n\n  values to me is a mechanism that removes the burden of agreeing on the\n  aggregate form of the returned values.  I guess this has to be explained\n  in terms of how other languages deal with the same issue: multiple values\n  are often expressed in C by passing a pointer to a structure in the\n  caller's memory to be filled in by the callee.  returning a structure is\n  _still_ not kosher in the C world, and incompatibilities exist in how it\n  is done.  this affects how people return more than one value from their\n  functions.  in some cases, the caller needs to pass multiple pointers as\n  arguments to be written to.  Ada has a clean way to do this: with in and\n  out arguments, the latter of which act just like multiple-value-setq.\n\n| When that's *not* the case, simply returning a list is better in every\n| way that springs to mind, IMO.\n\n  since consing and destructuring both have very significant costs, I'd\n  rate this is an insufficiency of things that spring to mind.\n\n#:Erik\n\n",
+  "date": "2000-03-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

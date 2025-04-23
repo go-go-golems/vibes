@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163031932885054@naggum.no.html",
+  "id": "3163031932885054@naggum.no",
+  "title": "Re: shall I learn LISP??",
+  "content": "\nSubject: Re: shall I learn LISP??\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/26\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163031932885054@naggum.no>\n\n* <xutao@mercury.ee.cornell.edu>\n| I was told that to be a good programmer, you must learn LISP, although\n| you might never use it in your real life programming, it will teach you\n| how to make good programs, is it true?\n\n  yes.  \"those who do not know Lisp are doomed to reinvent it.\"\n\n| If so, where shall I start to learn LISP, Lisp interpreters does not seem\n| to install in my LINUX system.\n\n  that's odd.  Linux systems are very well supported by Lisp systems.\n  which Linux are you using?  if you are using the programmers' favorite\n  distribution, Debian GNU/Linux, you can install CLISP and CMUCL with the\n  package system, and Franz Inc offers a trial edition for Linux that you\n  basically download and install.\n\n| But I guess that I shall be able to program lisp in Emacs, right?\n\n  you will, but Emacs Lisp is a _really_ ancient dialect of Lisp, with lots\n  of interesting stuff missing.  the modern Lisp is Common Lisp.\n\n#:Erik\n\n",
+  "date": "2000-03-26",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

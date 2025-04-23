@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163878195909751@naggum.no.html",
+  "id": "3163878195909751@naggum.no",
+  "title": "Re: howto string->symbol",
+  "content": "\nSubject: Re: howto string->symbol\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/04\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163878195909751@naggum.no>\n\n* Raymond Toy <toy@rtp.ericsson.se>\n| While I understood the nice explanation snipped out above, could you\n| explain more fully exactly what you mean by \"WYSIWYG print names\"?\n\n  symbols whose print names are what you see, i.e., no case conversion\n  either on input or on output.\n\n  please note that I'm no more a fan of upper-case Common Lisp code than\n  those who gave Common Lisp *print-case* and readtable-case were.\n\n#:Erik\n\n",
+  "date": "2000-04-04",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

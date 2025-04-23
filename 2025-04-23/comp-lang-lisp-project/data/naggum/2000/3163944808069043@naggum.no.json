@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163944808069043@naggum.no.html",
+  "id": "3163944808069043@naggum.no",
+  "title": "Re: more questions about threads...",
+  "content": "\nSubject: Re: more questions about threads...\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163944808069043@naggum.no>\n\n* David Hanley <djh@ncgr.org>\n| And perhaps more critically: the ability to make use of more than one\n| CPU if present.\n\n  yet this may be what slows down the threads and speeds up the processes.\n\n  I think a valuable benchmarking approach would be test the same kind of\n  communication between the various kinds of processes, like sockets and\n  some simple protocol.\n\n#:Erik\n\n",
+  "date": "2000-04-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160523659993482@naggum.no.html",
+  "id": "3160523659993482@naggum.no",
+  "title": "Re: More Scope...",
+  "content": "\nSubject: Re: More Scope...\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/26\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160523659993482@naggum.no>\n\n* gat@jpl.nasa.gov (Erann Gat)\n| It takes a pretty smart implementation of Common Lisp to actually\n| produce this result as presented.  In most systems you'll have to\n| recompile FOOBAR after DEFVARing X to see the result:\n\n  foo was never compiled.  there are downsides to compile-only systems.\n\n#:Erik\n\n",
+  "date": "2000-02-26",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

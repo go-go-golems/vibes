@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163278794398146@naggum.no.html",
+  "id": "3163278794398146@naggum.no",
+  "title": "Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses",
+  "content": "\nSubject: Re: Dangling Closing Parentheses vs. Stacked Closing Parentheses\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163278794398146@naggum.no>\n\n* Dorai Sitaram\n| Well, the CLISP pretty-printer gives this \"semi-dangled\" output:\n:\n| But if you look closer, you will realize with a jolt that the lparen that\n| an rparen lines up with is _not_ its matching lparen...\n\n  someone recently said (sorry, I have been skimming news lately) that he\n  had a problem starting with Lisp because everything was in uppercase --\n  small things like that can effectively block one's entry into new areas.\n  back when I was fairly new to Lisp (eons and eons ago, of course), I came\n  across CLISP and its unf<beep>ingbelievably braindamaged pretty printer.\n  it was immediately obvious that this had been implemented in a vacuum,\n  free from influence from all knowledgable programmers on the planet and\n  beyond, and it still sucked.  to see code printed like this was such a\n  horrible experience I immediately seized upon the source code to try to\n  find out how to turn this gut-wrenching abomination off.  but what did I\n  find?  the entire source code was formatted like this!  aaaaauuugh!  and\n  everything in German, to boot.  the abyss was staring back at me.  <fade>\n\n  CLISP has since improved.  no animals have been hurt in its production.\n\n#:Erik\n\n",
+  "date": "2000-03-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

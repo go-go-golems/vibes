@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159729676010387@naggum.no.html",
+  "id": "3159729676010387@naggum.no",
+  "title": "Re: floor",
+  "content": "\nSubject: Re: floor\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/16\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159729676010387@naggum.no>\n\n* \"Slapstiq\" <slapstiq@rochester.rr.com>\n| I need to use the floor function but it returns two numbers.\n\n  if you are talking about Common Lisp, the two numbers are returned as\n  multiple values, which means that the primary value is the only value you\n  will see if you don't do something special to capture the others.\n\n  if you are talking about Emacs Lisp, the two numbers are returned as a\n  list of two values if you use the Common Lisp-like FLOOR* function\n  because Emacs Lisp can only return one value from any function.\n\n| Is there any for me to break a list in two halves?\n\n  consider VALUES-LIST.  <grin>\n\n#:Erik\n\n",
+  "date": "2000-02-16",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

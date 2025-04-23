@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159202464932715@naggum.no.html",
+  "id": "3159202464932715@naggum.no",
+  "title": "Re: Querying whether there is a method which is applicable for an arglist",
+  "content": "\nSubject: Re: Querying whether there is a method which is applicable for an arglist\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/10\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159202464932715@naggum.no>\n\n* Robert Monfera <monfera@fisec.com>\n| Maybe (clos:compute-applicable-methods generic-function arguments) would\n| work for you, if your implementation has MOP.\n\n  COMPUTE-APPLICABLE-METHODS is in the COMMON-LISP package in ANSI Common\n  Lisps, and is unrelated to whether the implementation has MOP.\n\n#:Erik\n\n",
+  "date": "2000-02-10",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

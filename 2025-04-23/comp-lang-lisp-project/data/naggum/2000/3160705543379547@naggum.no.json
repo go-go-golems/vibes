@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160705543379547@naggum.no.html",
+  "id": "3160705543379547@naggum.no",
+  "title": "Re: Freeware Common lisp compiler?",
+  "content": "\nSubject: Re: Freeware Common lisp compiler?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/28\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160705543379547@naggum.no>\n\n* Marek Mikulec <mm98au@badger.ac.brocku.ca>\n| I'm looking for a freeware common lisp compiler (preferably Windows\n| based). Is there such a thing anyware? I just need it to do a couple of\n| assignments for uni, nothing spectacular.\n\n  start at www.lisp.org and look around.\n\n  I'd recommend getting Franz Inc's free version of Allegro CL for\n  Windows.  start at www.franz.com and look for \"free stuff\".\n\n#:Erik\n\n",
+  "date": "2000-02-28",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

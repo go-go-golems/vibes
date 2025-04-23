@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163950557082770@naggum.no.html",
+  "id": "3163950557082770@naggum.no",
+  "title": "Re: setf functions",
+  "content": "\nSubject: Re: setf functions\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163950557082770@naggum.no>\n\n* Harald Hanche-Olsen <hanche@math.ntnu.no>\n| My point is that, as far as I can understand the Hyperspec, there is\n| no way to do this for a function returning multiple values, since the\n| form should be a place, which by definition can only refer to a single\n| value.  I'd love to be proved wrong on this one, though.  Or even if I\n| am right, maybe there is a more natural way to attack the problem?\n\n  apart from actually working, what's wrong with this example?\n\n(defstruct display\n  x y)\n\n(defun global-pointer-position (object)\n  (values (display-x object) (display-y object)))\n\n(defsetf global-pointer-position (object) (new-x new-y)\n  `(setf (display-x ,object) ,new-x\n\t (display-y ,object) ,new-y))\n\n#:Erik\n\n",
+  "date": "2000-04-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

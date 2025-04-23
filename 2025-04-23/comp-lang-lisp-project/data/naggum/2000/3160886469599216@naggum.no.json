@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160886469599216@naggum.no.html",
+  "id": "3160886469599216@naggum.no",
+  "title": "Re: A modest proposal (long)",
+  "content": "\nSubject: Re: A modest proposal (long)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/01\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160886469599216@naggum.no>\n\n* Keke Abe\n| Is there anything particularly dangerous when a beginner equates\n| CL's special variables to global vars in other languages?\n\n  I can't answer for Erann, but my take on this is that beginners who get\n  confused about this will remain confused for a few days, and then get it\n  or get over it, as in: not worrying about it even if they don't get it.\n\n  if we change the semantics of the language from what said confused people\n  will find described in textbooks and other reference materials and when\n  searching the net, the number of days of confusion can only increase, not\n  the least because half the vendors will think this is a lame idea and not\n  implement it, and the other half will do it better than the lame code and\n  so the only thing we will succeed in is in destroying a very powerful\n  mechanism in Common Lisp that every other language is sadly lacking:\n  transparent, safe, and convenient global, dynamic variables.  all for the\n  purported, but obviously unrealizable benefit of reducing the number of\n  confused people and their posting frequency to comp.lang.lisp.\n\n  still, it would be nice if we had some simple programmatic access to the\n  specialness of a symbol.  this would have been covered by the environment\n  access functions that were not included in the standard.\n\n#:Erik\n\n",
+  "date": "2000-03-01",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

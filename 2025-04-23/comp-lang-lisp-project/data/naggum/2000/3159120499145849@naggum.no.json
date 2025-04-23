@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159120499145849@naggum.no.html",
+  "id": "3159120499145849@naggum.no",
+  "title": "Re: Why no standard foreign language interface?",
+  "content": "\nSubject: Re: Why no standard foreign language interface?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159120499145849@naggum.no>\n\n* Robert Posey <muddy@raytheon.com>\n| Why doesn't LISP have a standard foreign language interface?\n\n  because the standards committees failed to reach consensus on the many\n  differing proposals and techniques before them.  and that's a good thing,\n  considering that since the standard was approved, none of the then\n  current foreign function interfaces have survived, C has become the de\n  facto least common denominator, meaning that C's calling conventions and\n  types are now regarded as fundamental (they aren't and never have been),\n  and any standard would have had to be abandoned, anyway.\n\n  but why this clamoring for the _standard_ to solve everything for you?\n  do you know any other language where the language standard has it all?\n  (even Java and C++ fail this test on a huge number of counts.)\n\n#:Erik\n\n",
+  "date": "2000-02-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

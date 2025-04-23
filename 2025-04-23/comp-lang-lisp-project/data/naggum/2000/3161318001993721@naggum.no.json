@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161318001993721@naggum.no.html",
+  "id": "3161318001993721@naggum.no",
+  "title": "Re: Time in Lisp",
+  "content": "\nSubject: Re: Time in Lisp\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/06\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161318001993721@naggum.no>\n\n* \"Frederick C. Gibson, Architect\" <Frederick@gibson-design.com>\n| I'm working on a CLOS classification system and I'd like to add a time stamp\n| to objects as I create them.  Does anyone know of any public domain time\n| functions that can read the internal clock and output with date and time?\n\n  I'm still working on the code to accompany the paper I gave at LUGM, but\n  it is in production use with a client: http://www.naggum.no/lugm-time.html.\n\n  I expect it to be ready for publication in the not too distant future.\n  let me know if you're a willing test subject.\n\n#:Erik\n\n",
+  "date": "2000-03-06",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163863401819617@naggum.no.html",
+  "id": "3163863401819617@naggum.no",
+  "title": "Re: concatenated-stream - which component is being read from?",
+  "content": "\nSubject: Re: concatenated-stream - which component is being read from?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/04\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163863401819617@naggum.no>\n\n* hoehle-sorry@tzd.dont.telekom.spam.de.me (Joerg-Cyril Hoehle)\n| I believe there's a need for *particular* objects which *will* close\n| constituents when it has finished with them.\n\n  you _could_ define an after method on read-char and read-byte on that\n  stream that would close it once it got exhausted, using the widely\n  available Grey streams, or something better if and when it comes along\n  with such features available.  (hi, Duane!  hint for the taking!  :)\n\n  in an application that needed a little simpler life than it could get out\n  of the box, I added code to the socket layer this way to automatically\n  shut down the input side, forcing an EOF that consequently shut down the\n  output side gracefully as well when they ran into trouble of any kind, as\n  the socket error handling in most Unices is a disgraceful mess of special\n  cases that neither match nor attempt to match the TCP or IP\n  specifications.\n\n#:Erik\n\n",
+  "date": "2000-04-04",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

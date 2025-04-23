@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159121393908428@naggum.no.html",
+  "id": "3159121393908428@naggum.no",
+  "title": "Re: Interned Symbols and GC",
+  "content": "\nSubject: Re: Interned Symbols and GC\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/09\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159121393908428@naggum.no>\n\n* Sam Steingold <sds@gnu.org>\n| when foo:bar (which calls read) is called from the package zot, it\n| internes in zot.  I wish I could control where the symbols are\n| interned.  (e.g., with *read-intern* which can be NIL for no interning,\n| T for interning in *package* and a package to intern in that package).\n\n  this makes _zero_ sense.  you're not calling functions \"from\" any\n  packages in Common Lisp.  the default package used by INTERN is the value\n  of *PACKAGE*, and READ doesn't do anything magical in the absence of a\n  package specification, so if you want to control the package into which\n  INTERN interns symbols, justbind *PACKAGE* to that package.\n\n  what more control do you want?\n\n#:Erik\n\n",
+  "date": "2000-02-09",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

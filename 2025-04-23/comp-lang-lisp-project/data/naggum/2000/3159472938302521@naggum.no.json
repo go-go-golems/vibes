@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159472938302521@naggum.no.html",
+  "id": "3159472938302521@naggum.no",
+  "title": "Re: Why no standard foreign language interface?",
+  "content": "\nSubject: Re: Why no standard foreign language interface?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159472938302521@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| Erik said:\n| \"believe me, once you can figure out the braindamaged syntax of all these\n|   stupid infix languages with a plethora of static types and other junk\n|   enough to do the necessary steps of (1) writing wrapper code in that same\n|   language or in C that is more friendly to a Common Lisp interface, and\n|   (2) knowing enough to write foreign function interface code in Common\n|   Lisp, producing output that fits one of umpteen different foreign\n|   function interface definition \"languages\" for various Common Lisp\n|   implementations is _really_ trivial.\"\n\n  but Fernando read:\n\n| \"Once you figure out how to do (1) and (2) it's trivial\"\n\n  no wonder we don't communicate!\n\n| If you want to trivially write a C++ parser in CL that would be even better!\n\n  try a remedial reading comprehension class instead of this idiocy, will you?\n\n| Well, C++ sucks, but the CL add-on product could know enough about the\n| calling conventions of the particular C++ compiler, and about C++ syntax\n| to do a lot of stuff directly, for example by leveraging your dead Lucid\n| code [But don't throw loads of money at this!\n\n  that's why I stated, and quite explicitly at that, that you need to write\n  WRAPPER CODE IN THAT SAME LANGUAGE OR IN C THAT IS MORE FRIENDLY TO A\n  COMMON LISP INTERFACE.  will you _please_ get it?\n\n#:Erik\n\n",
+  "date": "2000-02-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

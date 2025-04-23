@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159291352590096@naggum.no.html",
+  "id": "3159291352590096@naggum.no",
+  "title": "Re: [N]TRUNCATE-LIST ?",
+  "content": "\nSubject: Re: [N]TRUNCATE-LIST ?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/11\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159291352590096@naggum.no>\n\n* Philip Lijnzaad <lijnzaad@ebi.ac.uk>\n| after some browsing in the HyperSpec, I couldn't find a function that yields,\n| as a list, the first N elts of the list passed as an argument, sort of the\n| opposites of [N]BUTLAST.\n\n  have you looked at SUBSEQ for the non-destructive version?  or a fairly\n  plain SETF of NTHCDR for a destructive version?  if you have to check for\n  the length, use NTHCDR, see if you get a cons cell, then SETF its CDR.\n  there's absolutely _no_ need to check the length of the list, which,\n  incidentally, may be circular, so use LIST-LENGTH instead of LENGTH if\n  you think you really have to.\n\n#:Erik\n\n",
+  "date": "2000-02-11",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

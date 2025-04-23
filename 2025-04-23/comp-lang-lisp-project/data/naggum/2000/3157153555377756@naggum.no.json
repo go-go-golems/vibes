@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157153555377756@naggum.no.html",
+  "id": "3157153555377756@naggum.no",
+  "title": "Re: Returning the name of a function",
+  "content": "\nSubject: Re: Returning the name of a function\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157153555377756@naggum.no>\n\n* \"Coby Beck\" <cbeck@mercury.bc.ca>\n| Admittedly not a big deal in this example, but it got me curious.\n\n  I suggest reading the manual on Allegro CL's TRACE top-level command.  as\n  far as I understand your question, it does what you want, and much more.\n\n  debugging by inserting code is generally considered to be very intrusive\n  to the code in question, and even more unlikely to produce efficient\n  bug-hunting.  consider ADVICE, TRACE, STEP, etc, instead.  debugging in\n  Common Lisp and C are as different as the languages are.\n\n#:Erik\n\n",
+  "date": "2000-01-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

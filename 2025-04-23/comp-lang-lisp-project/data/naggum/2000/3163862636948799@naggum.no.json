@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163862636948799@naggum.no.html",
+  "id": "3163862636948799@naggum.no",
+  "title": "Re: Alternatives to EVAL",
+  "content": "\nSubject: Re: Alternatives to EVAL\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/04\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163862636948799@naggum.no>\n\n* Scott L. Burson\n| I would additionally suggest going a bit further and making a package\n| that contains *only* the symbols you will need to read.  This will limit\n| what the incoming forms can do when EVALed... which would make me a lot\n| more comfortable with this design.\n\n  it's even a little worse than you sketch out.  ideally, you should be\n  able to force intern not to intern, i.e. to have read call find-symbol\n  and barf on uninterned symbols.  ideally, you should be able to force the\n  symbol-reader to barf on _any_ package specification other than those you\n  have specified.  neither of these are possible in fully conforming code.\n\n#:Erik\n\n",
+  "date": "2000-04-04",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

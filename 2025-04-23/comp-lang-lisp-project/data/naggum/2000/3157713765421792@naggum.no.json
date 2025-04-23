@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157713765421792@naggum.no.html",
+  "id": "3157713765421792@naggum.no",
+  "title": "Re: Would COMPILER-MACRO cut it?",
+  "content": "\nSubject: Re: Would COMPILER-MACRO cut it?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157713765421792@naggum.no>\n\n* Robert Monfera <monfera@fisec.com>\n| I'd like to implement a custom vector type, which stores fixnums and\n| double-floats only.\n\n  from your problem description, it does not seem excessively rational to\n  want to store fixnums.  I'd just go ahead and store double-floats.\n\n| Hopefully the relative lack of discussions on compiler-macrolet is not an\n| indication that it is an esoteric facility that should be avoided.  It\n| looks wonderful to me, provided I can make it work.\n\n  it is indeed a useful facility, but it helps a lot to be able to access\n  the declarations and (other) type information (inferences) in the\n  environment it is expanded.\n\n#:Erik\n\n",
+  "date": "2000-01-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

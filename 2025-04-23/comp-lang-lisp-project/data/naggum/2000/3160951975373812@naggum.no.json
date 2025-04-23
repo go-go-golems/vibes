@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3160951975373812@naggum.no.html",
+  "id": "3160951975373812@naggum.no",
+  "title": "Re: A modest proposal (long)",
+  "content": "\nSubject: Re: A modest proposal (long)\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/02\nNewsgroups: comp.lang.lisp\nMessage-ID: <3160951975373812@naggum.no>\n\n* wnewman@my-deja.com\n| All I'm trying to claim is that this example shows that the problem is\n| not confined to beginners.\n\n  but your example doesn't show any such thing!  that people are not\n  following the asterisk convention is _not_ the problem.  the problem as\n  stated is that there's a lambda list or let binding somewhere with a\n  symbol in it that has special binding which comes as a _surprise_ to\n  people who are moderately (but not overly) intimate with the code.  do\n  you have evidence of that, or is this only more unfounded fear that there\n  _might_ be a problem?  incidentally, I recognize that there _might_ be a\n  problem, the solution to which is to make the system easier to query for\n  such information.  I don't see any other problems that need solving.\n\n  my philosophy, in case you need to have it stated to avoid speculating\n  about it, is that in order to serve the needs of any community, one must\n  never, _ever_ to cater to the needs of ignorants and novices except in\n  carefully controlled settings where the express purpose is to make them\n  non-ignorants and non-novices, such as school or training courses.\n\n#:Erik\n\n",
+  "date": "2000-03-02",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

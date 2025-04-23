@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163959816816739@naggum.no.html",
+  "id": "3163959816816739@naggum.no",
+  "title": "Re: more questions about threads...",
+  "content": "\nSubject: Re: more questions about threads...\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/05\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163959816816739@naggum.no>\n\n* Andrew Cooke <andrew@andrewcooke.free-online.co.uk>\n| I don't have multithreaded Lisp experience, but work in Java, where\n| threads are part of the standard language, and they are invaluable in\n| making responsive, robust systems without complicated coupling between\n| separate parts of the program.  So they often help *good design*.\n\n  you don't need OS support to make this work the way you want.  the desire\n  for OS support can often lead you to dismiss what you can actually do as\n  \"undesirable\".  many would-be CL users have run into this \"mindset trap\"\n  where they refuse to use Common Lisp because they have this fixation that\n  some feature or another must be \"standard\" before they can use it.\n\n  investigate your Common Lisp environment.  programming only in Common\n  Lisp as per the standard _only_ is like programming in any other language\n  as per the standard _only_ (with the exception that you can actually get\n  quite a lot of interesting work done in standard CL) -- ignoring the\n  programming environment (such as Allegro CL for CL, and Unix for C) is\n  just plain stupid.\n\n#:Erik\n\n",
+  "date": "2000-04-05",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

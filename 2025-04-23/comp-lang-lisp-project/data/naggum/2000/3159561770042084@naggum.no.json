@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159561770042084@naggum.no.html",
+  "id": "3159561770042084@naggum.no",
+  "title": "Re: Why no standard foreign language interface?",
+  "content": "\nSubject: Re: Why no standard foreign language interface?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/15\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159561770042084@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| I was going to write:\n| \"Once you figure X in order to see how to do (1) and (2) it's trivial\"\n\n  once again, you have missed what \"it\" refers to.  I'm tiring of this.\n\n| Obviously, you have to \"figure out X\" if you're going to\n| \"figure out how to do (1) and (2)\"\n| \n| Anyway, Erik says:\n| \n| \"Figuring out the C++ syntax takes infinite time so, relatively speaking,\n| implementing a mapping is trivial\"\n\n  what I did in fact say, you George W. Bush you, was that once you got the\n  information, _which_ particular form the FFI glue code should take is\n  trivial.  the argument, since you missed it completely, was against\n  having a _standard_ FFI form, since that is such a trivial piece of the\n  whole equation.  do you get it _now_?\n\n  I realize that some people are so devoid of ethics as to pretend that\n  other people said things they never did simply by putting those funny \"\"\n  characters around any damn lie they want, but I take exception to that,\n  and I take exception to the whole personality of people who are so\n  mind-bogglingly unware of their own actions as not to realize that they\n  are doing this kind of shit.\n\n  go away, Fernando D. Mato Mira.\n\n#:Erik\n\n",
+  "date": "2000-02-15",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

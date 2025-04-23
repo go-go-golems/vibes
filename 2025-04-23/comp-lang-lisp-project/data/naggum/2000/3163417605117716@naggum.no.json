@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163417605117716@naggum.no.html",
+  "id": "3163417605117716@naggum.no",
+  "title": "Re: Help required: Is there a way to split up one element into several?",
+  "content": "\nSubject: Re: Help required: Is there a way to split up one element into several?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/30\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163417605117716@naggum.no>\n\n* Erik Halvarsson <ericthorvald@hotmail.com>\n| From an external file I need to get some data, and it's stored like:\n| \n| VKA100         707898.512    78172.497    143.803\n| \n| a simple xyz coordinate.  When I use the (readline file) function, that\n| string becomes one single element in the list I assign it to.  What I\n| need is four different elements in the list but I have so far no clue\n| how to achive this.  Would be great if anyone out there could help me.\n\n  if each line is known to consist of these four elements, the first looks\n  very much a symbol, and programmer time is more important than much\n  anything else, just use the function read.  here's a quick shot at it:\n\n(let ((*package* (make-package (gensym) :use ())))\n  (unwind-protect\n      (loop for line = (loop with first = (read <stream> nil)\n\t\t\t     if (not first)\n\t\t\t     then do (loop-finish)\n\t\t\t     else collect (symbol-name first)\n\t\t\t     repeat 3\n\t\t\t     collect (read <stream>))\n\t    while line\n\t    collect line)\n    (delete-package *package*)))\n\n#:Erik\n\n",
+  "date": "2000-03-30",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

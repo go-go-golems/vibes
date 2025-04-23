@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157726537067075@naggum.no.html",
+  "id": "3157726537067075@naggum.no",
+  "title": "Re: [Q] More beginner help",
+  "content": "\nSubject: Re: [Q] More beginner help\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157726537067075@naggum.no>\n\n* Pierre De Pascale <dpa@siemens.ch>\n| Actually your solution is recursive. Look that in your loop construct you\n| call (recursively) FLATTEN depending on the type of ELEMENT.  This is\n| clearly a case of recursion.\n\n  you're right, of course.  the recursion that I find silly, and therefore\n  reacted to, is using recursion to traverse lists, or recursing on the\n  CDR.  for the sake of argument, I ignored the recursion on the CAR.  I\n  think you made a good point for why that shouldn't be done.\n\n#:Erik\n\n",
+  "date": "2000-01-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

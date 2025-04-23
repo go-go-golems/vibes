@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161105359590485@naggum.no.html",
+  "id": "3161105359590485@naggum.no",
+  "title": "Re: best CL type for fixed decimal values",
+  "content": "\nSubject: Re: best CL type for fixed decimal values\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/03\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161105359590485@naggum.no>\n\n* Robert Monfera <monfera@fisec.com>\n| OTOH, a lot of real-life, \"mainstream\" problems cannot be solved with\n| fixnums of some implementations or even worse, the ANSI lower limit of 16\n| bits.\n\n  the important part about fixnums is not how big they are, but how they\n  interact with other implementation limits in the language.  e.g., array\n  indices are all fixnums.  allowing bignums for array indices is a bad\n  idea.  it is therefore valuable to have a type which is already necessary\n  in the language explicitly available for similarly constrained operations.\n\n#:Erik\n\n",
+  "date": "2000-03-03",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

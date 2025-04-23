@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162858618807593@naggum.no.html",
+  "id": "3162858618807593@naggum.no",
+  "title": "Re: Common Lisp interpretation by emacs",
+  "content": "\nSubject: Re: Common Lisp interpretation by emacs\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162858618807593@naggum.no>\n\n* Christopher R. Barry\n| Most people that complain that they want a CL-Emacs haven't really\n| said what they'd do with it or what applications they'd develop for it\n| that they won't make for our current Emacs.  Yes, having Gnus be able\n| to poll multiple servers simultaneously would be nice.  Is that all???\n\n  what I have wanted that can't be done in the current Emacs are:\n\n1 an Emacs server that talks to several Emacs clients that don't interfere\n  (such as one process per X window/Emacs frame).\n\n2 file-system server processes in user space which serve Emacs clients with\n  network-optimal fragments of files on remote and local hosts alike, such\n  that you can edit files with the native privileges of several users.\n\n3 integration via foreign function interfaces to other code on the system.\n  (there is now an Emacs with some dynamic loading support.)\n\n#:Erik\n\n",
+  "date": "2000-03-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

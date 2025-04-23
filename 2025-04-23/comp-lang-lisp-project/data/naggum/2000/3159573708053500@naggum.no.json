@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159573708053500@naggum.no.html",
+  "id": "3159573708053500@naggum.no",
+  "title": "Re: emacs lisp help",
+  "content": "\nSubject: Re: emacs lisp help\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/15\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159573708053500@naggum.no>\n\n* Marco Antoniotti <marcoxa@parades.rm.cnr.it>\n| I suppose at the reader level, isn't it?\n\n  well, since the package system is basically a reader-level thing to begin\n  with, naturally, that's where the problems begin, but they don't end\n  there.  Emacs is currently so hard-wired on the \"one namespace\" idea that\n  it is intractable to make FOO:BAR and BAR be _perceived_ to be the same\n  symbol by any code _other_ than the reader, meaning that code that makes\n  its own symbols needs to be made ware of packages, and code that tries to\n  write and read back data needs to be very carefully reviewed.  I didn't\n  feel like doing that work.\n\n#:Erik\n\n",
+  "date": "2000-02-15",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

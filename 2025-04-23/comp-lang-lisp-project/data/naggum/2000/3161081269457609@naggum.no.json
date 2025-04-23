@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161081269457609@naggum.no.html",
+  "id": "3161081269457609@naggum.no",
+  "title": "Re: best CL type for fixed decimal values",
+  "content": "\nSubject: Re: best CL type for fixed decimal values\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/03\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161081269457609@naggum.no>\n\n* Marc Battyani\n| What CL types are best suited for computing with fixed decimal values with\n| exactly n places after the decimal point?\n| \n| I can use\n|     floats with a special rounding after each operation\n\n* Johan Kullstam <kullstam@ne.mediaone.net>\n| floats are out since finite length decimal point numbers often have\n| non-finite binary expansions.  0.1 for example cannot be represented\n| exactly by floating point.\n\n  but if he knows he has N places after the decimal point, that translates\n  directly to a factor (expt 10 N), which means he could do well with the\n  extra precision and speed of a double-float value relative to bignums.\n\n#:Erik\n\n",
+  "date": "2000-03-03",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

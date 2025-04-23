@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157726372992359@naggum.no.html",
+  "id": "3157726372992359@naggum.no",
+  "title": "Re: setf implementation",
+  "content": "\nSubject: Re: setf implementation\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157726372992359@naggum.no>\n\n* mjd@op.net (Mark-Jason Dominus)\n| I was surprised by this, because I had picked up a different idea from\n| somewhere.\n\n  it's a notion from C's pointer concept.  as such, it's pretty bogus.\n\n| When you evaluate (cdr ...), you get back a pointer to the cdr, and\n| then the enclosing function receives this pointer as an argument.\n\n  that's precisely what you don't do in Common Lisp.  you don't get a\n  pointer to the CDR, you get the value of the CDR, which may or may not be\n  a pointer, depending on its type.  in any case, you're not getting a\n  pointer to something settable.\n\n  consider this schematic (yikes, I'm having to resort to graphics!):\n\n        +-------+-------+\n    X:  |  CAR  |  CDR  |--> ZOT\n        +-------+-------+\n            |\n            V\n           FOO\n\n  when you evaluate (CDR X), you get ZOT back.  if you wish the CDR of X to\n  point to something else, you would do (setf (cdr x) 'bar), but if you\n  have already obtained ZOT, you don't know where to store BAR.\n\n  therefore, in C terminology, what SETF gives you is the address of the\n  slot you wish to change, but that is not at all similar to a pointer to\n  the value _in_ that slot.\n\n  therefore, your approach won't work, since it misses out on the crucial\n  level of indirection.\n\n#:Erik\n\n",
+  "date": "2000-01-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

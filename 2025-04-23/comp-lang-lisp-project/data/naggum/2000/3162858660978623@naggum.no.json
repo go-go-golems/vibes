@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3162858660978623@naggum.no.html",
+  "id": "3162858660978623@naggum.no",
+  "title": "Re: setf & setq, newbie needs short definitions/examples",
+  "content": "\nSubject: Re: setf & setq, newbie needs short definitions/examples\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3162858660978623@naggum.no>\n\n* Tim Bradshaw <tfb@cley.com>\n| This is useful for things like swapping variables, and other things:\n| \n| \t(psetq x y \n| \t       y x)\n| \n| exchanges x and y (although there are more idiomatic ways of doing this,\n| perhaps).\n\n  like (rotatef x y).\n\n#:Erik\n\n",
+  "date": "2000-03-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

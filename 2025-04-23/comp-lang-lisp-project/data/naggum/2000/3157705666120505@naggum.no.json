@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157705666120505@naggum.no.html",
+  "id": "3157705666120505@naggum.no",
+  "title": "Re: [Q] More beginner help",
+  "content": "\nSubject: Re: [Q] More beginner help\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/24\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157705666120505@naggum.no>\n\n[ please look at how other Common Lisp programmers indent and present their\n  code.  parentheses are _not_ visually significant, although they are very\n  syntactically significant, in Lisp source code.  don't make them stand\n  out -- please -- you're code is so ugly it's hard to help you with it. ]\n\n* Dirt <pip3@inam3.com>\n| I am trying to \"unravel\" a list, but with little luck. I wish to take a\n| list such as:\n| \n| \t(a (b c (d e)) f)\n| \n| and create a new list that looks like one top level list:\n| \n| \t(a b c d e f)\n\n  this is normally called \"flattening\" a list.\n\n| I am trying to do this recursively but I am guessing I am way off because\n| I get a stack overflow.  What I am trying to say in my code below is:\n| \n| If the expression is a list, call the function again with the cdr of the\n| list, otherwise it is an atom so cons it to a list.\n\n  what you wish to do is to move each element of each list you encounter\n  onto a new list.  I'll try to show you with slightly more modern Common\n  Lisp that you're using:\n\n(defun flatten (list)\n  (loop for element in list\n        if (listp element) nconc (flatten element)\n        else collect element))\n\n  if you actually _need_ recursion, which will only waste space and time,\n  you should be able to unravel this iterative solution easily.  in my not\n  so humble opinion, being able to think recursively is very valuable, the\n  second most valuable ability you can have, beaten only by knowing _when_\n  to use recursion.\n\n  incidentally, this function considers an empty list a list of no elements\n  while you might want NIL to be a separate element in the resulting list.\n\n#:Erik\n\n",
+  "date": "2000-01-24",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3164984947664175@naggum.no.html",
+  "id": "3164984947664175@naggum.no",
+  "title": "Re: Deep copy in lisp: how?",
+  "content": "\nSubject: Re: Deep copy in lisp: how?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/17\nNewsgroups: comp.lang.lisp\nMessage-ID: <3164984947664175@naggum.no>\n\n* Courageous <jkraska1@san.rr.com>\n| You just can't stop, can you, Erik?\n\n  interestingly, this started with a general deep copier and the first\n  thing I told you about was detection of circularities.  I detect with\n  some satisfaction that you walk around in very small circles and ask the\n  same moronic questions over and over.  when will you realize it?\n\n  but now is the time we will learn whether you stop or prove again that\n  you are obsessing like the other morons who have visited this newsgroup.\n\n  since day 1, I have told you this: try some non-moronic behavior if you\n  want people to think differently about you.  this is obviously impossible\n  for you to fathom, and instead keep acting the moron because you want\n  others to stop calling you a moron before you change your moronic ways.\n\n  but sure, I can stop _calling_ you a moron, but that won't change you.\n  after all is said and done, I have said \"moron\", and you _are_ a moron.\n  is this really going to help you, you pitiful \"Courageous\" moron?\n\n  now, repeat another question for you own amusement.\n\n#:Erik\n\n",
+  "date": "2000-04-17",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

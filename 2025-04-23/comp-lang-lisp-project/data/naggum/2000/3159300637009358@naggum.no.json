@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159300637009358@naggum.no.html",
+  "id": "3159300637009358@naggum.no",
+  "title": "Re: Beginners course",
+  "content": "\nSubject: Re: Beginners course\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/11\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159300637009358@naggum.no>\n\n* kt-alt@SprocketShop.com (Kenneth P. Turvey)\n| I was corrected via email.  In my discussion of English grammar I often\n| referred to pronouns used for people of indeterminate sex as neuter.\n| This isn't really the case.  In English the neuter pronoun is \"it\", we\n| use \"he\" typically when we are referring to people of indeterminate sex\n| (although not always and there is no steadfast rule).  \n| \n| Should we modify the LOOP macro to accept \"he\", \"she\", and \"it\"?  \n\n  if someone ever gets the really bad idea to translate Common Lisp to New\n  Norwegian (as opposed to Old Norse, not the real Norwegian), they will\n  have to cope with the disconcerting habit in that language of referring\n  to inanimate objects with \"han\" (he) and \"hun\" (she).  try \"she went to\n  see this movie.  he was better than she expected.\" on for size.\n\n#:Erik\n\n",
+  "date": "2000-02-11",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

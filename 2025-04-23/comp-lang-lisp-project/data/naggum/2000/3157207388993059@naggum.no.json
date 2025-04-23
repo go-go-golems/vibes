@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3157207388993059@naggum.no.html",
+  "id": "3157207388993059@naggum.no",
+  "title": "Re: Returning the name of a function",
+  "content": "\nSubject: Re: Returning the name of a function\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/01/18\nNewsgroups: comp.lang.lisp\nMessage-ID: <3157207388993059@naggum.no>\n\n* Sashank Varma\n| how about something like the following?\n| \n| ? (defmacro magic-defun (name lambda-list . body)\n|     `(defun ,name ,lambda-list\n|        (flet ((magic-function ()\n|                 ',name))\n|          ,@body)))\n\n  while it appears to solve a problem, it actually doesn't.  the problem is\n  to know where you are in the code you are trying to figure out why is not\n  working as it should.  the solution is a backtrace.  the solution is to\n  read the manual and understand how Common Lisp differs from C in such a\n  way that debugging code in them differs also.\n\n  what would we do without C?  we would have PASAL, BASI, OBOL, and Ommon Lisp.\n\n#:Erik\n\n",
+  "date": "2000-01-18",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

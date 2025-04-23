@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3165125538003989@naggum.no.html",
+  "id": "3165125538003989@naggum.no",
+  "title": "Re: How does Lisp implement Primitive, Structured and User-defined data  types?",
+  "content": "\nSubject: Re: How does Lisp implement Primitive, Structured and User-defined data  types?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/04/19\nNewsgroups: comp.lang.lisp\nMessage-ID: <3165125538003989@naggum.no>\n\n* Lisp Researcher\n| I am doing a research on Lisp and I need to know...\n\n* Courageous <jkraska1@san.rr.com>\n| I suggest you get a copy of the ANSI Common Lisp\n| standards document.\n\n  sigh.  this is a genuinely bad idea for the answers to the questions\n  asked, which have to do with implementation of the language, not the\n  specification of the semantics of the language.  anyone who has _read_\n  the standard knows that it doesn't answer any of the questions.\n\n  the answer is obviously to call up a Lisp vendor and ask a technical\n  person for some pointers.  I don't think the question merits response\n  beyond that, mainly because I don't want people who have zero clue to\n  start doing research on anything.  acquire clue, _then_ do research.\n  otherwise, you ask clueless questions, get clueless answers from people\n  who have even less clue than you do, and don't recognize the problems\n  inherent in trusting the Net.\n\n#:Erik\n\n",
+  "date": "2000-04-19",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3161959623274993@naggum.no.html",
+  "id": "3161959623274993@naggum.no",
+  "title": "Re: Referential transparency support missing",
+  "content": "\nSubject: Re: Referential transparency support missing\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/13\nNewsgroups: comp.lang.lisp\nMessage-ID: <3161959623274993@naggum.no>\n\n* Pekka P. Pirinen\n| I rather like the idea of having a way to say \"this function\" in\n| declaration lists (since we have anonymous functions):\n|   (lambda (x)\n|     (declare (pure self))\n|     (+ 2 x))\n\n  `lambda' seems to me a much better choice than `self'.\n\n#:Erik\n\n",
+  "date": "2000-03-13",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

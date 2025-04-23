@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3159296652595081@naggum.no.html",
+  "id": "3159296652595081@naggum.no",
+  "title": "Re: Why no standard foreign language interface?",
+  "content": "\nSubject: Re: Why no standard foreign language interface?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/02/11\nNewsgroups: comp.lang.lisp\nMessage-ID: <3159296652595081@naggum.no>\n\n* \"Fernando D. Mato Mira\" <matomira@iname.com>\n| Automatic FFI generation from C++ header files is far from trivial.\n\n  it may help to read what I write if you want to pose counter-arguments to\n  it instead of counter-arguments to something I didn't say.\n\n  C++ sucks.  to interface to C++, you need wrapper code in C++ that makes\n  it possible to interface Common Lisp to the wrapper code.  this code may\n  well be strictly C-compatible, as in `extern \"C\"'.\n\n| For C, you can easily write a FFIGEN `backend' adapted to your CL\n| implementation.  That's true.\n\n  so what prohibits you from being smart and utilizing this fact when\n  dealing with the utter braindamage of C++?  my answer: nothing.  it's\n  better to waste time in wrapper code than on stupid programmer tricks.\n\n#:Erik\n\n",
+  "date": "2000-02-11",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}

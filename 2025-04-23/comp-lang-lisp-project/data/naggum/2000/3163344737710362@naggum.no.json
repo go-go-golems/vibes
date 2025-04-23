@@ -1,0 +1,10 @@
+{
+  "url": "https://www.xach.com/naggum/articles/3163344737710362@naggum.no.html",
+  "id": "3163344737710362@naggum.no",
+  "title": "Re: concatenated-stream - which component is being read from?",
+  "content": "\nSubject: Re: concatenated-stream - which component is being read from?\nFrom: Erik Naggum <erik@naggum.no>\nDate: 2000/03/29\nNewsgroups: comp.lang.lisp\nMessage-ID: <3163344737710362@naggum.no>\n\n* Sam Steingold <sds@gnu.org>\n| Is there a way to figure out which component of a concatenated stream is\n| being read from?\n\n  from the definition of concatenated-stream-streams:\n\nReturns a list of input streams that constitute the ordered set of streams\nthe concatenated-stream still has to read from, starting with the current\none it is reading from. The list may be empty if no more streams remain to\nbe read.\n\n#:Erik\n\n",
+  "date": "2000-03-29",
+  "author": "Erik Naggum",
+  "references": [],
+  "source": "naggum"
+}
