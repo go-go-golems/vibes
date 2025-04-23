@@ -1,0 +1,486 @@
+/* Base Styles */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --light-bg: #f8f9fa;
+    --dark-bg: #2c3e50;
+    --text-color: #333;
+    --light-text: #f8f9fa;
+    --border-color: #ddd;
+    --code-bg: #282c34;
+    --success-color: #2ecc71;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: #fff;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--accent-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+p {
+    margin-bottom: 1.5rem;
+}
+
+ul, ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+}
+
+pre {
+    background-color: var(--code-bg);
+    border-radius: 5px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+pre code {
+    background-color: transparent;
+    padding: 0;
+    color: #abb2bf;
+}
+
+/* Header Styles */
+header {
+    background-color: var(--primary-color);
+    color: var(--light-text);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.tagline {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+}
+
+nav li {
+    margin: 0 1rem;
+}
+
+nav a {
+    color: var(--light-text);
+    font-weight: 500;
+    padding: 0.5rem 0;
+    position: relative;
+}
+
+nav a:hover {
+    color: var(--secondary-color);
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--secondary-color);
+    transition: width 0.3s;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Section Styles */
+.section {
+    padding: 4rem 0;
+}
+
+.alt-bg {
+    background-color: var(--light-bg);
+}
+
+.section h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}
+
+.content-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.text-content {
+    flex: 1;
+    min-width: 300px;
+}
+
+.image-content {
+    flex: 1;
+    min-width: 300px;
+}
+
+.code-preview {
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Accordion Styles */
+.accordion {
+    margin-top: 2rem;
+}
+
+.accordion-item {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    background-color: #fff;
+    padding: 1rem;
+    cursor: pointer;
+    position: relative;
+    font-size: 1.2rem;
+    transition: background-color 0.3s;
+}
+
+.accordion-header:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.accordion-header::after {
+    content: '+';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.accordion-item.active .accordion-header::after {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.accordion-content {
+    padding: 0 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s;
+}
+
+.accordion-item.active .accordion-content {
+    padding: 1rem;
+    max-height: 1000px;
+}
+
+/* Architecture Diagram */
+.architecture-diagram {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.arch-component {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 1.5rem;
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.arch-arrow {
+    font-size: 2rem;
+    color: var(--secondary-color);
+}
+
+.file-path {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+}
+
+.project-structure {
+    margin-top: 3rem;
+}
+
+/* Code Tabs */
+.code-tabs {
+    margin-top: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.tab-headers {
+    display: flex;
+    background-color: #f1f1f1;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.tab-btn {
+    background-color: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 1rem 1.5rem;
+    transition: background-color 0.3s;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    background-color: #ddd;
+}
+
+.tab-btn.active {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.tab-content {
+    padding: 1rem;
+    background-color: #fff;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.tab-pane h3 {
+    margin-bottom: 1rem;
+}
+
+/* Terminal */
+.terminal {
+    background-color: #1e1e1e;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.terminal-header {
+    background-color: #323232;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background-color: #ff5f56;
+}
+
+.terminal-button:nth-child(2) {
+    background-color: #ffbd2e;
+}
+
+.terminal-button:nth-child(3) {
+    background-color: #27c93f;
+}
+
+.terminal-title {
+    color: #ddd;
+    margin-left: 1rem;
+    font-size: 0.9rem;
+}
+
+.terminal-content {
+    padding: 1rem;
+}
+
+.terminal-content pre {
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+.terminal-content code {
+    color: #ddd;
+}
+
+/* Output Preview */
+.output-preview {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 1.5rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.output-preview h3 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+/* Download Section */
+.download-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.download-btn {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 1rem;
+    flex: 1;
+    min-width: 250px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.download-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.download-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: var(--secondary-color);
+}
+
+.download-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.download-title {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.download-meta {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.usage-instructions {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 1.5rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer */
+footer {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    nav li {
+        margin: 0.5rem 0;
+    }
+    
+    .architecture-diagram {
+        flex-direction: column;
+    }
+    
+    .arch-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .download-btn {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    .section h2 {
+        font-size: 1.8rem;
+    }
+    
+    .tab-btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+}

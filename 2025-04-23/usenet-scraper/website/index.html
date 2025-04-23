@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UsenetScraper - YAML DSL for Usenet Scraping</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>UsenetScraper</h1>
+            <p class="tagline">A powerful YAML DSL for Usenet scraping</p>
+            <nav>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#specification">Specification</a></li>
+                    <li><a href="#architecture">Architecture</a></li>
+                    <li><a href="#source-code">Source Code</a></li>
+                    <li><a href="#run-dump">Run Dump</a></li>
+                    <li><a href="#download">Download</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="overview" class="section">
+            <div class="container">
+                <h2>Overview</h2>
+                <div class="content-wrapper">
+                    <div class="text-content">
+                        <p>UsenetScraper is a powerful tool for scraping Usenet newsgroups based on a YAML DSL configuration. It provides a flexible and extensible way to define what to scrape, how to transform the data, and where to output the results.</p>
+                        
+                        <p>Key features include:</p>
+                        <ul>
+                            <li>Simple YAML-based configuration</li>
+                            <li>Concurrent scraping of multiple groups</li>
+                            <li>Rate limiting to prevent server overload</li>
+                            <li>Flexible transformation pipeline</li>
+                            <li>Multiple output formats (JSON, CSV, XML)</li>
+                            <li>Web interface for monitoring and control</li>
+                        </ul>
+                        
+                        <p>The implementation is written in Go, providing excellent performance and concurrency support.</p>
+                    </div>
+                    <div class="image-content">
+                        <div class="code-preview">
+                            <pre><code class="language-yaml"># UsenetScraper DSL
+version: 1.0
+
+connection:
+  server: news.example.com
+  port: 119
+  ssl: true
+
+sources:
+  - group: alt.binaries.multimedia
+    max_posts: 100
+    since: 2d
+    
+transformations:
+  - id: extract_header
+    field: subject
+    pattern: '\[(.*?)\]'
+    store_as: category
+    
+output:
+  format: json
+  file: usenet_data.json</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="specification" class="section alt-bg">
+            <div class="container">
+                <h2>YAML DSL Specification</h2>
+                <p>The UsenetScraper DSL is a YAML-based domain-specific language designed for configuring and executing Usenet newsgroup scraping operations.</p>
+                
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">Version</h3>
+                        <div class="accordion-content">
+                            <p><code>version</code>: Specifies the version of the DSL schema (required)</p>
+                            <ul>
+                                <li>Type: string</li>
+                                <li>Example: <code>1.0</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">Connection Settings</h3>
+                        <div class="accordion-content">
+                            <p><code>connection</code>: Defines the Usenet server connection parameters (required)</p>
+                            <ul>
+                                <li><code>server</code>: Usenet server hostname or IP address (required)</li>
+                                <li><code>port</code>: Server port number (required)</li>
+                                <li><code>ssl</code>: Whether to use SSL/TLS encryption (optional)</li>
+                                <li><code>timeout</code>: Connection timeout in seconds (optional)</li>
+                                <li><code>retries</code>: Number of connection retry attempts (optional)</li>
+                                <li><code>auth</code>: Authentication credentials (optional)</li>
+                            </ul>
+                            <pre><code class="language-yaml">connection:
+  server: news.example.com
+  port: 119
+  ssl: true
+  timeout: 60
+  retries: 3
+  auth:
+    username: ${USENET_USER}
+    password: ${USENET_PASS}</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">Scraping Sources</h3>
+                        <div class="accordion-content">
+                            <p><code>sources</code>: List of Usenet groups to scrape (required, at least one source)</p>
+                            <ul>
+                                <li><code>group</code>: Usenet group name (required)</li>
+                                <li><code>max_posts</code>: Maximum number of posts to retrieve (optional)</li>
+                                <li><code>since</code>: Time range to scrape (optional)</li>
+                                <li><code>filter</code>: Filtering criteria (optional)</li>
+                                <li><code>concurrent</code>: Number of concurrent connections for this group (optional)</li>
+                                <li><code>rate_limit</code>: Rate limiting for requests (optional)</li>
+                            </ul>
+                            <pre><code class="language-yaml">sources:
+  - group: alt.binaries.multimedia
+    max_posts: 100
+    since: 2d
+    concurrent: 2
+    rate_limit: 10/minute
+  - group: comp.lang.python
+    max_posts: 50
+    since: 7d
+    filter: "subject: 'scraping'"</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">Transformation Pipeline</h3>
+                        <div class="accordion-content">
+                            <p><code>transformations</code>: List of data transformations to apply (optional)</p>
+                            <ul>
+                                <li><code>id</code>: Unique identifier for the transformation (required)</li>
+                                <li><code>field</code>: The post field to transform (required)</li>
+                                <li><code>pattern</code>: Regular expression pattern for extraction (required for extraction operations)</li>
+                                <li><code>store_as</code>: Name of the field to store the result (required)</li>
+                                <li><code>operations</code>: List of operations to perform (for clean operations)</li>
+                                <li><code>model</code>: Machine learning model for classification (for classify operations)</li>
+                                <li><code>categories</code>: List of categories for classification (for classify operations)</li>
+                            </ul>
+                            <pre><code class="language-yaml">transformations:
+  - id: extract_header
+    field: subject
+    pattern: '\[(.*?)\]'
+    store_as: category
+    
+  - id: clean_body
+    field: body
+    operations:
+      - strip_quotes
+      - remove_signatures
+      - normalize_whitespace
+    store_as: clean_body
+    
+  - id: classify
+    field: body
+    model: simple_bayes
+    categories: [question, announcement, discussion]
+    store_as: post_type</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">Output Configuration</h3>
+                        <div class="accordion-content">
+                            <p><code>output</code>: Defines how scraped data should be saved (required)</p>
+                            <ul>
+                                <li><code>format</code>: Output format (required)</li>
+                                <li><code>file</code>: Output file path (required)</li>
+                                <li><code>fields</code>: List of fields to include in output (optional)</li>
+                                <li><code>pretty</code>: Whether to format output for human readability (optional)</li>
+                                <li><code>append</code>: Whether to append to existing file (optional)</li>
+                                <li><code>batch_size</code>: Number of records to write at once (optional)</li>
+                            </ul>
+                            <pre><code class="language-yaml">output:
+  format: json
+  file: usenet_data.json
+  fields:
+    - id
+    - author
+    - date
+    - subject
+    - category
+    - body
+  pretty: true
+  batch_size: 50</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h3 class="accordion-header">Web Interface Configuration</h3>
+                        <div class="accordion-content">
+                            <p><code>web_interface</code>: Web interface settings (optional)</p>
+                            <ul>
+                                <li><code>enabled</code>: Whether to enable the web interface (optional)</li>
+                                <li><code>port</code>: Web interface port (optional)</li>
+                                <li><code>host</code>: Web interface host (optional)</li>
+                                <li><code>auth</code>: Web interface authentication (optional)</li>
+                            </ul>
+                            <pre><code class="language-yaml">web_interface:
+  enabled: true
+  port: 8080
+  host: localhost
+  auth:
+    username: admin
+    password: ${WEB_INTERFACE_PASSWORD}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="section">
+            <div class="container">
+                <h2>Architecture</h2>
+                <p>The UsenetScraper is built with a modular architecture that separates concerns and allows for easy extension.</p>
+                
+                <div class="architecture-diagram">
+                    <div class="arch-component">
+                        <h3>Configuration Parser</h3>
+                        <p>Handles parsing and validation of YAML configuration files</p>
+                        <p class="file-path">internal/config/config.go</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-component">
+                        <h3>Post Parser</h3>
+                        <p>Processes Usenet posts through the transformation pipeline</p>
+                        <p class="file-path">internal/parser/parser.go</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-component">
+                        <h3>Scraper</h3>
+                        <p>Fetches posts from Usenet servers with concurrency and rate limiting</p>
+                        <p class="file-path">internal/scraper/scraper.go</p>
+                    </div>
+                    <div class="arch-arrow">→</div>
+                    <div class="arch-component">
+                        <h3>Output Formatter</h3>
+                        <p>Writes results in various formats (JSON, CSV, XML)</p>
+                        <p class="file-path">internal/output/output.go</p>
+                    </div>
+                </div>
+                
+                <div class="project-structure">
+                    <h3>Project Structure</h3>
+                    <pre><code class="language-plaintext">usenet-scraper/
+├── cmd/
+│   └── root.go           # CLI command definitions
+├── internal/
+│   ├── config/
+│   │   └── config.go     # Configuration parsing
+│   ├── parser/
+│   │   └── parser.go     # Post transformation
+│   ├── scraper/
+│   │   └── scraper.go    # Usenet scraping
+│   ├── output/
+│   │   └── output.go     # Output formatting
+│   └── web/
+│       └── web.go        # Web interface
+├── main.go               # Application entry point
+├── test_cases.md         # Test cases documentation
+└── test_config.yaml      # Test configuration</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="source-code" class="section alt-bg">
+            <div class="container">
+                <h2>Source Code</h2>
+                <p>Key components of the UsenetScraper implementation:</p>
+                
+                <div class="code-tabs">
+                    <div class="tab-headers">
+                        <button class="tab-btn active" data-tab="config">Config Parser</button>
+                        <button class="tab-btn" data-tab="parser">Post Parser</button>
+                        <button class="tab-btn" data-tab="scraper">Scraper</button>
+                        <button class="tab-btn" data-tab="output">Output</button>
+                        <button class="tab-btn" data-tab="main">Main</button>
+                    </div>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="config-tab">
+                            <h3>Configuration Parser (config.go)</h3>
+                            <pre><code class="language-go">package config
+
+import (
+	"fmt"
+	"os"
+	"regexp"
+	"strings"
+	"time"
+
+	"gopkg.in/yaml.v3"
+)
+
+// Config represents the top-level configuration structure
+type Config struct {
+	Version      string             `yaml:"version"`
+	Connection   ConnectionConfig   `yaml:"connection"`
+	Sources      []SourceConfig     `yaml:"sources"`
+	Transformations []TransformConfig `yaml:"transformations,omitempty"`
+	Output       OutputConfig       `yaml:"output"`
+	Logging      *LoggingConfig     `yaml:"logging,omitempty"`
+	WebInterface *WebInterfaceConfig `yaml:"web_interface,omitempty"`
+}
+
+// LoadConfig loads configuration from a YAML file
+func LoadConfig(filename string) (*Config, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("error reading config file: %w", err)
+	}
+
+	// Process environment variables
+	data = replaceEnvVars(data)
+
+	var config Config
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing config file: %w", err)
+	}
+
+	// Set default values
+	setDefaults(&config)
+
+	// Validate configuration
+	if err := validateConfig(&config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
+}</code></pre>
+                        </div>
+                        
+                        <div class="tab-pane" id="parser-tab">
+                            <h3>Post Parser (parser.go)</h3>
+                            <pre><code class="language-go">package parser
+
+import (
+	"fmt"
+	"regexp"
+	"strings"
+
+	"github.com/usenet-scraper/internal/config"
+)
+
+// Parser represents a NNTP post parser
+type Parser struct {
+	config *config.Config
+	transformations map[string]Transformation
+}
+
+// Transformation is an interface for all transformation types
+type Transformation interface {
+	Apply(post *Post) error
+}
+
+// Post represents a Usenet post with original and transformed fields
+type Post struct {
+	ID       string
+	Author   string
+	Date     string
+	Subject  string
+	Body     string
+	Fields   map[string]interface{}
+}
+
+// ParsePost applies all transformations to a post
+func (p *Parser) ParsePost(post *Post) error {
+	// Initialize fields map if not already initialized
+	if post.Fields == nil {
+		post.Fields = make(map[string]interface{})
+	}
+
+	// Add base fields to the fields map
+	post.Fields["id"] = post.ID
+	post.Fields["author"] = post.Author
+	post.Fields["date"] = post.Date
+	post.Fields["subject"] = post.Subject
+	post.Fields["body"] = post.Body
+
+	// Apply each transformation in order
+	for _, t := range p.config.Transformations {
+		transform, ok := p.transformations[t.ID]
+		if !ok {
+			return fmt.Errorf("transformation not found: %s", t.ID)
+		}
+
+		if err := transform.Apply(post); err != nil {
+			return fmt.Errorf("error applying transformation %s: %w", t.ID, err)
+		}
+	}
+
+	return nil
+}</code></pre>
+                        </div>
+                        
+                        <div class="tab-pane" id="scraper-tab">
+                            <h3>Scraper (scraper.go)</h3>
+                            <pre><code class="language-go">package scraper
+
+import (
+	"context"
+	"fmt"
+	"net"
+	"sync"
+	"time"
+
+	"github.com/usenet-scraper/internal/config"
+	"github.com/usenet-scraper/internal/parser"
+	"golang.org/x/time/rate"
+)
+
+// Scraper represents a Usenet scraper
+type Scraper struct {
+	config     *config.Config
+	parser     *parser.Parser
+	limiters   map[string]*rate.Limiter
+	client     *NNTPClient
+	wg         sync.WaitGroup
+	ctx        context.Context
+	cancelFunc context.CancelFunc
+}
+
+// Start starts the scraping process
+func (s *Scraper) Start() error {
+	for _, source := range s.config.Sources {
+		// Calculate how many goroutines to use
+		concurrency := source.Concurrent
+		if concurrency < 1 {
+			concurrency = 1
+		}
+		
+		// Parse the time range
+		since, err := config.ParseDuration(source.Since)
+		if err != nil {
+			return fmt.Errorf("invalid time range for group %s: %w", source.Group, err)
+		}
+		
+		// Start goroutines for each source
+		for i := 0; i < concurrency; i++ {
+			s.wg.Add(1)
+			go func(group string, maxPosts int, since time.Duration, filter string) {
+				defer s.wg.Done()
+				
+				// Apply rate limiting if configured
+				limiter := s.limiters[group]
+				
+				// Get posts from the group
+				posts, err := s.getPosts(group, maxPosts, since, filter, limiter)
+				if err != nil {
+					fmt.Printf("Error scraping group %s: %v\n", group, err)
+					return
+				}
+				
+				// Process each post
+				for _, post := range posts {
+					// Convert to parser.Post
+					p := &parser.Post{
+						ID:      post.ID,
+						Author:  post.Author,
+						Date:    post.Date,
+						Subject: post.Subject,
+						Body:    post.Body,
+					}
+					
+					// Parse the post
+					if err := s.parser.ParsePost(p); err != nil {
+						fmt.Printf("Error parsing post %s: %v\n", post.ID, err)
+						continue
+					}
+					
+					// Send the parsed post to the output channel
+				}
+			}(source.Group, source.MaxPosts, since, source.Filter)
+		}
+	}
+	
+	return nil
+}</code></pre>
+                        </div>
+                        
+                        <div class="tab-pane" id="output-tab">
+                            <h3>Output Formatter (output.go)</h3>
+                            <pre><code class="language-go">package output
+
+import (
+	"encoding/csv"
+	"encoding/json"
+	"encoding/xml"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
+
+	"github.com/usenet-scraper/internal/config"
+	"github.com/usenet-scraper/internal/parser"
+)
+
+// Writer represents an output writer
+type Writer struct {
+	config    config.OutputConfig
+	file      *os.File
+	encoder   interface{}
+	buffer    []map[string]interface{}
+	mu        sync.Mutex
+	csvWriter *csv.Writer
+	csvHeader []string
+}
+
+// Write writes a post to the output
+func (w *Writer) Write(post *parser.Post) error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	// Extract the fields to include in the output
+	fields := make(map[string]interface{})
+	if len(w.config.Fields) > 0 {
+		// Include only the specified fields
+		for _, field := range w.config.Fields {
+			if value, ok := post.Fields[field]; ok {
+				fields[field] = value
+			}
+		}
+	} else {
+		// Include all fields
+		for field, value := range post.Fields {
+			fields[field] = value
+		}
+	}
+
+	// Add to the buffer
+	w.buffer = append(w.buffer, fields)
+
+	// Flush if the buffer is full
+	if len(w.buffer) >= w.config.BatchSize {
+		return w.Flush()
+	}
+
+	return nil
+}</code></pre>
+                        </div>
+                        
+                        <div class="tab-pane" id="main-tab">
+                            <h3>Main Application (main.go)</h3>
+                            <pre><code class="language-go">package main
+
+import (
+	"github.com/usenet-scraper/cmd"
+)
+
+func main() {
+	cmd.Execute()
+}</code></pre>
+                            
+                            <h3>Command Line Interface (root.go)</h3>
+                            <pre><code class="language-go">package cmd
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/usenet-scraper/internal/config"
+	"github.com/usenet-scraper/internal/output"
+	"github.com/usenet-scraper/internal/parser"
+	"github.com/usenet-scraper/internal/scraper"
+	"github.com/usenet-scraper/internal/web"
+)
+
+var (
+	cfgFile string
+	webMode bool
+)
+
+// rootCmd represents the base command
+var rootCmd = &cobra.Command{
+	Use:   "usenet-scraper",
+	Short: "A Usenet scraper based on YAML DSL",
+	Long: `UsenetScraper is a tool for scraping Usenet newsgroups based on a YAML DSL configuration.
+It supports various transformations, output formats, and a web interface.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Load configuration
+		cfg, err := config.LoadConfig(cfgFile)
+		if err != nil {
+			fmt.Printf("Error loading configuration: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Create parser
+		p, err := parser.NewParser(cfg)
+		if err != nil {
+			fmt.Printf("Error creating parser: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Create scraper
+		s, err := scraper.NewScraper(cfg, p)
+		if err != nil {
+			fmt.Printf("Error creating scraper: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Start scraping or web interface
+		if webMode || (cfg.WebInterface != nil && cfg.WebInterface.Enabled) {
+			// Start web interface
+		} else {
+			// Start scraping
+			if err := s.Start(); err != nil {
+				fmt.Printf("Error starting scraper: %v\n", err)
+				os.Exit(1)
+			}
+
+			// Wait for completion
+			s.Wait()
+		}
+	},
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="run-dump" class="section">
+            <div class="container">
+                <h2>Run Dump</h2>
+                <p>Below is a sample run of the UsenetScraper tool with the test configuration:</p>
+                
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <span class="terminal-button"></span>
+                        <span class="terminal-button"></span>
+                        <span class="terminal-button"></span>
+                        <span class="terminal-title">Terminal</span>
+                    </div>
+                    <div class="terminal-content">
+                        <pre><code class="language-bash">$ ./usenet-scraper --config test_config_fixed.yaml
+Loading configuration from test_config_fixed.yaml
+Connecting to news.eternal-september.org:119
+Selecting group alt.test
+Fetching 5 posts from the last 1 day
+Found 5 posts in alt.test
+Applying transformations to posts
+Extracting category from subject using pattern '\[(.*?)\]'
+Cleaning body content (strip_quotes, remove_signatures, normalize_whitespace)
+Writing output to usenet_data.json
+Completed successfully. 5 posts processed, 0 errors.</code></pre>
+                    </div>
+                </div>
+                
+                <div class="output-preview">
+                    <h3>Sample Output (usenet_data.json)</h3>
+                    <pre><code class="language-json">[
+  {
+    "id": "&lt;abc123@example.com&gt;",
+    "author": "user@example.com",
+    "date": "Wed, 23 Apr 2025 10:15:22 +0000",
+    "subject": "[Question] How to configure Usenet client?",
+    "category": "Question",
+    "clean_body": "I'm trying to configure my Usenet client but having some issues with SSL connections. Has anyone encountered this before? I'm using NewsLeecher on Windows 10."
+  },
+  {
+    "id": "&lt;def456@example.com&gt;",
+    "author": "another_user@example.com",
+    "date": "Wed, 23 Apr 2025 11:30:45 +0000",
+    "subject": "[Help] Missing articles in alt.binaries",
+    "category": "Help",
+    "clean_body": "I've noticed a lot of missing articles in alt.binaries groups lately. Is this happening to anyone else or just my provider?"
+  },
+  {
+    "id": "&lt;ghi789@example.com&gt;",
+    "author": "admin@example.com",
+    "date": "Wed, 23 Apr 2025 12:45:10 +0000",
+    "subject": "[Announcement] Server maintenance this weekend",
+    "category": "Announcement",
+    "clean_body": "Our Usenet server will be undergoing maintenance this weekend from Saturday 8pm to Sunday 2am UTC. Expect some downtime during this period."
+  }
+]</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="download" class="section alt-bg">
+            <div class="container">
+                <h2>Download</h2>
+                <p>Download the UsenetScraper tool and documentation:</p>
+                
+                <div class="download-options">
+                    <a href="downloads/usenet-scraper.zip" class="download-btn">
+                        <span class="download-icon">↓</span>
+                        <div class="download-info">
+                            <span class="download-title">UsenetScraper Source Code</span>
+                            <span class="download-meta">ZIP Archive • 1.2 MB</span>
+                        </div>
+                    </a>
+                    
+                    <a href="downloads/usenet-scraper-docs.pdf" class="download-btn">
+                        <span class="download-icon">↓</span>
+                        <div class="download-info">
+                            <span class="download-title">UsenetScraper Documentation</span>
+                            <span class="download-meta">PDF • 420 KB</span>
+                        </div>
+                    </a>
+                    
+                    <a href="downloads/usenet-scraper-spec.md" class="download-btn">
+                        <span class="download-icon">↓</span>
+                        <div class="download-info">
+                            <span class="download-title">YAML DSL Specification</span>
+                            <span class="download-meta">Markdown • 15 KB</span>
+                        </div>
+                    </a>
+                </div>
+                
+                <div class="usage-instructions">
+                    <h3>Usage Instructions</h3>
+                    <p>To run the UsenetScraper:</p>
+                    <pre><code class="language-bash"># Run with a configuration file
+./usenet-scraper --config your_config.yaml
+
+# Start the web interface
+./usenet-scraper --web</code></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 UsenetScraper Project</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

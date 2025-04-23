@@ -1,0 +1,42 @@
+[
+  {
+    "id": "<abc123@example.com>",
+    "author": "user@example.com",
+    "date": "Wed, 23 Apr 2025 10:15:22 +0000",
+    "subject": "[Question] How to configure Usenet client?",
+    "category": "Question",
+    "clean_body": "I'm trying to configure my Usenet client but having some issues with SSL connections. Has anyone encountered this before? I'm using NewsLeecher on Windows 10."
+  },
+  {
+    "id": "<def456@example.com>",
+    "author": "another_user@example.com",
+    "date": "Wed, 23 Apr 2025 11:30:45 +0000",
+    "subject": "[Help] Missing articles in alt.binaries",
+    "category": "Help",
+    "clean_body": "I've noticed a lot of missing articles in alt.binaries groups lately. Is this happening to anyone else or just my provider?"
+  },
+  {
+    "id": "<ghi789@example.com>",
+    "author": "admin@example.com",
+    "date": "Wed, 23 Apr 2025 12:45:10 +0000",
+    "subject": "[Announcement] Server maintenance this weekend",
+    "category": "Announcement",
+    "clean_body": "Our Usenet server will be undergoing maintenance this weekend from Saturday 8pm to Sunday 2am UTC. Expect some downtime during this period."
+  },
+  {
+    "id": "<jkl012@example.com>",
+    "author": "tech_user@example.com",
+    "date": "Wed, 23 Apr 2025 13:20:33 +0000",
+    "subject": "[Discussion] Best Usenet providers in 2025",
+    "category": "Discussion",
+    "clean_body": "I'm looking for recommendations on the best Usenet providers in 2025. I need good retention, completion rates, and reasonable pricing. What are you all using these days?"
+  },
+  {
+    "id": "<mno345@example.com>",
+    "author": "newbie@example.com",
+    "date": "Wed, 23 Apr 2025 14:05:17 +0000",
+    "subject": "[Question] How to get started with Usenet?",
+    "category": "Question",
+    "clean_body": "I'm completely new to Usenet and would appreciate some guidance on how to get started. What software should I use? Which providers are good for beginners? Any tips would be helpful."
+  }
+]
