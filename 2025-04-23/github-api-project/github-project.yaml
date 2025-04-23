@@ -1,0 +1,29 @@
+# GitHub Project Management Configuration
+
+config:
+  auth:
+    token: "${GITHUB_TOKEN}"  # Set the GITHUB_TOKEN environment variable
+  organization: "your-org"    # Replace with your organization or username
+
+project:
+  name: "My Project"
+  description: "Project description"
+  public: false
+  columns:
+    - name: "To Do"
+    - name: "In Progress"
+    - name: "Done"
+
+issues:
+  - title: "First Issue"
+    body: "Description of the first issue"
+    status: "To Do"
+    assignees:
+      - "username"
+    labels:
+      - name: "bug"
+        color: "d73a4a"
+    sub_issues:
+      - title: "Sub-task"
+        body: "Description of the sub-task"
+        status: "To Do"
