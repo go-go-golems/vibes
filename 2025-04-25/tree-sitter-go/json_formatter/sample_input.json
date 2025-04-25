@@ -1,0 +1,83 @@
+{
+  "basePath": "/home/scrapybara/go-file-analyzer/sample",
+  "files": [
+    {
+      "path": "/home/scrapybara/go-file-analyzer/sample/calculator/calculator.go",
+      "package": "calculator",
+      "functions": [
+        {
+          "name": "Add",
+          "filepath": "/home/scrapybara/go-file-analyzer/sample/calculator/calculator.go",
+          "startLine": 4,
+          "endLine": 6,
+          "isMethod": false
+        },
+        {
+          "name": "Subtract",
+          "filepath": "/home/scrapybara/go-file-analyzer/sample/calculator/calculator.go",
+          "startLine": 9,
+          "endLine": 11,
+          "isMethod": false
+        }
+      ]
+    },
+    {
+      "path": "/home/scrapybara/go-file-analyzer/sample/main.go",
+      "package": "main",
+      "functions": [
+        {
+          "name": "main",
+          "filepath": "/home/scrapybara/go-file-analyzer/sample/main.go",
+          "startLine": 10,
+          "endLine": 21,
+          "isMethod": false
+        },
+        {
+          "name": "getGreeting",
+          "filepath": "/home/scrapybara/go-file-analyzer/sample/main.go",
+          "startLine": 24,
+          "endLine": 26,
+          "isMethod": false
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "Add",
+      "filepath": "/home/scrapybara/go-file-analyzer/sample/calculator/calculator.go",
+      "startLine": 4,
+      "endLine": 6,
+      "isMethod": false
+    },
+    {
+      "name": "Subtract",
+      "filepath": "/home/scrapybara/go-file-analyzer/sample/calculator/calculator.go",
+      "startLine": 9,
+      "endLine": 11,
+      "isMethod": false
+    },
+    {
+      "name": "main",
+      "filepath": "/home/scrapybara/go-file-analyzer/sample/main.go",
+      "startLine": 10,
+      "endLine": 21,
+      "isMethod": false
+    },
+    {
+      "name": "getGreeting",
+      "filepath": "/home/scrapybara/go-file-analyzer/sample/main.go",
+      "startLine": 24,
+      "endLine": 26,
+      "isMethod": false
+    }
+  ],
+  "packages": {
+    "calculator": "/sample/calculator",
+    "main": "/sample"
+  },
+  "stats": {
+    "analysisTimeSeconds": 0.123,
+    "timestamp": "2025-04-24T01:23:45Z"
+  }
+}

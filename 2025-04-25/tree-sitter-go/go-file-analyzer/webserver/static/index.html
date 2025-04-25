@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go File Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css" rel="stylesheet">
+    <link href="static/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1>Go File Analyzer</h1>
+                <p class="lead">Parse and analyze Go source code with Tree-sitter</p>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Analyze Project</h5>
+                        <div class="input-group">
+                            <input type="text" id="project-path" class="form-control" placeholder="Enter path to Go project" value="/path/to/go/project">
+                            <button class="btn btn-primary" id="analyze-btn">Analyze</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="results-container" style="display: none;">
+            <div class="col-md-4 col-lg-3">
+                <div class="sidebar">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Project Summary</h5>
+                            <div id="project-summary">
+                                <p>Name: <span id="project-name"></span></p>
+                                <p>Files: <span id="file-count"></span></p>
+                                <p>Functions: <span id="function-count"></span></p>
+                                <p>Methods: <span id="method-count"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Packages</h5>
+                            <div id="package-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8 col-lg-9">
+                <div class="content">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">File: <span id="current-file-path"></span></h5>
+                            <h6>Package: <span id="current-package"></span></h6>
+                            
+                            <div class="mb-3">
+                                <h6>Functions</h6>
+                                <div id="function-list" class="function-list"></div>
+                            </div>
+                            
+                            <div class="code-container">
+                                <pre><code id="code-display" class="code-display language-go"></code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/languages/go.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="static/script.js"></script>
+    <script src="static/visualization.js"></script>
+</body>
+</html>
