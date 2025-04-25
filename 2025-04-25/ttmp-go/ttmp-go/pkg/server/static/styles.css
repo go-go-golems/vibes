@@ -1,0 +1,222 @@
+.markdown-content {
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.markdown-content pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+}
+
+.markdown-content code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+}
+
+.markdown-content blockquote {
+    border-left: 4px solid #ced4da;
+    padding-left: 1rem;
+    color: #6c757d;
+}
+
+.markdown-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.document-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.document-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.metadata-badge {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.metadata-table th {
+    width: 30%;
+}
+
+.footer {
+    margin-top: 2rem;
+}
+
+/* Stats View Styling */
+.stats-card {
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: scale(1.02);
+}
+
+/* Query highlighting */
+.highlight {
+    background-color: #fff3cd;
+    padding: 0.1rem 0.25rem;
+    border-radius: 0.25rem;
+}
+
+/* File Tree Styling */
+.file-tree {
+    font-size: 0.9rem;
+    border-right: 1px solid #dee2e6;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.directory-item, .file-item {
+    margin-bottom: 0.25rem;
+}
+
+.directory-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.directory-header:hover {
+    background-color: #f8f9fa;
+}
+
+.directory-toggle {
+    background: none;
+    border: none;
+    color: #6c757d;
+    padding: 0;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.directory-name {
+    color: #495057;
+    font-weight: 500;
+}
+
+.directory-name i {
+    color: #ffc107;
+    margin-right: 0.25rem;
+}
+
+.file-item {
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.file-item:hover {
+    background-color: #f8f9fa;
+}
+
+.file-item.selected {
+    background-color: #e9ecef;
+    font-weight: 500;
+}
+
+.file-name i {
+    color: #6c757d;
+    margin-right: 0.25rem;
+}
+
+.directory-children {
+    padding-left: 0.5rem;
+}
+
+.directory-item.collapsed .directory-children {
+    display: none;
+}
+
+/* Metadata display styling */
+.metadata-main {
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+}
+
+.metadata-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.metadata-dates {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Navigation sidebar styling */
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 56px);
+    padding-top: 1.5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.main-content {
+    padding-top: 1.5rem;
+}
+
+/* Document content display */
+.document-content-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1.5rem;
+    background-color: white;
+}
+
+/* Code highlighting */
+.hljs {
+    background: #f8f9fa;
+    border-radius: 0.25rem;
+    padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .markdown-content {
+        font-size: 1rem;
+    }
+    
+    .sidebar {
+        position: static;
+        height: auto;
+        margin-bottom: 1.5rem;
+    }
+    
+    .main-content {
+        padding-top: 0;
+    }
+}

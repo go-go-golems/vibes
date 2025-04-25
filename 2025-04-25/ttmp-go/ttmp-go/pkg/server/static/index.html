@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTMP Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/github.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-journal-code"></i> TTMP Explorer
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="nav-documents">
+                            <i class="bi bi-files"></i> Documents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="nav-query">
+                            <i class="bi bi-search"></i> Query
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="nav-validate">
+                            <i class="bi bi-check-circle"></i> Validate
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="nav-stats">
+                            <i class="bi bi-bar-chart"></i> Stats
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Documents View -->
+        <div id="documents-view">
+            <div class="row">
+                <!-- File Tree Sidebar -->
+                <div class="col-md-3 col-lg-3 d-md-block">
+                    <div class="sidebar">
+                        <h4 class="mb-3">File Explorer</h4>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="document-search" placeholder="Search...">
+                            <button class="btn btn-outline-secondary" type="button" id="document-search-btn">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div id="file-tree-container" class="mb-3">
+                            <!-- File tree will be dynamically loaded here -->
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documents List -->
+                <div class="col-md-9 col-lg-9 main-content">
+                    <h2>TTMP Documents</h2>
+                    <p class="text-muted">Browse and explore your TTMP document collection</p>
+                    
+                    <div class="row" id="documents-list">
+                        <!-- Documents will be dynamically loaded here -->
+                        <div class="col-12 text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Document View -->
+        <div id="document-view" style="display: none;">
+            <div class="row">
+                <!-- File Tree Sidebar -->
+                <div class="col-md-3 col-lg-3 d-md-block">
+                    <div class="sidebar">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4>File Explorer</h4>
+                            <button class="btn btn-sm btn-outline-secondary" id="back-to-documents">
+                                <i class="bi bi-arrow-left"></i> Back
+                            </button>
+                        </div>
+                        <div id="file-tree-container-doc-view" class="mb-3">
+                            <!-- File tree will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Document Content -->
+                <div class="col-md-9 col-lg-9 main-content">
+                    <h2 id="document-title" class="mb-4">Document Title</h2>
+                    
+                    <div class="mb-4" id="document-metadata">
+                        <!-- Metadata will be dynamically loaded here -->
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-file-text"></i> Document Content</h5>
+                        </div>
+                        <div class="card-body document-content-container">
+                            <div id="document-content" class="markdown-content">
+                                <!-- Content will be dynamically loaded here -->
+                                <div class="text-center">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Query View -->
+        <div id="query-view" style="display: none;">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="mb-4">Query TTMP Documents</h2>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-search"></i> Query Builder</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="query-input" class="form-label">Query Expression</label>
+                                <input type="text" class="form-control" id="query-input" 
+                                       placeholder="e.g., document_type='tutorial' && (tags contains 'golang')">
+                                <div class="form-text">
+                                    Use logical operators: &&, ||, !
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="query-keywords" class="form-label">Content Keywords (optional)</label>
+                                <input type="text" class="form-control" id="query-keywords" 
+                                       placeholder="e.g., golang,tutorial,advanced">
+                                <div class="form-text">
+                                    Comma-separated keywords to search in document content
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="run-query-btn">
+                                <i class="bi bi-search"></i> Run Query
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="query-results" style="display: none;">
+                        <h3 class="mb-3">Results</h3>
+                        <div id="query-summary" class="alert alert-info mb-4"></div>
+                        <div class="row" id="query-results-list">
+                            <!-- Query results will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Validate View -->
+        <div id="validate-view" style="display: none;">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="mb-4">Validate TTMP Document</h2>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-check-circle"></i> Validation Tool</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="validate-content" class="form-label">Document Content</label>
+                                <textarea class="form-control font-monospace" id="validate-content" rows="15" 
+                                          placeholder="Paste TTMP document content here..."></textarea>
+                            </div>
+                            <button class="btn btn-primary" id="validate-btn">
+                                <i class="bi bi-check-lg"></i> Validate
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="validate-result" class="alert" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats View -->
+        <div id="stats-view" style="display: none;">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <h2 class="mb-4">Document Statistics</h2>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Overview</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="stats-overview">
+                                        <!-- Overview stats will be dynamically loaded here -->
+                                        <div class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Document Types</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="stats-doc-types">
+                                        <!-- Document types chart will be dynamically loaded here -->
+                                        <div class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0"><i class="bi bi-list-columns"></i> Metadata Keys</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="stats-metadata-keys">
+                                        <!-- Metadata key stats will be dynamically loaded here -->
+                                        <div class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">TTMP Explorer - A web interface for the TTMP system</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/languages/go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/languages/yaml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/lib/languages/markdown.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="/static/js/filetree.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

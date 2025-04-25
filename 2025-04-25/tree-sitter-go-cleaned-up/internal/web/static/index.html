@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go File Analyzer</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/force-graph@1.43.0/dist/force-graph.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Go File Analyzer</h1>
+        <nav>
+            <ul>
+                <li><a href="#" id="analyze-btn" class="active">Analyze Code</a></li>
+                <li><a href="#" id="visualize-btn">Visualize</a></li>
+                <li><a href="#" id="cache-btn">Cached Results</a></li>
+                <li><a href="#" id="help-btn">Help</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <main>
+        <section id="analysis-form">
+            <h2>Analyze Go Code</h2>
+            <form id="analyze-form">
+                <div class="form-group">
+                    <label for="code-path">Code Path:</label>
+                    <input type="text" id="code-path" name="path" placeholder="Enter path to Go code">
+                </div>
+                <div class="form-group">
+                    <label for="exclude-dirs">Exclude Directories:</label>
+                    <input type="text" id="exclude-dirs" name="excludeDirs" placeholder="vendor,node_modules,dist">
+                </div>
+                <div class="form-group">
+                    <label for="exclude-files">Exclude Files:</label>
+                    <input type="text" id="exclude-files" name="excludeFiles" placeholder="*_test.go,generated_*.go">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enhanced-output" name="enhancedOutput" checked>
+                        Enhanced Output (for visualization)
+                    </label>
+                </div>
+                <button type="submit" class="primary-btn">Analyze</button>
+            </form>
+        </section>
+        
+        <section id="results" class="hidden">
+            <h2>Analysis Results</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="summary-tab">Summary</button>
+                <button class="tab-btn" data-tab="functions-tab">Functions</button>
+                <button class="tab-btn" data-tab="packages-tab">Packages</button>
+                <button class="tab-btn" data-tab="json-tab">JSON</button>
+            </div>
+            
+            <div id="summary-tab" class="tab-content">
+                <div id="summary-stats" class="stats-cards"></div>
+                <div id="summary-chart" class="chart"></div>
+            </div>
+            
+            <div id="functions-tab" class="tab-content hidden">
+                <div class="filter-bar">
+                    <input type="text" id="function-filter" placeholder="Filter functions...">
+                    <label>
+                        <input type="checkbox" id="show-methods-only"> 
+                        Methods Only
+                    </label>
+                    <label>
+                        <input type="checkbox" id="show-exported-only">
+                        Exported Only
+                    </label>
+                </div>
+                <table id="function-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Package</th>
+                            <th>Type</th>
+                            <th>File</th>
+                            <th>Lines</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div id="packages-tab" class="tab-content hidden">
+                <div id="package-tree" class="tree-view"></div>
+            </div>
+            
+            <div id="json-tab" class="tab-content hidden">
+                <pre id="json-output"></pre>
+            </div>
+        </section>
+        
+        <section id="visualization" class="hidden">
+            <h2>Visualizations</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="function-graph">Function Call Graph</button>
+                <button class="tab-btn" data-tab="package-map">Package Map</button>
+                <button class="tab-btn" data-tab="complexity-chart">Complexity Chart</button>
+            </div>
+            
+            <div id="function-graph" class="tab-content visualization-container">
+                <div class="controls">
+                    <label>
+                        <input type="checkbox" id="show-packages"> 
+                        Show Packages
+                    </label>
+                    <label>
+                        <input type="checkbox" id="show-methods"> 
+                        Show Methods
+                    </label>
+                    <button id="reset-graph" class="secondary-btn">Reset View</button>
+                </div>
+                <div id="graph-container"></div>
+            </div>
+            
+            <div id="package-map" class="tab-content hidden visualization-container">
+                <div id="treemap-container"></div>
+            </div>
+            
+            <div id="complexity-chart" class="tab-content hidden visualization-container">
+                <div id="complexity-container"></div>
+            </div>
+        </section>
+        
+        <section id="cache-list" class="hidden">
+            <h2>Cached Analyses</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Path</th>
+                        <th>Files</th>
+                        <th>Functions</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="cache-items">
+                    <!-- Cache items will be added here -->
+                </tbody>
+            </table>
+        </section>
+        
+        <section id="help" class="hidden">
+            <h2>Help</h2>
+            <div class="help-content">
+                <h3>About Go File Analyzer</h3>
+                <p>
+                    Go File Analyzer is a tool for analyzing Go codebases. It parses Go source code
+                    using Tree-sitter to extract detailed information about functions, methods, and packages.
+                </p>
+                
+                <h3>Analyzing Code</h3>
+                <ol>
+                    <li>Enter the path to the Go code you want to analyze in the "Code Path" field.</li>
+                    <li>Optionally specify directories and files to exclude from the analysis.</li>
+                    <li>Check "Enhanced Output" to get more detailed information for visualization.</li>
+                    <li>Click "Analyze" to start the analysis.</li>
+                </ol>
+                
+                <h3>Visualizations</h3>
+                <p>
+                    The tool provides several visualizations to help you understand your codebase:
+                </p>
+                <ul>
+                    <li><strong>Function Call Graph</strong>: Shows how functions call each other.</li>
+                    <li><strong>Package Map</strong>: Displays the package structure of your codebase.</li>
+                    <li><strong>Complexity Chart</strong>: Visualizes function complexity against size.</li>
+                </ul>
+                
+                <h3>Caching</h3>
+                <p>
+                    Analysis results are cached to improve performance. You can view and manage
+                    cached analyses from the "Cached Results" section.
+                </p>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>Go File Analyzer - Tree-sitter based tool for Go codebase exploration</p>
+    </footer>
+    
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
