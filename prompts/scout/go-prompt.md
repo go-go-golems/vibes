@@ -1,22 +1,41 @@
-# problems
+# Go Development Guidelines
 
-- filepaths
-- installing the right go compiler
-- create and initializing the module + package name
-- add tests for algorithms
-- use mocks in the tests when necessary
-- use table driven tests when possible
-- use cobra for cli apps
-- use either plain httpServer or echo for http apps
-- use viper for configuration and use yaml for most cases
-- use errGroup
+## Project Setup
 
-When implementing go interfaces, use the var \_ Interface = &Foo{} to make sure the interface is always implemented correctly.
-Always use a context argument when appropriate.
-Use the "defaults" package name, instead of "default" package name, as it's reserved in go.
-Use github.com/pkg/errors for wrapping errors.
-When starting goroutines, use errgroup.
+- Install the latest go compiler (see https://go.dev/doc/install)
+- Initialize modules with a properly chosen module path
+- Place code in logically named packages
+- Organize files using standard Go project structure
+- Set up a git repository for version control
+- Always use absolute paths when running commands or writing files
 
-- use a git repo to manage the files
-- always cd into the absolute path before running commands / writing files
-- use lint, also run go fmt
+## Code Quality
+
+- Run `go fmt` before committing code
+- Apply golangci-lint linting tools to ensure code quality
+- Use `var _ Interface = &Foo{}` pattern to verify interface implementations
+- Use context.Context argument when appropriate
+- Use "defaults" package name instead of "default" (reserved in Go)
+
+## Dependencies
+
+- Use github.com/pkg/errors for wrapping errors
+- Use errgroup when starting goroutines
+- For CLI applications, use cobra
+- For HTTP servers, use either standard net/http or echo
+- Use viper for configuration with YAML as the primary format
+
+## Testing
+
+- Write comprehensive tests for algorithms and business logic
+- Use table-driven tests when testing multiple input/output combinations
+- Implement mocks when testing external dependencies
+- Aim for high test coverage of critical code paths
+
+## Best Practices
+
+- Handle file paths cross-platform compatible way
+- Ensure you're using the correct Go compiler version
+- Document your code with clear comments
+- Handle errors explicitly
+- Use consistent code formatting
