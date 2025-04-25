@@ -220,7 +220,8 @@ func (a *GoParser) AnalyzeFile(ctx context.Context, filePath string) (*models.Fi
 // extractPackageName extracts the package name from a file
 func (a *GoParser) extractPackageName(node *sitter.Node, content []byte) (string, error) {
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(a.queries["package"], node)
+	query := a.queries["package"]
+	cursor.Exec(query, node)
 
 	// Get the first match (there should only be one package clause)
 	match, ok := cursor.NextMatch()
@@ -230,7 +231,7 @@ func (a *GoParser) extractPackageName(node *sitter.Node, content []byte) (string
 
 	// Extract package name
 	for _, capture := range match.Captures {
-		if capture.Node != nil && capture.CaptureName == "package_name" {
+		if capture.Node != nil && query.CaptureNameForId(capture.Index) == "package_name" {
 			return string(content[capture.Node.StartByte():capture.Node.EndByte()]), nil
 		}
 	}
@@ -239,11 +240,12 @@ func (a *GoParser) extractPackageName(node *sitter.Node, content []byte) (string
 }
 
 // extractImports extracts import statements from a file
-func (a *GoParser) extractImports(node *sitter.Node, content []byte) ([]ImportInfo, error) {
+func (a *GoParser) extractImports(node *sitter.Node, content []byte) ([]models.ImportInfo, error) {
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(a.queries["import"], node)
+	query := a.queries["import"]
+	cursor.Exec(query, node)
 
-	var imports []ImportInfo
+	var imports []models.ImportInfo
 
 	// Process all matches
 	for {
@@ -255,8 +257,8 @@ func (a *GoParser) extractImports(node *sitter.Node, content []byte) ([]ImportIn
 		var importPath string
 		var importAlias string
 
-		importPathNode := getNodeByCaptureName(match, "import_path")
-		importAliasNode := getNodeByCaptureName(match, "import_alias")
+		importPathNode := getNodeByCaptureName(match, query, "import_path")
+		importAliasNode := getNodeByCaptureName(match, query, "import_alias")
 
 		if importPathNode != nil {
 			// Remove quotes from import path
@@ -269,7 +271,7 @@ func (a *GoParser) extractImports(node *sitter.Node, content []byte) ([]ImportIn
 		}
 
 		if importPath != "" {
-			imports = append(imports, ImportInfo{
+			imports = append(imports, models.ImportInfo{
 				Path:  importPath,
 				Alias: importAlias,
 			})
@@ -280,11 +282,12 @@ func (a *GoParser) extractImports(node *sitter.Node, content []byte) ([]ImportIn
 }
 
 // extractFunctions extracts function declarations from a file
-func (a *GoParser) extractFunctions(node *sitter.Node, content []byte, filePath, packageName string) ([]FunctionInfo, error) {
+func (a *GoParser) extractFunctions(node *sitter.Node, content []byte, filePath, packageName string) ([]models.FunctionInfo, error) {
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(a.queries["function"], node)
+	query := a.queries["function"]
+	cursor.Exec(query, node)
 
-	var functions []FunctionInfo
+	var functions []models.FunctionInfo
 
 	// Process all matches
 	for {
@@ -293,11 +296,11 @@ func (a *GoParser) extractFunctions(node *sitter.Node, content []byte, filePath,
 			break
 		}
 
-		funcNameNode := getNodeByCaptureName(match, "func_name")
-		funcNode := getNodeByCaptureName(match, "function")
-		paramNode := getNodeByCaptureName(match, "parameters")
-		returnTypeNode := getNodeByCaptureName(match, "return_type")
-		returnParamsNode := getNodeByCaptureName(match, "return_params")
+		funcNameNode := getNodeByCaptureName(match, query, "func_name")
+		funcNode := getNodeByCaptureName(match, query, "function")
+		paramNode := getNodeByCaptureName(match, query, "parameters")
+		returnTypeNode := getNodeByCaptureName(match, query, "return_type")
+		returnParamsNode := getNodeByCaptureName(match, query, "return_params")
 
 		if funcNode != nil && funcNameNode != nil {
 			funcName := string(content[funcNameNode.StartByte():funcNameNode.EndByte()])
@@ -315,7 +318,7 @@ func (a *GoParser) extractFunctions(node *sitter.Node, content []byte, filePath,
 			returnTypes := a.extractReturnTypes(returnTypeNode, returnParamsNode, content)
 
 			// Create function info
-			functionInfo := FunctionInfo{
+			functionInfo := models.FunctionInfo{
 				Name:       funcName,
 				Filepath:   filePath,
 				StartLine:  int(startPoint.Row) + 1,
@@ -337,11 +340,12 @@ func (a *GoParser) extractFunctions(node *sitter.Node, content []byte, filePath,
 }
 
 // extractMethods extracts method declarations from a file
-func (a *GoParser) extractMethods(node *sitter.Node, content []byte, filePath, packageName string) ([]FunctionInfo, error) {
+func (a *GoParser) extractMethods(node *sitter.Node, content []byte, filePath, packageName string) ([]models.FunctionInfo, error) {
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(a.queries["method"], node)
+	query := a.queries["method"]
+	cursor.Exec(query, node)
 
-	var methods []FunctionInfo
+	var methods []models.FunctionInfo
 
 	// Process all matches
 	for {
@@ -350,14 +354,14 @@ func (a *GoParser) extractMethods(node *sitter.Node, content []byte, filePath, p
 			break
 		}
 
-		receiverNameNode := getNodeByCaptureName(match, "receiver_name")
-		receiverTypeNode := getNodeByCaptureName(match, "receiver_type")
-		receiverPointerTypeNode := getNodeByCaptureName(match, "receiver_pointer_type")
-		methodNameNode := getNodeByCaptureName(match, "method_name")
-		methodNode := getNodeByCaptureName(match, "method")
-		paramNode := getNodeByCaptureName(match, "parameters")
-		returnTypeNode := getNodeByCaptureName(match, "return_type")
-		returnParamsNode := getNodeByCaptureName(match, "return_params")
+		receiverNameNode := getNodeByCaptureName(match, query, "receiver_name")
+		receiverTypeNode := getNodeByCaptureName(match, query, "receiver_type")
+		receiverPointerTypeNode := getNodeByCaptureName(match, query, "receiver_pointer_type")
+		methodNameNode := getNodeByCaptureName(match, query, "method_name")
+		methodNode := getNodeByCaptureName(match, query, "method")
+		paramNode := getNodeByCaptureName(match, query, "parameters")
+		returnTypeNode := getNodeByCaptureName(match, query, "return_type")
+		returnParamsNode := getNodeByCaptureName(match, query, "return_params")
 
 		if methodNode != nil && methodNameNode != nil {
 			methodName := string(content[methodNameNode.StartByte():methodNameNode.EndByte()])
@@ -389,7 +393,7 @@ func (a *GoParser) extractMethods(node *sitter.Node, content []byte, filePath, p
 			returnTypes := a.extractReturnTypes(returnTypeNode, returnParamsNode, content)
 
 			// Create method info
-			methodInfo := FunctionInfo{
+			methodInfo := models.FunctionInfo{
 				Name:       methodName,
 				Filepath:   filePath,
 				StartLine:  int(startPoint.Row) + 1,
@@ -398,7 +402,7 @@ func (a *GoParser) extractMethods(node *sitter.Node, content []byte, filePath, p
 				EndCol:     int(endPoint.Column),
 				IsExported: isExported,
 				IsMethod:   true,
-				Receiver: &ReceiverInfo{
+				Receiver: &models.ReceiverInfo{
 					Name: receiverName,
 					Type: finalReceiverType,
 				},
@@ -415,15 +419,16 @@ func (a *GoParser) extractMethods(node *sitter.Node, content []byte, filePath, p
 }
 
 // extractParameters extracts parameters from a parameter list
-func (a *GoParser) extractParameters(paramListNode *sitter.Node, content []byte) []ParameterInfo {
+func (a *GoParser) extractParameters(paramListNode *sitter.Node, content []byte) []models.ParameterInfo {
 	if paramListNode == nil {
 		return nil
 	}
 
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(a.queries["parameter"], paramListNode)
+	query := a.queries["parameter"]
+	cursor.Exec(query, paramListNode)
 
-	var parameters []ParameterInfo
+	var parameters []models.ParameterInfo
 
 	// Process all matches
 	for {
@@ -432,8 +437,8 @@ func (a *GoParser) extractParameters(paramListNode *sitter.Node, content []byte)
 			break
 		}
 
-		paramNameNode := getNodeByCaptureName(match, "param_name")
-		paramTypeNode := getNodeByCaptureName(match, "param_type")
+		paramNameNode := getNodeByCaptureName(match, query, "param_name")
+		paramTypeNode := getNodeByCaptureName(match, query, "param_type")
 
 		var paramName string
 		var paramType string
@@ -447,7 +452,7 @@ func (a *GoParser) extractParameters(paramListNode *sitter.Node, content []byte)
 
 		// Add parameter only if we have a type
 		if paramType != "" {
-			parameters = append(parameters, ParameterInfo{
+			parameters = append(parameters, models.ParameterInfo{
 				Name: paramName,
 				Type: paramType,
 			})
@@ -487,7 +492,7 @@ func (a *GoParser) extractReturnTypes(returnTypeNode, returnParamsNode *sitter.N
 			}
 
 			// Extract return type (from the 'type' capture of the parameter query)
-			paramTypeNode := getNodeByCaptureName(match, "param_type")
+			paramTypeNode := getNodeByCaptureName(match, a.queries["parameter"], "param_type")
 			if paramTypeNode != nil {
 				returnType := string(content[paramTypeNode.StartByte():paramTypeNode.EndByte()])
 				returnTypes = append(returnTypes, returnType)
@@ -499,9 +504,10 @@ func (a *GoParser) extractReturnTypes(returnTypeNode, returnParamsNode *sitter.N
 }
 
 // attachCommentsToFunctions attaches comments to functions
-func (a *GoParser) attachCommentsToFunctions(node *sitter.Node, content []byte, functions []FunctionInfo) {
+func (a *GoParser) attachCommentsToFunctions(node *sitter.Node, content []byte, functions []models.FunctionInfo) {
 	cursor := sitter.NewQueryCursor()
-	cursor.Exec(a.queries["comment"], node)
+	query := a.queries["comment"]
+	cursor.Exec(query, node)
 
 	// Map of line numbers to comments
 	lineComments := make(map[int]string)
@@ -599,10 +605,11 @@ func cleanComment(commentText string) string {
 	return commentText
 }
 
-// Helper to get node by capture name
-func getNodeByCaptureName(match *sitter.QueryMatch, name string) *sitter.Node {
+// getNodeByCaptureName finds a node within a match based on the capture name.
+// It requires the query object to resolve capture names from indices.
+func getNodeByCaptureName(match *sitter.QueryMatch, query *sitter.Query, name string) *sitter.Node {
 	for _, capture := range match.Captures {
-		if capture.CaptureName == name {
+		if query.CaptureNameForId(capture.Index) == name {
 			return capture.Node
 		}
 	}

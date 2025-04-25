@@ -62,10 +62,10 @@ func main() {
 	}
 
 	analyzerConfig := analyzer.Config{
-		Parser:         goParser,
-		ExcludeDirs:    excludeDirs,
+		Parser:          goParser,
+		ExcludeDirs:     excludeDirs,
 		ExcludePatterns: excludeFilePatterns,
-		Concurrency:    *concurrency,
+		Concurrency:     *concurrency,
 	}
 	analyzerInstance, err := analyzer.NewAnalyzer(analyzerConfig)
 	if err != nil {
@@ -111,8 +111,7 @@ func main() {
 	}
 
 	// Print summary to stdout
-	fmt.Printf("\n--- Analysis Summary ---\
-")
+	fmt.Printf("\n--- Analysis Summary ---\n")
 	fmt.Printf("Analyzed Path: %s\n", analysisResult.BasePath)
 	fmt.Printf("Files Analyzed: %d\n", analysisResult.Stats.TotalFiles)
 	fmt.Printf("Packages Found: %d\n", analysisResult.Stats.TotalPackages)
@@ -122,4 +121,4 @@ func main() {
 	fmt.Printf("Results written to: %s\n", *outputPath)
 
 	log.Println("Analyzer finished.")
-} 
+}
