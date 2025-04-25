@@ -1,0 +1,535 @@
+{
+  "metadata": {
+    "name": "go-file-analyzer",
+    "basePath": "/home/scrapybara/go-file-analyzer",
+    "goVersion": "1.18",
+    "moduleName": "github.com/scrapybara/go-file-analyzer",
+    "numFiles": 3,
+    "numFunctions": 12,
+    "numMethods": 6,
+    "numPackages": 2,
+    "analysisTimeMs": 123,
+    "generated": "2025-04-24T13:25:32Z"
+  },
+  "files": [
+    {
+      "path": "sample/calculator/calculator.go",
+      "absPath": "/home/scrapybara/go-file-analyzer/sample/calculator/calculator.go",
+      "package": "calculator",
+      "imports": [],
+      "functions": [
+        {
+          "id": "calculator.Add",
+          "name": "Add",
+          "signature": "func Add(a int, b int) int",
+          "filepath": "sample/calculator/calculator.go",
+          "startLine": 4,
+          "endLine": 6,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "calculator",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "a",
+              "type": "int"
+            },
+            {
+              "name": "b",
+              "type": "int"
+            }
+          ],
+          "returnTypes": ["int"],
+          "comments": "Add adds two integers and returns the result"
+        },
+        {
+          "id": "calculator.Subtract",
+          "name": "Subtract",
+          "signature": "func Subtract(a int, b int) int",
+          "filepath": "sample/calculator/calculator.go",
+          "startLine": 9,
+          "endLine": 11,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "calculator",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "a",
+              "type": "int"
+            },
+            {
+              "name": "b",
+              "type": "int"
+            }
+          ],
+          "returnTypes": ["int"],
+          "comments": "Subtract subtracts b from a and returns the result"
+        },
+        {
+          "id": "calculator.Multiply",
+          "name": "Multiply",
+          "signature": "func Multiply(a int, b int) int",
+          "filepath": "sample/calculator/calculator.go",
+          "startLine": 14,
+          "endLine": 16,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "calculator",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "a",
+              "type": "int"
+            },
+            {
+              "name": "b",
+              "type": "int"
+            }
+          ],
+          "returnTypes": ["int"],
+          "comments": "Multiply multiplies two integers and returns the result"
+        },
+        {
+          "id": "calculator.Divide",
+          "name": "Divide",
+          "signature": "func Divide(a int, b int) int",
+          "filepath": "sample/calculator/calculator.go",
+          "startLine": 19,
+          "endLine": 24,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "calculator",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "a",
+              "type": "int"
+            },
+            {
+              "name": "b",
+              "type": "int"
+            }
+          ],
+          "returnTypes": ["int"],
+          "comments": "Divide divides a by b and returns the result\nNote: This function is not used in the main program"
+        }
+      ],
+      "numLines": 25,
+      "size": 512
+    },
+    {
+      "path": "sample/nested/subpackage/helper.go",
+      "absPath": "/home/scrapybara/go-file-analyzer/sample/nested/subpackage/helper.go",
+      "package": "subpackage",
+      "imports": [
+        {
+          "path": "errors"
+        },
+        {
+          "path": "strings"
+        }
+      ],
+      "functions": [
+        {
+          "id": "subpackage.NewHelper",
+          "name": "NewHelper",
+          "signature": "func NewHelper(prefix string) *Helper",
+          "filepath": "sample/nested/subpackage/helper.go",
+          "startLine": 16,
+          "endLine": 21,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "subpackage",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "prefix",
+              "type": "string"
+            }
+          ],
+          "returnTypes": ["*Helper"],
+          "comments": "NewHelper creates a new Helper instance"
+        },
+        {
+          "id": "subpackage.FormatString",
+          "name": "FormatString",
+          "signature": "func (h *Helper) FormatString(input string) string",
+          "filepath": "sample/nested/subpackage/helper.go",
+          "startLine": 24,
+          "endLine": 35,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "subpackage",
+          "isMethod": true,
+          "isExported": true,
+          "receiver": {
+            "name": "h",
+            "type": "*Helper",
+            "isPointer": true,
+            "typeName": "Helper"
+          },
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            }
+          ],
+          "returnTypes": ["string"],
+          "comments": "FormatString formats a string with the helper's prefix"
+        },
+        {
+          "id": "subpackage.ClearCache",
+          "name": "ClearCache",
+          "signature": "func (h *Helper) ClearCache()",
+          "filepath": "sample/nested/subpackage/helper.go",
+          "startLine": 38,
+          "endLine": 40,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "subpackage",
+          "isMethod": true,
+          "isExported": true,
+          "receiver": {
+            "name": "h",
+            "type": "*Helper",
+            "isPointer": true,
+            "typeName": "Helper"
+          },
+          "parameters": [],
+          "returnTypes": [],
+          "comments": "ClearCache clears the helper's cache"
+        },
+        {
+          "id": "subpackage.Validate",
+          "name": "Validate",
+          "signature": "func Validate(input string) error",
+          "filepath": "sample/nested/subpackage/helper.go",
+          "startLine": 43,
+          "endLine": 57,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "subpackage",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            }
+          ],
+          "returnTypes": ["error"],
+          "comments": "Validate checks if a string meets certain criteria"
+        }
+      ],
+      "numLines": 57,
+      "size": 1024
+    },
+    {
+      "path": "sample/nested/deep_directory.go",
+      "absPath": "/home/scrapybara/go-file-analyzer/sample/nested/deep_directory.go",
+      "package": "nested",
+      "imports": [
+        {
+          "path": "fmt"
+        },
+        {
+          "path": "strings"
+        }
+      ],
+      "functions": [
+        {
+          "id": "nested.NewNestedStruct",
+          "name": "NewNestedStruct",
+          "signature": "func NewNestedStruct(name string, value int) *NestedStruct",
+          "filepath": "sample/nested/deep_directory.go",
+          "startLine": 16,
+          "endLine": 22,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "nested",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "value",
+              "type": "int"
+            }
+          ],
+          "returnTypes": ["*NestedStruct"],
+          "comments": "NewNestedStruct creates a new NestedStruct"
+        },
+        {
+          "id": "nested.GetFullName",
+          "name": "GetFullName",
+          "signature": "func (n *NestedStruct) GetFullName() string",
+          "filepath": "sample/nested/deep_directory.go",
+          "startLine": 25,
+          "endLine": 27,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "nested",
+          "isMethod": true,
+          "isExported": true,
+          "receiver": {
+            "name": "n",
+            "type": "*NestedStruct",
+            "isPointer": true,
+            "typeName": "NestedStruct"
+          },
+          "parameters": [],
+          "returnTypes": ["string"],
+          "comments": "GetFullName returns the name with a prefix"
+        },
+        {
+          "id": "nested.GetFormattedInfo",
+          "name": "GetFormattedInfo",
+          "signature": "func (n *NestedStruct) GetFormattedInfo() string",
+          "filepath": "sample/nested/deep_directory.go",
+          "startLine": 30,
+          "endLine": 32,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "nested",
+          "isMethod": true,
+          "isExported": true,
+          "receiver": {
+            "name": "n",
+            "type": "*NestedStruct",
+            "isPointer": true,
+            "typeName": "NestedStruct"
+          },
+          "parameters": [],
+          "returnTypes": ["string"],
+          "comments": "GetFormattedInfo returns a formatted string with the struct's information"
+        },
+        {
+          "id": "nested.Toggle",
+          "name": "Toggle",
+          "signature": "func (n *NestedStruct) Toggle()",
+          "filepath": "sample/nested/deep_directory.go",
+          "startLine": 36,
+          "endLine": 38,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "nested",
+          "isMethod": true,
+          "isExported": true,
+          "receiver": {
+            "name": "n",
+            "type": "*NestedStruct",
+            "isPointer": true,
+            "typeName": "NestedStruct"
+          },
+          "parameters": [],
+          "returnTypes": [],
+          "comments": "Toggle toggles the enabled state"
+        },
+        {
+          "id": "nested.ProcessData",
+          "name": "ProcessData",
+          "signature": "func ProcessData(input string, multiplier int) (string, int)",
+          "filepath": "sample/nested/deep_directory.go",
+          "startLine": 41,
+          "endLine": 51,
+          "startCol": 1,
+          "endCol": 1,
+          "package": "nested",
+          "isMethod": false,
+          "isExported": true,
+          "parameters": [
+            {
+              "name": "input",
+              "type": "string"
+            },
+            {
+              "name": "multiplier",
+              "type": "int"
+            }
+          ],
+          "returnTypes": ["string", "int"],
+          "comments": "ProcessData performs some operations on input data"
+        }
+      ],
+      "numLines": 51,
+      "size": 896
+    }
+  ],
+  "functions": [
+    {
+      "id": "calculator.Add",
+      "name": "Add",
+      "signature": "func Add(a int, b int) int",
+      "filepath": "sample/calculator/calculator.go",
+      "startLine": 4,
+      "endLine": 6,
+      "startCol": 1,
+      "endCol": 1,
+      "package": "calculator",
+      "isMethod": false,
+      "isExported": true,
+      "parameters": [
+        {
+          "name": "a",
+          "type": "int"
+        },
+        {
+          "name": "b",
+          "type": "int"
+        }
+      ],
+      "returnTypes": ["int"],
+      "comments": "Add adds two integers and returns the result",
+      "calls": ["sample/main.go:main"]
+    }
+  ],
+  "packages": [
+    {
+      "name": "calculator",
+      "path": "sample/calculator",
+      "files": ["sample/calculator/calculator.go"],
+      "functions": ["calculator.Add", "calculator.Subtract", "calculator.Multiply", "calculator.Divide"]
+    },
+    {
+      "name": "nested",
+      "path": "sample/nested",
+      "files": ["sample/nested/deep_directory.go"],
+      "functions": ["nested.NewNestedStruct", "nested.GetFullName", "nested.GetFormattedInfo", "nested.Toggle", "nested.ProcessData"]
+    },
+    {
+      "name": "subpackage",
+      "path": "sample/nested/subpackage",
+      "files": ["sample/nested/subpackage/helper.go"],
+      "functions": ["subpackage.NewHelper", "subpackage.FormatString", "subpackage.ClearCache", "subpackage.Validate"]
+    }
+  ],
+  "callGraph": {
+    "nodes": [
+      {
+        "id": "calculator.Add",
+        "label": "Add",
+        "type": "function",
+        "package": "calculator",
+        "filepath": "sample/calculator/calculator.go"
+      },
+      {
+        "id": "main.main",
+        "label": "main",
+        "type": "function",
+        "package": "main",
+        "filepath": "sample/main.go"
+      },
+      {
+        "id": "pkg:calculator",
+        "label": "calculator",
+        "type": "package",
+        "package": "calculator"
+      }
+    ],
+    "edges": [
+      {
+        "source": "calculator.Add",
+        "target": "pkg:calculator",
+        "type": "belongs_to"
+      },
+      {
+        "source": "main.main",
+        "target": "calculator.Add",
+        "type": "calls"
+      }
+    ]
+  },
+  "visualizationData": {
+    "packageHierarchy": {
+      "name": "root",
+      "children": [
+        {
+          "name": "calculator",
+          "path": "sample/calculator",
+          "value": 4,
+          "children": []
+        },
+        {
+          "name": "nested",
+          "path": "sample/nested",
+          "value": 5,
+          "children": []
+        },
+        {
+          "name": "subpackage",
+          "path": "sample/nested/subpackage",
+          "value": 4,
+          "children": []
+        }
+      ]
+    },
+    "callNetwork": {
+      "nodes": [
+        {
+          "id": "calculator.Add",
+          "label": "Add",
+          "package": "calculator",
+          "group": "calculator",
+          "value": 3,
+          "isMethod": false,
+          "type": "function"
+        },
+        {
+          "id": "main.main",
+          "label": "main",
+          "package": "main",
+          "group": "main",
+          "value": 12,
+          "isMethod": false,
+          "type": "function"
+        }
+      ],
+      "links": [
+        {
+          "source": "main.main",
+          "target": "calculator.Add",
+          "value": 1,
+          "type": "calls"
+        }
+      ]
+    },
+    "moduleDependencies": {
+      "names": ["calculator", "nested", "subpackage", "main"],
+      "matrix": [
+        [0, 0, 0, 1],
+        [0, 0, 1, 0],
+        [0, 0, 0, 0],
+        [1, 0, 0, 0]
+      ]
+    },
+    "functionComplexity": [
+      {
+        "name": "Add",
+        "package": "calculator",
+        "complexity": 1,
+        "lines": 3
+      },
+      {
+        "name": "main",
+        "package": "main",
+        "complexity": 2,
+        "lines": 12
+      },
+      {
+        "name": "ProcessData",
+        "package": "nested",
+        "complexity": 2,
+        "lines": 11
+      }
+    ]
+  }
+}

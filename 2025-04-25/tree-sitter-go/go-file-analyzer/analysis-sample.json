@@ -1,0 +1,52 @@
+{
+  "functions": [
+    {
+      "name": "Add",
+      "filepath": "sample/calculator/calculator.go",
+      "startLine": 4,
+      "endLine": 6
+    },
+    {
+      "name": "Subtract",
+      "filepath": "sample/calculator/calculator.go",
+      "startLine": 9,
+      "endLine": 11
+    },
+    {
+      "name": "Multiply",
+      "filepath": "sample/calculator/calculator.go",
+      "startLine": 14,
+      "endLine": 16
+    },
+    {
+      "name": "Divide",
+      "filepath": "sample/calculator/calculator.go",
+      "startLine": 20,
+      "endLine": 25
+    },
+    {
+      "name": "main",
+      "filepath": "sample/main.go",
+      "startLine": 10,
+      "endLine": 21
+    },
+    {
+      "name": "getGreeting",
+      "filepath": "sample/main.go",
+      "startLine": 24,
+      "endLine": 26
+    },
+    {
+      "name": "printMessage",
+      "filepath": "sample/main.go",
+      "startLine": 29,
+      "endLine": 34
+    },
+    {
+      "name": "exitIfEmpty",
+      "filepath": "sample/main.go",
+      "startLine": 37,
+      "endLine": 42
+    }
+  ]
+}
