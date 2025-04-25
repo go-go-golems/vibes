@@ -6,8 +6,15 @@
 - Initialize modules with a properly chosen module path
 - Place code in logically named packages
 - Organize files using standard Go project structure
-- Set up a git repository for version control
 - Always use absolute paths when running commands or writing files
+
+## Source control (IMPORTANT)
+
+- Set up a git repository for version control
+- ALWAYS USE git to manage your code
+- always add every file to git, even if you think you already added it
+- Call git to commit after every step
+- at regular intervals, run "git add ." to add everything to make sure we have it all
 
 ## Code Quality
 
