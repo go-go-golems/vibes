@@ -4,9 +4,11 @@
 
 - Install the latest go compiler (see https://go.dev/doc/install)
 - Initialize modules with a properly chosen module path
+- Use go.mod and do go mod tidy after every step
 - Place code in logically named packages
 - Organize files using standard Go project structure
 - Always use absolute paths when running commands or writing files
+- Use the standard pkg/ cmd/ internal/ directories
 
 ## Source control (IMPORTANT)
 
@@ -23,6 +25,7 @@
 - Use `var _ Interface = &Foo{}` pattern to verify interface implementations
 - Use context.Context argument when appropriate
 - Use "defaults" package name instead of "default" (reserved in Go)
+- Use zerolog for logging and be extremely generous with logging so that we can better debug issues. Default log level should be debug.
 
 ## Dependencies
 
