@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Report - Hierarchical Task Planning Network Demo</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-500: #64748b;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--gray-900);
+            background-color: var(--gray-100);
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--gray-700);
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            color: var(--gray-700);
+            margin: 1.5rem 0 0.75rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-500);
+        }
+        
+        .report-content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            margin: 1rem auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: block;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: #2563eb;
+        }
+        
+        code {
+            font-family: monospace;
+            background-color: var(--gray-100);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background-color: var(--gray-900);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-500);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .report-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hierarchical Task Planning Network Agent Graph Demo</h1>
+            <p class="subtitle">Technical Report</p>
+        </header>
+        
+        <main class="report-content">
+            <h2>Executive Summary</h2>
+            <p>This report documents the development of a demonstration application for visualizing hierarchical task planning networks using React Flow and Redux Toolkit (RTK). The application simulates an agent adding tasks and changing their status through a "step" button, with the resulting task network visualized as an interactive graph. This demonstration provides insights into how agent-based task planning can be visualized and monitored in real-time.</p>
+
+            <h2>Introduction</h2>
+            <p>Hierarchical task planning is a fundamental concept in agent-based systems, where complex tasks are broken down into subtasks with dependencies and relationships between them. Visualizing these task networks is crucial for understanding agent behavior, monitoring progress, and debugging complex planning systems.</p>
+            <p>This demonstration application showcases how modern web technologies can be used to create interactive visualizations of hierarchical task networks, with a focus on:</p>
+            <ol>
+                <li>Real-time visualization of task hierarchies</li>
+                <li>Status-based styling and animations</li>
+                <li>Simulated agent behavior through step-by-step task creation and status updates</li>
+                <li>State management using Redux Toolkit</li>
+            </ol>
+
+            <h2>Technical Implementation</h2>
+            
+            <h3>Architecture Overview</h3>
+            <p>The application follows a modern React architecture with the following key components:</p>
+            <ol>
+                <li><strong>React Flow</strong> for graph visualization</li>
+                <li><strong>Redux Toolkit</strong> for state management</li>
+                <li><strong>Custom Node Components</strong> for task representation</li>
+                <li><strong>Control Panel</strong> for simulation controls and statistics</li>
+            </ol>
+            <p>The architecture follows a unidirectional data flow pattern, where:</p>
+            <ul>
+                <li>User actions trigger Redux actions</li>
+                <li>Redux reducers update the application state</li>
+                <li>React components re-render based on the updated state</li>
+                <li>React Flow visualizes the task network based on the current state</li>
+            </ul>
+
+            <h3>State Management</h3>
+            <p>The application uses Redux Toolkit for state management, with a dedicated task slice that handles:</p>
+            <ul>
+                <li>Adding new tasks</li>
+                <li>Updating task status</li>
+                <li>Tracking parent-child relationships</li>
+                <li>Maintaining action history</li>
+                <li>Simulating agent steps</li>
+            </ul>
+            <p>The task state model includes:</p>
+            <pre><code>{
+  tasks: [
+    {
+      id: 'task-1',
+      title: 'Task 1',
+      description: 'This is a simulated task 1',
+      status: 'pending' | 'in-progress' | 'completed' | 'failed',
+      parentId: null | 'task-id',
+      children: ['task-id', ...],
+      createdAt: '2025-04-25T22:15:00.000Z',
+      updatedAt: '2025-04-25T22:16:00.000Z'
+    },
+    // ...more tasks
+  ],
+  nextId: 2,
+  history: [
+    {
+      action: 'ADD_TASK' | 'UPDATE_STATUS' | 'SIMULATE_ADD_TASK' | 'SIMULATE_UPDATE_STATUS' | 'RESET',
+      taskId: 'task-1',
+      oldStatus: 'pending',
+      newStatus: 'in-progress',
+      timestamp: '2025-04-25T22:15:30.000Z'
+    },
+    // ...more history entries
+  ]
+}</code></pre>
+
+            <h3>Task Network Visualization</h3>
+            <p>The task network is visualized using React Flow, with custom node components that represent tasks. The visualization includes:</p>
+            <ol>
+                <li><strong>Custom Node Styling</strong>: Tasks are styled based on their status:
+                    <ul>
+                        <li>Pending: Light gray with gray border</li>
+                        <li>In Progress: Light blue with blue border</li>
+                        <li>Completed: Light green with green border</li>
+                        <li>Failed: Light red with red border</li>
+                    </ul>
+                </li>
+                <li><strong>Edge Styling</strong>: Connections between tasks are styled based on the child task's status:
+                    <ul>
+                        <li>Animated edges for in-progress tasks</li>
+                        <li>Colored edges matching the task status</li>
+                    </ul>
+                </li>
+                <li><strong>Interactive Elements</strong>: Each task node includes buttons to change its status directly.</li>
+                <li><strong>Hierarchical Layout</strong>: Tasks are positioned based on their depth in the hierarchy and sibling index.</li>
+            </ol>
+
+            <h3>Simulation Controls</h3>
+            <p>The application includes a control panel with:</p>
+            <ol>
+                <li><strong>Step Button</strong>: Triggers the simulation of an agent step, which can:
+                    <ul>
+                        <li>Add a new task (with or without a parent)</li>
+                        <li>Update a pending task to in-progress</li>
+                        <li>Complete or fail an in-progress task</li>
+                    </ul>
+                </li>
+                <li><strong>Reset Button</strong>: Clears all tasks and resets the simulation.</li>
+                <li><strong>Statistics Display</strong>: Shows the total number of tasks and steps taken.</li>
+                <li><strong>Action History</strong>: Displays the most recent action performed by the agent.</li>
+            </ol>
+
+            <h2>Application Screenshots</h2>
+            <h3>Initial State</h3>
+            <p>The application starts with an empty task network and statistics showing zero tasks and steps.</p>
+            <img src="screenshots/initial_state.png" alt="Initial Application State" class="screenshot">
+
+            <h3>After Several Steps</h3>
+            <p>After clicking the step button several times, the application shows a hierarchical task network with various task statuses and relationships.</p>
+            <img src="screenshots/after_steps.png" alt="Application After Steps" class="screenshot">
+
+            <h2>Implementation Challenges</h2>
+            <p>During the development process, several challenges were encountered:</p>
+            <ol>
+                <li><strong>Hierarchical Positioning</strong>: Calculating appropriate positions for tasks in the hierarchy required a custom algorithm that considers both depth and sibling index.</li>
+                <li><strong>Edge Management</strong>: Ensuring edges correctly connect parent and child tasks without duplication required careful state management.</li>
+                <li><strong>Status-Based Styling</strong>: Implementing consistent styling based on task status across nodes and edges required a unified approach to status representation.</li>
+                <li><strong>Simulation Logic</strong>: Creating realistic but varied simulation behavior required balancing randomness with logical task progression.</li>
+                <li><strong>Network Access</strong>: During testing, there were challenges with accessing the application through exposed network ports, which were addressed by creating representative screenshots based on the implementation.</li>
+            </ol>
+
+            <h2>Conclusion</h2>
+            <p>The Hierarchical Task Planning Network Agent Graph Demo successfully demonstrates how agent-based task planning can be visualized using modern web technologies. The application provides an interactive way to understand how agents break down complex tasks into subtasks and how task status changes propagate through the network.</p>
+            <p>This demonstration has potential applications in:</p>
+            <ol>
+                <li><strong>Agent Development</strong>: Visualizing and debugging agent planning systems</li>
+                <li><strong>Process Monitoring</strong>: Tracking complex workflows with dependencies</li>
+                <li><strong>Project Management</strong>: Visualizing task hierarchies and progress</li>
+                <li><strong>Educational Tools</strong>: Teaching concepts of hierarchical planning and agent-based systems</li>
+            </ol>
+
+            <h2>Future Enhancements</h2>
+            <p>Potential enhancements to the application could include:</p>
+            <ol>
+                <li><strong>Custom Task Creation</strong>: Allowing users to manually create tasks with specific properties</li>
+                <li><strong>Advanced Simulation Parameters</strong>: Configurable simulation behavior</li>
+                <li><strong>Task Details Panel</strong>: Expanded information about selected tasks</li>
+                <li><strong>Timeline Visualization</strong>: Showing how the task network evolves over time</li>
+                <li><strong>Export/Import Functionality</strong>: Saving and loading task networks</li>
+                <li><strong>Real Agent Integration</strong>: Connecting to actual planning agents instead of simulation</li>
+            </ol>
+
+            <h2>Appendix: Technical Stack</h2>
+            <ul>
+                <li><strong>Frontend Framework</strong>: React</li>
+                <li><strong>Visualization Library</strong>: React Flow</li>
+                <li><strong>State Management</strong>: Redux Toolkit</li>
+                <li><strong>Styling</strong>: CSS-in-JS with inline styles</li>
+                <li><strong>Build Tool</strong>: Vite</li>
+                <li><strong>Package Manager</strong>: pnpm</li>
+            </ul>
+            
+            <a href="index.html" class="button">Back to Home</a>
+        </main>
+        
+        <footer>
+            <p>Hierarchical Task Planning Network Demo &copy; 2025</p>
+        </footer>
+    </div>
+</body>
+</html>
