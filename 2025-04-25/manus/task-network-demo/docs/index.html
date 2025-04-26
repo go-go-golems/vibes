@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchical Task Planning Network Demo</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --gray-100: #f8fafc;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-500: #64748b;
+            --gray-700: #334155;
+            --gray-900: #0f172a;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+                Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--gray-900);
+            background-color: var(--gray-100);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--gray-700);
+            margin: 2rem 0 1rem;
+        }
+        
+        h3 {
+            font-size: 1.4rem;
+            color: var(--gray-700);
+            margin: 1.5rem 0 0.75rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-500);
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .screenshot {
+            width: 100%;
+            max-width: 800px;
+            margin: 1rem auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: block;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .button:hover {
+            background-color: #2563eb;
+        }
+        
+        .button.secondary {
+            background-color: var(--gray-500);
+        }
+        
+        .button.secondary:hover {
+            background-color: var(--gray-700);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            font-family: monospace;
+            background-color: var(--gray-100);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background-color: var(--gray-900);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+            color: var(--gray-500);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hierarchical Task Planning Network Demo</h1>
+            <p class="subtitle">A visualization of agent-based task planning using React Flow and Redux Toolkit</p>
+        </header>
+        
+        <main>
+            <section class="card">
+                <h2>Project Overview</h2>
+                <p>
+                    This project demonstrates a hierarchical task planning network visualization using React Flow and Redux Toolkit (RTK).
+                    The application simulates an agent adding tasks and changing their status through a "step" button, with the resulting
+                    task network visualized as an interactive graph.
+                </p>
+                <p>
+                    <a href="report.html" class="button">View Full Report</a>
+                    <a href="https://github.com/your-username/task-network-demo" class="button secondary">Source Code</a>
+                </p>
+            </section>
+            
+            <section>
+                <h2>Application Screenshots</h2>
+                <div class="card">
+                    <h3>Initial State</h3>
+                    <p>The application starts with an empty task network and statistics showing zero tasks and steps.</p>
+                    <img src="screenshots/initial_state.png" alt="Initial Application State" class="screenshot">
+                </div>
+                
+                <div class="card">
+                    <h3>After Several Steps</h3>
+                    <p>After clicking the step button several times, the application shows a hierarchical task network with various task statuses and relationships.</p>
+                    <img src="screenshots/after_steps.png" alt="Application After Steps" class="screenshot">
+                </div>
+            </section>
+            
+            <section>
+                <h2>Key Features</h2>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-title">React Flow Integration</div>
+                        <p>
+                            Utilizes React Flow for interactive graph visualization with custom node types
+                            and edge configurations.
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-title">Redux Toolkit State Management</div>
+                        <p>
+                            Implements RTK for efficient state management with actions for adding tasks,
+                            updating status, and simulating agent steps.
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-title">Hierarchical Visualization</div>
+                        <p>
+                            Tasks are positioned based on their depth in the hierarchy and sibling index,
+                            creating a clear visual representation of task relationships.
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-title">Status-Based Styling</div>
+                        <p>
+                            Tasks are styled based on their status (pending, in-progress, completed, failed)
+                            with appropriate colors and animations.
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-title">Step Simulation</div>
+                        <p>
+                            The "Step" button simulates an agent adding tasks or changing task statuses,
+                            demonstrating how a planning agent might operate.
+                        </p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-title">Interactive Controls</div>
+                        <p>
+                            Users can directly interact with task nodes to change their status or reset
+                            the entire simulation.
+                        </p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="card">
+                <h2>Technical Implementation</h2>
+                <h3>Task State Model</h3>
+                <pre><code>{
+  tasks: [
+    {
+      id: 'task-1',
+      title: 'Task 1',
+      description: 'This is a simulated task 1',
+      status: 'pending' | 'in-progress' | 'completed' | 'failed',
+      parentId: null | 'task-id',
+      children: ['task-id', ...],
+      createdAt: '2025-04-25T22:15:00.000Z',
+      updatedAt: '2025-04-25T22:16:00.000Z'
+    },
+    // ...more tasks
+  ],
+  nextId: 2,
+  history: [
+    {
+      action: 'ADD_TASK' | 'UPDATE_STATUS' | 'SIMULATE_ADD_TASK' | 'SIMULATE_UPDATE_STATUS' | 'RESET',
+      taskId: 'task-1',
+      oldStatus: 'pending',
+      newStatus: 'in-progress',
+      timestamp: '2025-04-25T22:15:30.000Z'
+    },
+    // ...more history entries
+  ]
+}</code></pre>
+            </section>
+            
+            <section class="card">
+                <h2>Getting Started</h2>
+                <p>To run this application locally:</p>
+                <ol>
+                    <li>Clone the repository</li>
+                    <li>Install dependencies with <code>pnpm install</code></li>
+                    <li>Start the development server with <code>pnpm run dev</code></li>
+                    <li>Open <code>http://localhost:5173</code> in your browser</li>
+                </ol>
+                <p>
+                    <a href="task-network-demo.zip" class="button">Download Project Files</a>
+                </p>
+            </section>
+        </main>
+        
+        <footer>
+            <p>Hierarchical Task Planning Network Demo &copy; 2025</p>
+        </footer>
+    </div>
+</body>
+</html>
