@@ -46,7 +46,9 @@ func (a *PlanAndExecuteAgent) buildExecutorPrompt() string {
 	for _, tool := range a.tools.GetAllTools() {
 		params := tool.Parameters()
 		var paramDescs []string
-		for name, schema := range params {
+		for pair := params.Oldest(); pair != nil; pair = pair.Next() {
+			name := pair.Key
+			schema := pair.Value
 			paramDescs = append(paramDescs, fmt.Sprintf("  - %s: %s", name, schema.Description))
 		}
 

@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Examples",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/run_examples",
+            "cwd": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/run_examples",
+            "env": {},
+            "args": []
+        }
+    ]
+} 
