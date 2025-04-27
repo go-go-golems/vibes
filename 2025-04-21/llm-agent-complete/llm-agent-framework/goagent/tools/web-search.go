@@ -26,6 +26,8 @@ func NewWebSearchTool() *WebSearchTool {
 	}
 }
 
+var _ Tool = &WebSearchTool{}
+
 // AddSearchResults adds search results for a query
 func (t *WebSearchTool) AddSearchResults(query string, results []SearchResult) {
 	t.results[query] = results
@@ -43,8 +45,10 @@ func (t *WebSearchTool) Description() string {
 
 // Execute executes the tool with the given input
 func (t *WebSearchTool) Execute(ctx context.Context, input string) (string, error) {
-	var querystruct {
+	query := struct {
 		Query string `json:"query"`
+	}{
+		Query: input,
 	}
 
 	if err := json.Unmarshal([]byte(input), &query); err != nil {

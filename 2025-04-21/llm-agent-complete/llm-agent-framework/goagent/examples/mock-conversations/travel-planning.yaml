@@ -1,0 +1,398 @@
+- planner_interactions:
+    - request: 
+        - system: |
+            You are a task planning assistant. Given a task, create a detailed plan.
+            Break down the task into a sequence of steps that can be executed one by one.
+            Each step should be clear and actionable.
+
+            Create a plan with the following format:
+            1. First step
+            2. Second step
+            ...
+
+        - user: Plan a 7-day trip to Europe, visiting Paris and Rome. Include flights, hotels, and must-see attractions.
+      response: |
+        1. Search for flights from New York to Paris for the first day of the trip
+        2. Search for hotels in Paris for 3 nights
+        3. Find attractions to visit in Paris
+        4. Search for flights from Paris to Rome for the fourth day
+        5. Search for hotels in Rome for 3 nights
+        6. Find attractions to visit in Rome
+        7. Create a day-by-day itinerary for the entire trip
+    - request: 
+        - system: |
+            You are a task finalizer. Given the original input, the plan, and the results of each step,
+            provide a comprehensive final answer.
+
+            Be concise but thorough in your response.
+
+        - user: |
+            Input: Plan a 7-day trip to Europe, visiting Paris and Rome. Include flights, hotels, and must-see attractions.
+            Plan: 1. Search for flights from New York to Paris for the first day of the trip
+            2. Search for hotels in Paris for 3 nights
+            3. Find attractions to visit in Paris
+            4. Search for flights from Paris to Rome for the fourth day
+            5. Search for hotels in Rome for 3 nights
+            6. Find attractions to visit in Rome
+            7. Create a day-by-day itinerary for the entire trip
+            Results: Step 1: Search for flights from New York to Paris for the first day of the trip
+            Result: [
+              {
+                "airline": "Air France",
+                "flight_no": "AF123",
+                "departure": "JFK",
+                "arrival": "CDG",
+                "departure_at": "2025-06-15T18:30:00Z",
+                "arrival_at": "2025-06-16T08:00:00Z",
+                "price": 850.5
+              },
+              {
+                "airline": "Delta",
+                "flight_no": "DL456",
+                "departure": "JFK",
+                "arrival": "CDG",
+                "departure_at": "2025-06-15T21:45:00Z",
+                "arrival_at": "2025-06-16T11:15:00Z",
+                "price": 790.75
+              }
+            ]
+            Step 2: Search for hotels in Paris for 3 nights
+            Result: [
+              {
+                "name": "Hotel de Luxe",
+                "address": "123 Champs-Élysées, Paris",
+                "stars": 5,
+                "price": 350,
+                "features": "Spa, Restaurant, City View"
+              },
+              {
+                "name": "Cozy Parisian Inn",
+                "address": "45 Rue de Rivoli, Paris",
+                "stars": 3,
+                "price": 150,
+                "features": "Free Wifi, Breakfast Included"
+              }
+            ]
+            Step 3: Find attractions to visit in Paris
+            Result: [
+              {
+                "name": "Eiffel Tower",
+                "description": "Iconic iron tower built in 1889",
+                "category": "landmark",
+                "rating": 4.7
+              },
+              {
+                "name": "Louvre Museum",
+                "description": "World's largest art museum and historic monument",
+                "category": "museum",
+                "rating": 4.8
+              },
+              {
+                "name": "Le Jules Verne",
+                "description": "Upscale French restaurant in the Eiffel Tower",
+                "category": "restaurant",
+                "rating": 4.5
+              }
+            ]
+            Step 4: Search for flights from Paris to Rome for the fourth day
+            Result: [
+              {
+                "airline": "Alitalia",
+                "flight_no": "AZ789",
+                "departure": "CDG",
+                "arrival": "FCO",
+                "departure_at": "2025-06-20T10:15:00Z",
+                "arrival_at": "2025-06-20T12:30:00Z",
+                "price": 210.25
+              }
+            ]
+            Step 5: Search for hotels in Rome for 3 nights
+            Result: [
+              {
+                "name": "Roman Retreat",
+                "address": "78 Via Veneto, Rome",
+                "stars": 4,
+                "price": 220,
+                "features": "Pool, Restaurant, Historic Building"
+              }
+            ]
+            Step 6: Find attractions to visit in Rome
+            Result: [
+              {
+                "name": "Colosseum",
+                "description": "Ancient amphitheater built in 70-80 AD",
+                "category": "landmark",
+                "rating": 4.8
+              },
+              {
+                "name": "Vatican Museums",
+                "description": "Museums displaying works from the extensive collection of the Catholic Church",
+                "category": "museum",
+                "rating": 4.7
+              }
+            ]
+      response: |
+        # 7-Day Europe Trip: Paris & Rome Itinerary
+
+        ## Flight Details
+
+        **Outbound: New York to Paris**
+        - Delta Airlines DL456
+        - June 15, 2025, 9:45 PM - June 16, 2025, 11:15 AM
+        - Price: $790.75
+
+        **Connection: Paris to Rome**
+        - Alitalia AZ789
+        - June 20, 2025, 10:15 AM - 12:30 PM
+        - Price: $210.25
+
+        ## Accommodations
+
+        **Paris (June 16-19)**
+        - Cozy Parisian Inn
+        - 45 Rue de Rivoli, Paris
+        - 3-star hotel, $150/night
+        - Features: Free WiFi, Breakfast Included
+
+        **Rome (June 20-23)**
+        - Roman Retreat
+        - 78 Via Veneto, Rome
+        - 4-star hotel, $220/night
+        - Features: Pool, Restaurant, Historic Building
+
+        ## Day-by-Day Itinerary
+
+        ### Day 1 (June 16) - Arrival in Paris
+        - Arrive at Charles de Gaulle Airport (CDG) at 11:15 AM
+        - Check-in at Cozy Parisian Inn
+        - Afternoon: Rest and explore the neighborhood
+        - Evening: Dinner at a local café
+
+        ### Day 2 (June 17) - Paris Exploration I
+        - Morning: Visit the Eiffel Tower (4.7/5 rating)
+        - Lunch at Le Jules Verne restaurant in the Eiffel Tower (4.5/5 rating)
+        - Afternoon: Explore surrounding areas and Seine River
+
+        ### Day 3 (June 18) - Paris Exploration II
+        - Full day at the Louvre Museum (4.8/5 rating)
+        - Evening: Stroll along the Champs-Élysées
+
+        ### Day 4 (June 19) - Paris to Rome
+        - Morning: Check-out from Cozy Parisian Inn
+        - 10:15 AM: Flight from Paris (CDG) to Rome (FCO)
+        - Arrive in Rome at 12:30 PM
+        - Check-in at Roman Retreat
+        - Afternoon: Rest and explore the neighborhood
+
+        ### Day 5 (June 20) - Rome Exploration I
+        - Full day at the Colosseum and Roman Forum (4.8/5 rating)
+        - Evening: Dinner in Trastevere district
+
+        ### Day 6 (June 21) - Rome Exploration II
+        - Full day at Vatican Museums (4.7/5 rating)
+        - Visit St. Peter's Basilica
+        - Evening: Dinner near Piazza Navona
+
+        ### Day 7 (June 22) - Final Day in Rome
+        - Morning: Shopping and souvenir hunting
+        - Afternoon: Relax at hotel pool
+        - Evening: Farewell dinner
+
+        ## Total Budget Estimate
+        - Flights: $1,001.00
+        - Hotels: $1,110.00 (3 nights in Paris + 3 nights in Rome)
+        - Daily expenses (food, attractions, transportation): ~$150/day = $1,050
+        - **Total estimate: $3,161.00**
+
+        This itinerary provides a balanced experience of both cities, allowing you to see the major attractions while also having time to relax and enjoy the local atmosphere.
+- executor_interactions:
+    - request: 
+        - system: |
+            You are a task executor. Follow the plan and execute each step using available tools.
+
+            You have access to the following tools:
+
+            Tool: search_flights
+            Description: Search for flights between cities
+            Parameters:
+              - from: Departure city
+              - to: Arrival city
+              - date: Departure date (YYYY-MM-DD)
+
+            Tool: search_hotels
+            Description: Search for hotels in a city
+            Parameters:
+              - city: City to search for hotels
+              - stars: Minimum star rating (1-5)
+
+            Tool: find_attractions
+            Description: Find attractions in a city
+            Parameters:
+              - city: City to search for attractions
+              - category: Category of attractions (e.g., museum, park, restaurant)
+
+            Use the following format:
+
+            Thought: think about the current step
+            Action: the action to take, should be one of [search_flights, search_hotels, find_attractions]
+            Action Input: the input for the action (in JSON format)
+
+        - user: |
+            Plan: 1. Search for flights from New York to Paris for the first day of the trip
+            2. Search for hotels in Paris for 3 nights
+            3. Find attractions to visit in Paris
+            4. Search for flights from Paris to Rome for the fourth day
+            5. Search for hotels in Rome for 3 nights
+            6. Find attractions to visit in Rome
+            7. Create a day-by-day itinerary for the entire trip
+            Current step: Search for flights from New York to Paris for the first day of the trip
+            Previous results: 
+      response: |
+        Thought: I need to search for flights from New York to Paris for the first day of the trip. I'll use the search_flights tool for this.
+        Action: search_flights
+        Action Input: {"from": "New York", "to": "Paris", "date": "2025-06-15"}
+    - request: 
+        - system: |
+            You are a task executor. Follow the plan and execute each step using available tools.
+            You have access to the following tools:
+
+            Tool: search_flights
+            Description: Search for flights between cities
+            Parameters:
+              - from: Departure city
+              - to: Arrival city
+              - date: Departure date (YYYY-MM-DD)
+
+            Tool: search_hotels
+            Description: Search for hotels in a city
+            Parameters:
+              - city: City to search for hotels
+              - stars: Minimum star rating (1-5)
+
+            Tool: find_attractions
+            Description: Find attractions in a city
+            Parameters:
+              - city: City to search for attractions
+              - category: Category of attractions (e.g., museum, park, restaurant)
+
+            Use the following format:
+
+            Thought: think about the current step
+            Action: the action to take, should be one of [search_flights, search_hotels, find_attractions]
+            Action Input: the input for the action (in JSON format)
+
+        - user: |
+            Plan: 1. Search for flights from New York to Paris for the first day of the trip
+            2. Search for hotels in Paris for 3 nights
+            3. Find attractions to visit in Paris
+            4. Search for flights from Paris to Rome for the fourth day
+            5. Search for hotels in Rome for 3 nights
+            6. Find attractions to visit in Rome
+            7. Create a day-by-day itinerary for the entire trip
+            Current step: Search for hotels in Paris for 3 nights
+            Previous results: Step 1: Search for flights from New York to Paris for the first day of the trip
+            Result: [
+              {
+                "airline": "Air France",
+                "flight_no": "AF123",
+                "departure": "JFK",
+                "arrival": "CDG",
+                "departure_at": "2025-06-15T18:30:00Z",
+                "arrival_at": "2025-06-16T08:00:00Z",
+                "price": 850.5
+              },
+              {
+                "airline": "Delta",
+                "flight_no": "DL456",
+                "departure": "JFK",
+                "arrival": "CDG",
+                "departure_at": "2025-06-15T21:45:00Z",
+                "arrival_at": "2025-06-16T11:15:00Z",
+                "price": 790.75
+              }
+            ]
+      response: |
+        Thought: Now I need to search for hotels in Paris for 3 nights. I'll use the search_hotels tool for this. I'll look for hotels with at least 3 stars to ensure a comfortable stay.
+        Action: search_hotels
+        Action Input: {"city": "Paris", "stars": 3}
+    - request: 
+        - system: |
+            You are a task executor. Follow the plan and execute each step using available tools.
+            You have access to the following tools:
+
+            Tool: search_flights
+            Description: Search for flights between cities
+            Parameters:
+              - from: Departure city
+              - to: Arrival city
+              - date: Departure date (YYYY-MM-DD)
+
+            Tool: search_hotels
+            Description: Search for hotels in a city
+            Parameters:
+              - city: City to search for hotels
+              - stars: Minimum star rating (1-5)
+
+            Tool: find_attractions
+            Description: Find attractions in a city
+            Parameters:
+              - city: City to search for attractions
+              - category: Category of attractions (e.g., museum, park, restaurant)
+
+            Use the following format:
+
+            Thought: think about the current step
+            Action: the action to take, should be one of [search_flights, search_hotels, find_attractions]
+            Action Input: the input for the action (in JSON format)
+
+        - user: |
+            Plan: 1. Search for flights from New York to Paris for the first day of the trip
+            2. Search for hotels in Paris for 3 nights
+            3. Find attractions to visit in Paris
+            4. Search for flights from Paris to Rome for the fourth day
+            5. Search for hotels in Rome for 3 nights
+            6. Find attractions to visit in Rome
+            7. Create a day-by-day itinerary for the entire trip
+            Current step: Find attractions to visit in Paris
+            Previous results: Step 1: Search for flights from New York to Paris for the first day of the trip
+            Result: [
+              {
+                "airline": "Air France",
+                "flight_no": "AF123",
+                "departure": "JFK",
+                "arrival": "CDG",
+                "departure_at": "2025-06-15T18:30:00Z",
+                "arrival_at": "2025-06-16T08:00:00Z",
+                "price": 850.5
+              },
+              {
+                "airline": "Delta",
+                "flight_no": "DL456",
+                "departure": "JFK",
+                "arrival": "CDG",
+                "departure_at": "2025-06-15T21:45:00Z",
+                "arrival_at": "2025-06-16T11:15:00Z",
+                "price": 790.75
+              }
+            ]
+            Step 2: Search for hotels in Paris for 3 nights
+            Result: [
+              {
+                "name": "Hotel de Luxe",
+                "address": "123 Champs-Élysées, Paris",
+                "stars": 5,
+                "price": 350,
+                "features": "Spa, Restaurant, City View"
+              },
+              {
+                "name": "Cozy Parisian Inn",
+                "address": "45 Rue de Rivoli, Paris",
+                "stars": 3,
+                "price": 150,
+                "features": "Free Wifi, Breakfast Included"
+              }
+            ]
+      response: |
+        Thought: Now I need to find attractions to visit in Paris. I'll use the find_attractions tool to get a list of popular attractions. I won't specify a category to get a variety of options.
+        Action: find_attractions
+        Action Input: {"city": "Paris"}
