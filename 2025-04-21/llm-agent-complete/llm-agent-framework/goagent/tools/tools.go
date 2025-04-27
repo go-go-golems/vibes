@@ -3,8 +3,10 @@ package tools
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+
+	claudeapi "github.com/go-go-golems/geppetto/pkg/steps/ai/claude/api"
+	go_openai "github.com/sashabaranov/go-openai"
 
 	"github.com/goagent/framework/goagent/types"
 )
@@ -13,13 +15,13 @@ import (
 type Tool interface {
 	// Name returns the name of the tool
 	Name() string
-	
+
 	// Description returns the description of the tool
 	Description() string
-	
+
 	// Execute executes the tool with the given input
 	Execute(ctx context.Context, input string) (string, error)
-	
+
 	// Parameters returns the parameters schema of the tool
 	Parameters() map[string]types.ParameterSchema
 }
@@ -75,33 +77,39 @@ func (e *ToolExecutor) ExecuteTool(ctx context.Context, name, input string) (str
 
 // ToolRequest represents a request to execute a tool
 type ToolRequest struct {
-	ToolName string
-	Input    string
+	ID       string                 `json:"id,omitempty"`
+	ToolName string                 `json:"tool_name"`
+	Input    string                 `json:"input"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // ToolResponse represents the response from executing a tool
 type ToolResponse struct {
-	ToolName string
-	Result   string
-	Error    error
+	ID       string                 `json:"id,omitempty"`
+	ToolName string                 `json:"tool_name"`
+	Result   string                 `json:"result,omitempty"`
+	Error    error                  `json:"error,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // ExecuteParallel executes multiple tools in parallel
 func (e *ToolExecutor) ExecuteParallel(ctx context.Context, requests []ToolRequest) []ToolResponse {
 	responses := make([]ToolResponse, len(requests))
-	
+
 	// Create a channel for results
 	resultChan := make(chan struct {
 		index    int
 		response ToolResponse
 	}, len(requests))
-	
+
 	// Execute each tool in a goroutine
 	for i, req := range requests {
 		go func(i int, req ToolRequest) {
 			var response ToolResponse
+			response.ID = req.ID // Propagate ID
 			response.ToolName = req.ToolName
-			
+			response.Metadata = req.Metadata // Propagate Metadata
+
 			tool := e.tools[req.ToolName]
 			if tool == nil {
 				response.Error = fmt.Errorf("tool not found: %s", req.ToolName)
@@ -110,138 +118,93 @@ func (e *ToolExecutor) ExecuteParallel(ctx context.Context, requests []ToolReque
 				response.Result = result
 				response.Error = err
 			}
-			
+
 			resultChan <- struct {
 				index    int
 				response ToolResponse
 			}{i, response}
 		}(i, req)
 	}
-	
+
 	// Collect results
 	for i := 0; i < len(requests); i++ {
 		result := <-resultChan
 		responses[result.index] = result.response
 	}
-	
+
 	return responses
 }
 
-// MockTool implements the Tool interface for testing
-type MockTool struct {
-	name        string
-	description string
-	responses   map[string]string
-	parameters  map[string]types.ParameterSchema
+// JSONSchema represents the structure expected by OpenAI and Claude for parameters.
+type JSONSchema struct {
+	Type       string                    `json:"type"`
+	Properties map[string]ParameterField `json:"properties"`
+	Required   []string                  `json:"required,omitempty"`
 }
 
-// NewMockTool creates a new MockTool
-func NewMockTool(name, description string) *MockTool {
-	return &MockTool{
-		name:        name,
-		description: description,
-		responses:   make(map[string]string),
-		parameters:  make(map[string]types.ParameterSchema),
+type ParameterField struct {
+	Type        string `json:"type"`
+	Description string `json:"description,omitempty"`
+	// Add other fields as needed for more complex schemas (e.g., Enum, Items for arrays)
+}
+
+// toolParametersToJSONSchema converts the tool's parameters into a JSON schema object.
+func toolParametersToJSONSchema(params map[string]types.ParameterSchema) JSONSchema {
+	properties := make(map[string]ParameterField)
+	required := []string{}
+
+	for name, schema := range params {
+		properties[name] = ParameterField{
+			Type:        schema.Type,
+			Description: schema.Description,
+		}
+		if schema.Required {
+			required = append(required, name)
+		}
+	}
+
+	return JSONSchema{
+		Type:       "object",
+		Properties: properties,
+		Required:   required,
 	}
 }
 
-// AddResponse adds a response for a given input
-func (t *MockTool) AddResponse(input, response string) {
-	t.responses[input] = response
-}
-
-// AddParameter adds a parameter schema
-func (t *MockTool) AddParameter(name string, schema types.ParameterSchema) {
-	t.parameters[name] = schema
-}
-
-// Name returns the name of the tool
-func (t *MockTool) Name() string {
-	return t.name
-}
-
-// Description returns the description of the tool
-func (t *MockTool) Description() string {
-	return t.description
-}
-
-// Execute executes the tool with the given input
-func (t *MockTool) Execute(ctx context.Context, input string) (string, error) {
-	if response, ok := t.responses[input]; ok {
-		return response, nil
-	}
-	return "No response configured for this input", nil
-}
-
-// Parameters returns the parameters schema of the tool
-func (t *MockTool) Parameters() map[string]types.ParameterSchema {
-	return t.parameters
-}
-
-// WebSearchTool is a mock implementation of a web search tool
-type WebSearchTool struct {
-	results map[string][]SearchResult
-}
-
-// SearchResult represents a search result
-type SearchResult struct {
-	Title   string `json:"title"`
-	URL     string `json:"url"`
-	Snippet string `json:"snippet"`
-}
-
-// NewWebSearchTool creates a new WebSearchTool
-func NewWebSearchTool() *WebSearchTool {
-	return &WebSearchTool{
-		results: make(map[string][]SearchResult),
-	}
-}
-
-// AddSearchResults adds search results for a query
-func (t *WebSearchTool) AddSearchResults(query string, results []SearchResult) {
-	t.results[query] = results
-}
-
-// Name returns the name of the tool
-func (t *WebSearchTool) Name() string {
-	return "web_search"
-}
-
-// Description returns the description of the tool
-func (t *WebSearchTool) Description() string {
-	return "Search the web for information"
-}
-
-// Execute executes the tool with the given input
-func (t *WebSearchTool) Execute(ctx context.Context, input string) (string, error) {
-	var query struct {
-		Query string `json:"query"`
-	}
-	
-	if err := json.Unmarshal([]byte(input), &query); err != nil {
-		return "", fmt.Errorf("invalid input: %w", err)
-	}
-	
-	results, ok := t.results[query.Query]
-	if !ok {
-		return "No results found", nil
-	}
-	
-	resultJSON, err := json.MarshalIndent(results, "", "  ")
-	if err != nil {
-		return "", err
-	}
-	
-	return string(resultJSON), nil
-}
-
-// Parameters returns the parameters schema of the tool
-func (t *WebSearchTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"query": {
-			Type:        "string",
-			Description: "The search query",
-			Required:    true,
+// ToolToOpenAITool converts a goagent Tool into an OpenAI Tool definition.
+func ToolToOpenAITool(tool Tool) go_openai.Tool {
+	return go_openai.Tool{
+		Type: go_openai.ToolTypeFunction,
+		Function: &go_openai.FunctionDefinition{
+			Name:        tool.Name(),
+			Description: tool.Description(),
+			Parameters:  toolParametersToJSONSchema(tool.Parameters()),
 		},
+	}
+}
+
+// ToolToClaudeTool converts a goagent Tool into a Claude Tool definition.
+func ToolToClaudeTool(tool Tool) claudeapi.Tool {
+	return claudeapi.Tool{
+		Name:        tool.Name(),
+		Description: tool.Description(),
+		InputSchema: toolParametersToJSONSchema(tool.Parameters()),
+	}
+}
+
+// OpenAIToolCallToToolRequest converts an OpenAI ToolCall into a ToolRequest.
+func OpenAIToolCallToToolRequest(toolCall go_openai.ToolCall) ToolRequest {
+	return ToolRequest{
+		ID:       toolCall.ID, // Use OpenAI ToolCall ID
+		ToolName: toolCall.Function.Name,
+		Input:    toolCall.Function.Arguments,
+	}
+}
+
+// ClaudeToolUseToToolRequest converts a Claude ToolUseContent into a ToolRequest.
+func ClaudeToolUseToToolRequest(toolUse claudeapi.ToolUseContent) ToolRequest {
+	return ToolRequest{
+		ID:       toolUse.ID, // Use Claude ToolUse ID
+		ToolName: toolUse.Name,
+		Input:    toolUse.Input,
 	}
 }

@@ -1,20 +1,20 @@
 [
   {
     "name": "PlanAndExecuteAgent.Run",
-    "span_id": "79062a99-72bc-4f0f-ac2c-7dd4e0d5a6ff",
-    "timestamp": 1745267662819990141,
+    "span_id": "ca48e999-cbc4-400e-81d0-808b10d7f390",
+    "timestamp": 1745789937203044793,
     "type": "span_start"
   },
   {
     "type": "plan",
     "data": null,
-    "timestamp": 1745267662819999792
+    "timestamp": 1745789937203053139
   },
   {
-    "duration": 15546,
+    "duration": 11888,
     "name": "PlanAndExecuteAgent.Run",
-    "span_id": "79062a99-72bc-4f0f-ac2c-7dd4e0d5a6ff",
-    "timestamp": 1745267662820005687,
+    "span_id": "ca48e999-cbc4-400e-81d0-808b10d7f390",
+    "timestamp": 1745789937203056681,
     "type": "span_end"
   }
 ]
