@@ -25,7 +25,6 @@ interactions:
           ... (this Thought/Action/Action Input/Observation can repeat N times)
           Thought: I now know the final answer
           Final Answer: the final answer to the original input question
-
       - user: Research the latest information on climate change impacts and write a comprehensive article about it.
     response: |
       Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
@@ -57,7 +56,6 @@ interactions:
           ... (this Thought/Action/Action Input/Observation can repeat N times)
           Thought: I now know the final answer
           Final Answer: the final answer to the original input question
-
       - user: Research the latest information on climate change impacts and write a comprehensive article about it.
       - assistant: |
           Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
@@ -106,7 +104,6 @@ interactions:
           ... (this Thought/Action/Action Input/Observation can repeat N times)
           Thought: I now know the final answer
           Final Answer: the final answer to the original input question
-
       - user: Research the latest information on climate change impacts and write a comprehensive article about it.
       - assistant: |
           Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
@@ -205,7 +202,6 @@ interactions:
           ... (this Thought/Action/Action Input/Observation can repeat N times)
           Thought: I now know the final answer
           Final Answer: the final answer to the original input question
-
       - user: Research the latest information on climate change impacts and write a comprehensive article about it.
       - assistant: |
           Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
@@ -310,7 +306,6 @@ streams:
           ... (this Thought/Action/Action Input/Observation can repeat N times)
           Thought: I now know the final answer
           Final Answer: the final answer to the original input question
-
       - user: Research the latest information on climate change impacts and write a comprehensive article about it.
     response_chunks:
       - "Thought: I need to gather "

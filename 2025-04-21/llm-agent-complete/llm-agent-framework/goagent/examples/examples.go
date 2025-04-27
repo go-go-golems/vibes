@@ -1,4 +1,3 @@
-// Package examples provides example implementations using the GoAgent framework
 package examples
 
 import (
@@ -15,6 +14,7 @@ import (
 	"github.com/goagent/framework/goagent/memory"
 	"github.com/goagent/framework/goagent/tools"
 	"github.com/goagent/framework/goagent/types"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -60,6 +60,7 @@ func ConvertToMessages(yamlConversation *YAMLConversation) ([][]*conversation.Me
 			// Check for system message
 			if systemMsg, ok := item["system"]; ok {
 				if text, ok := systemMsg.(string); ok {
+					text = strings.TrimSpace(text)
 					msg := conversation.NewChatMessage(conversation.RoleSystem, text)
 					messages = append(messages, msg)
 				}
@@ -68,6 +69,7 @@ func ConvertToMessages(yamlConversation *YAMLConversation) ([][]*conversation.Me
 			// Check for user message
 			if userMsg, ok := item["user"]; ok {
 				if text, ok := userMsg.(string); ok {
+					text = strings.TrimSpace(text)
 					msg := conversation.NewChatMessage(conversation.RoleUser, text)
 					messages = append(messages, msg)
 				}
@@ -76,6 +78,7 @@ func ConvertToMessages(yamlConversation *YAMLConversation) ([][]*conversation.Me
 			// Check for assistant message
 			if assistantMsg, ok := item["assistant"]; ok {
 				if text, ok := assistantMsg.(string); ok {
+					text = strings.TrimSpace(text)
 					msg := conversation.NewChatMessage(conversation.RoleAssistant, text)
 					messages = append(messages, msg)
 				}
@@ -266,6 +269,8 @@ type MockFileTool struct {
 	files       map[string]string
 }
 
+var _ tools.Tool = &MockFileTool{}
+
 func (t *MockFileTool) Name() string {
 	return t.name
 }
@@ -288,19 +293,19 @@ func (t *MockFileTool) Execute(ctx context.Context, input string) (string, error
 	return fmt.Sprintf("File '%s' written successfully", params.Filename), nil
 }
 
-func (t *MockFileTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"filename": {
-			Type:        "string",
-			Description: "The name of the file to write",
-			Required:    true,
-		},
-		"content": {
-			Type:        "string",
-			Description: "The content to write to the file",
-			Required:    true,
-		},
-	}
+func (t *MockFileTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("filename", types.ParameterSchema{
+		Type:        "string",
+		Description: "The name of the file to write",
+		Required:    true,
+	})
+	om.Set("content", types.ParameterSchema{
+		Type:        "string",
+		Description: "The content to write to the file",
+		Required:    true,
+	})
+	return om
 }
 
 // FlightResult represents a flight search result
@@ -320,6 +325,8 @@ type MockFlightSearchTool struct {
 	description string
 	flights     map[string][]FlightResult
 }
+
+var _ tools.Tool = &MockFlightSearchTool{}
 
 func (t *MockFlightSearchTool) Name() string {
 	return t.name
@@ -354,24 +361,24 @@ func (t *MockFlightSearchTool) Execute(ctx context.Context, input string) (strin
 	return string(resultJSON), nil
 }
 
-func (t *MockFlightSearchTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"from": {
-			Type:        "string",
-			Description: "Departure city",
-			Required:    true,
-		},
-		"to": {
-			Type:        "string",
-			Description: "Arrival city",
-			Required:    true,
-		},
-		"date": {
-			Type:        "string",
-			Description: "Departure date (YYYY-MM-DD)",
-			Required:    true,
-		},
-	}
+func (t *MockFlightSearchTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("from", types.ParameterSchema{
+		Type:        "string",
+		Description: "Departure city",
+		Required:    true,
+	})
+	om.Set("to", types.ParameterSchema{
+		Type:        "string",
+		Description: "Arrival city",
+		Required:    true,
+	})
+	om.Set("date", types.ParameterSchema{
+		Type:        "string",
+		Description: "Departure date (YYYY-MM-DD)",
+		Required:    true,
+	})
+	return om
 }
 
 // HotelResult represents a hotel search result
@@ -389,6 +396,8 @@ type MockHotelSearchTool struct {
 	description string
 	hotels      map[string][]HotelResult
 }
+
+var _ tools.Tool = &MockHotelSearchTool{}
 
 func (t *MockHotelSearchTool) Name() string {
 	return t.name
@@ -431,19 +440,19 @@ func (t *MockHotelSearchTool) Execute(ctx context.Context, input string) (string
 	return string(resultJSON), nil
 }
 
-func (t *MockHotelSearchTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"city": {
-			Type:        "string",
-			Description: "City to search for hotels",
-			Required:    true,
-		},
-		"stars": {
-			Type:        "integer",
-			Description: "Minimum star rating (1-5)",
-			Required:    false,
-		},
-	}
+func (t *MockHotelSearchTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("city", types.ParameterSchema{
+		Type:        "string",
+		Description: "City to search for hotels",
+		Required:    true,
+	})
+	om.Set("stars", types.ParameterSchema{
+		Type:        "integer",
+		Description: "Minimum star rating (1-5)",
+		Required:    false,
+	})
+	return om
 }
 
 // AttractionResult represents an attraction search result
@@ -460,6 +469,8 @@ type MockAttractionsTool struct {
 	description string
 	attractions map[string][]AttractionResult
 }
+
+var _ tools.Tool = &MockAttractionsTool{}
 
 func (t *MockAttractionsTool) Name() string {
 	return t.name
@@ -502,19 +513,19 @@ func (t *MockAttractionsTool) Execute(ctx context.Context, input string) (string
 	return string(resultJSON), nil
 }
 
-func (t *MockAttractionsTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"city": {
-			Type:        "string",
-			Description: "City to search for attractions",
-			Required:    true,
-		},
-		"category": {
-			Type:        "string",
-			Description: "Category of attractions (e.g., museum, park, restaurant)",
-			Required:    false,
-		},
-	}
+func (t *MockAttractionsTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("city", types.ParameterSchema{
+		Type:        "string",
+		Description: "City to search for attractions",
+		Required:    true,
+	})
+	om.Set("category", types.ParameterSchema{
+		Type:        "string",
+		Description: "Category of attractions (e.g., museum, park, restaurant)",
+		Required:    false,
+	})
+	return om
 }
 
 // MockFileReaderTool is a mock implementation of a file reader tool
@@ -523,6 +534,8 @@ type MockFileReaderTool struct {
 	description string
 	files       map[string]string
 }
+
+var _ tools.Tool = &MockFileReaderTool{}
 
 func (t *MockFileReaderTool) Name() string {
 	return t.name
@@ -549,14 +562,14 @@ func (t *MockFileReaderTool) Execute(ctx context.Context, input string) (string,
 	return content, nil
 }
 
-func (t *MockFileReaderTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"filename": {
-			Type:        "string",
-			Description: "The name of the file to read",
-			Required:    true,
-		},
-	}
+func (t *MockFileReaderTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("filename", types.ParameterSchema{
+		Type:        "string",
+		Description: "The name of the file to read",
+		Required:    true,
+	})
+	return om
 }
 
 // MockFileSearchTool is a mock implementation of a file search tool
@@ -565,6 +578,8 @@ type MockFileSearchTool struct {
 	description string
 	fileSystem  map[string][]string
 }
+
+var _ tools.Tool = &MockFileSearchTool{}
 
 func (t *MockFileSearchTool) Name() string {
 	return t.name
@@ -607,19 +622,19 @@ func (t *MockFileSearchTool) Execute(ctx context.Context, input string) (string,
 	return string(resultJSON), nil
 }
 
-func (t *MockFileSearchTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"directory": {
-			Type:        "string",
-			Description: "The directory to search in",
-			Required:    true,
-		},
-		"pattern": {
-			Type:        "string",
-			Description: "Optional pattern to filter files",
-			Required:    false,
-		},
-	}
+func (t *MockFileSearchTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("directory", types.ParameterSchema{
+		Type:        "string",
+		Description: "The directory to search in",
+		Required:    true,
+	})
+	om.Set("pattern", types.ParameterSchema{
+		Type:        "string",
+		Description: "Optional pattern to filter files",
+		Required:    false,
+	})
+	return om
 }
 
 // CodeAnalysisResult represents the result of code analysis
@@ -636,6 +651,8 @@ type MockCodeAnalysisTool struct {
 	description string
 	analyses    map[string]CodeAnalysisResult
 }
+
+var _ tools.Tool = &MockCodeAnalysisTool{}
 
 func (t *MockCodeAnalysisTool) Name() string {
 	return t.name
@@ -667,14 +684,14 @@ func (t *MockCodeAnalysisTool) Execute(ctx context.Context, input string) (strin
 	return string(resultJSON), nil
 }
 
-func (t *MockCodeAnalysisTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"filename": {
-			Type:        "string",
-			Description: "The name of the file to analyze",
-			Required:    true,
-		},
-	}
+func (t *MockCodeAnalysisTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("filename", types.ParameterSchema{
+		Type:        "string",
+		Description: "The name of the file to analyze",
+		Required:    true,
+	})
+	return om
 }
 
 // Helper functions to add mock data and responses

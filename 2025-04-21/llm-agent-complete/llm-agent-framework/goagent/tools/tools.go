@@ -7,6 +7,7 @@ import (
 
 	claudeapi "github.com/go-go-golems/geppetto/pkg/steps/ai/claude/api"
 	go_openai "github.com/sashabaranov/go-openai"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 
 	"github.com/goagent/framework/goagent/types"
 )
@@ -23,7 +24,7 @@ type Tool interface {
 	Execute(ctx context.Context, input string) (string, error)
 
 	// Parameters returns the parameters schema of the tool
-	Parameters() map[string]types.ParameterSchema
+	Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema]
 }
 
 // ToolExecutor executes tools in parallel
@@ -149,11 +150,13 @@ type ParameterField struct {
 }
 
 // toolParametersToJSONSchema converts the tool's parameters into a JSON schema object.
-func toolParametersToJSONSchema(params map[string]types.ParameterSchema) JSONSchema {
+func toolParametersToJSONSchema(params *orderedmap.OrderedMap[string, types.ParameterSchema]) JSONSchema {
 	properties := make(map[string]ParameterField)
 	required := []string{}
 
-	for name, schema := range params {
+	for pair := params.Oldest(); pair != nil; pair = pair.Next() {
+		name := pair.Key
+		schema := pair.Value
 		properties[name] = ParameterField{
 			Type:        schema.Type,
 			Description: schema.Description,

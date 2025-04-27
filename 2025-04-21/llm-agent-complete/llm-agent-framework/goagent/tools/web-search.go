@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/goagent/framework/goagent/types"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 // WebSearchTool is a mock implementation of a web search tool
@@ -69,12 +71,12 @@ func (t *WebSearchTool) Execute(ctx context.Context, input string) (string, erro
 }
 
 // Parameters returns the parameters schema of the tool
-func (t *WebSearchTool) Parameters() map[string]types.ParameterSchema {
-	return map[string]types.ParameterSchema{
-		"query": {
-			Type:        "string",
-			Description: "The search query",
-			Required:    true,
-		},
-	}
+func (t *WebSearchTool) Parameters() *orderedmap.OrderedMap[string, types.ParameterSchema] {
+	om := orderedmap.New[string, types.ParameterSchema]()
+	om.Set("query", types.ParameterSchema{
+		Type:        "string",
+		Description: "The search query",
+		Required:    true,
+	})
+	return om
 }
