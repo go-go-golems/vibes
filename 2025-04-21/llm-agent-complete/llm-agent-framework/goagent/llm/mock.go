@@ -2,8 +2,9 @@ package llm
 
 import (
 	"context"
-	"github.com/goagent/framework/goagent/types"
 	"sync"
+
+	"github.com/go-go-golems/geppetto/pkg/conversation"
 )
 
 // MockLLM implements the LLM interface for testing
@@ -14,6 +15,8 @@ type MockLLM struct {
 	embeddings      map[string][]float32
 }
 
+var _ LLM = &MockLLM{}
+
 // NewMockLLM creates a new MockLLM
 func NewMockLLM() *MockLLM {
 	return &MockLLM{
@@ -23,20 +26,22 @@ func NewMockLLM() *MockLLM {
 	}
 }
 
-// AddResponse adds a response for a given input
-func (m *MockLLM) AddResponse(input, response string) {
+// AddResponse adds a response for a given input. The input key is generated from a list of messages.
+func (m *MockLLM) AddResponse(messages []*conversation.Message, response string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.responses[input] = response
+	key := messagesToKey(messages)
+	m.responses[key] = response
 }
 
-// AddStreamResponse adds a streaming response for a given input
-func (m *MockLLM) AddStreamResponse(input string, chunks []string) {
+// AddStreamResponse adds a streaming response for a given input. The input key is generated from a list of messages.
+func (m *MockLLM) AddStreamResponse(messages []*conversation.Message, chunks []string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.streamResponses[input] = chunks
+	key := messagesToKey(messages)
+	m.streamResponses[key] = chunks
 }
 
 // AddEmbedding adds an embedding for a given text
@@ -48,7 +53,7 @@ func (m *MockLLM) AddEmbedding(text string, embedding []float32) {
 }
 
 // Generate generates a response to the given messages
-func (m *MockLLM) Generate(ctx context.Context, messages []types.Message) (string, error) {
+func (m *MockLLM) Generate(ctx context.Context, messages []*conversation.Message) (string, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -65,7 +70,7 @@ func (m *MockLLM) Generate(ctx context.Context, messages []types.Message) (strin
 }
 
 // GenerateWithStream generates a response to the given messages with streaming
-func (m *MockLLM) GenerateWithStream(ctx context.Context, messages []types.Message) (<-chan string, error) {
+func (m *MockLLM) GenerateWithStream(ctx context.Context, messages []*conversation.Message) (<-chan string, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -131,10 +136,16 @@ func (m *MockLLM) GenerateEmbedding(ctx context.Context, text string) ([]float32
 }
 
 // messagesToKey converts a slice of messages to a string key
-func messagesToKey(messages []types.Message) string {
+func messagesToKey(messages []*conversation.Message) string {
 	var key string
 	for _, msg := range messages {
-		key += msg.Role + ": " + msg.Content + "\n"
+		if msg.Content.ContentType() == conversation.ContentTypeChatMessage {
+			chatContent := msg.Content.(*conversation.ChatMessageContent)
+			key += string(chatContent.Role) + ": " + chatContent.Text + "\n"
+		} else {
+			// Handle other content types if necessary, or skip them
+			key += string(msg.Content.ContentType()) + ": [non-text content]\n"
+		}
 	}
 	return key
 }

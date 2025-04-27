@@ -3,9 +3,11 @@ package agent
 import (
 	"context"
 	"fmt"
+	"strings"
+
+	"github.com/go-go-golems/geppetto/pkg/conversation"
 	"github.com/goagent/framework/goagent/llm"
 	"github.com/goagent/framework/goagent/types"
-	"strings"
 )
 
 // PlanAndExecuteAgent implements the Plan-and-Execute pattern
@@ -133,9 +135,9 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 	defer span.End()
 
 	// Generate plan
-	planMessages := []types.Message{
-		{Role: "system", Content: a.buildPlannerPrompt()},
-		{Role: "user", Content: input},
+	planMessages := []*conversation.Message{
+		conversation.NewChatMessage(conversation.RoleSystem, a.buildPlannerPrompt()),
+		conversation.NewChatMessage(conversation.RoleUser, input),
 	}
 
 	planResponse, err := a.planner.Generate(ctx, planMessages)
@@ -157,10 +159,10 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 	results := make([]string, len(steps))
 	for i, step := range steps {
 		// Build executor prompt
-		executorMessages := []types.Message{
-			{Role: "system", Content: a.buildExecutorPrompt()},
-			{Role: "user", Content: fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
-				planResponse, step, strings.Join(results[:i], "\n"))},
+		executorMessages := []*conversation.Message{
+			conversation.NewChatMessage(conversation.RoleSystem, a.buildExecutorPrompt()),
+			conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
+				planResponse, step, strings.Join(results[:i], "\n"))),
 		}
 
 		// Get executor response
@@ -195,10 +197,10 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 	}
 
 	// Generate final answer
-	finalMessages := []types.Message{
-		{Role: "system", Content: a.buildFinalizerPrompt()},
-		{Role: "user", Content: fmt.Sprintf("Input: %s\nPlan: %s\nResults: %s",
-			input, planResponse, strings.Join(results, "\n"))},
+	finalMessages := []*conversation.Message{
+		conversation.NewChatMessage(conversation.RoleSystem, a.buildFinalizerPrompt()),
+		conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Input: %s\nPlan: %s\nResults: %s",
+			input, planResponse, strings.Join(results, "\n"))),
 	}
 
 	finalResponse, err := a.planner.Generate(ctx, finalMessages)
@@ -225,9 +227,9 @@ func (a *PlanAndExecuteAgent) RunWithStream(ctx context.Context, input string) (
 			Content: "Generating plan...",
 		}
 
-		planMessages := []types.Message{
-			{Role: "system", Content: a.buildPlannerPrompt()},
-			{Role: "user", Content: input},
+		planMessages := []*conversation.Message{
+			conversation.NewChatMessage(conversation.RoleSystem, a.buildPlannerPrompt()),
+			conversation.NewChatMessage(conversation.RoleUser, input),
 		}
 
 		planChan, err := a.planner.GenerateWithStream(ctx, planMessages)
@@ -277,10 +279,10 @@ func (a *PlanAndExecuteAgent) RunWithStream(ctx context.Context, input string) (
 			}
 
 			// Build executor prompt
-			executorMessages := []types.Message{
-				{Role: "system", Content: a.buildExecutorPrompt()},
-				{Role: "user", Content: fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
-					planResponse, step, strings.Join(results[:i], "\n"))},
+			executorMessages := []*conversation.Message{
+				conversation.NewChatMessage(conversation.RoleSystem, a.buildExecutorPrompt()),
+				conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
+					planResponse, step, strings.Join(results[:i], "\n"))),
 			}
 
 			// Get executor response with streaming
@@ -356,10 +358,10 @@ func (a *PlanAndExecuteAgent) RunWithStream(ctx context.Context, input string) (
 			Content: "Generating final answer...",
 		}
 
-		finalMessages := []types.Message{
-			{Role: "system", Content: a.buildFinalizerPrompt()},
-			{Role: "user", Content: fmt.Sprintf("Input: %s\nPlan: %s\nResults: %s",
-				input, planResponse, strings.Join(results, "\n"))},
+		finalMessages := []*conversation.Message{
+			conversation.NewChatMessage(conversation.RoleSystem, a.buildFinalizerPrompt()),
+			conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Input: %s\nPlan: %s\nResults: %s",
+				input, planResponse, strings.Join(results, "\n"))),
 		}
 
 		finalChan, err := a.planner.GenerateWithStream(ctx, finalMessages)

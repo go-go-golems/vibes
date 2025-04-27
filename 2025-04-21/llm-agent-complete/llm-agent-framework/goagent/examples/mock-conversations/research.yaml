@@ -1,0 +1,321 @@
+interactions:
+  - request: 
+      - system: |
+          You are an AI assistant that can use tools to help answer questions.
+
+          You have access to the following tools:
+
+          Tool: web_search
+          Description: Search the web for information
+          Parameters:
+            - query: The search query
+
+          Tool: write_file
+          Description: Write content to a file
+          Parameters:
+            - filename: The name of the file to write
+            - content: The content to write to the file
+
+          Use the following format:
+
+          Thought: you should always think about what to do
+          Action: the action to take, should be one of [web_search, write_file]
+          Action Input: the input to the action (in JSON format)
+          Observation: the result of the action
+          ... (this Thought/Action/Action Input/Observation can repeat N times)
+          Thought: I now know the final answer
+          Final Answer: the final answer to the original input question
+
+      - user: Research the latest information on climate change impacts and write a comprehensive article about it.
+    response: |
+      Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
+      Action: web_search
+      Action Input: {"query": "climate change impacts"}
+  - request: 
+      - system: |
+          You are an AI assistant that can use tools to help answer questions.
+
+          You have access to the following tools:
+
+          Tool: web_search
+          Description: Search the web for information
+          Parameters:
+            - query: The search query
+
+          Tool: write_file
+          Description: Write content to a file
+          Parameters:
+            - filename: The name of the file to write
+            - content: The content to write to the file
+
+          Use the following format:
+
+          Thought: you should always think about what to do
+          Action: the action to take, should be one of [web_search, write_file]
+          Action Input: the input to the action (in JSON format)
+          Observation: the result of the action
+          ... (this Thought/Action/Action Input/Observation can repeat N times)
+          Thought: I now know the final answer
+          Final Answer: the final answer to the original input question
+
+      - user: Research the latest information on climate change impacts and write a comprehensive article about it.
+      - assistant: |
+          Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
+          Action: web_search
+          Action Input: {"query": "climate change impacts"}
+      - user: |
+          Observation: [
+            {
+              "title": "Climate Change Impacts - IPCC Report 2025",
+              "url": "https://example.com/ipcc-report-2025",
+              "snippet": "The latest IPCC report shows accelerating impacts of climate change across all continents."
+            },
+            {
+              "title": "How Climate Change Affects Biodiversity",
+              "url": "https://example.com/climate-biodiversity",
+              "snippet": "Research indicates that climate change is causing significant biodiversity loss worldwide."
+            }
+          ]
+    response: |
+      Thought: I've found some information about climate change impacts, including a reference to the latest IPCC report and information about biodiversity impacts. Let me search for information about renewable energy solutions as well, since that's an important part of addressing climate change.
+      Action: web_search
+      Action Input: {"query": "renewable energy solutions"}
+  - request: 
+      - system: |
+          You are an AI assistant that can use tools to help answer questions.
+
+          You have access to the following tools:
+
+          Tool: web_search
+          Description: Search the web for information
+          Parameters:
+            - query: The search query
+
+          Tool: write_file
+          Description: Write content to a file
+          Parameters:
+            - filename: The name of the file to write
+            - content: The content to write to the file
+
+          Use the following format:
+
+          Thought: you should always think about what to do
+          Action: the action to take, should be one of [web_search, write_file]
+          Action Input: the input to the action (in JSON format)
+          Observation: the result of the action
+          ... (this Thought/Action/Action Input/Observation can repeat N times)
+          Thought: I now know the final answer
+          Final Answer: the final answer to the original input question
+
+      - user: Research the latest information on climate change impacts and write a comprehensive article about it.
+      - assistant: |
+          Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
+          Action: web_search
+          Action Input: {"query": "climate change impacts"}
+      - user: |
+          Observation: [
+            {
+              "title": "Climate Change Impacts - IPCC Report 2025",
+              "url": "https://example.com/ipcc-report-2025",
+              "snippet": "The latest IPCC report shows accelerating impacts of climate change across all continents."
+            },
+            {
+              "title": "How Climate Change Affects Biodiversity",
+              "url": "https://example.com/climate-biodiversity",
+              "snippet": "Research indicates that climate change is causing significant biodiversity loss worldwide."
+            }
+          ]
+      - assistant: |
+          Thought: I've found some information about climate change impacts, including a reference to the latest IPCC report and information about biodiversity impacts. Let me search for information about renewable energy solutions as well, since that's an important part of addressing climate change.
+          Action: web_search
+          Action Input: {"query": "renewable energy solutions"}
+      - user: |
+          Observation: [
+            {
+              "title": "Advances in Solar Technology 2025",
+              "url": "https://example.com/solar-tech-2025",
+              "snippet": "New solar panel designs have achieved 35% efficiency, making them more viable than ever."
+            },
+            {
+              "title": "Wind Energy Growth Worldwide",
+              "url": "https://example.com/wind-energy-growth",
+              "snippet": "Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries."
+            }
+          ]
+    response: |
+      Thought: Now I have information about both climate change impacts and renewable energy solutions. I can write a comprehensive article that covers the latest findings on climate change impacts and discusses potential solutions through renewable energy. Let me write the article.
+      Action: write_file
+      Action Input: {"filename": "climate_change_article.md", "content": "# The Accelerating Impact of Climate Change and the Promise of Renewable Energy
+
+      ## Introduction
+
+      Climate change continues to be one of the most pressing challenges facing our planet. According to the latest IPCC Report 2025, the impacts of climate change are accelerating across all continents, affecting ecosystems, human health, and economic stability. This article explores the latest findings on climate change impacts and examines how renewable energy solutions are evolving to address this global crisis.
+
+      ## Recent Climate Change Impacts
+
+      The latest IPCC report provides compelling evidence that climate change impacts are intensifying worldwide. These impacts include:
+
+      - Rising global temperatures leading to more frequent and severe heatwaves
+      - Increasing sea levels threatening coastal communities
+      - More extreme weather events, including hurricanes, floods, and droughts
+      - Accelerating loss of biodiversity and ecosystem disruption
+
+      Research indicates that climate change is causing significant biodiversity loss worldwide. As temperatures rise and habitats change, many species are unable to adapt quickly enough, leading to population declines and potential extinctions. This loss of biodiversity has profound implications for ecosystem stability and resilience.
+
+      ## Renewable Energy Solutions
+
+      Addressing climate change requires a transition away from fossil fuels toward renewable energy sources. Recent advances in renewable energy technology offer promising solutions:
+
+      ### Solar Energy
+
+      New solar panel designs have achieved 35% efficiency, making them more viable than ever. This represents a significant improvement over previous generations of solar technology, which typically operated at 15-20% efficiency. Higher efficiency means more energy can be generated from the same amount of sunlight, reducing the cost per kilowatt-hour and making solar energy increasingly competitive with fossil fuels.
+
+      ### Wind Energy
+
+      Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries. This rapid growth demonstrates the increasing economic viability of wind power as a clean energy solution. Improvements in turbine design, materials, and grid integration have all contributed to making wind energy one of the fastest-growing renewable energy sectors.
+
+      ## Conclusion
+
+      The latest research on climate change impacts underscores the urgency of transitioning to a low-carbon economy. While the challenges are significant, advances in renewable energy technology provide hope that we can mitigate the worst effects of climate change. By accelerating the deployment of solar, wind, and other renewable energy sources, we can reduce greenhouse gas emissions while creating new economic opportunities.
+
+      Addressing climate change will require coordinated action at all levels—from individual choices to international agreements. The latest scientific findings and technological advances give us the knowledge and tools we need to create a more sustainable future."}
+  - request:
+      - system: |
+          You are an AI assistant that can use tools to help answer questions.
+
+          You have access to the following tools:
+
+          Tool: web_search
+          Description: Search the web for information
+          Parameters:
+            - query: The search query
+
+          Tool: write_file
+          Description: Write content to a file
+          Parameters:
+            - filename: The name of the file to write
+            - content: The content to write to the file
+
+          Use the following format:
+
+          Thought: you should always think about what to do
+          Action: the action to take, should be one of [web_search, write_file]
+          Action Input: the input to the action (in JSON format)
+          Observation: the result of the action
+          ... (this Thought/Action/Action Input/Observation can repeat N times)
+          Thought: I now know the final answer
+          Final Answer: the final answer to the original input question
+
+      - user: Research the latest information on climate change impacts and write a comprehensive article about it.
+      - assistant: |
+          Thought: I need to gather information about the latest climate change impacts. Let me search for recent information.
+          Action: web_search
+          Action Input: {"query": "climate change impacts"}
+      - user: |
+          Observation: [
+              {
+              "title": "Climate Change Impacts - IPCC Report 2025",
+              "url": "https://example.com/ipcc-report-2025",
+              "snippet": "The latest IPCC report shows accelerating impacts of climate change across all continents."
+            },
+            {
+              "title": "How Climate Change Affects Biodiversity",
+              "url": "https://example.com/climate-biodiversity",
+              "snippet": "Research indicates that climate change is causing significant biodiversity loss worldwide."
+            }
+          ]
+      - assistant: |
+          Thought: I've found some information about climate change impacts, including a reference to the latest IPCC report and information about biodiversity impacts. Let me search for information about renewable energy solutions as well, since that's an important part of addressing climate change.
+          Action: web_search
+          Action Input: {"query": "renewable energy solutions"}
+      - user: |
+          Observation: [
+            {
+              "title": "Advances in Solar Technology 2025",
+              "url": "https://example.com/solar-tech-2025",
+              "snippet": "New solar panel designs have achieved 35% efficiency, making them more viable than ever."
+            },
+            {
+              "title": "Wind Energy Growth Worldwide",
+              "url": "https://example.com/wind-energy-growth",
+              "snippet": "Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries."
+            }
+          ]
+      - assistant: |
+          Thought: Now I have information about both climate change impacts and renewable energy solutions. I can write a comprehensive article that covers the latest findings on climate change impacts and discusses potential solutions through renewable energy. Let me write the article.
+          Action: write_file
+          Action Input: {"filename": "climate_change_article.md", "content": "# The Accelerating Impact of Climate Change and the Promise of Renewable Energy
+
+          ## Introduction
+
+          Climate change continues to be one of the most pressing challenges facing our planet. According to the latest IPCC Report 2025, the impacts of climate change are accelerating across all continents, affecting ecosystems, human health, and economic stability. This article explores the latest findings on climate change impacts and examines how renewable energy solutions are evolving to address this global crisis.
+
+          ## Recent Climate Change Impacts
+
+          The latest IPCC report provides compelling evidence that climate change impacts are intensifying worldwide. These impacts include:
+
+          - Rising global temperatures leading to more frequent and severe heatwaves
+          - Increasing sea levels threatening coastal communities
+          - More extreme weather events, including hurricanes, floods, and droughts
+          - Accelerating loss of biodiversity and ecosystem disruption
+
+          Research indicates that climate change is causing significant biodiversity loss worldwide. As temperatures rise and habitats change, many species are unable to adapt quickly enough, leading to population declines and potential extinctions. This loss of biodiversity has profound implications for ecosystem stability and resilience.
+
+          ## Renewable Energy Solutions
+
+          Addressing climate change requires a transition away from fossil fuels toward renewable energy sources. Recent advances in renewable energy technology offer promising solutions:
+
+          ### Solar Energy
+
+          New solar panel designs have achieved 35% efficiency, making them more viable than ever. This represents a significant improvement over previous generations of solar technology, which typically operated at 15-20% efficiency. Higher efficiency means more energy can be generated from the same amount of sunlight, reducing the cost per kilowatt-hour and making solar energy increasingly competitive with fossil fuels.
+
+          ### Wind Energy
+
+          Wind energy capacity has grown by 25% in the past year, with significant installations in developing countries. This rapid growth demonstrates the increasing economic viability of wind power as a clean energy solution. Improvements in turbine design, materials, and grid integration have all contributed to making wind energy one of the fastest-growing renewable energy sectors.
+
+          ## Conclusion
+
+          The latest research on climate change impacts underscores the urgency of transitioning to a low-carbon economy. While the challenges are significant, advances in renewable energy technology provide hope that we can mitigate the worst effects of climate change. By accelerating the deployment of solar, wind, and other renewable energy sources, we can reduce greenhouse gas emissions while creating new economic opportunities.
+
+          Addressing climate change will require coordinated action at all levels—from individual choices to international agreements. The latest scientific findings and technological advances give us the knowledge and tools we need to create a more sustainable future."}
+      - user: |
+          Observation: File 'climate_change_article.md' written successfully
+    response: |
+      Thought: I have successfully researched information about climate change impacts and renewable energy solutions, and written a comprehensive article about these topics. The article covers the latest findings from the IPCC report, discusses biodiversity loss due to climate change, and explores recent advances in solar and wind energy technology.
+      Final Answer: I've researched the latest information on climate change impacts and written a comprehensive article titled "The Accelerating Impact of Climate Change and the Promise of Renewable Energy." The article covers the latest findings from the 2025 IPCC report, which shows accelerating impacts across all continents, and discusses how climate change is causing significant biodiversity loss worldwide. It also explores recent advances in renewable energy solutions, including new solar panel designs achieving 35% efficiency and wind energy capacity growing by 25% in the past year. The article has been saved as 'climate_change_article.md'.
+streams:
+  - request:
+      - system: |
+          You are an AI assistant that can use tools to help answer questions.
+
+          You have access to the following tools:
+
+          Tool: web_search
+          Description: Search the web for information
+          Parameters:
+            - query: The search query
+
+          Tool: write_file
+          Description: Write content to a file
+          Parameters:
+            - filename: The name of the file to write
+            - content: The content to write to the file
+
+          Use the following format:
+
+          Thought: you should always think about what to do
+          Action: the action to take, should be one of [web_search, write_file]
+          Action Input: the input to the action (in JSON format)
+          Observation: the result of the action
+          ... (this Thought/Action/Action Input/Observation can repeat N times)
+          Thought: I now know the final answer
+          Final Answer: the final answer to the original input question
+
+      - user: Research the latest information on climate change impacts and write a comprehensive article about it.
+    response_chunks:
+      - "Thought: I need to gather "
+      - "information about the latest "
+      - "climate change impacts. Let me "
+      - "search for recent information. "
+      - "Action: web_search"
+      - "Action Input: {\"query\": \"climate change impacts\"}"

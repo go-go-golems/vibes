@@ -3,9 +3,11 @@ package agent
 import (
 	"context"
 	"fmt"
+	"strings"
+
+	"github.com/go-go-golems/geppetto/pkg/conversation"
 	"github.com/goagent/framework/goagent/llm"
 	"github.com/goagent/framework/goagent/types"
-	"strings"
 )
 
 // NewReActAgent creates a new ReActAgent
@@ -96,9 +98,9 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
 	ctx, span := a.tracer.StartSpan(ctx, "ReActAgent.Run")
 	defer span.End()
 
-	messages := []types.Message{
-		{Role: "system", Content: a.buildSystemPrompt()},
-		{Role: "user", Content: input},
+	messages := []*conversation.Message{
+		conversation.NewChatMessage(conversation.RoleSystem, a.buildSystemPrompt()),
+		conversation.NewChatMessage(conversation.RoleUser, input),
 	}
 
 	for i := 0; i < a.maxIter; i++ {
@@ -141,14 +143,8 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
 		})
 
 		// Add to messages
-		messages = append(messages, types.Message{
-			Role:    "assistant",
-			Content: response,
-		})
-		messages = append(messages, types.Message{
-			Role:    "user",
-			Content: "Observation: " + result,
-		})
+		messages = append(messages, conversation.NewChatMessage(conversation.RoleAssistant, response))
+		messages = append(messages, conversation.NewChatMessage(conversation.RoleUser, "Observation: "+result))
 	}
 
 	return "Agent exceeded maximum iterations", nil
@@ -164,9 +160,9 @@ func (a *ReActAgent) RunWithStream(ctx context.Context, input string) (<-chan ty
 		defer close(responseChan)
 		defer span.End()
 
-		messages := []types.Message{
-			{Role: "system", Content: a.buildSystemPrompt()},
-			{Role: "user", Content: input},
+		messages := []*conversation.Message{
+			conversation.NewChatMessage(conversation.RoleSystem, a.buildSystemPrompt()),
+			conversation.NewChatMessage(conversation.RoleUser, input),
 		}
 
 		for i := 0; i < a.maxIter; i++ {
@@ -249,14 +245,8 @@ func (a *ReActAgent) RunWithStream(ctx context.Context, input string) (<-chan ty
 			}
 
 			// Add to messages
-			messages = append(messages, types.Message{
-				Role:    "assistant",
-				Content: response,
-			})
-			messages = append(messages, types.Message{
-				Role:    "user",
-				Content: "Observation: " + result,
-			})
+			messages = append(messages, conversation.NewChatMessage(conversation.RoleAssistant, response))
+			messages = append(messages, conversation.NewChatMessage(conversation.RoleUser, "Observation: "+result))
 		}
 
 		responseChan <- types.AgentResponse{
