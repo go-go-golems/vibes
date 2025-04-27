@@ -1,14 +1,14 @@
 [
   {
     "name": "ReActAgent.Run",
-    "span_id": "823f0cca-a2ed-4745-9bf3-e9923900bbaf",
-    "timestamp": 1745267662819353578,
+    "span_id": "334b1826-064b-4d1b-9117-484ce2269c58",
+    "timestamp": 1745789937202116709,
     "type": "span_start"
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819381296
+    "timestamp": 1745789937202134637
   },
   {
     "type": "tool_execution",
@@ -17,12 +17,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819383137
+    "timestamp": 1745789937202136156
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819394868
+    "timestamp": 1745789937202141889
   },
   {
     "type": "tool_execution",
@@ -31,12 +31,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819395733
+    "timestamp": 1745789937202142559
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819403615
+    "timestamp": 1745789937202148686
   },
   {
     "type": "tool_execution",
@@ -45,12 +45,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819404300
+    "timestamp": 1745789937202149303
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819426936
+    "timestamp": 1745789937202162277
   },
   {
     "type": "tool_execution",
@@ -59,12 +59,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819427716
+    "timestamp": 1745789937202162942
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819438664
+    "timestamp": 1745789937202173208
   },
   {
     "type": "tool_execution",
@@ -73,12 +73,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819439298
+    "timestamp": 1745789937202173861
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819490585
+    "timestamp": 1745789937202191900
   },
   {
     "type": "tool_execution",
@@ -87,12 +87,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819492175
+    "timestamp": 1745789937202192780
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819503656
+    "timestamp": 1745789937202200302
   },
   {
     "type": "tool_execution",
@@ -101,12 +101,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819504567
+    "timestamp": 1745789937202200969
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819533024
+    "timestamp": 1745789937202212889
   },
   {
     "type": "tool_execution",
@@ -115,12 +115,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819533748
+    "timestamp": 1745789937202213521
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819565248
+    "timestamp": 1745789937202237107
   },
   {
     "type": "tool_execution",
@@ -129,12 +129,12 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819565964
+    "timestamp": 1745789937202237800
   },
   {
     "type": "thought",
     "data": "",
-    "timestamp": 1745267662819598004
+    "timestamp": 1745789937202256653
   },
   {
     "type": "tool_execution",
@@ -143,13 +143,13 @@
       "result": "Error: tool not found: ",
       "tool": ""
     },
-    "timestamp": 1745267662819598687
+    "timestamp": 1745789937202257263
   },
   {
-    "duration": 245442,
+    "duration": 140771,
     "name": "ReActAgent.Run",
-    "span_id": "823f0cca-a2ed-4745-9bf3-e9923900bbaf",
-    "timestamp": 1745267662819599020,
+    "span_id": "334b1826-064b-4d1b-9117-484ce2269c58",
+    "timestamp": 1745789937202257480,
     "type": "span_end"
   }
 ]
