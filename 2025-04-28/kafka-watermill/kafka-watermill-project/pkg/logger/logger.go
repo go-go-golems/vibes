@@ -48,6 +48,7 @@ type LogEntry struct {
 
 // NewStructuredLogger creates a new structured logger
 func NewStructuredLogger(serviceName string) *StructuredLogger {
+	fmt.Println("NewStructuredLogger %v", serviceName)
 	// Default is to write to stdout
 	return &StructuredLogger{
 		serviceName: serviceName,

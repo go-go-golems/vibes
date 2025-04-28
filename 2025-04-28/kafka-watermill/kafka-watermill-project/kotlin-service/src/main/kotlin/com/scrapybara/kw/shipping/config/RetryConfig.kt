@@ -33,17 +33,17 @@ class RetryConfig {
     }
     
     @Bean
-    fun kafkaOperations(kafkaTemplate: KafkaTemplate<String, Any>, retryTemplate: RetryTemplate): KafkaOperations {
+    fun kafkaOperations(kafkaTemplate: KafkaTemplate<String, ByteArray>, retryTemplate: RetryTemplate): KafkaOperations {
         return KafkaOperations(kafkaTemplate, retryTemplate)
     }
 }
 
 class KafkaOperations(
-    private val kafkaTemplate: KafkaTemplate<String, Any>,
+    private val kafkaTemplate: KafkaTemplate<String, ByteArray>,
     private val retryTemplate: RetryTemplate
 ) {
     
-    fun sendWithRetry(topic: String, payload: Any) {
+    fun sendWithRetry(topic: String, payload: ByteArray) {
         retryTemplate.execute<Void, Exception> {
             kafkaTemplate.send(topic, payload).get() // Wait for the send to complete to catch errors
             null

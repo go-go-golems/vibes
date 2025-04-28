@@ -1,7 +1,7 @@
 package com.scrapybara.kw.shipping.saga
 
-import com.scrapybara.kw.idl.OrderCancelled
-import com.scrapybara.kw.idl.OrderFulfilled
+import com.scrapybara.kw.idl.OrderProto.OrderCancelled
+import com.scrapybara.kw.idl.OrderProto.OrderFulfilled
 import com.scrapybara.kw.shipping.models.ShipmentEvent
 import com.scrapybara.kw.shipping.services.ShippingTrackerService
 import org.slf4j.LoggerFactory
@@ -9,6 +9,9 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.*
+import com.google.protobuf.GeneratedMessageV3
+import org.apache.kafka.common.serialization.ByteArraySerializer
+import org.apache.kafka.common.serialization.StringSerializer
 
 /**
  * Data for the shipping saga
@@ -37,7 +40,7 @@ data class ShippingSagaData(
  */
 @Component
 class ShippingSagaManager(
-    private val kafkaTemplate: KafkaTemplate<String, Any>,
+    private val kafkaTemplate: KafkaTemplate<String, ByteArray>,
     private val shippingService: ShippingTrackerService
 ) {
     private val logger = LoggerFactory.getLogger(ShippingSagaManager::class.java)
@@ -147,15 +150,16 @@ class ShippingSagaManager(
                 data.notificationSent = true
                 
                 // Publish the shipment event to Kafka
-                val orderFulfilled = OrderFulfilled(
-                    orderId = data.orderId,
-                    shippingId = data.shippingId!!,
-                    trackingNumber = data.trackingNumber!!,
-                    status = "shipped",
-                    timestamp = Instant.now()
-                )
+                val orderFulfilled = OrderFulfilled.newBuilder()
+                    .setOrderId(data.orderId)
+                    .setShippingId(data.shippingId!!)
+                    .setTrackingNumber(data.trackingNumber!!)
+                    .setStatus("shipped")
+                    .setTimestamp(data.startTime.toEpochMilli().toString())
+                    .build()
                 
-                kafkaTemplate.send("order.fulfilled", orderFulfilled)
+                // Serialize Protobuf to ByteArray
+                kafkaTemplate.send("order.fulfilled", orderFulfilled.toByteArray())
                 data
             },
             compensation = { data ->
@@ -163,14 +167,15 @@ class ShippingSagaManager(
                 
                 // In a real system, this would send a cancellation email
                 // Publish order cancelled event
-                val orderCancelled = OrderCancelled(
-                    orderId = data.orderId,
-                    reason = "Shipping failed: ${data.error}",
-                    refundStatus = "pending",
-                    timestamp = Instant.now()
-                )
+                val orderCancelled = OrderCancelled.newBuilder()
+                    .setOrderId(data.orderId)
+                    .setReason("Shipping failed: ${data.error}")
+                    .setRefundStatus("pending")
+                    .setTimestamp(Instant.now().toEpochMilli().toString())
+                    .build()
                 
-                kafkaTemplate.send("order.cancelled", orderCancelled)
+                // Serialize Protobuf to ByteArray
+                kafkaTemplate.send("order.cancelled", orderCancelled.toByteArray())
                 data
             }
         )

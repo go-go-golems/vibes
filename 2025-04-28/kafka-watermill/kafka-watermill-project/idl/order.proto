@@ -5,6 +5,7 @@ package order;
 option go_package = "github.com/scrapybara/kafka-watermill/idl/go/order";
 option java_package = "com.scrapybara.kw.idl";
 option java_outer_classname = "OrderProto";
+option java_multiple_files = true;
 option ruby_package = "KafkaWatermill.IDL";
 
 // Event representing an order created by a user
@@ -73,4 +74,13 @@ message UnavailableItem {
   string name = 2;
   int32 requested_quantity = 3;
   int32 available_quantity = 4;
+}
+
+// Event representing saga audit trail
+message SagaEvent {
+  string saga_id   = 1;
+  string saga_name = 2;
+  string status    = 3;        // e.g., STARTED, COMPLETED, FAILED, COMPENSATING
+  int64  timestamp = 4;        // epoch-millis
+  string error     = 5;        // Optional error message
 }
