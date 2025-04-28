@@ -14,14 +14,14 @@ require_relative 'lib/analytics_commands'
 
 module AnalyticsService
   class Application
-    attr_reader :logger, :kafka_client, :event_processor, :analytics_repo, :metrics, :web_app,
+    attr_reader :logger, :kafka_client, :event_processor, :analytics_repo, :metrics,
                 :event_store, :command_bus, :query_bus, :event_bus
 
     def initialize
       @logger = Logger.new(STDOUT)
       @logger.level = ENV['LOG_LEVEL'] ? Logger.const_get(ENV['LOG_LEVEL']) : Logger::INFO
 
-      @logger.info("Initializing Analytics Service...")
+      @logger.info('Initializing Analytics Service...')
 
       # Initialize components
       db_path = ENV['DB_PATH'] || 'db/analytics.db'
@@ -37,93 +37,95 @@ module AnalyticsService
       }
 
       @kafka_client = KafkaClient.new(kafka_config)
-      
+
       # Initialize event sourcing components
       @event_store = EventSourcing::EventStore.new(@db)
       @repository = EventSourcing::Repository.new(@event_store, OrderAnalyticsAggregate)
-      
+
       # Initialize CQRS components
       @command_bus = CQRS::CommandBus.new
       @query_bus = CQRS::QueryBus.new
       @event_bus = CQRS::EventBus.new
-      
+
       # Register command handlers
       @command_bus.register(
-        Commands::CalculateOrderConversionRate.name,
+        Commands::CalculateOrderConversionRate,
         Commands::CalculateOrderConversionRateHandler.new(@repository)
       )
-      
+
       @command_bus.register(
-        Commands::GenerateDailyOrderReport.name,
+        Commands::GenerateDailyOrderReport,
         Commands::GenerateDailyOrderReportHandler.new(@repository, @event_store, @kafka_client)
       )
-      
+
       @command_bus.register(
-        Commands::DetectInventoryAnomaly.name,
+        Commands::DetectInventoryAnomaly,
         Commands::DetectInventoryAnomalyHandler.new(@repository, @event_store, @kafka_client)
       )
-      
+
       @command_bus.register(
-        Commands::PublishAnalyticsInsight.name,
+        Commands::PublishAnalyticsInsight,
         Commands::PublishAnalyticsInsightHandler.new(@repository, @kafka_client)
       )
-      
+
       # Register query handlers
       @query_bus.register(
-        Queries::GetOrderAnalytics.name,
+        Queries::GetOrderAnalytics,
         Queries::GetOrderAnalyticsHandler.new(@analytics_repo)
       )
-      
+
       @query_bus.register(
-        Queries::GetOrdersTimeline.name,
+        Queries::GetOrdersTimeline,
         Queries::GetOrdersTimelineHandler.new(@analytics_repo)
       )
-      
+
       @query_bus.register(
-        Queries::GetTopProducts.name,
+        Queries::GetTopProducts,
         Queries::GetTopProductsHandler.new(@analytics_repo)
       )
-      
+
       @query_bus.register(
-        Queries::GetInventoryShortages.name,
+        Queries::GetInventoryShortages,
         Queries::GetInventoryShortagesHandler.new(@analytics_repo)
       )
-      
+
       # Register event handlers
       @event_bus.register(
         'ORDER_CREATED',
         EventHandlers::AnalyticsReadModelUpdater.new(@analytics_repo)
       )
-      
+
       @event_bus.register(
         'PAYMENT_PROCESSED',
         EventHandlers::AnalyticsReadModelUpdater.new(@analytics_repo)
       )
-      
+
       @event_bus.register(
         'INVENTORY_CHECKED',
         EventHandlers::AnalyticsReadModelUpdater.new(@analytics_repo)
       )
-      
+
       @event_bus.register(
         'ORDER_FULFILLED',
         EventHandlers::AnalyticsReadModelUpdater.new(@analytics_repo)
       )
-      
+
       @event_bus.register(
         'ORDER_CANCELLED',
         EventHandlers::AnalyticsReadModelUpdater.new(@analytics_repo)
       )
-      
+
       # Initialize event processor with the event bus
       @event_processor = EventProcessor.new(@logger, @analytics_repo, @metrics)
-      
-      # Initialize web app
-      @web_app = AnalyticsWeb.new(@analytics_repo, @metrics, @kafka_client)
+
+      # Configure AnalyticsWeb settings instead of creating an instance
+      AnalyticsWeb.set :analytics_repo, @analytics_repo
+      AnalyticsWeb.set :metrics, @metrics
+      AnalyticsWeb.set :kafka_producer, @kafka_client # Pass the Kafka client as the producer
     end
 
     def start
-      @logger.info("Starting Analytics Service...")
+      @logger.info('Starting Analytics Service...')
 
       # Start Kafka consumer in a background thread
       consumer_thread = @kafka_client.start_consumer(@event_processor)
@@ -141,7 +143,7 @@ module AnalyticsService
       consumer_thread.wait
       web_thread.join if web_thread.is_a?(Thread)
 
-      @logger.info("Analytics Service stopped.")
+      @logger.info('Analytics Service stopped.')
     end
 
     private
@@ -152,11 +154,11 @@ module AnalyticsService
         execution_interval: 24 * 60 * 60, # 24 hours
         timeout_interval: 5 * 60          # 5 minutes timeout
       ) do
-        @logger.info("Generating daily order report...")
+        @logger.info('Generating daily order report...')
         begin
           @command_bus.dispatch(Commands::GenerateDailyOrderReport.new(nil, {}))
-          @logger.info("Daily report generated successfully")
-        rescue => e
+          @logger.info('Daily report generated successfully')
+        rescue StandardError => e
           @logger.error("Error generating daily report: #{e.message}")
           @logger.error(e.backtrace.join("\n"))
         end
@@ -167,11 +169,11 @@ module AnalyticsService
         execution_interval: 60 * 60,      # 1 hour
         timeout_interval: 5 * 60          # 5 minutes timeout
       ) do
-        @logger.info("Detecting inventory anomalies...")
+        @logger.info('Detecting inventory anomalies...')
         begin
           @command_bus.dispatch(Commands::DetectInventoryAnomaly.new(nil, {}))
-          @logger.info("Inventory anomaly detection completed")
-        rescue => e
+          @logger.info('Inventory anomaly detection completed')
+        rescue StandardError => e
           @logger.error("Error detecting inventory anomalies: #{e.message}")
           @logger.error(e.backtrace.join("\n"))
         end
@@ -180,17 +182,17 @@ module AnalyticsService
 
     def start_web_server
       Thread.new do
-        @logger.info("Starting web server on port #{@web_app.settings.port}...")
-        @web_app.run!
+        @logger.info("Starting web server on port #{AnalyticsWeb.settings.port}...")
+        AnalyticsWeb.run!
       end
     end
 
     def setup_shutdown_handler
-      %w(INT TERM).each do |signal|
+      %w[INT TERM].each do |signal|
         trap(signal) do
           @logger.info("Received signal #{signal}, shutting down...")
           @kafka_client.stop_consumer
-          @logger.info("Shutdown complete.")
+          @logger.info('Shutdown complete.')
           exit
         end
       end

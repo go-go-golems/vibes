@@ -62,23 +62,27 @@ While the Ruby classes used for events (`../idl/ruby/order_events.rb`) are check
     *(Note: This should already be handled by `bundle install` if `google-protobuf` is in the Gemfile.)*
 
 2.  **Run the `protoc` command:**
-    From the root directory of the `kafka-watermill-project`, run:
+    From the root directory of the `kafka-watermill-project` (where the `protoc-gen-order_events` script is located), run:
     ```bash
-    protoc --proto_path=idl --ruby_out=idl/ruby idl/order.proto
+    chmod +x ./protoc-gen-order_events # Ensure the script is executable
+    protoc --proto_path=idl \
+           --plugin=protoc-gen-order_events=./protoc-gen-order_events \
+           --order_events_out=idl/ruby \
+           idl/order.proto
     ```
     *   `--proto_path=idl`: Specifies the directory containing the `.proto` source files.
-    *   `--ruby_out=idl/ruby`: Specifies the output directory for the generated Ruby code.
+    *   `--plugin=protoc-gen-order_events=./protoc-gen-order_events`: Specifies the custom plugin script.
+    *   `--order_events_out=idl/ruby`: Specifies the output directory for the generated Ruby code using our custom plugin.
     *   `idl/order.proto`: The input Protobuf definition file.
 
-    This command generates a file named `idl/ruby/order_pb.rb`.
+    This command uses the custom `./protoc-gen-order_events` script to generate the `idl/ruby/order_events.rb` file directly, incorporating the custom logic.
 
 3.  **Understanding `order_events.rb` vs. `order_pb.rb`:**
-    The file currently used by this service is `idl/ruby/order_events.rb`. **This is a custom Ruby implementation** designed to closely match the structure defined in `idl/order.proto`. It includes custom logic, such as:
-    *   Specific `initialize` methods for easier object creation from hashes.
-    *   Parsing of timestamp strings into `Time` objects.
-    *   Custom `to_json` and `from_json` methods using Ruby's `json` library.
+    The file generated and used by this service is `idl/ruby/order_events.rb`. This file is created by our custom `protoc-gen-order_events` plugin.
 
-    The standard `protoc` output (`order_pb.rb`) would define similar classes but with a more direct mapping from the Protobuf types and without this custom Ruby logic. The custom `order_events.rb` file is used here likely for better integration with Ruby conventions and existing code patterns within this service. If you regenerate using `protoc`, you would get `order_pb.rb`, and you would need to decide whether to adapt the service to use the generated code directly or manually update `order_events.rb` based on the changes in the `.proto` file and the generated `order_pb.rb`.
+    If you were to use the standard Ruby Protobuf plugin (`--ruby_out` instead of `--plugin` and `--order_events_out`), `protoc` would generate a different file, typically named `idl/ruby/order_pb.rb`. This standard file would lack the custom Ruby logic (like specific initializers, timestamp parsing, custom JSON methods) present in `order_events.rb`.
+
+    Always use the command provided in step 2 to ensure `order_events.rb` is generated correctly for this project.
 
 ### Installation
 
