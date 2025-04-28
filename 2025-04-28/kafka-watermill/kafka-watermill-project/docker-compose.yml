@@ -1,0 +1,191 @@
+version: '3'
+
+services:
+  # Kafka infrastructure
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.2
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181", "|", "grep", "imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.2
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka-setup:
+    image: confluentinc/cp-kafka:7.3.2
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: |
+      bash -c '
+        echo "Waiting for Kafka to be ready..."
+        cub kafka-ready -b kafka:9092 1 30
+        
+        echo "Creating topics..."
+        kafka-topics --create --if-not-exists --topic order.created --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic payment.processed --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic inventory.checked --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic order.fulfilled --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic order.cancelled --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic saga.events --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic saga.step.events --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic analytics.insights.inventory --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        kafka-topics --create --if-not-exists --topic analytics.reports.daily --partitions 3 --replication-factor 1 --bootstrap-server kafka:9092
+        
+        echo "Topics created."
+      '
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  # Go microservices
+  order-service:
+    build:
+      context: .
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE_NAME: order-service
+    ports:
+      - "8001:8001"
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      PORT: 8001
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE_NAME: payment-service
+    ports:
+      - "8002:8002"
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      PORT: 8002
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE_NAME: inventory-service
+    ports:
+      - "8003:8003"
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      PORT: 8003
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE_NAME: notification-service
+    ports:
+      - "8004:8004"
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      PORT: 8004
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # Kotlin microservice
+  shipping-service:
+    build:
+      context: .
+      dockerfile: docker/kotlin/Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # Ruby microservice
+  analytics-service:
+    build:
+      context: .
+      dockerfile: docker/ruby/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      KAFKA_BROKERS: kafka:9092
+    volumes:
+      - ./ruby-service/db:/app/db
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # Patterns demo
+  patterns-demo:
+    build:
+      context: .
+      dockerfile: docker/go/Dockerfile
+      args:
+        SERVICE_NAME: patterns-demo
+    environment:
+      KAFKA_BROKERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+      order-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      shipping-service:
+        condition: service_started
+      analytics-service:
+        condition: service_started

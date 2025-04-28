@@ -1,0 +1,56 @@
+filebeat.inputs:
+- type: container
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  json.keys_under_root: true
+  json.message_key: log
+  json.add_error_key: true
+  processors:
+    - add_docker_metadata: ~
+    - add_kubernetes_metadata: ~
+
+# Optional: Use autodiscover to automatically detect containers
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      templates:
+        - condition:
+            contains:
+              container.labels.app: "kafka-watermill"
+          config:
+            - type: container
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
+  - rename:
+      fields:
+        - from: "container.labels.com_docker_compose_service"
+          to: "service.name"
+      ignore_missing: true
+  - drop_fields:
+      fields: ["agent", "ecs", "input", "prospector", "host"]
+      ignore_missing: true
+
+# Use logstash for output
+output.logstash:
+  hosts: ["logstash:5044"]
+
+# Configure logging for filebeat itself
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# Configure monitoring
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]

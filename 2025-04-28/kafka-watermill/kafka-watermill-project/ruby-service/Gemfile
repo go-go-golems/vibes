@@ -1,0 +1,29 @@
+source 'https://rubygems.org'
+
+# Kafka and concurrency
+gem 'ruby-kafka', '~> 1.5'
+gem 'concurrent-ruby', '~> 1.2'
+
+# Web framework and server
+gem 'sinatra', '~> 3.0'
+gem 'sinatra-contrib', '~> 3.0'   # For JSON helpers and extensions
+gem 'puma', '~> 6.3'
+
+# Visualization and analytics
+gem 'chartkick', '~> 5.0'         # For generating charts
+gem 'groupdate', '~> 6.1'         # For grouping data by date
+gem 'descriptive_statistics', '~> 2.5'  # For calculating statistics
+
+# Persistence
+gem 'sqlite3', '~> 1.6'           # Simple database for storing analytics
+gem 'sequel', '~> 5.73'           # ORM for database interactions
+
+# Monitoring and metrics
+gem 'prometheus-client', '~> 4.0' # For exposing metrics
+
+# Development and testing
+group :development, :test do
+  gem 'rspec', '~> 3.12'
+  gem 'rack-test', '~> 2.1'
+  gem 'byebug', '~> 11.1'
+end
