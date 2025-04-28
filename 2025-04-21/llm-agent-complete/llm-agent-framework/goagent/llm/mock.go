@@ -55,7 +55,7 @@ func (m *MockLLM) AddEmbedding(text string, embedding []float32) {
 }
 
 // Generate generates a response to the given messages
-func (m *MockLLM) Generate(ctx context.Context, messages []*conversation.Message) (string, error) {
+func (m *MockLLM) Generate(ctx context.Context, messages []*conversation.Message) (*conversation.Message, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -64,7 +64,7 @@ func (m *MockLLM) Generate(ctx context.Context, messages []*conversation.Message
 
 	// Check if we have a response for this input
 	if response, ok := m.responses[key]; ok {
-		return response, nil
+		return conversation.NewChatMessage(conversation.RoleAssistant, response), nil
 	}
 	// INSERT_YOUR_CODE
 
@@ -81,54 +81,7 @@ func (m *MockLLM) Generate(ctx context.Context, messages []*conversation.Message
 	}
 
 	// Default response
-	return "I don't know how to respond to that.", nil
-}
-
-// GenerateWithStream generates a response to the given messages with streaming
-func (m *MockLLM) GenerateWithStream(ctx context.Context, messages []*conversation.Message) (<-chan string, error) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	// Create a key from the messages
-	key := messagesToKey(messages)
-
-	// Create a channel for the response
-	responseChan := make(chan string)
-
-	go func() {
-		defer close(responseChan)
-
-		// Check if we have a streaming response for this input
-		if chunks, ok := m.streamResponses[key]; ok {
-			for _, chunk := range chunks {
-				select {
-				case <-ctx.Done():
-					return
-				case responseChan <- chunk:
-				}
-			}
-			return
-		}
-
-		// Check if we have a non-streaming response for this input
-		if response, ok := m.responses[key]; ok {
-			select {
-			case <-ctx.Done():
-				return
-			case responseChan <- response:
-			}
-			return
-		}
-
-		// Default response
-		select {
-		case <-ctx.Done():
-			return
-		case responseChan <- "I don't know how to respond to that.":
-		}
-	}()
-
-	return responseChan, nil
+	return conversation.NewChatMessage(conversation.RoleAssistant, "I don't know how to respond to that."), nil
 }
 
 // GenerateEmbedding generates an embedding for the given text

@@ -148,7 +148,7 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 	}
 
 	// Parse plan into steps
-	steps := a.parsePlan(planResponse)
+	steps := a.parsePlan(planResponse.Content.String())
 
 	// Log plan
 	a.tracer.LogEvent(ctx, types.Event{
@@ -174,7 +174,7 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 		}
 
 		// Extract action and action input
-		action, actionInput := a.parseExecutorResponse(executorResponse)
+		action, actionInput := a.parseExecutorResponse(executorResponse.Content.String())
 
 		// Execute tool
 		result, err := a.tools.ExecuteTool(ctx, action, actionInput)
@@ -210,179 +210,5 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 		return "", err
 	}
 
-	return finalResponse, nil
-}
-
-// RunWithStream executes the agent with streaming response
-func (a *PlanAndExecuteAgent) RunWithStream(ctx context.Context, input string) (<-chan types.AgentResponse, error) {
-	ctx, span := a.tracer.StartSpan(ctx, "PlanAndExecuteAgent.RunWithStream")
-
-	responseChan := make(chan types.AgentResponse)
-
-	go func() {
-		defer close(responseChan)
-		defer span.End()
-
-		// Generate plan
-		responseChan <- types.AgentResponse{
-			Type:    "status",
-			Content: "Generating plan...",
-		}
-
-		planMessages := []*conversation.Message{
-			conversation.NewChatMessage(conversation.RoleSystem, a.buildPlannerPrompt()),
-			conversation.NewChatMessage(conversation.RoleUser, input),
-		}
-
-		planChan, err := a.planner.GenerateWithStream(ctx, planMessages)
-		if err != nil {
-			responseChan <- types.AgentResponse{
-				Type:    "error",
-				Content: err.Error(),
-			}
-			return
-		}
-
-		// Collect the full plan
-		var fullPlan strings.Builder
-		for chunk := range planChan {
-			fullPlan.WriteString(chunk)
-			responseChan <- types.AgentResponse{
-				Type:    "planning",
-				Content: chunk,
-			}
-		}
-
-		planResponse := fullPlan.String()
-
-		// Parse plan into steps
-		steps := a.parsePlan(planResponse)
-
-		// Log plan
-		a.tracer.LogEvent(ctx, types.Event{
-			Type:      "plan",
-			Data:      steps,
-			Timestamp: 0, // Will be set by the tracer
-		})
-
-		// Send complete plan
-		responseChan <- types.AgentResponse{
-			Type:    "plan",
-			Content: planResponse,
-		}
-
-		// Execute each step
-		results := make([]string, len(steps))
-		for i, step := range steps {
-			// Send step status
-			responseChan <- types.AgentResponse{
-				Type:    "status",
-				Content: fmt.Sprintf("Executing step %d: %s", i+1, step),
-			}
-
-			// Build executor prompt
-			executorMessages := []*conversation.Message{
-				conversation.NewChatMessage(conversation.RoleSystem, a.buildExecutorPrompt()),
-				conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
-					planResponse, step, strings.Join(results[:i], "\n"))),
-			}
-
-			// Get executor response with streaming
-			executorChan, err := a.executor.GenerateWithStream(ctx, executorMessages)
-			if err != nil {
-				responseChan <- types.AgentResponse{
-					Type:    "error",
-					Content: err.Error(),
-				}
-				return
-			}
-
-			// Collect the full executor response
-			var fullExecutor strings.Builder
-			for chunk := range executorChan {
-				fullExecutor.WriteString(chunk)
-				responseChan <- types.AgentResponse{
-					Type:    "thinking",
-					Content: chunk,
-				}
-			}
-
-			executorResponse := fullExecutor.String()
-
-			// Extract action and action input
-			action, actionInput := a.parseExecutorResponse(executorResponse)
-
-			// Send tool call notification
-			responseChan <- types.AgentResponse{
-				Type:    "tool_call",
-				Content: "",
-				ToolCall: &types.ToolCall{
-					Name:  action,
-					Input: actionInput,
-				},
-			}
-
-			// Execute tool
-			result, err := a.tools.ExecuteTool(ctx, action, actionInput)
-			if err != nil {
-				result = "Error: " + err.Error()
-			}
-
-			// Send tool result
-			responseChan <- types.AgentResponse{
-				Type:    "tool_result",
-				Content: result,
-				ToolResult: &types.ToolResult{
-					Name:   action,
-					Output: result,
-				},
-			}
-
-			// Store result
-			results[i] = fmt.Sprintf("Step %d: %s\nResult: %s", i+1, step, result)
-
-			// Log step execution
-			a.tracer.LogEvent(ctx, types.Event{
-				Type: "step_execution",
-				Data: map[string]string{
-					"step":   step,
-					"tool":   action,
-					"input":  actionInput,
-					"result": result,
-				},
-				Timestamp: 0, // Will be set by the tracer
-			})
-		}
-
-		// Generate final answer
-		responseChan <- types.AgentResponse{
-			Type:    "status",
-			Content: "Generating final answer...",
-		}
-
-		finalMessages := []*conversation.Message{
-			conversation.NewChatMessage(conversation.RoleSystem, a.buildFinalizerPrompt()),
-			conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Input: %s\nPlan: %s\nResults: %s",
-				input, planResponse, strings.Join(results, "\n"))),
-		}
-
-		finalChan, err := a.planner.GenerateWithStream(ctx, finalMessages)
-		if err != nil {
-			responseChan <- types.AgentResponse{
-				Type:    "error",
-				Content: err.Error(),
-			}
-			return
-		}
-
-		// Send final answer chunks
-		for chunk := range finalChan {
-			responseChan <- types.AgentResponse{
-				Type:    "final_stream",
-				Content: chunk,
-			}
-		}
-	}()
-
-	return responseChan, nil
+	return finalResponse.Content.String(), nil
 }

@@ -96,7 +96,7 @@ func (a *ReActAgent) parseResponse(response string) (thought, action, actionInpu
 }
 
 // Run executes the agent with the ReAct pattern
-func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
+func (a *ReActAgent) Run(ctx context.Context, input string) (*conversation.Message, error) {
 	ctx, span := a.tracer.StartSpan(ctx, "ReActAgent.Run")
 	defer span.End()
 
@@ -107,10 +107,13 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
 
 	for i := 0; i < a.maxIter; i++ {
 		// Get next step from LLM
-		response, err := a.llm.Generate(ctx, messages)
+		responseMsg, err := a.llm.Generate(ctx, messages)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
+
+		// Extract content from the message
+		response := responseMsg.Content.String()
 
 		// Extract thought, action, and action input
 		thought, action, actionInput := a.parseResponse(response)
@@ -124,7 +127,7 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
 
 		// Check if final answer
 		if action == "final_answer" {
-			return actionInput, nil
+			return conversation.NewChatMessage(conversation.RoleAssistant, actionInput), nil
 		}
 
 		// Execute tool
@@ -145,122 +148,13 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
 		})
 
 		// Add to messages
-		messages = append(messages, conversation.NewChatMessage(conversation.RoleAssistant, response))
+		messages = append(messages, responseMsg)
 		messages = append(messages, conversation.NewChatMessage(conversation.RoleUser, "Observation: "+result))
 	}
 
-	return "Agent exceeded maximum iterations", nil
+	return conversation.NewChatMessage(conversation.RoleAssistant, "Agent exceeded maximum iterations"), nil
 }
 
-// RunWithStream executes the agent with streaming response
-func (a *ReActAgent) RunWithStream(ctx context.Context, input string) (<-chan types.AgentResponse, error) {
-	ctx, span := a.tracer.StartSpan(ctx, "ReActAgent.RunWithStream")
-
-	responseChan := make(chan types.AgentResponse)
-
-	go func() {
-		defer close(responseChan)
-		defer span.End()
-
-		messages := []*conversation.Message{
-			conversation.NewChatMessage(conversation.RoleSystem, a.buildSystemPrompt()),
-			conversation.NewChatMessage(conversation.RoleUser, input),
-		}
-
-		for i := 0; i < a.maxIter; i++ {
-			// Get next step from LLM with streaming
-			stepChan, err := a.llm.GenerateWithStream(ctx, messages)
-			if err != nil {
-				responseChan <- types.AgentResponse{
-					Type:    "error",
-					Content: err.Error(),
-				}
-				return
-			}
-
-			// Collect the full response
-			var fullResponse strings.Builder
-			for chunk := range stepChan {
-				fullResponse.WriteString(chunk)
-				responseChan <- types.AgentResponse{
-					Type:    "thinking",
-					Content: chunk,
-				}
-			}
-
-			response := fullResponse.String()
-
-			// Extract thought, action, and action input
-			thought, action, actionInput := a.parseResponse(response)
-
-			// Log thought
-			a.tracer.LogEvent(ctx, types.Event{
-				Type:      "thought",
-				Data:      thought,
-				Timestamp: 0, // Will be set by the tracer
-			})
-
-			// Check if final answer
-			if action == "final_answer" {
-				responseChan <- types.AgentResponse{
-					Type:    "final",
-					Content: actionInput,
-				}
-				return
-			}
-
-			// Send tool call notification
-			responseChan <- types.AgentResponse{
-				Type:    "tool_call",
-				Content: "",
-				ToolCall: &types.ToolCall{
-					Name:  action,
-					Input: actionInput,
-				},
-			}
-
-			// Execute tool
-			result, err := a.tools.ExecuteTool(ctx, action, actionInput)
-			if err != nil {
-				result = "Error: " + err.Error()
-			}
-
-			// Log tool execution
-			a.tracer.LogEvent(ctx, types.Event{
-				Type: "tool_execution",
-				Data: map[string]string{
-					"tool":   action,
-					"input":  actionInput,
-					"result": result,
-				},
-				Timestamp: 0, // Will be set by the tracer
-			})
-
-			// Send tool result
-			responseChan <- types.AgentResponse{
-				Type:    "tool_result",
-				Content: result,
-				ToolResult: &types.ToolResult{
-					Name:   action,
-					Output: result,
-				},
-			}
-
-			// Add to messages
-			messages = append(messages, conversation.NewChatMessage(conversation.RoleAssistant, response))
-			messages = append(messages, conversation.NewChatMessage(conversation.RoleUser, "Observation: "+result))
-		}
-
-		responseChan <- types.AgentResponse{
-			Type:    "error",
-			Content: "Agent exceeded maximum iterations",
-		}
-	}()
-
-	return responseChan, nil
-}
-
-// ReActAgent implements the ReAct pattern
 type ReActAgent struct {
 	*BaseAgent
 }
