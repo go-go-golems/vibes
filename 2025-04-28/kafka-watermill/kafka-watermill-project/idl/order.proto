@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "github.com/scrapybara/kafka-watermill/idl/go/order";
+option java_package = "com.scrapybara.kw.idl";
+option java_outer_classname = "OrderProto";
+option ruby_package = "KafkaWatermill.IDL";
+
+// Event representing an order created by a user
+message OrderCreated {
+  string order_id = 1;
+  string user_id = 2;
+  repeated OrderItem items = 3;
+  float total_amount = 4;
+  string timestamp = 5;
+}
+
+// Event representing a payment being processed for an order
+message PaymentProcessed {
+  string order_id = 1;
+  string payment_id = 2;
+  string status = 3; // "success", "failed", "pending"
+  string transaction_id = 4;
+  float amount = 5;
+  string timestamp = 6;
+}
+
+// Event representing inventory being checked for an order
+message InventoryChecked {
+  string order_id = 1;
+  bool all_items_available = 2;
+  repeated UnavailableItem unavailable_items = 3;
+  string timestamp = 4;
+}
+
+// Event representing order fulfillment 
+message OrderFulfilled {
+  string order_id = 1;
+  string shipping_id = 2;
+  string tracking_number = 3;
+  string status = 4;
+  string timestamp = 5;
+}
+
+// Event representing an order cancellation
+message OrderCancelled {
+  string order_id = 1;
+  string reason = 2;
+  string refund_status = 3;
+  string timestamp = 4;
+}
+
+// Notification event for various order process steps
+message Notification {
+  string order_id = 1;
+  string notification_type = 2; // "order_confirmation", "payment_success", "payment_failed", "shipping_update", etc.
+  string recipient = 3;
+  string content = 4;
+  string timestamp = 5;
+}
+
+// Supporting message types
+message OrderItem {
+  string product_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+  float price = 4;
+}
+
+message UnavailableItem {
+  string product_id = 1;
+  string name = 2;
+  int32 requested_quantity = 3;
+  int32 available_quantity = 4;
+}

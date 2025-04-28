@@ -1,0 +1,219 @@
+<div class="row">
+  <div class="col-md-12 mb-4">
+    <h1 class="display-5">Order Processing Analytics</h1>
+    <p class="lead">Real-time analytics for order processing through Kafka events</p>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Order stats -->
+  <div class="col-md-3">
+    <div class="dashboard-card">
+      <h3>Orders Created</h3>
+      <div class="stat-value"><%= @summary[:orders_created] %></div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="dashboard-card">
+      <h3>Orders Fulfilled</h3>
+      <div class="stat-value"><%= @summary[:orders_fulfilled] %></div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="dashboard-card">
+      <h3>Orders Cancelled</h3>
+      <div class="stat-value"><%= @summary[:orders_cancelled] %></div>
+      <div class="stat-label">Total</div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="dashboard-card">
+      <h3>Avg. Order Value</h3>
+      <div class="stat-value">$<%= sprintf('%.2f', @summary[:avg_order_value]) %></div>
+      <div class="stat-label">Per Order</div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <!-- Payment stats -->
+  <div class="col-md-6">
+    <div class="dashboard-card">
+      <h3>Payment Status</h3>
+      <canvas id="payment-chart" height="200"></canvas>
+      <script>
+        new Chart(document.getElementById("payment-chart"), {
+          type: 'pie',
+          data: {
+            labels: ["Success", "Failed"],
+            datasets: [{
+              data: [<%= @summary[:payments_success] || 0 %>, <%= @summary[:payments_failed] || 0 %>],
+              backgroundColor: ["#198754", "#dc3545"]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'right',
+              },
+              title: {
+                display: true,
+                text: 'Payment Processing Results'
+              }
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+  
+  <!-- Inventory stats -->
+  <div class="col-md-6">
+    <div class="dashboard-card">
+      <h3>Inventory Availability</h3>
+      <canvas id="inventory-chart" height="200"></canvas>
+      <script>
+        new Chart(document.getElementById("inventory-chart"), {
+          type: 'pie',
+          data: {
+            labels: ["Available", "Unavailable"],
+            datasets: [{
+              data: [<%= @summary[:inventory_available] || 0 %>, <%= @summary[:inventory_unavailable] || 0 %>],
+              backgroundColor: ["#198754", "#ffc107"]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'right',
+              },
+              title: {
+                display: true,
+                text: 'Inventory Check Results'
+              }
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <!-- Order Timeline -->
+  <div class="col-md-12">
+    <div class="dashboard-card">
+      <h3>Orders Timeline</h3>
+      <canvas id="orders-timeline" height="150"></canvas>
+      <script>
+        new Chart(document.getElementById("orders-timeline"), {
+          type: 'line',
+          data: {
+            labels: <%= @orders_timeline.map { |date, _| date }.to_json %>,
+            datasets: [{
+              label: 'Orders Created',
+              data: <%= @orders_timeline.map { |_, count| count }.to_json %>,
+              borderColor: '#0d6efd',
+              backgroundColor: 'rgba(13, 110, 253, 0.1)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Number of Orders'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Date'
+                }
+              }
+            }
+          }
+        });
+      </script>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <!-- Top Products -->
+  <div class="col-md-6">
+    <div class="dashboard-card">
+      <h3>Top Products</h3>
+      <% if @top_products.empty? %>
+        <p class="text-muted">No product data available yet.</p>
+      <% else %>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @top_products.each do |product| %>
+              <tr>
+                <td><%= product[:product_name] %></td>
+                <td><%= product[:quantity] %></td>
+                <td>$<%= sprintf('%.2f', product[:revenue]) %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Unavailable Products -->
+  <div class="col-md-6">
+    <div class="dashboard-card">
+      <h3>Inventory Shortages</h3>
+      <% if @unavailable_products.empty? %>
+        <p class="text-muted">No inventory shortage data available yet.</p>
+      <% else %>
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Requested</th>
+              <th>Available</th>
+              <th>Shortage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @unavailable_products.each do |product| %>
+              <tr>
+                <td><%= product[:product_name] %></td>
+                <td><%= product[:requested] %></td>
+                <td><%= product[:available] %></td>
+                <td class="text-danger"><%= product[:shortage] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+</div>
