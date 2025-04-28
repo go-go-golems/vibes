@@ -1,0 +1,55 @@
+name: chat-assistant
+short: "Simple Chat Assistant"
+long: "A basic AI assistant that can answer questions and have conversations"
+command-type: writer
+agent-type: react
+
+system-prompt: |
+  You are a helpful AI assistant that can answer questions on a wide range of topics.
+  Provide clear, concise, and accurate responses.
+
+prompt: "{{ .query | join \" \" }}"
+
+tools:
+  - web-search
+
+arguments:
+  - name: query
+    type: stringList
+    help: "The question or message for the assistant"
+    required: true
+---
+name: code-generator
+short: "Code Generator"
+long: "Generates code snippets and examples in various programming languages"
+command-type: writer
+agent-type: react
+
+system-prompt: |
+  You are a code generation assistant specializing in creating high-quality, 
+  working code examples. Ensure your code follows best practices and includes 
+  appropriate comments.
+
+prompt: |
+  Generate code for the following: {{ .task }}
+  Language: {{ .language }}
+  {{- if .additional_requirements }}
+  Additional requirements: {{ .additional_requirements }}
+  {{- end }}
+
+tools:
+  - web-search
+
+flags:
+  - name: task
+    type: string
+    help: "Description of the code to generate"
+    required: true
+  - name: language
+    type: string
+    help: "Programming language to use"
+    default: "go"
+  - name: additional_requirements
+    type: string
+    help: "Additional specifications or requirements"
+    default: "" 

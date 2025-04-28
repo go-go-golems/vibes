@@ -1,0 +1,60 @@
+name: code-exploration
+short: "AI Code Explorer"
+long: |
+  A code analysis assistant that can explore and understand codebases by reading files,
+  searching directories, and analyzing code structure. Useful for understanding 
+  new projects, identifying dependencies, and generating documentation.
+
+# Using writer command type as this agent outputs text analysis
+command-type: writer
+# Using react agent type for interactive exploration
+agent-type: react
+
+system-prompt: |
+  You are an AI code exploration assistant that helps developers understand codebases.
+  Your capabilities include:
+  
+  1. Reading file contents to understand code implementations
+  2. Searching directories to find relevant files
+  3. Analyzing code structure to identify functions, classes, and dependencies
+  4. Providing clear explanations of how code components work together
+  5. Identifying common patterns, potential issues, and architectural decisions
+  
+  When exploring code, take a systematic approach:
+  1. Start by understanding the project structure and key entry points
+  2. Analyze important modules and their relationships
+  3. Trace the flow of execution through the code
+  4. Identify design patterns and architectural choices
+  5. Summarize your findings in a clear, organized way
+
+prompt: |
+  Explore the following codebase: {{ .query | join " " }}
+  {{- if .focus }}
+  Focus on {{ .focus }}.
+  {{- end }}
+  {{- if .output_format }}
+  Provide your analysis as {{ .output_format }}.
+  {{- end }}
+
+# Tools available to this agent
+tools:
+  - read_file
+  - search_files
+  - analyze_code
+
+# Command parameters
+flags:
+  - name: focus
+    type: string
+    help: "Specific aspect to focus on (e.g., 'architecture', 'data flow', 'a specific feature')"
+    default: ""
+  - name: output_format
+    type: string
+    help: "Format for the analysis (e.g., 'summary', 'detailed report', 'diagram description')"
+    default: "detailed report"
+
+arguments:
+  - name: query
+    type: stringList
+    help: "Path to the codebase or specific question about the code"
+    required: true 

@@ -1,0 +1,53 @@
+name: research
+short: "AI Research Assistant"
+long: |
+  A research assistant that can search the web for information and generate
+  well-structured articles and reports based on the findings.
+  Uses the ReAct pattern to think step-by-step about the research process.
+
+# Using writer command type as this agent outputs plain text
+command-type: writer
+# Using react agent type for step-by-step reasoning
+agent-type: react
+
+system-prompt: |
+  You are an AI research assistant specialized in finding information and synthesizing it 
+  into well-structured reports. Follow these guidelines:
+  
+  1. When researching a topic, first search for recent and reliable information
+  2. Analyze and synthesize information from multiple sources
+  3. Organize findings into a coherent structure with clear sections
+  4. Include citations of sources when appropriate
+  5. Highlight any areas where information may be conflicting or uncertain
+  6. Provide balanced perspective on controversial topics
+
+prompt: |
+  Research the following topic: {{ .query | join " " }}
+  {{- if .format -}}
+  Format the research as a {{ .format }}.
+  {{- end -}}
+  {{- if .length -}}
+  The {{ if eq .format ""}}research{{else}}{{ .format }}{{end}} should be approximately {{ .length }} in length.
+  {{- end -}}
+
+# Tools available to this agent
+tools:
+  - web-search
+  - write_file
+
+# Command parameters
+flags:
+  - name: format
+    type: string
+    help: "Output format (article, report, summary, bullet-points)"
+    default: ""
+  - name: length
+    type: string
+    help: "Approximate length (short, medium, long, or specific word count)"
+    default: "medium"
+
+arguments:
+  - name: query
+    type: stringList
+    help: "The research topic or question to explore"
+    required: true 

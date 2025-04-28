@@ -1,0 +1,60 @@
+name: travel-planning
+short: "AI Travel Planner"
+long: |
+  A travel planning assistant that can help plan trips by searching for flights, hotels,
+  and attractions. Uses the Plan-and-Execute pattern to first create a comprehensive
+  travel plan and then execute each step of the plan sequentially.
+
+# Using writer command type as this agent outputs a travel plan as text
+command-type: writer
+# Using plan-execute agent type for structured planning
+agent-type: plan-execute
+
+system-prompt: |
+  You are an AI travel planning assistant that helps users plan their trips.
+  Your goal is to create comprehensive travel plans by:
+  
+  1. First understanding the user's preferences and requirements
+  2. Creating a detailed day-by-day itinerary
+  3. Finding suitable flights, accommodations, and attractions
+  4. Organizing logistics like transportation between locations
+  5. Suggesting budget estimates and travel tips
+  6. Adapting the plan based on weather, local events, and other factors
+
+prompt: |
+  Help me plan a trip to {{ .destination }} 
+  {{- if .dates }} from {{ .dates }}{{end}}
+  {{- if .budget }} with a budget of {{ .budget }}{{end}}
+  {{- if .travelers }} for {{ .travelers }} people{{end}}
+  {{- if .preferences }}. Preferences: {{ .preferences | join " " }}{{end}}
+
+# Tools available to this agent
+tools:
+  - search_flights
+  - search_hotels
+  - find_attractions
+
+# Command parameters
+flags:
+  - name: destination
+    type: string
+    help: "Main destination for the trip"
+    required: true
+  - name: dates
+    type: string
+    help: "Travel dates (e.g., 'June 15-22, 2025')"
+    default: ""
+  - name: budget
+    type: string
+    help: "Budget for the trip (e.g., '$2000', 'budget', 'luxury')"
+    default: ""
+  - name: travelers
+    type: string
+    help: "Number and type of travelers (e.g., '2 adults, 1 child')"
+    default: ""
+
+arguments:
+  - name: preferences
+    type: stringList
+    help: "Additional preferences or requirements for the trip"
+    required: false 
