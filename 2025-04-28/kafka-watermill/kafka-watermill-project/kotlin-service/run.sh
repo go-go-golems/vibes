@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Building Kotlin shipping service..."
-./gradlew clean build
+./gradlew clean build generateProto
 
 if [ $? -eq 0 ]; then
     echo "Build successful. Starting service..."

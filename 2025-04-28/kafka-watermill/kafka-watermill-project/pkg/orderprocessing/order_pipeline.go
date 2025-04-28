@@ -2,32 +2,31 @@ package orderprocessing
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/google/uuid"
-	"github.com/scrapybara/kafka-watermill-project/idl/go"
+	order "github.com/scrapybara/kafka-watermill-project/idl/go"
 	"github.com/scrapybara/kafka-watermill-project/pkg/mediator"
 	"github.com/scrapybara/kafka-watermill-project/pkg/pipeline"
 )
 
 // OrderProcessingData contains data for order processing
 type OrderProcessingData struct {
-	OrderID       string
-	UserID        string
-	Items         []order.OrderItem
-	TotalAmount   float64
-	PaymentID     string
-	PaymentStatus string
-	InventoryOK   bool
-	ShippingID    string
-	TrackingNumber string
+	OrderID           string
+	UserID            string
+	Items             []order.OrderItem
+	TotalAmount       float64
+	PaymentID         string
+	PaymentStatus     string
+	InventoryOK       bool
+	ShippingID        string
+	TrackingNumber    string
 	FulfillmentStatus string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
 }
 
 // OrderCommands
@@ -94,10 +93,10 @@ func (e PaymentProcessedEvent) EventType() string {
 }
 
 type InventoryCheckedEvent struct {
-	OrderID          string
+	OrderID           string
 	AllItemsAvailable bool
-	UnavailableItems []order.UnavailableItem
-	Timestamp        time.Time
+	UnavailableItems  []order.UnavailableItem
+	Timestamp         time.Time
 }
 
 func (e InventoryCheckedEvent) EventType() string {
@@ -118,13 +117,13 @@ func (e OrderFulfilledEvent) EventType() string {
 
 // CommandHandlers
 type CreateOrderHandler struct {
-	mediator mediator.Mediator
+	mediator  mediator.Mediator
 	publisher message.Publisher
 }
 
 func NewCreateOrderHandler(med mediator.Mediator, pub message.Publisher) *CreateOrderHandler {
 	return &CreateOrderHandler{
-		mediator: med,
+		mediator:  med,
 		publisher: pub,
 	}
 }
@@ -184,13 +183,13 @@ func (h *CreateOrderHandler) Handle(ctx context.Context, cmd mediator.Command) (
 }
 
 type ProcessPaymentHandler struct {
-	mediator mediator.Mediator
+	mediator  mediator.Mediator
 	publisher message.Publisher
 }
 
 func NewProcessPaymentHandler(med mediator.Mediator, pub message.Publisher) *ProcessPaymentHandler {
 	return &ProcessPaymentHandler{
-		mediator: med,
+		mediator:  med,
 		publisher: pub,
 	}
 }
@@ -257,9 +256,9 @@ func (h *ProcessPaymentHandler) Handle(ctx context.Context, cmd mediator.Command
 
 // Create an order processing pipeline that combines all steps
 type OrderProcessor struct {
-	mediator   mediator.Mediator
-	publisher  message.Publisher
-	pipeline   *pipeline.Pipeline
+	mediator  mediator.Mediator
+	publisher message.Publisher
+	pipeline  *pipeline.Pipeline
 }
 
 func NewOrderProcessor(med mediator.Mediator, pub message.Publisher) *OrderProcessor {
@@ -300,7 +299,7 @@ func NewOrderProcessor(med mediator.Mediator, pub message.Publisher) *OrderProce
 		}
 
 		paymentData := result.(*OrderProcessingData)
-		
+
 		// Update order data
 		orderData.PaymentID = paymentData.PaymentID
 		orderData.PaymentStatus = paymentData.PaymentStatus
@@ -322,7 +321,7 @@ func NewOrderProcessor(med mediator.Mediator, pub message.Publisher) *OrderProce
 		}
 
 		// Check inventory
-		checkInventoryCmd := CheckInventoryCommand{
+		_ = CheckInventoryCommand{
 			OrderID: orderData.OrderID,
 			Items:   orderData.Items,
 		}
@@ -349,10 +348,10 @@ func NewOrderProcessor(med mediator.Mediator, pub message.Publisher) *OrderProce
 
 		// Publish InventoryChecked event
 		event := InventoryCheckedEvent{
-			OrderID:          orderData.OrderID,
+			OrderID:           orderData.OrderID,
 			AllItemsAvailable: allAvailable,
-			UnavailableItems: unavailableItems,
-			Timestamp:        timestamp,
+			UnavailableItems:  unavailableItems,
+			Timestamp:         timestamp,
 		}
 
 		if err := med.Publish(ctx, event); err != nil {
@@ -361,7 +360,7 @@ func NewOrderProcessor(med mediator.Mediator, pub message.Publisher) *OrderProce
 
 		// Convert to Kafka event
 		kafkaEvent := order.InventoryChecked{
-			OrderID:          orderData.OrderID,
+			OrderID:           orderData.OrderID,
 			AllItemsAvailable: allAvailable,
 			UnavailableItems:  unavailableItems,
 			Timestamp:         timestamp,
@@ -395,9 +394,9 @@ func NewOrderProcessor(med mediator.Mediator, pub message.Publisher) *OrderProce
 		},
 		checkInventoryStage,
 	)
-	
+
 	processor.pipeline = pipelineBuilder.Build()
-	
+
 	return processor
 }
 
@@ -424,7 +423,6 @@ func (p *OrderProcessor) ProcessKafkaMessage(msg *message.Message) error {
 	// Extract event type from topic
 	topic := msg.Metadata.Get("topic")
 	var event interface{}
-	var err error
 
 	switch topic {
 	case "order.created":
@@ -439,7 +437,7 @@ func (p *OrderProcessor) ProcessKafkaMessage(msg *message.Message) error {
 			TotalAmount: orderCreated.TotalAmount,
 			Timestamp:   orderCreated.Timestamp,
 		}
-	
+
 	case "payment.processed":
 		var paymentProcessed order.PaymentProcessed
 		if err := order.FromJSON(msg.Payload, &paymentProcessed); err != nil {
@@ -453,19 +451,19 @@ func (p *OrderProcessor) ProcessKafkaMessage(msg *message.Message) error {
 			Amount:        paymentProcessed.Amount,
 			Timestamp:     paymentProcessed.Timestamp,
 		}
-	
+
 	case "inventory.checked":
 		var inventoryChecked order.InventoryChecked
 		if err := order.FromJSON(msg.Payload, &inventoryChecked); err != nil {
 			return fmt.Errorf("error unmarshaling InventoryChecked: %w", err)
 		}
 		event = InventoryCheckedEvent{
-			OrderID:          inventoryChecked.OrderID,
+			OrderID:           inventoryChecked.OrderID,
 			AllItemsAvailable: inventoryChecked.AllItemsAvailable,
-			UnavailableItems: inventoryChecked.UnavailableItems,
-			Timestamp:        inventoryChecked.Timestamp,
+			UnavailableItems:  inventoryChecked.UnavailableItems,
+			Timestamp:         inventoryChecked.Timestamp,
 		}
-	
+
 	default:
 		return fmt.Errorf("unknown topic: %s", topic)
 	}
