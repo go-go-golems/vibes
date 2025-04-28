@@ -1,0 +1,7 @@
+- [ ] Streaming to Run agent
+- [ ] Add tool calling
+- [ ] Add system prompt rendering
+- [ ] Add conversation management
+- [ ] How do we get a full trace of the agents
+- [ ] Extend bobachat/event system for new agent events
+- [ ] input should be arguments and flags as well
