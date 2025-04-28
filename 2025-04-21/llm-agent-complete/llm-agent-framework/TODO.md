@@ -1,4 +1,5 @@
 - [ ] Streaming to Run agent
+- [ ] Figure out how to do the construction time Writer/Bare/Glazed dispatch (it seems we have agent-type in the yaml, but it shoud be on the Agent class or registry)
 - [ ] Add tool calling
 - [ ] Add system prompt rendering
 - [ ] Add conversation management
