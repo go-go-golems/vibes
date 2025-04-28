@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Examples",
+            "name": "Run main.go with debug flags",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -10,6 +10,20 @@
             "cwd": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/run_examples",
             "env": {},
             "args": []
+        },
+        {
+            "name": "simple 4o-mini agent",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/simple/main.go",
+            "cwd": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/simple",
+            "env": {},
+            "args": [
+                "--log-level", "DEBUG",
+                "--with-caller",
+                "--profile", "4o-mini", "--ai-stream=true"
+            ]
         }
     ]
 } 
