@@ -163,8 +163,9 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 		// Build executor prompt
 		executorMessages := []*conversation.Message{
 			conversation.NewChatMessage(conversation.RoleSystem, a.buildExecutorPrompt()),
-			conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
-				planResponse, step, strings.Join(results[:i], "\n"))),
+			conversation.NewChatMessage(conversation.RoleUser,
+				fmt.Sprintf("Plan: %s\nCurrent step: %s\nPrevious results: %s",
+					planResponse.Content.String(), step, strings.Join(results[:i], "\n"))),
 		}
 
 		// Get executor response
@@ -202,7 +203,7 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 	finalMessages := []*conversation.Message{
 		conversation.NewChatMessage(conversation.RoleSystem, a.buildFinalizerPrompt()),
 		conversation.NewChatMessage(conversation.RoleUser, fmt.Sprintf("Input: %s\nPlan: %s\nResults: %s",
-			input, planResponse, strings.Join(results, "\n"))),
+			input, planResponse.Content.String(), strings.Join(results, "\n"))),
 	}
 
 	finalResponse, err := a.planner.Generate(ctx, finalMessages)
