@@ -27,3 +27,6 @@ group :development, :test do
   gem 'rack-test', '~> 2.1'
   gem 'byebug', '~> 11.1'
 end
+gem "google-protobuf", "~> 4.30"
+
+gem "snappy", "~> 0.4.0"

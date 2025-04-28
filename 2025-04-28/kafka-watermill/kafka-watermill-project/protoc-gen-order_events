@@ -1,0 +1,115 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+# protoc-gen-order_events — regenerate idl/ruby/order_events.rb
+
+require 'json'
+require 'time'
+require 'google/protobuf'
+require 'google/protobuf/plugin_pb'  # <-- NEW
+
+# ---------- helper fns (unchanged except for minor refactors) ---------------
+def ruby_type(name)
+  name.split('_').map(&:capitalize).join
+end
+
+def attr_line(n)    = "attr_reader :#{n}"
+def ctor_arg(f)
+  "#{f.name}:"
+end
+
+def is_timestamp?(n)
+  n == 'timestamp'
+end
+
+def init_assign(f)
+  n = f.name
+  if f.type == :TYPE_MESSAGE # Use enum symbol instead of :message
+    # Extract the base message type name (e.g., 'OrderItem' from '.KafkaWatermill.IDL.OrderItem')
+    cls = ruby_type(f.type_name.split('.').last)
+    if f.label == :LABEL_REPEATED # Use enum symbol instead of :repeated
+      "@#{n} = #{n}.map { |item| item.is_a?(Hash) ? #{cls}.new(**item) : item }"
+    else
+      # Handle single message assignment - check if hash and instantiate
+      "@#{n} = #{n}.is_a?(Hash) ? #{cls}.new(**#{n}) : #{n}"
+    end
+  elsif is_timestamp?(n)
+    "@timestamp = #{n}.is_a?(String) ? Time.parse(#{n}) : #{n}"
+  else
+    "@#{n} = #{n}"
+  end
+end
+
+def to_h_pair(f)
+  n = f.name
+  val =
+    if f.label == :LABEL_REPEATED # Use enum symbol
+      "@#{n}.map(&:to_h)"
+    elsif f.type == :TYPE_MESSAGE # Use enum symbol
+      # Handle single message serialization
+      "@#{n}.to_h"
+    elsif is_timestamp?(n)
+      "@timestamp.iso8601"
+    else
+      "@#{n}"
+    end
+  "          #{n}: #{val}"
+end
+# ---------------------------------------------------------------------------
+
+req  = Google::Protobuf::Compiler::CodeGeneratorRequest.decode(STDIN.read)
+file = req.proto_file.find { |f| req.file_to_generate.include?(f.name) }
+
+supporting, events = file.message_type.partition { |m| %w[OrderItem UnavailableItem].include?(m.name) }
+
+base_event = <<~RUBY
+  # Base class for all events
+  class Event
+    def to_json
+      JSON.generate(to_h)
+    end
+
+    def self.from_json(json_str)
+      new(**JSON.parse(json_str, symbolize_names: true))
+    end
+  end
+
+  # Supporting classes
+RUBY
+
+tmpl = ->(m, superclass) do
+  # Correct attr_reader generation
+  attr_readers = m.field.map { |f| ":#{f.name}" }.join(', ')
+  <<~RUBY
+    class #{m.name}#{superclass}
+      attr_reader #{attr_readers}
+
+      def initialize(#{m.field.map { |f| ctor_arg(f) }.join(', ')})
+  #{m.field.map { |f| '        ' + init_assign(f) }.join("\n")}
+      end
+
+      def to_h
+        {
+  #{m.field.map { |f| to_h_pair(f) }.join(",\n")}
+        }
+      end
+    end
+  RUBY
+end
+
+out = +"# AUTO-GENERATED — DO NOT EDIT MANUALLY\n" \
+       "# Protoc version: #{req.compiler_version ? "#{req.compiler_version.major}.#{req.compiler_version.minor}.#{req.compiler_version.patch}" : 'unknown'}\n" \
+       "# Source file: #{file.name}\n" \
+       "\nrequire 'json'\nrequire 'time'\n\nmodule KafkaWatermill\n  module IDL\n"
+out << base_event # Add base Event and Supporting classes comment
+supporting.each { |m| out << "\n" + tmpl.call(m, '') }
+out << "\n    # Event classes\n" # Add Event classes comment
+events.each     { |m| out << "\n" + tmpl.call(m, ' < Event') }
+out << "  end\nend\n"
+
+resp = Google::Protobuf::Compiler::CodeGeneratorResponse.new
+resp.file << Google::Protobuf::Compiler::CodeGeneratorResponse::File.new(
+  name: 'idl/ruby/order_events.rb',
+  content: out
+)
+STDOUT.write(resp.to_proto)
+
