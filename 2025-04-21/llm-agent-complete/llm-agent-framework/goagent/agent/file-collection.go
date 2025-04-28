@@ -3,11 +3,15 @@ package agent
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/go-go-golems/geppetto/pkg/conversation"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	glazed_types "github.com/go-go-golems/glazed/pkg/types"
 	"github.com/goagent/framework/goagent/llm"
 	"github.com/goagent/framework/goagent/types"
+	"github.com/pkg/errors"
 	"golang.org/x/exp/maps"
 )
 
@@ -86,12 +90,32 @@ If you need to generate more files in a subsequent response after finishing one,
 `
 }
 
-// Run executes the FileCollectionAgent. It iteratively calls the LLM,
-// extracting files based on XML tags until the LLM signals completion
-// or the maximum iterations are reached.
-// It returns a summary string of the files generated.
-func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, error) {
-	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.Run")
+// buildSummary generates a string containing the full content of each collected file,
+// formatted as markdown code blocks.
+func (a *FileCollectionAgent) buildSummary() string {
+	if len(a.files) == 0 {
+		return "No files were generated."
+	}
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Generated %d files:\n\n", len(a.files)))
+	for name, content := range a.files {
+		// Determine language for syntax highlighting if possible (simple check)
+		lang := ""
+		splitName := strings.Split(name, ".")
+		if len(splitName) > 1 {
+			lang = splitName[len(splitName)-1]
+		}
+		sb.WriteString(fmt.Sprintf("**%s**\n```%s\n", name, lang))
+		sb.WriteString(content)
+		sb.WriteString("\n```\n\n")
+	}
+	return sb.String()
+}
+
+// runInternal executes the core file generation logic by interacting with the LLM.
+// It populates the a.files map with the extracted files.
+func (a *FileCollectionAgent) runInternal(ctx context.Context, input string) (map[string]string, error) {
+	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.runInternal")
 	defer span.End()
 
 	// Reset files map and extractor state for this run
@@ -108,7 +132,8 @@ func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, er
 	for i := 0; i < a.maxIter; i++ {
 		responseMsg, err := a.llm.Generate(ctx, messages)
 		if err != nil {
-			return "", fmt.Errorf("LLM generation failed on iteration %d: %w", i, err)
+			// Return the files collected so far along with the error
+			return a.files, fmt.Errorf("LLM generation failed on iteration %d: %w", i, err)
 		}
 
 		response := responseMsg.Content.String()
@@ -184,33 +209,105 @@ func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, er
 		}
 	}
 
-	// Build a summary string of the generated files
-	var summary strings.Builder
-	summary.WriteString(fmt.Sprintf("Agent finished. Collected %d files:\n", len(a.files)))
-	if len(a.files) > 0 {
-		fileNames := maps.Keys(a.files)
-		for _, name := range fileNames {
-			summary.WriteString(fmt.Sprintf("- %s\n", name))
-		}
-	} else {
-		summary.WriteString("No files were collected.\n")
-	}
-
-	// Check if the last file might have been incomplete even if completion marker was found (edge case)
-	if strings.Contains(messages[len(messages)-1].Content.String(), "<!-- all files emitted -->") && a.extractor.incompleteFileName != "" {
-		a.tracer.LogEvent(ctx, types.Event{
-			Type:      "warning_incomplete_file_despite_marker",
-			Data:      fmt.Sprintf("Completion marker found, but extractor state indicates file '%s' might be incomplete. Storing partial content.", a.extractor.incompleteFileName),
-			Timestamp: 0,
-		})
-		// Store the potentially incomplete file content
-		a.files[a.extractor.incompleteFileName] = strings.TrimSpace(a.extractor.incompleteFileContent.String()) + "\n... (potentially truncated despite completion marker)"
-	}
-
-	return summary.String(), nil
+	// Return the collected files map
+	return a.files, nil
 }
 
-// Ensure FileCollectionAgent implements the main Agent interface (Run method)
-// Note: BaseAgent provides AddTool and SetMemory. The Run method here returns
-// a summary string.
-var _ Agent = (*FileCollectionAgent)(nil)
+// --- Agent Interface Methods ---
+
+// Run executes the core file generation logic and returns a summary string.
+// This satisfies the base Agent interface.
+func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, error) {
+	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.Run")
+	defer span.End()
+
+	_, err := a.runInternal(ctx, input)
+	summary := a.buildSummary() // Build summary even if there was an error
+
+	// Log the final collected files for debugging/tracing
+	a.tracer.LogEvent(ctx, types.Event{
+		Type: "run_completed",
+		Data: map[string]interface{}{
+			"summary":   summary,
+			"fileCount": len(a.files),
+			"fileNames": maps.Keys(a.files),
+		},
+	})
+
+	return summary, err // Return summary and any error from runInternal
+}
+
+// RunIntoWriter executes the agent and writes the summary string to the writer.
+// This satisfies the WriterAgent interface.
+func (a *FileCollectionAgent) RunIntoWriter(ctx context.Context, input string, w io.Writer) error {
+	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.RunIntoWriter")
+	defer span.End()
+
+	summary, runErr := a.Run(ctx, input) // Call Run to get the summary and potential error
+
+	_, writeErr := fmt.Fprintln(w, summary)
+	if writeErr != nil {
+		// Prioritize returning the write error if it occurs
+		return errors.Wrap(writeErr, "failed to write summary")
+	}
+
+	// Return the error from the Run execution, if any
+	return runErr
+}
+
+// RunIntoGlazeProcessor executes the agent and streams file data as rows
+// into the Glazed processor. This satisfies the GlazedAgent interface.
+func (a *FileCollectionAgent) RunIntoGlazeProcessor(
+	ctx context.Context,
+	input string,
+	gp middlewares.Processor,
+) error {
+	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.RunIntoGlazeProcessor")
+	defer span.End()
+
+	// Step 1: Execute the core logic via runInternal to populate a.files.
+	files, runErr := a.runInternal(ctx, input)
+
+	// Log if Run failed, but proceed to output any files collected before the error.
+	if runErr != nil {
+		a.tracer.LogEvent(ctx, types.Event{
+			Type: "run_error_in_glazed_processor",
+			Data: runErr.Error(),
+		})
+	}
+
+	// Step 2: Process the collected files into the Glaze processor.
+	for filename, content := range files { // Iterate over the files returned by runInternal
+		row := glazed_types.NewRow(
+			glazed_types.MRP("filename", filename),
+			glazed_types.MRP("content", content),
+		)
+		if err := gp.AddRow(ctx, row); err != nil {
+			// If adding a row fails, wrap and return the error immediately.
+			// Log the underlying runErr as well if it exists.
+			if runErr != nil {
+				a.tracer.LogEvent(ctx, types.Event{
+					Type: "add_row_failed_after_run_error",
+					Data: map[string]interface{}{
+						"add_row_error": err.Error(),
+						"run_error":     runErr.Error(),
+						"filename":      filename,
+					},
+				})
+			}
+			return errors.Wrapf(err, "failed to add row for file '%s'", filename)
+		}
+	}
+
+	// Step 3: Return the original error from runInternal if it occurred.
+	// If AddRow failed, that error was already returned.
+	if runErr != nil {
+		return errors.Wrap(runErr, "core agent run failed but partial results might have been processed")
+	}
+	return nil
+}
+
+// Ensure FileCollectionAgent implements the relevant agent interfaces
+var _ Agent = (*FileCollectionAgent)(nil)       // Base interface
+var _ WriterAgent = (*FileCollectionAgent)(nil) // For RunIntoWriter
+var _ GlazedAgent = (*FileCollectionAgent)(nil) // For RunIntoGlazeProcessor

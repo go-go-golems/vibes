@@ -24,6 +24,19 @@
                 "--with-caller",
                 "--profile", "4o-mini", "--ai-stream=true"
             ]
+        },
+        {
+            "name": "Run agent weather for Berlin",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/agent/main.go",
+            "cwd": "${workspaceFolder}/2025-04-21/llm-agent-complete/llm-agent-framework/cmd/agent",
+            "env": {},
+            "args": [
+                "weather",
+                "--location", "berlin"
+            ]
         }
     ]
 } 
