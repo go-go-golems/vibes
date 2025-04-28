@@ -17,6 +17,8 @@ func NewReActAgent(llmModel llm.LLM, maxIterations int) *ReActAgent {
 	}
 }
 
+var _ Agent = &ReActAgent{}
+
 // buildSystemPrompt builds the system prompt for the ReAct agent
 func (a *ReActAgent) buildSystemPrompt() string {
 	var toolDescriptions []string
@@ -96,7 +98,7 @@ func (a *ReActAgent) parseResponse(response string) (thought, action, actionInpu
 }
 
 // Run executes the agent with the ReAct pattern
-func (a *ReActAgent) Run(ctx context.Context, input string) (*conversation.Message, error) {
+func (a *ReActAgent) Run(ctx context.Context, input string) (string, error) {
 	ctx, span := a.tracer.StartSpan(ctx, "ReActAgent.Run")
 	defer span.End()
 
@@ -109,7 +111,7 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (*conversation.Messa
 		// Get next step from LLM
 		responseMsg, err := a.llm.Generate(ctx, messages)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		// Extract content from the message
@@ -127,7 +129,7 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (*conversation.Messa
 
 		// Check if final answer
 		if action == "final_answer" {
-			return conversation.NewChatMessage(conversation.RoleAssistant, actionInput), nil
+			return actionInput, nil
 		}
 
 		// Execute tool
@@ -152,7 +154,7 @@ func (a *ReActAgent) Run(ctx context.Context, input string) (*conversation.Messa
 		messages = append(messages, conversation.NewChatMessage(conversation.RoleUser, "Observation: "+result))
 	}
 
-	return conversation.NewChatMessage(conversation.RoleAssistant, "Agent exceeded maximum iterations"), nil
+	return "Agent exceeded maximum iterations", nil
 }
 
 type ReActAgent struct {

@@ -49,7 +49,7 @@ func runResearchExample() {
 	}
 
 	// Save the result and trace
-	saveResult("research_result.txt", result.Content.String())
+	saveResult("research_result.txt", result)
 	saveTrace("research_trace.json", agent.BaseAgent.GetTracer().GetEvents())
 }
 
@@ -91,7 +91,7 @@ func runCodeExplorationExample() {
 	}
 
 	// Save the result and trace
-	saveResult("code_exploration_result.txt", result.Content.String())
+	saveResult("code_exploration_result.txt", result)
 	saveTrace("code_exploration_trace.json", agent.BaseAgent.GetTracer().GetEvents())
 }
 
