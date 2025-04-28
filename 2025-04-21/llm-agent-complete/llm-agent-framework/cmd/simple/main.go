@@ -118,7 +118,7 @@ func (sac *SimpleAgentCmd) Run(ctx context.Context, parsedLayers *layers.ParsedL
 
 	// 7. Call the LLM
 	log.Info().Msg("Calling LLM Generate")
-	_, err = geppettoLLM.Generate(ctx, messages) // No topicID argument needed here
+	v, err := geppettoLLM.Generate(ctx, messages) // No topicID argument needed here
 	if err != nil {
 		log.Error().Err(err).Msg("LLM Generate failed")
 		// We might want to cancel and wait even if LLM fails, to ensure clean router shutdown
@@ -128,6 +128,9 @@ func (sac *SimpleAgentCmd) Run(ctx context.Context, parsedLayers *layers.ParsedL
 	} else {
 		log.Info().Msg("LLM Generate completed")
 	}
+
+	log.Info().Msg("LLM Generate completed")
+	fmt.Println(v)
 
 	// 8. Signal router to stop and wait for shutdown
 	log.Info().Msg("Signalling router to stop")
