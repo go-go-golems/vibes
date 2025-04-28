@@ -27,7 +27,7 @@ def init_assign(f)
     # Extract the base message type name (e.g., 'OrderItem' from '.KafkaWatermill.IDL.OrderItem')
     cls = ruby_type(f.type_name.split('.').last)
     if f.label == :LABEL_REPEATED # Use enum symbol instead of :repeated
-      "@#{n} = #{n}.map { |item| item.is_a?(Hash) ? #{cls}.new(**item) : item }"
+      "@#{n} = (#{n} ? #{n}.map { |item| item.is_a?(Hash) ? #{cls}.new(**item) : item } : [])"
     else
       # Handle single message assignment - check if hash and instantiate
       "@#{n} = #{n}.is_a?(Hash) ? #{cls}.new(**#{n}) : #{n}"

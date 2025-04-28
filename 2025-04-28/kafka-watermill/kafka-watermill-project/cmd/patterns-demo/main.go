@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -14,22 +15,26 @@ import (
 	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/google/uuid"
-	"github.com/scrapybara/kafka-watermill-project/idl/go"
+	order "github.com/scrapybara/kafka-watermill-project/idl/go"
 	"github.com/scrapybara/kafka-watermill-project/pkg/mediator"
 	"github.com/scrapybara/kafka-watermill-project/pkg/orderprocessing"
 	"github.com/scrapybara/kafka-watermill-project/pkg/saga"
 )
 
 var (
-	brokers = []string{"kafka:9092"}
-	logger  = watermill.NewStdLogger(false, false)
+	logger = watermill.NewStdLogger(false, false)
 )
 
 func main() {
+	brokers := os.Getenv("KAFKA_BROKERS")
+	if brokers == "" {
+		brokers = "kafka:9092"
+	}
+	brokerList := strings.Split(brokers, ",")
 	// Create Kafka publisher
 	publisher, err := kafka.NewPublisher(
 		kafka.PublisherConfig{
-			Brokers:   brokers,
+			Brokers:   brokerList,
 			Marshaler: kafka.DefaultMarshaler{},
 		},
 		logger,
@@ -42,7 +47,7 @@ func main() {
 	// Create Kafka subscriber
 	subscriber, err := kafka.NewSubscriber(
 		kafka.SubscriberConfig{
-			Brokers:               brokers,
+			Brokers:               brokerList,
 			Unmarshaler:           kafka.DefaultMarshaler{},
 			OverwriteSaramaConfig: kafka.DefaultSaramaSubscriberConfig(),
 			ConsumerGroup:         "patterns-demo",
@@ -108,14 +113,14 @@ func generateOrders(ctx context.Context, processor *orderprocessing.OrderProcess
 			// Create a random order
 			items := []order.OrderItem{
 				{
-					ProductID: fmt.Sprintf("product%d", (time.Now().Unix() % 3) + 1),
-					Name:      fmt.Sprintf("Product %d", (time.Now().Unix() % 3) + 1),
+					ProductID: fmt.Sprintf("product%d", (time.Now().Unix()%3)+1),
+					Name:      fmt.Sprintf("Product %d", (time.Now().Unix()%3)+1),
 					Quantity:  int((time.Now().Unix() % 5) + 1),
 					Price:     19.99,
 				},
 				{
-					ProductID: fmt.Sprintf("product%d", ((time.Now().Unix() + 1) % 3) + 1),
-					Name:      fmt.Sprintf("Product %d", ((time.Now().Unix() + 1) % 3) + 1),
+					ProductID: fmt.Sprintf("product%d", ((time.Now().Unix()+1)%3)+1),
+					Name:      fmt.Sprintf("Product %d", ((time.Now().Unix()+1)%3)+1),
 					Quantity:  int(((time.Now().Unix() + 1) % 3) + 1),
 					Price:     29.99,
 				},
@@ -127,7 +132,7 @@ func generateOrders(ctx context.Context, processor *orderprocessing.OrderProcess
 			}
 
 			cmd := orderprocessing.CreateOrderCommand{
-				UserID:      fmt.Sprintf("user-%d", time.Now().Unix() % 10),
+				UserID:      fmt.Sprintf("user-%d", time.Now().Unix()%10),
 				Items:       items,
 				TotalAmount: totalAmount,
 			}
@@ -138,7 +143,7 @@ func generateOrders(ctx context.Context, processor *orderprocessing.OrderProcess
 				continue
 			}
 
-			log.Printf("Order created: %s, Total: $%.2f, Items: %d", 
+			log.Printf("Order created: %s, Total: $%.2f, Items: %d",
 				orderData.OrderID, orderData.TotalAmount, len(orderData.Items))
 		}
 	}
@@ -155,7 +160,7 @@ func handleMessagesWithSaga(ctx context.Context, subscriber message.Subscriber, 
 	// Process each topic
 	for _, topic := range topics {
 		topic := topic // Create a new variable to avoid closure issues
-		
+
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -180,7 +185,7 @@ func handleMessagesWithSaga(ctx context.Context, subscriber message.Subscriber, 
 
 					// Process the message with saga pattern
 					processSaga(ctx, msg, topic, publisher)
-					
+
 					// Mark the message as processed
 					msg.Ack()
 				}
@@ -217,7 +222,7 @@ func processSaga(ctx context.Context, msg *message.Message, topic string, publis
 			return
 		}
 
-		log.Printf("Saga started for order %s, status: %v", 
+		log.Printf("Saga started for order %s, status: %v",
 			sagaData.OrderID, sagaInstance.Error == nil)
 
 	case "payment.processed":
@@ -228,11 +233,11 @@ func processSaga(ctx context.Context, msg *message.Message, topic string, publis
 			return
 		}
 
-		log.Printf("Payment %s processed for order %s: %s", 
+		log.Printf("Payment %s processed for order %s: %s",
 			paymentProcessed.PaymentID, paymentProcessed.OrderID, paymentProcessed.Status)
 
 		// In a real system, you might retrieve the saga by ID and continue it
-	
+
 	case "inventory.checked":
 		// Handle inventory checked events
 		var inventoryChecked order.InventoryChecked
@@ -241,11 +246,11 @@ func processSaga(ctx context.Context, msg *message.Message, topic string, publis
 			return
 		}
 
-		log.Printf("Inventory checked for order %s, all available: %v", 
+		log.Printf("Inventory checked for order %s, all available: %v",
 			inventoryChecked.OrderID, inventoryChecked.AllItemsAvailable)
 
 		// In a real system, you might retrieve the saga by ID and continue it
-		
+
 		// If inventory is not available, we need to compensate
 		if !inventoryChecked.AllItemsAvailable {
 			// Create a compensation event for demonstration
@@ -268,7 +273,7 @@ func processSaga(ctx context.Context, msg *message.Message, topic string, publis
 				return
 			}
 
-			log.Printf("Compensation: Order %s cancelled due to inventory issues", 
+			log.Printf("Compensation: Order %s cancelled due to inventory issues",
 				inventoryChecked.OrderID)
 		}
 	}
