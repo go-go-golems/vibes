@@ -1,20 +1,18 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
-	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill-kafka/v2/pkg/kafka"
 	customlogger "github.com/scrapybara/kafka-watermill-project/pkg/logger"
 )
 
 var (
-	logger       *customlogger.StructuredLogger
+	logger        *customlogger.StructuredLogger
 	kafkaAppender *customlogger.KafkaAppender
 )
 
@@ -29,10 +27,10 @@ func main() {
 	// Create structured logger
 	var err error
 	serviceName := "order-service"
-	
+
 	// First create a standard logger that writes to stdout
 	logger = customlogger.NewStructuredLogger(serviceName)
-	
+
 	// Try to create a Kafka appender for logs
 	kafkaAppender, err = customlogger.NewKafkaAppender(brokerList, "service.logs", 1000)
 	if err != nil {
@@ -51,15 +49,7 @@ func main() {
 	}
 
 	// Create watermill logger that wraps our structured logger
-	watermillLogger := watermill.NewStdLoggerAdapter(logger.Info, logger.Error, 
-		func(msg string, fields watermill.LogFields) {
-			// Convert watermill fields to our logger fields
-			ourFields := make(map[string]interface{}, len(fields))
-			for k, v := range fields {
-				ourFields[k] = v
-			}
-			logger.Debug(msg, ourFields)
-		})
+	watermillLogger := customlogger.NewWatermillAdapter(logger)
 
 	// Create Kafka publisher
 	publisher, err := kafka.NewPublisher(
@@ -87,15 +77,15 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
-	
+
 	logger.Info("Shutting down")
-	
+
 	if err := publisher.Close(); err != nil {
 		logger.Error("Error closing publisher", map[string]interface{}{
 			"error": err.Error(),
 		})
 	}
-	
+
 	if kafkaAppender != nil {
 		if err := kafkaAppender.Close(); err != nil {
 			log.Printf("Error closing Kafka appender: %v", err)

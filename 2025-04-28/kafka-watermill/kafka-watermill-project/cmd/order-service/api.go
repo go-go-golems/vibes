@@ -4,24 +4,23 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
+	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/ThreeDotsLabs/watermill/message"
 	orderEvents "github.com/scrapybara/kafka-watermill-project/idl/go"
-	"github.com/scrapybara/kafka-watermill-project/pkg/logger"
+	customlogger "github.com/scrapybara/kafka-watermill-project/pkg/logger"
 )
 
 // API holds dependencies for the API handlers
 type API struct {
 	publisher message.Publisher
-	logger    *logger.StructuredLogger
+	logger    *customlogger.StructuredLogger
 }
 
 // NewAPI creates a new API instance
-func NewAPI(publisher message.Publisher, logger *logger.StructuredLogger) *API {
+func NewAPI(publisher message.Publisher, logger *customlogger.StructuredLogger) *API {
 	return &API{
 		publisher: publisher,
 		logger:    logger,
@@ -54,7 +53,7 @@ func (api *API) StartServer() {
 	api.logger.Info("Starting HTTP server", map[string]interface{}{
 		"port": port,
 	})
-	
+
 	if err := server.ListenAndServe(); err != nil {
 		api.logger.Error("Server failed", map[string]interface{}{
 			"error": err.Error(),
@@ -71,18 +70,18 @@ func (api *API) healthHandler(w http.ResponseWriter, r *http.Request) {
 
 // OrderRequest represents a request to create an order
 type OrderRequest struct {
-	UserID      string              `json:"user_id"`
+	UserID      string                  `json:"user_id"`
 	Items       []orderEvents.OrderItem `json:"items"`
-	TotalAmount float64             `json:"total_amount"`
+	TotalAmount float64                 `json:"total_amount"`
 }
 
 // OrderResponse represents the response from creating an order
 type OrderResponse struct {
-	OrderID     string              `json:"order_id"`
-	UserID      string              `json:"user_id"`
+	OrderID     string                  `json:"order_id"`
+	UserID      string                  `json:"user_id"`
 	Items       []orderEvents.OrderItem `json:"items"`
-	TotalAmount float64             `json:"total_amount"`
-	CreatedAt   string              `json:"created_at"`
+	TotalAmount float64                 `json:"total_amount"`
+	CreatedAt   string                  `json:"created_at"`
 }
 
 // createOrderHandler creates a new order and publishes an event
@@ -92,7 +91,7 @@ func (api *API) createOrderHandler(w http.ResponseWriter, r *http.Request) {
 	if correlationID == "" {
 		correlationID = uuid.New().String()
 	}
-	
+
 	// Create a logger with the correlation ID
 	reqLogger := api.logger.WithCorrelationID(correlationID)
 
@@ -127,8 +126,8 @@ func (api *API) createOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	orderLogger := reqLogger.WithOrderID(orderID)
 	orderLogger.Info("Creating order", map[string]interface{}{
-		"user_id": req.UserID,
-		"items_count": len(req.Items),
+		"user_id":      req.UserID,
+		"items_count":  len(req.Items),
 		"total_amount": req.TotalAmount,
 	})
 
@@ -154,7 +153,7 @@ func (api *API) createOrderHandler(w http.ResponseWriter, r *http.Request) {
 	msg := message.NewMessage(uuid.New().String(), payload)
 	// Add correlation ID to message metadata
 	msg.Metadata.Set("correlation_id", correlationID)
-	
+
 	if err := api.publisher.Publish("order.created", msg); err != nil {
 		orderLogger.Error("Error publishing order created event", map[string]interface{}{
 			"error": err.Error(),
@@ -190,7 +189,7 @@ func (api *API) getOrderHandler(w http.ResponseWriter, r *http.Request) {
 	if correlationID == "" {
 		correlationID = uuid.New().String()
 	}
-	
+
 	// Create a logger with the correlation ID and order ID
 	reqLogger := api.logger.WithCorrelationID(correlationID).WithOrderID(orderID)
 
@@ -198,10 +197,10 @@ func (api *API) getOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	// In a real system, this would look up the order in a database
 	// For demo purposes, we'll just return a mock response
-	
+
 	resp := OrderResponse{
-		OrderID:     orderID,
-		UserID:      "user-123",
+		OrderID: orderID,
+		UserID:  "user-123",
 		Items: []orderEvents.OrderItem{
 			{
 				ProductID: "product-1",

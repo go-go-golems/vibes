@@ -1,5 +1,6 @@
 package com.scrapybara.kw.shipping.saga
 
+import com.scrapybara.kw.idl.OrderProto.SagaEvent
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Instant
@@ -37,7 +38,7 @@ enum class SagaStatus {
 class SagaCoordinator<T : SagaData>(
     private val sagaName: String,
     private val steps: List<SagaStep<T>>,
-    private val kafkaTemplate: KafkaTemplate<String, Any>
+    private val kafkaTemplate: KafkaTemplate<String, ByteArray>
 ) {
     private val logger = LoggerFactory.getLogger(SagaCoordinator::class.java)
 
@@ -100,36 +101,35 @@ class SagaCoordinator<T : SagaData>(
     }
     
     private fun publishSagaEvent(data: T, status: String, error: String? = null) {
-        val sagaEvent = mapOf(
-            "sagaId" to data.sagaId,
-            "sagaName" to sagaName,
-            "status" to status,
-            "timestamp" to Instant.now().toString(),
-            "error" to error
-        )
+        val sagaEvent = SagaEvent.newBuilder()
+            .setSagaId(data.sagaId)
+            .setSagaName(sagaName)
+            .setStatus(status)
+            .setTimestamp(Instant.now().toEpochMilli())
+            .setError(error ?: "")
+            .build()
         
-        kafkaTemplate.send("saga.events", data.sagaId, sagaEvent)
-            .whenComplete { result, ex ->
+        kafkaTemplate.send("saga.events", data.sagaId, sagaEvent.toByteArray())
+            .whenComplete { _, ex ->
                 if (ex != null) {
-                    logger.error("Error publishing saga event: ${ex.message}")
+                    logger.error("Error publishing saga event", ex)
                 }
             }
     }
     
     private fun publishStepEvent(data: T, stepName: String, status: String, error: String? = null) {
-        val stepEvent = mapOf(
-            "sagaId" to data.sagaId,
-            "sagaName" to sagaName,
-            "stepName" to stepName,
-            "status" to status,
-            "timestamp" to Instant.now().toString(),
-            "error" to error
-        )
+        val stepEventProto = SagaEvent.newBuilder()
+            .setSagaId(data.sagaId)
+            .setSagaName(sagaName)
+            .setStatus("$stepName:$status")
+            .setTimestamp(Instant.now().toEpochMilli())
+            .setError(error ?: "")
+            .build()
         
-        kafkaTemplate.send("saga.step.events", data.sagaId, stepEvent)
-            .whenComplete { result, ex ->
+        kafkaTemplate.send("saga.step.events", data.sagaId, stepEventProto.toByteArray())
+            .whenComplete { _, ex ->
                 if (ex != null) {
-                    logger.error("Error publishing step event: ${ex.message}")
+                    logger.error("Error publishing step event for step $stepName", ex)
                 }
             }
     }
@@ -138,7 +138,7 @@ class SagaCoordinator<T : SagaData>(
 /**
  * Factory to create saga coordinators
  */
-class SagaCoordinatorFactory(private val kafkaTemplate: KafkaTemplate<String, Any>) {
+class SagaCoordinatorFactory(private val kafkaTemplate: KafkaTemplate<String, ByteArray>) {
     fun <T : SagaData> createCoordinator(sagaName: String, steps: List<SagaStep<T>>): SagaCoordinator<T> {
         return SagaCoordinator(sagaName, steps, kafkaTemplate)
     }

@@ -2,8 +2,10 @@ package logger
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/IBM/sarama"
@@ -12,7 +14,8 @@ import (
 // KafkaAppender sends logs to a Kafka topic
 type KafkaAppender struct {
 	producer   sarama.SyncProducer
-	topic      string
+			topic      string
+	brokers    []string
 	bufferSize int
 	logChan    chan []byte
 	wg         sync.WaitGroup
@@ -21,6 +24,7 @@ type KafkaAppender struct {
 
 // NewKafkaAppender creates a new Kafka appender
 func NewKafkaAppender(brokers []string, topic string, bufferSize int) (*KafkaAppender, error) {
+	fmt.Println("NewKafkaAppender %v", brokers)
 	config := sarama.NewConfig()
 	config.Producer.RequiredAcks = sarama.WaitForLocal
 	config.Producer.Retry.Max = 3
@@ -35,6 +39,7 @@ func NewKafkaAppender(brokers []string, topic string, bufferSize int) (*KafkaApp
 		producer:   producer,
 		topic:      topic,
 		bufferSize: bufferSize,
+		brokers:    brokers,
 		logChan:    make(chan []byte, bufferSize),
 		done:       make(chan struct{}),
 	}
@@ -95,10 +100,11 @@ func (a *KafkaAppender) sendToKafka(logMessage []byte) {
 		}
 	}
 
+
 	// Send to Kafka
 	_, _, err := a.producer.SendMessage(msg)
 	if err != nil {
-		os.Stderr.Write([]byte("Failed to send log to Kafka: " + err.Error() + "\n"))
+		os.Stderr.Write([]byte("Failed to send log to Kafka: " + err.Error() + ", brokers: " + strings.Join(a.brokers, ",") + "\n"))
 	}
 }
 

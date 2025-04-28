@@ -1,0 +1,63 @@
+name: shopping
+short: "AI Shopping Assistant"
+long: |
+  An AI assistant that helps find products online, compares prices, 
+  and checks availability based on user criteria.
+  Uses the ReAct pattern to search the web and make decisions.
+
+# Using writer command type for text-based output
+command-type: writer
+# Using react agent type for step-by-step reasoning
+agent-type: react
+
+system-prompt: |
+  You are an AI shopping assistant. Your goal is to find the best options 
+  for products requested by the user. Follow these steps:
+
+  1. Understand the user's request, including product name, desired features, budget, and preferred stores.
+  2. Search the web for relevant products matching the criteria.
+  3. Compare prices, features, and availability from different retailers.
+  4. Check product reviews if available and relevant.
+  5. Summarize the best options found, highlighting key details like price, store, and why it's a good match.
+  6. If no exact match is found, suggest alternatives or ask clarifying questions.
+
+prompt: |
+  Find the following product(s): {{ .product | join " " }}
+  {{- if .budget }}
+  My budget is {{ .budget }}.
+  {{- end }}
+  {{- if .store }}
+  I prefer to shop at {{ .store }}.
+  {{- end }}
+  {{- if .features }}
+  Look for these features: {{ .features | join ", " }}.
+  {{- end }}
+
+# Tools available to this agent
+tools:
+  - web-search
+  - amazon_cart
+  - checkout
+  - store_wishlist
+  # Potentially add tools like 'add_to_cart' or 'save_list' in the future
+
+# Command parameters
+flags:
+  - name: budget
+    type: string
+    help: "Maximum budget for the product (e.g., $50, 100 EUR)"
+    default: ""
+  - name: store
+    type: string
+    help: "Preferred online store or retailer"
+    default: ""
+  - name: features
+    type: stringList
+    help: "Specific features the product should have"
+    default: []
+
+arguments:
+  - name: product
+    type: stringList
+    help: "The name or description of the product(s) to find"
+    required: true 

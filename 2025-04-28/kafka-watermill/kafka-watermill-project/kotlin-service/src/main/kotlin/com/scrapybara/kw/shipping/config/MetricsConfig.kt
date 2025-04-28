@@ -49,4 +49,8 @@ class ShippingMetrics(private val registry: MeterRegistry) {
         "shipping.active.shipments",
         AtomicInteger(0)
     ) ?: AtomicInteger(0)
+    
+    // Helper functions for common increments
+    fun incrementOrdersFulfilled() = ordersFulfilled.increment()
+    fun incrementOrdersCancelled() = ordersCancelled.increment()
 }
