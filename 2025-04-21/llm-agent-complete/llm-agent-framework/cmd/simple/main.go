@@ -76,6 +76,7 @@ func (sac *SimpleAgentCmd) Run(ctx context.Context, parsedLayers *layers.ParsedL
 	// Start the router in a background goroutine
 	eg, routerCtx := errgroup.WithContext(ctx)
 	eg.Go(func() error {
+		defer cancel()
 		log.Info().Msg("Starting event router")
 		runErr := router.Run(routerCtx) // Use derived context for cancellation
 		log.Info().Err(runErr).Msg("Event router stopped")
@@ -117,24 +118,24 @@ func (sac *SimpleAgentCmd) Run(ctx context.Context, parsedLayers *layers.ParsedL
 	// fmt.Println("Asking LLM:", prompt)
 
 	// 7. Call the LLM
-	log.Info().Msg("Calling LLM Generate")
-	v, err := geppettoLLM.Generate(ctx, messages) // No topicID argument needed here
-	if err != nil {
-		log.Error().Err(err).Msg("LLM Generate failed")
-		// We might want to cancel and wait even if LLM fails, to ensure clean router shutdown
-		// cancel()
-		// eg.Wait() // Consider error handling for wait here too
-		return errors.Wrap(err, "failed to generate response from LLM")
-	} else {
-		log.Info().Msg("LLM Generate completed")
-	}
-
-	log.Info().Msg("LLM Generate completed")
-	fmt.Println(v)
+	eg.Go(func() error {
+		defer cancel()
+		log.Info().Msg("Calling LLM Generate")
+		v, err := geppettoLLM.Generate(ctx, messages) // No topicID argument needed here
+		if err != nil {
+			log.Error().Err(err).Msg("LLM Generate failed")
+			// We might want to cancel and wait even if LLM fails, to ensure clean router shutdown
+			// cancel()
+			// eg.Wait() // Consider error handling for wait here too
+			return errors.Wrap(err, "failed to generate response from LLM")
+		} else {
+			log.Info().Msg("LLM Generate completed")
+			fmt.Println(v.Content.String())
+		}
+		return nil
+	})
 
 	// 8. Signal router to stop and wait for shutdown
-	log.Info().Msg("Signalling router to stop")
-	cancel() // Cancel the main context, which stops the router via routerCtx
 
 	log.Info().Msg("Waiting for event router to shut down")
 	if err := eg.Wait(); err != nil {
