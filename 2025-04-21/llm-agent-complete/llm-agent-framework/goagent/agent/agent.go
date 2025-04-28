@@ -1,4 +1,3 @@
-// Package agent defines interfaces and implementations for LLM agents
 package agent
 
 import (
@@ -7,16 +6,12 @@ import (
 	"github.com/goagent/framework/goagent/memory"
 	"github.com/goagent/framework/goagent/tools"
 	"github.com/goagent/framework/goagent/tracing"
-	"github.com/goagent/framework/goagent/types"
 )
 
 // Agent interface defines the core functionality of an agent
 type Agent interface {
 	// Run executes the agent with the given input and returns the result
 	Run(ctx context.Context, input string) (string, error)
-
-	// RunWithStream executes the agent with streaming response
-	RunWithStream(ctx context.Context, input string) (<-chan types.AgentResponse, error)
 
 	// AddTool adds a tool to the agent
 	AddTool(tool tools.Tool) error
