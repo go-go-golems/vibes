@@ -70,7 +70,7 @@ func runTravelPlanningExample() {
 	}
 
 	// Save the result and trace
-	saveResult("travel_planning_result.txt", result.Content.String())
+	saveResult("travel_planning_result.txt", result)
 	saveTrace("travel_planning_trace.json", agent.BaseAgent.GetTracer().GetEvents())
 }
 
