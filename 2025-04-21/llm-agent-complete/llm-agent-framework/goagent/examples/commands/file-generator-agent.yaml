@@ -1,0 +1,35 @@
+name: file-generator
+short: "Generate multiple files based on a description"
+long: |
+  An agent that takes a description and generates multiple code/text files.
+
+type: agent
+
+# Using glazed command type for structured file output
+command-type: glazed 
+# Using file-collection agent type as specified in the example
+agent-type: file-collection 
+
+system-prompt: |
+  You are an AI assistant that generates complete, ready-to-use code files based on user requests. 
+  Follow the file generation instructions precisely:
+  1. Generate each file's complete content sequentially.
+  2. Wrap EACH file's content within <file name="filename.ext">...</file> XML tags.
+  3. Include <!-- all files emitted --> on a new line AFTER the last </file> tag.
+
+prompt: |
+  Generate the files described here: {{ .description | join " " }}
+
+# No specific tools listed in the example, can be added later if needed
+# tools:
+#   - example-tool
+
+# No specific flags listed in the example
+flags: []
+
+# Arguments matching the Go code example
+arguments:
+  - name: description
+    type: stringList # Kept as stringList based on template usage
+    help: "Description of the files to generate"
+    required: true 

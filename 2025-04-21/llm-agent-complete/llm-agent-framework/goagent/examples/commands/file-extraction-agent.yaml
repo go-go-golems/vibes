@@ -6,6 +6,8 @@ long: |
   to a specified output directory. Ideal for code generation, template creation,
   and documentation generation tasks.
 
+type: agent
+
 # Using glazed command type for structured file output
 command-type: glazed
 # Using file-collection agent type for specialized file handling

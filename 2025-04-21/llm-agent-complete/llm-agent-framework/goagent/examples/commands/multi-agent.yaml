@@ -1,6 +1,7 @@
 name: chat-assistant
 short: "Simple Chat Assistant"
 long: "A basic AI assistant that can answer questions and have conversations"
+type: agent
 command-type: writer
 agent-type: react
 

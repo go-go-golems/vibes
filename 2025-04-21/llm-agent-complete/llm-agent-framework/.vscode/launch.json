@@ -1,0 +1,42 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run main.go with debug flags",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/agent/main.go",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "args": []
+        },
+        {
+            "name": "simple 4o-mini agent",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/simple/main.go",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "args": [
+                "--log-level", "DEBUG",
+                "--with-caller",
+                "--profile", "4o-mini", "--ai-stream=true"
+            ]
+        },
+        {
+            "name": "Run agent weather for Berlin",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/agent/main.go",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "args": [
+                "weather",
+                "--location", "berlin"
+            ]
+        }
+    ]
+} 

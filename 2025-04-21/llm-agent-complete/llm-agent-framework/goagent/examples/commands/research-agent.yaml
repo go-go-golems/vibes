@@ -5,6 +5,8 @@ long: |
   well-structured articles and reports based on the findings.
   Uses the ReAct pattern to think step-by-step about the research process.
 
+type: agent
+
 # Using writer command type as this agent outputs plain text
 command-type: writer
 # Using react agent type for step-by-step reasoning

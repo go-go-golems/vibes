@@ -33,6 +33,7 @@ arguments: # (when an input query is needed)
     type: stringList
     help: "The main query"
     required: true
+type: agent
 command-type: writer # or glazed
 agent-type: react # or other agent types
 system-prompt: "Initial system instructions to the AI model"
@@ -48,6 +49,7 @@ Each of these fields maps directly to properties in the `AgentCommand` structure
 
 - **`name`**: Command identifier, used in CLI invocation.
 - **`short`/`long`**: Command descriptions for help text.
+- **`type`**: Command type, should always be `agent`.
 - **`command-type`**: Determines output format (`writer` for text, `glazed` for structured data).
 - **`agent-type`**: Specifies the reasoning logic pattern (e.g., `react`, `plan-execute`).
 - **`system-prompt`**: Instructions to guide the agent's behavior.
@@ -204,6 +206,7 @@ Arguments work similarly to flags but are positional rather than named.
 name: qa-agent
 short: "Question answering agent"
 long: "An agent that answers questions using web search when needed."
+type: agent
 # command-type: writer is implied (default)
 agent-type: react
 system-prompt: "You are a helpful AI assistant that answers questions accurately."
@@ -228,6 +231,7 @@ arguments:
 name: api-generator
 short: "Generate REST API code"
 long: "An agent that generates REST API code in various languages."
+type: agent
 command-type: glazed
 agent-type: file-collection
 system-prompt: |

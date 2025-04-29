@@ -5,6 +5,8 @@ long: |
   searching directories, and analyzing code structure. Useful for understanding 
   new projects, identifying dependencies, and generating documentation.
 
+type: agent
+
 # Using writer command type as this agent outputs text analysis
 command-type: writer
 # Using react agent type for interactive exploration

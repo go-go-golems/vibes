@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/alias"
+	"github.com/go-go-golems/glazed/pkg/cmds/loaders"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -13,9 +15,41 @@ import (
 // AgentCommandLoader loads agent commands from YAML files
 type AgentCommandLoader struct{}
 
+const (
+	AgentCommandLoaderName = "agent"
+)
+
+var _ loaders.CommandLoader = (*AgentCommandLoader)(nil)
+
 // IsFileSupported checks if the file is supported by this loader
 func (a *AgentCommandLoader) IsFileSupported(f fs.FS, fileName string) bool {
 	return strings.HasSuffix(fileName, ".yaml") || strings.HasSuffix(fileName, ".yml")
+}
+
+// LoadCommands implements the CommandLoader interface
+func (a *AgentCommandLoader) LoadCommands(
+	f fs.FS,
+	entryName string,
+	options []cmds.CommandDescriptionOption,
+	aliasOptions []alias.Option,
+) ([]cmds.Command, error) {
+	r, err := f.Open(entryName)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to open file %s", entryName)
+	}
+	defer func(r fs.File) {
+		_ = r.Close()
+	}(r)
+
+	// Add source tracking option
+	sourceOption := cmds.WithSource("file:" + entryName)
+	allOptions := append(options, sourceOption)
+
+	return loaders.LoadCommandOrAliasFromReader(
+		r,
+		a.loadAgentCommandFromReader,
+		allOptions,
+		aliasOptions)
 }
 
 // LoadFromYAML loads Agent commands from YAML content with additional options
@@ -29,11 +63,17 @@ func LoadFromYAML(b []byte, options ...cmds.CommandDescriptionOption) ([]cmds.Co
 func (a *AgentCommandLoader) loadAgentCommandFromReader(
 	r io.Reader,
 	options []cmds.CommandDescriptionOption,
-	parent *cmds.CommandDescription,
+	_ []alias.Option,
 ) ([]cmds.Command, error) {
 	var description AgentCommandDescription
 
-	decoder := yaml.NewDecoder(r)
+	yamlContent, err := io.ReadAll(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read YAML content")
+	}
+
+	buf := strings.NewReader(string(yamlContent))
+	decoder := yaml.NewDecoder(buf)
 	if err := decoder.Decode(&description); err != nil {
 		return nil, errors.Wrap(err, "failed to decode YAML")
 	}
@@ -45,6 +85,7 @@ func (a *AgentCommandLoader) loadAgentCommandFromReader(
 		cmds.WithLong(description.Long),
 		cmds.WithFlags(description.Flags...),
 		cmds.WithArguments(description.Arguments...),
+		cmds.WithType(AgentCommandLoaderName), // Set a type for multi-loader support
 	)
 
 	// Apply additional options
@@ -66,20 +107,4 @@ func (a *AgentCommandLoader) loadAgentCommandFromReader(
 	}
 
 	return []cmds.Command{agentCmd}, nil
-}
-
-// LoadFileFromFS loads an agent command from a file in the file system
-func (a *AgentCommandLoader) LoadFileFromFS(
-	f fs.FS,
-	filePath string,
-	options []cmds.CommandDescriptionOption,
-	parent *cmds.CommandDescription,
-) ([]cmds.Command, error) {
-	file, err := f.Open(filePath)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to open file %s", filePath)
-	}
-	defer file.Close()
-
-	return a.loadAgentCommandFromReader(file, options, parent)
 }

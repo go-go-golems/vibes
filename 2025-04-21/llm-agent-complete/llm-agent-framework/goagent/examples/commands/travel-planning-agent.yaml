@@ -5,6 +5,8 @@ long: |
   and attractions. Uses the Plan-and-Execute pattern to first create a comprehensive
   travel plan and then execute each step of the plan sequentially.
 
+type: agent
+
 # Using writer command type as this agent outputs a travel plan as text
 command-type: writer
 # Using plan-execute agent type for structured planning
