@@ -78,6 +78,12 @@ func (sac *SimpleAgentCmd) Run(ctx context.Context, parsedLayers *layers.ParsedL
 	eg.Go(func() error {
 		defer cancel()
 		log.Info().Msg("Starting event router")
+		// Ensure router is closed when this goroutine exits
+		defer func() {
+			log.Info().Msg("Closing event router")
+			_ = router.Close()
+			log.Info().Msg("Event router closed")
+		}()
 		runErr := router.Run(routerCtx) // Use derived context for cancellation
 		log.Info().Err(runErr).Msg("Event router stopped")
 		// Don't return context.Canceled as a fatal error
@@ -120,6 +126,11 @@ func (sac *SimpleAgentCmd) Run(ctx context.Context, parsedLayers *layers.ParsedL
 	// 7. Call the LLM
 	eg.Go(func() error {
 		defer cancel()
+
+		// Wait for the router to be running before calling the LLM
+		<-router.Running()
+		log.Info().Msg("Event router is running, proceeding with LLM call")
+
 		log.Info().Msg("Calling LLM Generate")
 		v, err := geppettoLLM.Generate(ctx, messages) // No topicID argument needed here
 		if err != nil {

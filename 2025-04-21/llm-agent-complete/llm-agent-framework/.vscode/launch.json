@@ -37,6 +37,20 @@
                 "weather",
                 "--location", "berlin"
             ]
+        },
+        {
+            "name": "Run file-collection with context extraction",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/agent/main.go",
+            "cwd": "${workspaceFolder}",
+            "env": {},
+            "args": [
+                "file-generator",
+                "--context", "goagent/examples/commands/README.md",
+                "Extract each topic as a separate json file, max 3 topics."
+            ]
         }
     ]
 } 
