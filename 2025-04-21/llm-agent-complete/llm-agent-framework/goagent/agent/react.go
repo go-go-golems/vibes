@@ -6,15 +6,50 @@ import (
 	"strings"
 
 	"github.com/go-go-golems/geppetto/pkg/conversation"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
 	"github.com/goagent/framework/goagent/llm"
 	"github.com/goagent/framework/goagent/types"
 )
 
-// NewReActAgent creates a new ReActAgent
-func NewReActAgent(llmModel llm.LLM, maxIterations int) *ReActAgent {
-	return &ReActAgent{
-		BaseAgent: NewBaseAgent(llmModel, maxIterations),
+type ReactAgentFactory struct{}
+
+var _ AgentFactory = &ReactAgentFactory{}
+
+const ReactAgentType = "react"
+
+func (f *ReactAgentFactory) NewAgent(ctx context.Context, parsedLayers *layers.ParsedLayers, llmModel llm.LLM) (Agent, error) {
+	var settings ReactAgentSettings
+	err := parsedLayers.InitializeStruct(ReactAgentType, &settings)
+	if err != nil {
+		return nil, err
 	}
+	return &ReActAgent{
+		BaseAgent: NewBaseAgent(llmModel, settings.MaxIterations),
+	}, nil
+}
+
+type ReactAgentSettings struct {
+	MaxIterations int `glazed.parameter:"max-iterations"`
+}
+
+func (f *ReactAgentFactory) CreateLayers() ([]layers.ParameterLayer, error) {
+	agentLayer, err := layers.NewParameterLayer(
+		ReactAgentType,
+		"React agent configuration",
+		layers.WithParameterDefinitions(
+			parameters.NewParameterDefinition(
+				"max-iterations",
+				parameters.ParameterTypeInteger,
+				parameters.WithHelp("Maximum number of iterations for agent execution"),
+				parameters.WithDefault(10),
+			),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return []layers.ParameterLayer{agentLayer}, nil
 }
 
 var _ Agent = &ReActAgent{}

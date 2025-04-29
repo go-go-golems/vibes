@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/go-go-golems/geppetto/pkg/conversation"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
 	"github.com/go-go-golems/glazed/pkg/middlewares"
 	glazed_types "github.com/go-go-golems/glazed/pkg/types"
 	"github.com/goagent/framework/goagent/llm"
@@ -14,6 +16,48 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/exp/maps"
 )
+
+// FileCollectionAgentFactory creates FileCollectionAgent instances.
+type FileCollectionAgentFactory struct{}
+
+var _ AgentFactory = &FileCollectionAgentFactory{}
+
+const FileCollectionAgentType = "file-collection" // Define the type constant
+
+// FileCollectionAgentSettings holds configuration for the FileCollectionAgent.
+type FileCollectionAgentSettings struct {
+	MaxIterations int `glazed.parameter:"max-iterations"`
+}
+
+// NewAgent creates a new FileCollectionAgent.
+func (f *FileCollectionAgentFactory) NewAgent(ctx context.Context, parsedLayers *layers.ParsedLayers, llmModel llm.LLM) (Agent, error) {
+	var settings FileCollectionAgentSettings
+	err := parsedLayers.InitializeStruct(FileCollectionAgentType, &settings)
+	if err != nil {
+		return nil, err
+	}
+	return NewFileCollectionAgent(llmModel, settings.MaxIterations), nil
+}
+
+// CreateLayers defines the Glazed parameter layers for the FileCollectionAgent.
+func (f *FileCollectionAgentFactory) CreateLayers() ([]layers.ParameterLayer, error) {
+	agentLayer, err := layers.NewParameterLayer(
+		FileCollectionAgentType,
+		"File Collection agent configuration",
+		layers.WithParameterDefinitions(
+			parameters.NewParameterDefinition(
+				"max-iterations",
+				parameters.ParameterTypeInteger,
+				parameters.WithHelp("Maximum number of generation iterations"),
+				parameters.WithDefault(5), // Lower default for file collection?
+			),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return []layers.ParameterLayer{agentLayer}, nil
+}
 
 // FileCollectionAgent implements an agent that can generate multiple files
 // using XML tags to delimit them in the LLM response.

@@ -1,0 +1,132 @@
+name: bank-statement-extractor
+short: "Extracts and categorizes bank statement data into JSON and CSV files"
+long: |
+  An agent that takes bank statement CSV data and a task description, then generates a JSON summary and categorized withdrawals/deposits CSV files for each account found.
+
+type: agent
+command-type: glazed # Use glazed for structured file output (important for file collection)
+agent-type: file-collection # Suitable for generating multiple files
+
+system-prompt: |
+  You are an AI assistant tasked with extracting and categorizing bank statement data. 
+
+prompt: |
+  Your goal is to create a JSON summary file and categorized withdrawal/deposit CSV files for each bank account identified in the statement.
+  
+  Output each generated file within <file> tags, specifying the filename. Include an optional Comment column in CSVs.
+  
+  JSON Summary File Example:
+  <file name="summary_ACCOUNT_NAME.json">
+  {
+    "account_name": "ACCOUNT_NAME",
+    "beginning_balance": "$2,003,062.39",
+    "deposits_and_additions": "$1,110,866.78",
+    "withdrawals_and_subtractions": "-$12,440.16",
+    "checks": "-$0.00",
+    "service_fees": "-$7.69",
+    "ending_balance": "$XXX,XXX.XX"
+  }
+  </file>
+  
+  Withdrawals CSV File Example (with Category and optional Comment):
+  <file name="withdrawals_ACCOUNT_NAME.csv">
+  Date,Description,Amount,Category,Comment
+  2023-10-30,CHECKCARD BANDCAMP BLACK ACRE REC,-$8.53,Entertainment Music,
+  2023-10-30,PURCHASE PAYPAL *UBER 402-935-7733 CA,-$4.76,Transportation RideShare,Uber ride
+  2023-10-30,PURCHASE WORKBAR.COM WORKBAR.COM MA,-$139.00,Business Workspace,Monthly membership
+  ...
+  </file>
+  
+  Deposits CSV File Example (with Category and optional Comment):
+  <file name="deposits_ACCOUNT_NAME.csv">
+  Date,Description,Amount,Category,Comment
+  2023-11-15,Direct Deposit COMPANY_NAME,$5000.00,Income Payroll,Bi-weekly salary
+  2023-11-20,Transfer from Savings XXXX1234,$200.00,Transfer,
+  ...
+  </file>
+  
+  Include <!-- all files emitted --> on a new line AFTER the last </file> tag.
+  If you cannot extract certain information or create a particular file due to missing data, explain the issue within <error> tags.
+  Remember to maintain the privacy and security of the financial data.
+
+  ---
+
+  {{ define "base_prompt" -}}
+  Here is the bank statement CSV data (format: Date,Description,Amount) from the provided file(s):
+  {{ range .csv_data }}
+  --- File: {{ .Path }} ---
+  <csv_data>
+  {{ .Content }}
+  </csv_data>
+  {{ end }}
+
+  Your task is described as follows:
+  <task_description>
+  {{ .task_description | join " " }}
+  </task_description>
+
+  Use the following concise expense categories. Assign one or more relevant categories (space-separated) to each transaction's `Category` column. If no category fits, leave it blank. Add an optional short comment to the `Comment` column if context can be inferred from the description.
+  <expense_categories>
+  Income (Payroll, Business, Investment, Other)
+  Housing (Rent, Mortgage, Tax, Insurance, Utilities, Repairs)
+  Transportation (Car, Gas, PublicTransit, RideShare, Parking, Maintenance)
+  Food/Dining (Groceries, Restaurants, Coffee, FastFood, Alcohol)
+  Utilities (Electricity, Gas, Water, Internet, Phone, Cable, Trash)
+  PersonalCare (Health, Hygiene, Clothing, Gym, Laundry)
+  Healthcare (Insurance, Doctor, Dentist, Pharmacy, Meds)
+  Entertainment (Movies, Music, Games, Hobbies, Sports, Travel, Vacation)
+  Shopping (Electronics, Clothes, Gifts, Home, Pets, Online)
+  Education (Tuition, Books, Supplies, Courses)
+  Debt (CreditCard, Loan, Mortgage)
+  Business (Office, Software, Travel, Meals, Marketing, Legal)
+  Taxes (Income, Property, Sales)
+  Insurance (Health, Life, Auto, Home)
+  Fees (Bank, Service, Late, ATM)
+  Gifts/Donations (Charity)
+  Transfers (Internal, External)
+  Miscellaneous (Other, Uncategorized, Reimbursement)
+  </expense_categories>
+
+  Follow these steps to complete the task:
+
+  1. Parse the CSV data (Date,Description,Amount) to extract relevant information about bank accounts, transactions, and balances.
+  2. Identify the unique bank accounts present in the statement (assume account name can be inferred if not explicitly stated, or use a default like "Primary").
+  3. For each identified bank account:
+     a. Create a JSON file named `summary_ACCOUNT_NAME.json` containing the account summary (beginning balance, total deposits, total withdrawals, checks, service fees, ending balance).
+     b. Create a CSV file named `withdrawals_ACCOUNT_NAME.csv` (Header: Date,Description,Amount,Category,Comment) listing withdrawals. Populate `Category` (space-separated) and optional `Comment`.
+     c. Create a CSV file named `deposits_ACCOUNT_NAME.csv` (Header: Date,Description,Amount,Category,Comment) listing deposits. Populate `Category` and optional `Comment`.
+  4. Ensure the JSON file is valid and CSVs have correct headers.
+  5. Format currency values consistently (e.g., $1234.56 or -$123.45).
+  6. Sort transactions by date chronologically in CSVs.
+  7. Output the generated JSON and CSV files using `<file>` tags as shown in the system prompt.
+
+  Proceed with the task.
+  {{- end }}
+
+  {{ template "base_prompt" . }}
+
+  {{ if .context }}
+  Additional Context:
+  {{ range .context }}
+  --- File: {{ .Path }} ---
+  {{ .Content }}
+  ---
+  {{- end }}
+  {{ end }}
+
+# No specific tools needed for this task, relying on the LLM's parsing abilities.
+# tools:
+
+# Add the context flag back
+flags:
+  - name: context
+    type: fileList
+    help: Additional context from files
+  - name: csv_data
+    type: fileList # Changed from string to fileList
+    help: "Path(s) to the bank statement CSV file(s) (format: Date,Description,Amount)"
+    required: true
+  - name: task_description
+    type: stringList
+    help: "Specific instructions for the extraction and categorization task"
+    required: false 
