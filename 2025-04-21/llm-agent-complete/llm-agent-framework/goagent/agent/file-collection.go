@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/go-go-golems/geppetto/pkg/conversation"
@@ -26,7 +28,9 @@ const FileCollectionAgentType = "file-collection" // Define the type constant
 
 // FileCollectionAgentSettings holds configuration for the FileCollectionAgent.
 type FileCollectionAgentSettings struct {
-	MaxIterations int `glazed.parameter:"max-iterations"`
+	MaxIterations        int    `glazed.parameter:"max-iterations"`
+	SaveToDisk           bool   `glazed.parameter:"save-to-disk"`
+	DestinationDirectory string `glazed.parameter:"destination-directory"`
 }
 
 // NewAgent creates a new FileCollectionAgent.
@@ -36,7 +40,7 @@ func (f *FileCollectionAgentFactory) NewAgent(ctx context.Context, parsedLayers 
 	if err != nil {
 		return nil, err
 	}
-	return NewFileCollectionAgent(llmModel, settings.MaxIterations), nil
+	return NewFileCollectionAgent(llmModel, &settings), nil
 }
 
 // CreateLayers defines the Glazed parameter layers for the FileCollectionAgent.
@@ -49,7 +53,19 @@ func (f *FileCollectionAgentFactory) CreateLayers() ([]layers.ParameterLayer, er
 				"max-iterations",
 				parameters.ParameterTypeInteger,
 				parameters.WithHelp("Maximum number of generation iterations"),
-				parameters.WithDefault(5), // Lower default for file collection?
+				parameters.WithDefault(5),
+			),
+			parameters.NewParameterDefinition(
+				"save-to-disk",
+				parameters.ParameterTypeBool,
+				parameters.WithHelp("Save generated files to disk instead of printing content"),
+				parameters.WithDefault(true),
+			),
+			parameters.NewParameterDefinition(
+				"destination-directory",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Directory to save generated files (required if save-to-disk is true)"),
+				parameters.WithDefault(""), // Default empty, validation happens at runtime
 			),
 		),
 	)
@@ -62,17 +78,19 @@ func (f *FileCollectionAgentFactory) CreateLayers() ([]layers.ParameterLayer, er
 // FileCollectionAgent implements an agent that can generate multiple files
 // using XML tags to delimit them in the LLM response.
 type FileCollectionAgent struct {
-	*BaseAgent                   // Embed BaseAgent from goagent/agent
-	extractor  *FileExtractor    // Handles file extraction logic
-	files      map[string]string // Maps filenames to their complete content accumulated across calls
+	*BaseAgent                              // Embed BaseAgent from goagent/agent
+	extractor  *FileExtractor               // Handles file extraction logic
+	files      map[string]string            // Maps filenames to their complete content accumulated across calls
+	settings   *FileCollectionAgentSettings // Added settings field
 }
 
 // NewFileCollectionAgent creates a new FileCollectionAgent.
-func NewFileCollectionAgent(llmModel llm.LLM, maxIterations int) *FileCollectionAgent {
+func NewFileCollectionAgent(llmModel llm.LLM, settings *FileCollectionAgentSettings) *FileCollectionAgent {
 	return &FileCollectionAgent{
-		BaseAgent: NewBaseAgent(llmModel, maxIterations), // Use constructor from goagent/agent
+		BaseAgent: NewBaseAgent(llmModel, settings.MaxIterations), // Use maxIter from settings
 		extractor: NewFileExtractor(),
 		files:     make(map[string]string),
+		settings:  settings, // Store settings
 	}
 }
 
@@ -134,25 +152,37 @@ If you need to generate more files in a subsequent response after finishing one,
 `
 }
 
-// buildSummary generates a string containing the full content of each collected file,
-// formatted as markdown code blocks.
-func (a *FileCollectionAgent) buildSummary() string {
+// buildSummary generates a string summarizing the outcome.
+// If savedToDisk is true, it lists filenames and sizes.
+// If savedToDisk is false, it shows filenames and their full content.
+func (a *FileCollectionAgent) buildSummary(savedToDisk bool) string {
 	if len(a.files) == 0 {
 		return "No files were generated."
 	}
+
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Generated %d files:\n\n", len(a.files)))
-	for name, content := range a.files {
-		// Determine language for syntax highlighting if possible (simple check)
-		lang := ""
-		splitName := strings.Split(name, ".")
-		if len(splitName) > 1 {
-			lang = splitName[len(splitName)-1]
+
+	if savedToDisk {
+		sb.WriteString(fmt.Sprintf("Saved %d files to %s:\n", len(a.files), a.settings.DestinationDirectory))
+		for name, content := range a.files {
+			// Simple byte count for size
+			sb.WriteString(fmt.Sprintf("- %s (%d bytes)\n", name, len(content)))
 		}
-		sb.WriteString(fmt.Sprintf("**%s**\n```%s\n", name, lang))
-		sb.WriteString(content)
-		sb.WriteString("\n```\n\n")
+	} else {
+		sb.WriteString(fmt.Sprintf("Generated %d files:\n\n", len(a.files)))
+		for name, content := range a.files {
+			// Determine language for syntax highlighting if possible (simple check)
+			lang := ""
+			splitName := strings.Split(name, ".")
+			if len(splitName) > 1 {
+				lang = splitName[len(splitName)-1]
+			}
+			sb.WriteString(fmt.Sprintf("**%s**\n```%s\n", name, lang))
+			sb.WriteString(content)
+			sb.WriteString("\n```\n\n")
+		}
 	}
+
 	return sb.String()
 }
 
@@ -257,34 +287,102 @@ func (a *FileCollectionAgent) runInternal(ctx context.Context, input string) (ma
 	return a.files, nil
 }
 
-// --- Agent Interface Methods ---
-
-// Run executes the core file generation logic and returns a summary string.
-// This satisfies the base Agent interface.
+// Run executes the core file generation logic.
+// If settings.SaveToDisk is true, it saves files to settings.DestinationDirectory
+// and returns a summary of saved files (names and sizes).
+// If settings.SaveToDisk is false, it returns a summary with full file content.
 func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, error) {
 	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.Run")
 	defer span.End()
 
-	files, err := a.runInternal(ctx, input)
-	_ = files
-	// XXX store the files to disk based on a flag
-	summary := a.buildSummary() // Build summary even if there was an error
+	// Execute the LLM interaction to populate a.files
+	files, runErr := a.runInternal(ctx, input)
+	if runErr != nil {
+		// Log the error but continue to potentially save/summarize partial results
+		a.tracer.LogEvent(ctx, types.Event{
+			Type: "run_internal_error",
+			Data: runErr.Error(),
+		})
+	}
 
-	// Log the final collected files for debugging/tracing
+	saveErr := error(nil) // Variable to store potential saving errors
+	savedToDisk := false  // Flag to indicate if saving was attempted and successful
+
+	// Handle saving to disk if enabled
+	if a.settings.SaveToDisk {
+		if a.settings.DestinationDirectory == "" {
+			saveErr = errors.New("--destination-directory is required when --save-to-disk is true")
+		} else {
+			// Create the directory if it doesn't exist
+			err := os.MkdirAll(a.settings.DestinationDirectory, 0755)
+			if err != nil {
+				saveErr = errors.Wrapf(err, "failed to create destination directory: %s", a.settings.DestinationDirectory)
+			} else {
+				savedToDisk = true // Indicate saving is happening
+				// Save each file
+				for filename, content := range files {
+					filePath := filepath.Join(a.settings.DestinationDirectory, filename)
+					err := os.WriteFile(filePath, []byte(content), 0644)
+					if err != nil {
+						// Collect the first saving error encountered
+						if saveErr == nil {
+							saveErr = errors.Wrapf(err, "failed to write file: %s", filePath)
+						}
+						savedToDisk = false // If any file fails, mark as not fully saved
+						a.tracer.LogEvent(ctx, types.Event{
+							Type: "file_save_error",
+							Data: map[string]interface{}{
+								"filename": filePath,
+								"error":    err.Error(),
+							},
+						})
+						// Optionally, break here or try saving remaining files
+					} else {
+						a.tracer.LogEvent(ctx, types.Event{
+							Type: "file_saved",
+							Data: map[string]interface{}{
+								"filename": filePath,
+								"size":     len(content),
+							},
+						})
+					}
+				}
+			}
+		}
+	}
+
+	// Build summary based on whether files were (intended to be) saved
+	summary := a.buildSummary(a.settings.SaveToDisk && saveErr == nil) // Show saved summary only if saving was intended and had no error
+
+	// Log the final outcome
 	a.tracer.LogEvent(ctx, types.Event{
 		Type: "run_completed",
 		Data: map[string]interface{}{
 			"summary":   summary,
 			"fileCount": len(a.files),
 			"fileNames": maps.Keys(a.files),
+			"saved":     savedToDisk,
+			"saveError": nil, // Handle potential saveErr logging later
 		},
 	})
+	if saveErr != nil {
+		a.tracer.LogEvent(ctx, types.Event{
+			Type: "run_completion_error",
+			Data: map[string]interface{}{
+				"saveError": saveErr.Error(),
+			},
+		})
+	}
 
-	return summary, err // Return summary and any error from runInternal
+	// Prioritize returning errors: first saveErr, then runErr
+	if saveErr != nil {
+		return summary, saveErr // Return summary even with save error
+	}
+	return summary, runErr // Return summary and original LLM run error if any
 }
 
 // RunIntoWriter executes the agent and writes the summary string to the writer.
-// This satisfies the WriterAgent interface.
+// It respects the save-to-disk logic performed by the Run method.
 func (a *FileCollectionAgent) RunIntoWriter(ctx context.Context, input string, w io.Writer) error {
 	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.RunIntoWriter")
 	defer span.End()
@@ -302,7 +400,8 @@ func (a *FileCollectionAgent) RunIntoWriter(ctx context.Context, input string, w
 }
 
 // RunIntoGlazeProcessor executes the agent and streams file data as rows
-// into the Glazed processor. This satisfies the GlazedAgent interface.
+// into the Glazed processor. This method IGNORES the save-to-disk flags
+// and ALWAYS outputs the full file content, as its purpose is structured data output.
 func (a *FileCollectionAgent) RunIntoGlazeProcessor(
 	ctx context.Context,
 	input string,
@@ -312,6 +411,7 @@ func (a *FileCollectionAgent) RunIntoGlazeProcessor(
 	defer span.End()
 
 	// Step 1: Execute the core logic via runInternal to populate a.files.
+	// This bypasses the Run method's saving logic.
 	files, runErr := a.runInternal(ctx, input)
 
 	// Log if Run failed, but proceed to output any files collected before the error.
