@@ -60,10 +60,12 @@ prompt: |
   </csv_data>
   {{ end }}
 
+  {{ if .description }}
   Your task is described as follows:
   <task_description>
-  {{ .task_description | join " " }}
+  {{ .description | join " " }}
   </task_description>
+  {{ end }}
 
   Use the following concise expense categories. Assign one or more relevant categories (space-separated) to each transaction's `Category` column. If no category fits, leave it blank. Add an optional short comment to the `Comment` column if context can be inferred from the description.
   <expense_categories>
@@ -126,7 +128,7 @@ flags:
     type: fileList # Changed from string to fileList
     help: "Path(s) to the bank statement CSV file(s) (format: Date,Description,Amount)"
     required: true
-  - name: task_description
+  - name: description
     type: stringList
     help: "Specific instructions for the extraction and categorization task"
     required: false 
