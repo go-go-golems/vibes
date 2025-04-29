@@ -6,9 +6,56 @@ import (
 	"strings"
 
 	"github.com/go-go-golems/geppetto/pkg/conversation"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
 	"github.com/goagent/framework/goagent/llm"
 	"github.com/goagent/framework/goagent/types"
 )
+
+// PlanAndExecuteAgentFactory creates PlanAndExecuteAgent instances.
+type PlanAndExecuteAgentFactory struct{}
+
+var _ AgentFactory = &PlanAndExecuteAgentFactory{}
+
+const PlanAndExecuteAgentType = "plan-execute" // Define the type constant
+
+// PlanAndExecuteAgentSettings holds configuration for the PlanAndExecuteAgent.
+type PlanAndExecuteAgentSettings struct {
+	MaxIterations int `glazed.parameter:"max-iterations"`
+	// TODO(manuel): Add separate parameters for planner and executor LLMs if needed
+}
+
+// NewAgent creates a new PlanAndExecuteAgent.
+func (f *PlanAndExecuteAgentFactory) NewAgent(ctx context.Context, parsedLayers *layers.ParsedLayers, llmModel llm.LLM) (Agent, error) {
+	var settings PlanAndExecuteAgentSettings
+	err := parsedLayers.InitializeStruct(PlanAndExecuteAgentType, &settings)
+	if err != nil {
+		return nil, err
+	}
+	// Use the provided llmModel for both planner and executor for now
+	return NewPlanAndExecuteAgent(llmModel, settings.MaxIterations), nil
+}
+
+// CreateLayers defines the Glazed parameter layers for the PlanAndExecuteAgent.
+func (f *PlanAndExecuteAgentFactory) CreateLayers() ([]layers.ParameterLayer, error) {
+	agentLayer, err := layers.NewParameterLayer(
+		PlanAndExecuteAgentType,
+		"Plan-and-Execute agent configuration",
+		layers.WithParameterDefinitions(
+			parameters.NewParameterDefinition(
+				"max-iterations",
+				parameters.ParameterTypeInteger,
+				parameters.WithHelp("Maximum number of planning/execution iterations"),
+				parameters.WithDefault(5), // Lower default for plan-execute?
+			),
+			// Add parameters for planner/executor models here if needed
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return []layers.ParameterLayer{agentLayer}, nil
+}
 
 // PlanAndExecuteAgent implements the Plan-and-Execute pattern
 type PlanAndExecuteAgent struct {
@@ -18,11 +65,11 @@ type PlanAndExecuteAgent struct {
 }
 
 // NewPlanAndExecuteAgent creates a new PlanAndExecuteAgent
-func NewPlanAndExecuteAgent(planner, executor llm.LLM, maxIterations int) *PlanAndExecuteAgent {
+func NewPlanAndExecuteAgent(model llm.LLM, maxIterations int) *PlanAndExecuteAgent {
 	return &PlanAndExecuteAgent{
-		BaseAgent: NewBaseAgent(executor, maxIterations),
-		planner:   planner,
-		executor:  executor,
+		BaseAgent: NewBaseAgent(model, maxIterations),
+		planner:   model,
+		executor:  model,
 	}
 }
 
@@ -213,3 +260,6 @@ func (a *PlanAndExecuteAgent) Run(ctx context.Context, input string) (string, er
 
 	return finalResponse.Content.String(), nil
 }
+
+// Ensure PlanAndExecuteAgent implements the Agent interface
+var _ Agent = (*PlanAndExecuteAgent)(nil)

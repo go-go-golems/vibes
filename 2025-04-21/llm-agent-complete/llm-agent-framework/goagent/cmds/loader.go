@@ -94,7 +94,7 @@ func (a *AgentCommandLoader) loadAgentCommandFromReader(
 	}
 
 	// Create agent command with options from YAML
-	agentCmd, err := NewAgentCommand(
+	agentCmd, err := NewWriterAgentCommand(
 		cmdDescription,
 		WithAgentType(description.AgentType),
 		WithSystemPrompt(description.SystemPrompt),
