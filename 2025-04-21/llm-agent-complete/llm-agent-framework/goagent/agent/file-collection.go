@@ -221,7 +221,9 @@ func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, er
 	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.Run")
 	defer span.End()
 
-	_, err := a.runInternal(ctx, input)
+	files, err := a.runInternal(ctx, input)
+	_ = files
+	// XXX store the files to disk based on a flag
 	summary := a.buildSummary() // Build summary even if there was an error
 
 	// Log the final collected files for debugging/tracing

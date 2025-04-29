@@ -69,10 +69,6 @@ flags:
     type: string
     help: "Directory where generated files will be saved"
     default: "./output"
-  - name: max-iterations
-    type: int
-    help: "Maximum number of iterations for the agent"
-    default: 10
   - name: language
     type: string
     help: "Primary programming language to use"

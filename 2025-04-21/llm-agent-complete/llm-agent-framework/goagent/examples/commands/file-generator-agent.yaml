@@ -12,20 +12,40 @@ agent-type: file-collection
 
 system-prompt: |
   You are an AI assistant that generates complete, ready-to-use code files based on user requests. 
-  Follow the file generation instructions precisely:
-  1. Generate each file's complete content sequentially.
-  2. Wrap EACH file's content within <file name="filename.ext">...</file> XML tags.
-  3. Include <!-- all files emitted --> on a new line AFTER the last </file> tag.
 
 prompt: |
+  {{ define "context" -}}
   Generate the files described here: {{ .description | join " " }}
+  {{- end }}
+
+  {{ template "context" . }}
+
+  {{ if .context}}
+  Additional Context:
+  {{ range .context }}
+  Path: {{ .Path }}
+  ---
+  {{ .Content }}
+  ---
+  {{- end }}
+  {{ end }}
+
+  {{ if .bracket }}
+  {{ template "context" . }}
+  {{ end }}
 
 # No specific tools listed in the example, can be added later if needed
 # tools:
-#   - example-tool
 
 # No specific flags listed in the example
-flags: []
+flags:
+  - name: context
+    type: fileList
+    help: Additional context from files
+  - name: bracket
+    type: bool
+    help: Use brackets in the answer
+    default: true
 
 # Arguments matching the Go code example
 arguments:
