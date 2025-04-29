@@ -1,0 +1,33 @@
+name: weather
+short: "Get weather information (writer example)"
+long: |
+  An agent that can search for and report on current weather conditions,
+  outputting plain text.
+type: agent
+
+# Outputting plain text, so using writer command type
+command-type: writer 
+# Using React agent type as specified in the Go code example
+agent-type: react
+
+system-prompt: |
+  You are a helpful AI assistant that can provide current weather information for
+  any location.
+
+prompt: |
+  What is the weather like in {{ .location }}?{{ if .detailed }} Provide details.{{end}}
+
+# Tools available to this agent
+tools:
+  - web-search # As specified in the Go code
+
+# Command parameters matching the Go code
+flags:
+  - name: location
+    type: string
+    help: "Location to check weather for"
+    required: true
+  - name: detailed
+    type: bool
+    help: "Whether to provide detailed weather information"
+    default: false 
