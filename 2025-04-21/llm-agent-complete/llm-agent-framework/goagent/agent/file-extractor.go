@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+XXX also handle " " in the CSV
+XXX we need to handle continuation having the xml tag at the top of the continuation
+XXX also that after that it continues from where it left off or something
+XXX potentially chain the import call after that to retry (when inserting into sqlite)
+
 // FileExtractor handles the extraction of file content delimited by XML tags,
 // managing state across multiple potentially incomplete LLM responses.
 type FileExtractor struct {

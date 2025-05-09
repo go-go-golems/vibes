@@ -86,6 +86,13 @@ type FileCollectionAgent struct {
 
 // NewFileCollectionAgent creates a new FileCollectionAgent.
 func NewFileCollectionAgent(llmModel llm.LLM, settings *FileCollectionAgentSettings) *FileCollectionAgent {
+	// Ensure settings is not nil
+	if settings == nil {
+		settings = &FileCollectionAgentSettings{
+			MaxIterations: 5, // Default value
+		}
+	}
+
 	return &FileCollectionAgent{
 		BaseAgent: NewBaseAgent(llmModel, settings.MaxIterations), // Use maxIter from settings
 		extractor: NewFileExtractor(),
@@ -108,6 +115,7 @@ func (a *FileCollectionAgent) buildSystemPrompt() string {
 	return `You are an AI assistant that generates complete, ready-to-use code files based on a request.
 
 When asked to create files, you MUST follow these instructions:
+0. Complete any necessary steps that might be asked of you.
 1. Generate each file's complete content sequentially.
 2. Wrap EACH file's content within <file name="filename.ext">...</file> XML tags. The filename MUST be included in the 'name' attribute.
 3. Ensure each file is complete and ready to use (including imports, comments, etc.).
@@ -191,6 +199,11 @@ func (a *FileCollectionAgent) buildSummary(savedToDisk bool) string {
 func (a *FileCollectionAgent) runInternal(ctx context.Context, input string) (map[string]string, error) {
 	ctx, span := a.tracer.StartSpan(ctx, "FileCollectionAgent.runInternal")
 	defer span.End()
+
+	// Validate save-to-disk settings before starting inference
+	if a.settings.SaveToDisk && a.settings.DestinationDirectory == "" {
+		return nil, errors.New("destination-directory is required when save-to-disk is true")
+	}
 
 	// Reset files map and extractor state for this run
 	a.files = make(map[string]string)
@@ -303,6 +316,10 @@ func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, er
 			Type: "run_internal_error",
 			Data: runErr.Error(),
 		})
+		// Return empty summary and error for validation failures
+		if strings.Contains(runErr.Error(), "destination-directory is required") {
+			return "", runErr
+		}
 	}
 
 	saveErr := error(nil) // Variable to store potential saving errors
@@ -310,42 +327,38 @@ func (a *FileCollectionAgent) Run(ctx context.Context, input string) (string, er
 
 	// Handle saving to disk if enabled
 	if a.settings.SaveToDisk {
-		if a.settings.DestinationDirectory == "" {
-			saveErr = errors.New("--destination-directory is required when --save-to-disk is true")
+		// Create the directory if it doesn't exist
+		err := os.MkdirAll(a.settings.DestinationDirectory, 0755)
+		if err != nil {
+			saveErr = errors.Wrapf(err, "failed to create destination directory: %s", a.settings.DestinationDirectory)
 		} else {
-			// Create the directory if it doesn't exist
-			err := os.MkdirAll(a.settings.DestinationDirectory, 0755)
-			if err != nil {
-				saveErr = errors.Wrapf(err, "failed to create destination directory: %s", a.settings.DestinationDirectory)
-			} else {
-				savedToDisk = true // Indicate saving is happening
-				// Save each file
-				for filename, content := range files {
-					filePath := filepath.Join(a.settings.DestinationDirectory, filename)
-					err := os.WriteFile(filePath, []byte(content), 0644)
-					if err != nil {
-						// Collect the first saving error encountered
-						if saveErr == nil {
-							saveErr = errors.Wrapf(err, "failed to write file: %s", filePath)
-						}
-						savedToDisk = false // If any file fails, mark as not fully saved
-						a.tracer.LogEvent(ctx, types.Event{
-							Type: "file_save_error",
-							Data: map[string]interface{}{
-								"filename": filePath,
-								"error":    err.Error(),
-							},
-						})
-						// Optionally, break here or try saving remaining files
-					} else {
-						a.tracer.LogEvent(ctx, types.Event{
-							Type: "file_saved",
-							Data: map[string]interface{}{
-								"filename": filePath,
-								"size":     len(content),
-							},
-						})
+			savedToDisk = true // Indicate saving is happening
+			// Save each file
+			for filename, content := range files {
+				filePath := filepath.Join(a.settings.DestinationDirectory, filename)
+				err := os.WriteFile(filePath, []byte(content), 0644)
+				if err != nil {
+					// Collect the first saving error encountered
+					if saveErr == nil {
+						saveErr = errors.Wrapf(err, "failed to write file: %s", filePath)
 					}
+					savedToDisk = false // If any file fails, mark as not fully saved
+					a.tracer.LogEvent(ctx, types.Event{
+						Type: "file_save_error",
+						Data: map[string]interface{}{
+							"filename": filePath,
+							"error":    err.Error(),
+						},
+					})
+					// Optionally, break here or try saving remaining files
+				} else {
+					a.tracer.LogEvent(ctx, types.Event{
+						Type: "file_saved",
+						Data: map[string]interface{}{
+							"filename": filePath,
+							"size":     len(content),
+						},
+					})
 				}
 			}
 		}
@@ -413,6 +426,11 @@ func (a *FileCollectionAgent) RunIntoGlazeProcessor(
 	// Step 1: Execute the core logic via runInternal to populate a.files.
 	// This bypasses the Run method's saving logic.
 	files, runErr := a.runInternal(ctx, input)
+
+	// If runErr contains a validation error, return immediately without processing
+	if runErr != nil && strings.Contains(runErr.Error(), "destination-directory is required") {
+		return runErr
+	}
 
 	// Log if Run failed, but proceed to output any files collected before the error.
 	if runErr != nil {

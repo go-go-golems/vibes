@@ -77,9 +77,7 @@ Example:
 		// --- End of URL construction ---
 
 		log.Debug().Str("url", apiURL).Msg("Requesting LibGen URL")
-		fmt.Printf("Searching LibGen mirror at %s for: 
-'%s
-' (max results: %d)\n", libgenMirror, libgenQuery, libgenMaxResults)
+		fmt.Printf("Searching LibGen mirror at %s for:\n'%s '\n(max results: %d)\n", libgenMirror, libgenQuery, libgenMaxResults)
 		fmt.Println("Requesting URL:", apiURL)
 		fmt.Println("Note: LibGen search is via web scraping and may be slow or break if the site structure changes.")
 		time.Sleep(1 * time.Second)
