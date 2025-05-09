@@ -95,9 +95,10 @@ type FindFullTextRequest struct {
 
 // FindFullTextResponse represents the response from find_full_text
 type FindFullTextResponse struct {
-	PDFURL   string `json:"pdf_url"`
+	PDFURL   string `json:"pdf_url"`      // Can be PDF or HTML URL depending on what's available
 	Source   string `json:"source"`
 	OAStatus string `json:"oa_status,omitempty"`
 	License  string `json:"license,omitempty"`
 	MD5      string `json:"md5,omitempty"` // Only for LibGen
+	IsPDF    bool   `json:"is_pdf,omitempty"` // Indicates if the URL is for a PDF (false means HTML)
 }

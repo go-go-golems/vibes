@@ -156,6 +156,60 @@ The `metrics` command retrieves citation metrics for a scholarly work.
    ./arxiv-libgen-searcher metrics -i "W2741809809" -j
    ```
 
+### Citations (New!)
+
+The `citations` command retrieves one hop of the citation graph.
+
+**Command:**
+```bash
+./arxiv-libgen-searcher citations [flags]
+```
+
+**Flags:**
+- `-i, --id string`: Work ID (DOI or OpenAlex ID) (required)
+- `-r, --direction string`: Citation direction: 'refs' (outgoing) or 'cited_by' (incoming) (default "cited_by")
+- `-l, --limit int`: Maximum number of citations to return (default 20)
+- `-j, --json`: Output as JSON
+
+**Examples:**
+
+1. Get works that cite a paper (incoming citations):
+   ```bash
+   ./arxiv-libgen-searcher citations -i "10.1038/nphys1170" -r cited_by
+   ```
+
+2. Get references from a paper (outgoing citations):
+   ```bash
+   ./arxiv-libgen-searcher citations -i "W2741809809" -r refs -l 50
+   ```
+
+### Full Text (New!)
+
+The `fulltext` command finds the best PDF or HTML URL for a work.
+
+**Command:**
+```bash
+./arxiv-libgen-searcher fulltext [flags]
+```
+
+**Flags:**
+- `-i, --doi string`: DOI of the work
+- `-t, --title string`: Title of the work
+- `-v, --version string`: Preferred version (published, accepted, submitted) (default "published")
+- `-j, --json`: Output as JSON
+
+**Examples:**
+
+1. Find full text for a paper by DOI:
+   ```bash
+   ./arxiv-libgen-searcher fulltext -i "10.1038/nphys1170"
+   ```
+
+2. Find full text for a paper by title, preferring the accepted version:
+   ```bash
+   ./arxiv-libgen-searcher fulltext -t "The rise of quantum biology" -v accepted
+   ```
+
 ### Arxiv Search
 
 The `arxiv` command searches for papers on Arxiv. This command has been tested and is working correctly.
@@ -270,6 +324,8 @@ The `openalex` command searches for scholarly works on OpenAlex. This command ha
     - `doi.go`: Implements the `doi` command for DOI resolution.
     - `keywords.go`: Implements the `keywords` command for keyword suggestions.
     - `metrics.go`: Implements the `metrics` command for work metrics.
+    - `citations.go`: Implements the `citations` command for citation retrieval.
+    - `fulltext.go`: Implements the `fulltext` command for finding PDFs.
 - `pkg/`: Contains the package implementations.
     - `arxiv/`: Arxiv API client implementation.
     - `libgen/`: LibGen scraping implementation.
@@ -279,6 +335,64 @@ The `openalex` command searches for scholarly works on OpenAlex. This command ha
     - `scholarly/`: New package implementing unified search functionality.
 - `go.mod`, `go.sum`: Go module files.
 - `*.md` research files: Contain notes on API research for each platform.
+
+## System Architecture
+
+The following diagram shows how the different components of the system interact:
+
+```mermaid
+flowchart TB
+    User[User] --> CLI[CLI Interface]
+    
+    CLI --> Search[search works]
+    CLI --> DOI[resolve doi]
+    CLI --> Keywords[suggest keywords]
+    CLI --> Metrics[get metrics]
+    CLI --> Citations[get citations]
+    CLI --> FullText[find full text]    
+    CLI --> OldCmds[original commands]    
+    
+    subgraph "scholarly package"
+        Search --> ArxivS[Arxiv Search]
+        Search --> CrossrefS[Crossref Search]
+        Search --> OpenAlexS[OpenAlex Search]
+        
+        DOI --> OpenAlexD[OpenAlex Data]
+        DOI --> CrossrefD[Crossref Data]
+        DOI --> Merge[Merge Data]
+        
+        Keywords --> OpenAlexK[OpenAlex Concepts]
+        
+        Metrics --> OpenAlexM[OpenAlex Metrics]
+
+        Citations --> OpenAlexC1[OpenAlex Citations]
+
+        FullText --> OpenAlexFT[OpenAlex Locations]
+        FullText --> UnpaywallFT[Unpaywall API]
+        FullText --> LibGenFT[LibGen Search]
+    end
+    
+    subgraph "Provider Clients"
+        ArxivS --> ArxivC[Arxiv Client]
+        CrossrefS --> CrossrefC[Crossref Client]
+        OpenAlexS --> OpenAlexC[OpenAlex Client]
+        OpenAlexD --> OpenAlexC
+        CrossrefD --> CrossrefC
+        OpenAlexK --> OpenAlexC
+        OpenAlexM --> OpenAlexC
+        OpenAlexC1 --> OpenAlexC
+        OpenAlexFT --> OpenAlexC
+        LibGenFT --> LibGenC[LibGen Client]
+    end
+    
+    subgraph "External APIs"
+        ArxivC --> ArxivAPI[Arxiv API]
+        CrossrefC --> CrossrefAPI[Crossref API]
+        OpenAlexC --> OpenAlexAPI[OpenAlex API]
+        LibGenC --> LibgenAPI[LibGen]
+        UnpaywallFT --> UnpaywallAPI[Unpaywall API]
+    end
+```
 
 ## Dependencies
 

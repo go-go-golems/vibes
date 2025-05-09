@@ -1,81 +1,160 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"arxiv-libgen-cli/pkg/arxiv"
 	"arxiv-libgen-cli/pkg/common"
 
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-var arxivQuery string
-var arxivMaxResults int
+// ArxivCommand is a glazed command for searching arxiv
+type ArxivCommand struct {
+	*cmds.CommandDescription
+}
 
-// arxivCmd represents the arxiv command
-var arxivCmd = &cobra.Command{
-	Use:   "arxiv",
-	Short: "Search for scientific papers on Arxiv",
-	Long: `Search for scientific papers on Arxiv using its public API.
+// Ensure interface implementation
+var _ cmds.GlazeCommand = &ArxivCommand{}
+
+// ArxivSettings holds the parameters for arxiv search
+type ArxivSettings struct {
+	Query      string `glazed.parameter:"query"`
+	MaxResults int    `glazed.parameter:"max_results"`
+}
+
+// RunIntoGlazeProcessor executes the arxiv search and processes results
+func (c *ArxivCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	// Parse settings from layers
+	s := &ArxivSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, s); err != nil {
+		return err
+	}
+
+	// Validate query
+	if s.Query == "" {
+		return fmt.Errorf("query cannot be empty")
+	}
+
+	log.Debug().Str("query", s.Query).Int("max_results", s.MaxResults).Msg("Arxiv search initiated")
+
+	// Search Arxiv
+	client := arxiv.NewClient()
+	params := common.SearchParams{
+		Query:      s.Query,
+		MaxResults: s.MaxResults,
+	}
+
+	results, err := client.Search(params)
+	if err != nil {
+		return err
+	}
+
+	if len(results) == 0 {
+		log.Info().Msg("No results found in Arxiv response")
+		return nil
+	}
+
+	// Process results into rows
+	for _, result := range results {
+		row := types.NewRow(
+			types.MRP("title", result.Title),
+			types.MRP("authors", strings.Join(result.Authors, ", ")),
+			types.MRP("published", result.Published),
+			types.MRP("source_url", result.SourceURL),
+			types.MRP("pdf_url", result.PDFURL),
+			types.MRP("abstract", result.Abstract),
+		)
+
+		// Add any additional metadata fields
+		if updated, ok := result.Metadata["updated"].(string); ok {
+			row.Set("updated", updated)
+		}
+
+		if err := gp.AddRow(ctx, row); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// NewArxivCommand creates a new arxiv command
+func NewArxivCommand() (*ArxivCommand, error) {
+	// Create the Glazed layer for output formatting
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create command description
+	cmdDesc := cmds.NewCommandDescription(
+		"arxiv",
+		cmds.WithShort("Search for scientific papers on Arxiv"),
+		cmds.WithLong(`Search for scientific papers on Arxiv using its public API.
 
 Example:
   arxiv-libgen-cli arxiv --query "all:electron" --max_results 5
-  arxiv-libgen-cli arxiv -q "ti:large language models AND au:Hinton" -n 3`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if arxivQuery == "" {
-			fmt.Println("Error: query cannot be empty.")
-			cmd.Help()
-			os.Exit(1)
-		}
-		log.Debug().Str("query", arxivQuery).Int("max_results", arxivMaxResults).Msg("Arxiv search initiated")
+  arxiv-libgen-cli arxiv -q "ti:large language models AND au:Hinton" -n 3
 
-		fmt.Printf("Searching Arxiv for: '%s' (max results: %d)\n", arxivQuery, arxivMaxResults)
+Thank you to arXiv for use of its open access interoperability.`),
 
-		client := arxiv.NewClient()
-		params := common.SearchParams{
-			Query:      arxivQuery,
-			MaxResults: arxivMaxResults,
-		}
+		// Define command flags
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"query",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Search query for Arxiv (e.g., 'all:electron', 'ti:\"quantum computing\" AND au:\"John Preskill\"') (required)"),
+				parameters.WithRequired(true),
+				parameters.WithShortFlag("q"),
+			),
+			parameters.NewParameterDefinition(
+				"max_results",
+				parameters.ParameterTypeInteger,
+				parameters.WithHelp("Maximum number of results to return"),
+				parameters.WithDefault(10),
+				parameters.WithShortFlag("n"),
+			),
+		),
 
-		results, err := client.Search(params)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to search Arxiv")
-			os.Exit(1)
-		}
+		// Add parameter layers
+		cmds.WithLayersList(
+			glazedLayer,
+		),
+	)
 
-		if len(results) == 0 {
-			fmt.Println("No results found.")
-			log.Info().Msg("No results found in Arxiv response")
-			return
-		}
-
-		fmt.Printf("\nFound %d results (showing up to %d):\n", len(results), len(results))
-		fmt.Println("--------------------------------------------------")
-
-		for i, result := range results {
-			fmt.Printf("Result %d:\n", i+1)
-			fmt.Printf("  Title: %s\n", result.Title)
-			fmt.Printf("  Authors: %s\n", strings.Join(result.Authors, ", "))
-			fmt.Printf("  Published: %s\n", result.Published)
-			if updated, ok := result.Metadata["updated"].(string); ok {
-				fmt.Printf("  Updated: %s\n", updated)
-			}
-			fmt.Printf("  ID: %s\n", result.SourceURL)
-			if result.PDFURL != "" {
-				fmt.Printf("  PDF Link: %s\n", result.PDFURL)
-			}
-			fmt.Printf("  Abstract: %s\n", result.Abstract)
-			fmt.Println("--------------------------------------------------")
-		}
-		fmt.Println("\nThank you to arXiv for use of its open access interoperability.")
-	},
+	return &ArxivCommand{
+		CommandDescription: cmdDesc,
+	}, nil
 }
 
+// init registers the arxiv command
 func init() {
-	rootCmd.AddCommand(arxivCmd)
-	arxivCmd.Flags().StringVarP(&arxivQuery, "query", "q", "", "Search query for Arxiv (e.g., 'all:electron', 'ti:\"quantum computing\" AND au:\"John Preskill\"') (required)")
-	arxivCmd.Flags().IntVarP(&arxivMaxResults, "max_results", "n", 10, "Maximum number of results to return")
+	// Create the arxiv command
+	arxivCmd, err := NewArxivCommand()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create arxiv command")
+	}
+
+	// Convert to Cobra command
+	axCobraCmd, err := cli.BuildCobraCommandFromCommand(arxivCmd)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build arxiv cobra command")
+	}
+
+	// Add to root command
+	rootCmd.AddCommand(axCobraCmd)
 }
