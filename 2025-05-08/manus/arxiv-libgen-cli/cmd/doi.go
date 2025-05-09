@@ -1,126 +1,139 @@
 package cmd
 
 import (
-	"arxiv-libgen-cli/pkg/scholarly"
-	"encoding/json"
+	"context"
 	"fmt"
-	"os"
 
+	"arxiv-libgen-cli/pkg/scholarly"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-var (
-	doiString string
-	doiJsonOutput bool
-)
+// DOICommand is a glazed command for resolving DOIs
+type DOICommand struct {
+	*cmds.CommandDescription
+}
 
-// doiCmd represents the doi command
-var doiCmd = &cobra.Command{
-	Use:   "doi",
-	Short: "Resolve a DOI to get full metadata",
-	Long: `Resolve a DOI to get complete metadata from both Crossref and OpenAlex.
+// Ensure interface implementation
+var _ cmds.GlazeCommand = &DOICommand{}
+
+// DOISettings holds the parameters for DOI resolution
+type DOISettings struct {
+	DOI string `glazed.parameter:"doi"`
+}
+
+// RunIntoGlazeProcessor executes the DOI resolution and processes results
+func (c *DOICommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	// Parse settings from layers
+	s := &DOISettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, s); err != nil {
+		return err
+	}
+
+	// Validate DOI
+	if s.DOI == "" {
+		return fmt.Errorf("DOI cannot be empty")
+	}
+
+	log.Debug().Str("doi", s.DOI).Msg("Resolving DOI")
+
+	req := scholarly.ResolveDOIRequest{
+		DOI: s.DOI,
+	}
+
+	// Resolve DOI
+	work, err := scholarly.ResolveDOI(req)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to resolve DOI")
+		return err
+	}
+
+	// Create a row from the work
+	row := types.NewRow()
+	
+	// Add all available fields to the row
+	row.Set("title", work.Title)
+	row.Set("doi", work.DOI)
+	row.Set("id", work.ID)
+	row.Set("year", work.Year)
+	row.Set("authors", work.Authors)
+	row.Set("citation_count", work.CitationCount)
+	row.Set("is_open_access", work.IsOA)
+	row.Set("pdf_url", work.PDFURL)
+	row.Set("abstract", work.Abstract)
+	row.Set("source_name", work.SourceName)
+
+	return gp.AddRow(ctx, row)
+}
+
+// NewDOICommand creates a new DOI command
+func NewDOICommand() (*DOICommand, error) {
+	// Create the Glazed layer for output formatting
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create command description
+	cmdDesc := cmds.NewCommandDescription(
+		"doi",
+		cmds.WithShort("Resolve a DOI to get full metadata"),
+		cmds.WithLong(`Resolve a DOI to get complete metadata from both Crossref and OpenAlex.
 
 This command fetches metadata from multiple sources and merges them into a single
 rich record with information like authors, citations, concepts, and more.
 
 Example:
   arxiv-libgen-cli doi --doi "10.1038/nphys1170"
-  arxiv-libgen-cli doi --doi "10.1103/PhysRevLett.116.061102" --json`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if doiString == "" {
-			fmt.Println("Error: DOI cannot be empty")
-			cmd.Help()
-			os.Exit(1)
-		}
+  arxiv-libgen-cli doi --doi "10.1103/PhysRevLett.116.061102" --output json`),
 
-		log.Debug().Str("doi", doiString).Msg("Resolving DOI")
+		// Define command flags
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"doi",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("DOI to resolve (required)"),
+				parameters.WithRequired(true),
+				parameters.WithShortFlag("i"),
+			),
+		),
 
-		req := scholarly.ResolveDOIRequest{
-			DOI: doiString,
-		}
+		// Add parameter layers
+		cmds.WithLayersList(
+			glazedLayer,
+		),
+	)
 
-		work, err := scholarly.ResolveDOI(req)
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to resolve DOI")
-			fmt.Printf("Error: %s\n", err.Error())
-			os.Exit(1)
-		}
-
-		if doiJsonOutput {
-			printWorkAsJSON(work)
-		} else {
-			printWorkDetails(work)
-		}
-	},
+	return &DOICommand{
+		CommandDescription: cmdDesc,
+	}, nil
 }
 
+// init registers the DOI command
 func init() {
-	rootCmd.AddCommand(doiCmd)
-
-	doiCmd.Flags().StringVarP(&doiString, "doi", "i", "", "DOI to resolve (required)")
-	doiCmd.Flags().BoolVarP(&doiJsonOutput, "json", "j", false, "Output as JSON")
-
-	doiCmd.MarkFlagRequired("doi")
-}
-
-// printWorkAsJSON prints the work as JSON
-func printWorkAsJSON(work *scholarly.Work) {
-	jsonData, err := json.MarshalIndent(work, "", "  ")
+	// Create the DOI command
+	doiCmd, err := NewDOICommand()
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to marshal work to JSON")
-		fmt.Println("Error formatting work as JSON")
-		return
+		log.Fatal().Err(err).Msg("Failed to create DOI command")
 	}
 
-	fmt.Println(string(jsonData))
-}
+	// Convert to Cobra command
+	doiCobraCmd, err := cli.BuildCobraCommandFromCommand(doiCmd)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build DOI cobra command")
+	}
 
-// printWorkDetails prints the work details in a human-readable format
-func printWorkDetails(work *scholarly.Work) {
-	fmt.Println("--------------------------------------------------")
-	fmt.Printf("Title: %s\n", work.Title)
-	
-	if len(work.Authors) > 0 {
-		fmt.Printf("Authors: %s\n", formatAuthors(work.Authors))
-	}
-	
-	if work.Year > 0 {
-		fmt.Printf("Year: %d\n", work.Year)
-	}
-	
-	if work.DOI != "" {
-		fmt.Printf("DOI: %s\n", work.DOI)
-	}
-	
-	if work.ID != "" {
-		fmt.Printf("ID: %s\n", work.ID)
-	}
-	
-	if work.CitationCount > 0 {
-		fmt.Printf("Citations: %d\n", work.CitationCount)
-	}
-	
-	if work.IsOA {
-		fmt.Printf("Open Access: Yes\n")
-	}
-	
-	if work.PDFURL != "" {
-		fmt.Printf("PDF URL: %s\n", work.PDFURL)
-	}
-	
-	if work.Abstract != "" {
-		fmt.Printf("\nAbstract:\n%s\n", work.Abstract)
-	}
-	
-	fmt.Printf("\nSource: %s\n", work.SourceName)
-	fmt.Println("--------------------------------------------------")
-}
-
-// formatAuthors formats the authors list
-func formatAuthors(authors []string) string {
-	if len(authors) <= 3 {
-		return fmt.Sprintf("%s", authors)
-	}
-	return fmt.Sprintf("%s [+ %d more]", authors[:3], len(authors)-3)
+	// Add to root command
+	rootCmd.AddCommand(doiCobraCmd)
 }
