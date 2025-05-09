@@ -11,53 +11,26 @@ system-prompt: |
   You are an AI assistant tasked with extracting and categorizing bank statement data. 
 
 prompt: |
-  Your goal is to create a JSON summary file and categorized withdrawal/deposit CSV files for each bank account identified in the statement.
-  
-  Output each generated file within <file> tags, specifying the filename. Include an optional Comment column in CSVs.
-  
-  JSON Summary File Example:
-  <file name="summary_ACCOUNT_NAME.json">
-  {
-    "account_name": "ACCOUNT_NAME",
-    "beginning_balance": "$2,003,062.39",
-    "deposits_and_additions": "$1,110,866.78",
-    "withdrawals_and_subtractions": "-$12,440.16",
-    "checks": "-$0.00",
-    "service_fees": "-$7.69",
-    "ending_balance": "$XXX,XXX.XX"
-  }
-  </file>
-  
-  Withdrawals CSV File Example (with Category and optional Comment):
-  <file name="withdrawals_ACCOUNT_NAME.csv">
-  Date,Description,Amount,Category,Comment
-  2023-10-30,CHECKCARD BANDCAMP BLACK ACRE REC,-$8.53,Entertainment Music,
-  2023-10-30,PURCHASE PAYPAL *UBER 402-935-7733 CA,-$4.76,Transportation RideShare,Uber ride
-  2023-10-30,PURCHASE WORKBAR.COM WORKBAR.COM MA,-$139.00,Business Workspace,Monthly membership
-  ...
-  </file>
-  
-  Deposits CSV File Example (with Category and optional Comment):
-  <file name="deposits_ACCOUNT_NAME.csv">
-  Date,Description,Amount,Category,Comment
-  2023-11-15,Direct Deposit COMPANY_NAME,$5000.00,Income Payroll,Bi-weekly salary
-  2023-11-20,Transfer from Savings XXXX1234,$200.00,Transfer,
-  ...
-  </file>
-  
-  Include <!-- all files emitted --> on a new line AFTER the last </file> tag.
-  If you cannot extract certain information or create a particular file due to missing data, explain the issue within <error> tags.
-  Remember to maintain the privacy and security of the financial data.
+  You are a sophisticated financial data processor tasked with analyzing bank statement data and generating structured summaries and categorized transaction files. Your goal is to create a JSON summary file and categorized withdrawal/deposit CSV files for each bank account identified in the statement.
 
-  ---
-
+  First, let's examine the OCR output data provided, which is the result of OCRing a bank statement image as individual lines.
+  
   {{ define "base_prompt" -}}
-  Here is the bank statement CSV data (format: Date,Description,Amount) from the provided file(s):
+  Here is the input OCR output data (format: page,lineno,text):
   {{ range .csv_data }}
-  --- File: {{ .Path }} ---
-  <csv_data>
-  {{ .Content }}
-  </csv_data>
+   --- File: {{ .Path }} ---
+  <ocr_output>
+   {{ .Content }}
+  </ocr_output>
+   {{ end }}
+
+  {{ if .account_names }}
+  The following bank account names have been specified:
+  <account_names>
+  {{ range .account_names }}
+  - {{ . }}
+  {{ end }}
+  </account_names>
   {{ end }}
 
   {{ if .description }}
@@ -67,7 +40,52 @@ prompt: |
   </task_description>
   {{ end }}
 
-  Use the following concise expense categories. Assign one or more relevant categories (space-separated) to each transaction's `Category` column. If no category fits, leave it blank. Add an optional short comment to the `Comment` column if context can be inferred from the description.
+  {{ if .previous_extractions }}
+  For reference, here are previously extracted documents:
+  {{ range .previous_extractions }}
+  --- Previous Extraction: {{ .Path }} ---
+  {{ .Content }}
+  {{ end }}
+  {{ end }}
+  {{ end }}
+
+  {{ template "base_prompt" . }}
+
+  Before we begin processing the data, please analyze the information provided and outline your approach. Wrap your data processing plan in <data_processing_plan> tags, following these steps:
+
+  1. OCR Output Parsing:
+    - Note any inconsistencies or potential issues in the data
+    - Determine which lines contain relevant information (account details, transactions, balances, etc.)
+    - Extract key information such as account numbers, dates, and transaction details
+
+  2. Account Identification:
+    - Look for any explicit account identifiers in the data
+    - List all unique accounts identified, numbering each one
+
+  3. Transaction Categorization Strategy:
+    - Review the provided expense categories (listed below)
+    - Brainstorm a list of keywords that could help match transactions to categories
+    - Plan how to match transaction descriptions to categories
+    - Consider edge cases and how to handle ambiguous transactions
+    - List examples of potentially challenging transactions and how you plan to categorize them
+
+  4. Data Processing Approach:
+    - Outline the steps to separate withdrawals and deposits
+    - Consider any data cleaning or formatting needed (e.g., standardizing date formats, handling currency symbols)
+
+  5. Potential Challenges:
+    - Identify any missing or incomplete data
+    - Note any unusual patterns or outliers in the transactions
+    - Consider how to handle any discrepancies between calculated and provided balances
+    - Propose solutions for each identified challenge
+
+  After your analysis, proceed with processing the data and generating the required files. For each identified bank account, create three files:
+  1. A JSON summary file named "summary_ACCOUNT_NAME.json"
+  2. A CSV file for withdrawals named "withdrawals_ACCOUNT_NAME.csv"
+  3. A CSV file for deposits named "deposits_ACCOUNT_NAME.csv"
+
+  Use the following expense categories to categorize transactions. Assign one or more relevant categories (space-separated) to each transaction's `Category` column. If no category fits, leave it blank. Add an optional short comment to the `Comment` column if context can be inferred from the description.
+
   <expense_categories>
   Income (Payroll, Business, Investment, Other)
   Housing (Rent, Mortgage, Tax, Insurance, Utilities, Repairs)
@@ -89,23 +107,45 @@ prompt: |
   Miscellaneous (Other, Uncategorized, Reimbursement)
   </expense_categories>
 
-  Follow these steps to complete the task:
+  Ensure that the JSON file is valid and the CSVs have the correct headers:
+  - For JSON: Include account_name, beginning_balance, deposits_and_additions, withdrawals_and_subtractions, checks, service_fees, and ending_balance.
+  - For CSVs: Use the header "Date,Description,Amount,Thinking,Category,Comment"
 
-  1. Parse the CSV data (Date,Description,Amount) to extract relevant information about bank accounts, transactions, and balances.
-  2. Identify the unique bank accounts present in the statement (assume account name can be inferred if not explicitly stated, or use a default like "Primary").
-  3. For each identified bank account:
-     a. Create a JSON file named `summary_ACCOUNT_NAME.json` containing the account summary (beginning balance, total deposits, total withdrawals, checks, service fees, ending balance).
-     b. Create a CSV file named `withdrawals_ACCOUNT_NAME.csv` (Header: Date,Description,Amount,Category,Comment) listing withdrawals. Populate `Category` (space-separated) and optional `Comment`.
-     c. Create a CSV file named `deposits_ACCOUNT_NAME.csv` (Header: Date,Description,Amount,Category,Comment) listing deposits. Populate `Category` and optional `Comment`.
-  4. Ensure the JSON file is valid and CSVs have correct headers.
-  5. Format currency values consistently (e.g., $1234.56 or -$123.45).
-  6. Sort transactions by date chronologically in CSVs.
-  7. Output the generated JSON and CSV files using `<file>` tags as shown in the system prompt.
+  The Thinking column should contain your reasoning about the transaction, including any assumptions you made. Don't mention which category you chose, just describe your reasoning.
 
-  Proceed with the task.
-  {{- end }}
+  Format currency values consistently (e.g., $1234.56 or -$123.45).
 
-  {{ template "base_prompt" . }}
+  Output each generated file within <file> tags, specifying the filename. After outputting all files, include the line "<!-- all files emitted -->" on a new line.
+
+  If you cannot extract certain information or create a particular file due to missing data, explain the issue within <error> tags.
+
+  Here's an example of how the output should be structured:
+
+  <file name="summary_ACCOUNT_NAME.json">
+  {
+    "account_name": "ACCOUNT_NAME",
+    "beginning_balance": "$1,234.56",
+    "deposits_and_additions": "$2,500.00",
+    "withdrawals_and_subtractions": "-$1,200.75",
+    "checks": "$350.00",
+    "service_fees": "-$15.99",
+    "ending_balance": "$2,168.82"
+  }
+  </file>
+
+  <file name="withdrawals_ACCOUNT_NAME.csv">
+  Date,Description,Amount,Thinking,Category,Comment
+  2023-01-01,EXAMPLE WITHDRAWAL,-$100.00,"This appears to be a purchase at a grocery store based on the merchant name. The amount suggests a moderate grocery trip for household essentials.",Food/Dining Groceries,Weekly grocery shopping
+  </file>
+
+  <file name="deposits_ACCOUNT_NAME.csv">
+  Date,Description,Amount,Thinking,Category,Comment
+  2023-01-01,EXAMPLE DEPOSIT,$100.00,"This transaction shows 'DIRECT DEPOSIT' and the amount is consistent with a part-time paycheck. The bi-weekly timing further supports this is employment income.",Income Payroll,Bi-weekly paycheck
+  </file>
+
+  <!-- all files emitted -->
+
+  Remember to maintain the privacy and security of the financial data throughout this process. Begin your analysis of the provided CSV data now.
 
   {{ if .context }}
   Additional Context:
@@ -115,6 +155,8 @@ prompt: |
   ---
   {{- end }}
   {{ end }}
+  
+
 
 # No specific tools needed for this task, relying on the LLM's parsing abilities.
 # tools:
@@ -131,4 +173,12 @@ flags:
   - name: description
     type: stringList
     help: "Specific instructions for the extraction and categorization task"
+    required: false 
+  - name: account_names
+    type: stringList
+    help: "Optional list of bank account names to process specifically"
+    required: false
+  - name: previous_extractions
+    type: fileList
+    help: "Previously extracted documents to use as reference"
     required: false 
