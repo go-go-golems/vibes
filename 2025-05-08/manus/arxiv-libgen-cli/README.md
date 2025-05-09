@@ -8,10 +8,12 @@
 - Search LibGen mirrors for scientific articles (via web scraping).
 - Search Crossref for metadata of scholarly works.
 - Search OpenAlex for scholarly works and entities.
+- Unified search functionality across all sources with standardized output format.
 - Uses Cobra for a structured CLI experience.
 - Customizable number of results for each platform.
 - Option to specify LibGen mirror for searching.
 - Global `--debug` flag to enable detailed zerolog logging for troubleshooting.
+- JSON output option for programmatic consumption of results.
 
 ## Prerequisites
 
@@ -44,6 +46,115 @@ To enable debug logging for any command, add the `--debug` or `-d` flag:
 ```bash
 ./arxiv-libgen-searcher [command] [flags] --debug
 ```
+
+### Unified Search (New!)
+
+The `search` command provides a unified interface to search across all supported sources with a standardized output format.
+
+**Command:**
+```bash
+./arxiv-libgen-searcher search [flags]
+```
+
+**Flags:**
+- `-q, --query string`: Search query (required)
+- `-s, --source string`: Source to search (arxiv, crossref, openalex) (default "arxiv")
+- `-l, --limit int`: Maximum number of results to return (default 10)
+- `-f, --filter string`: Filter string (format: key1:value1,key2:value2)
+- `-j, --json`: Output results as JSON
+
+**Examples:**
+
+1. Search for "quantum computing" papers on arXiv:
+   ```bash
+   ./arxiv-libgen-searcher search -q "quantum computing" -s arxiv
+   ```
+
+2. Search for climate change papers on OpenAlex, limit to 5 results with JSON output:
+   ```bash
+   ./arxiv-libgen-searcher search -q "climate change" -s openalex -l 5 -j
+   ```
+
+3. Search for machine learning journal articles on Crossref with filtering:
+   ```bash
+   ./arxiv-libgen-searcher search -q "machine learning" -s crossref -f "type:journal-article"
+   ```
+
+### DOI Resolution (New!)
+
+The `doi` command resolves a DOI to fetch complete metadata from multiple sources.
+
+**Command:**
+```bash
+./arxiv-libgen-searcher doi [flags]
+```
+
+**Flags:**
+- `-i, --doi string`: DOI to resolve (required)
+- `-j, --json`: Output as JSON
+
+**Examples:**
+
+1. Resolve a physics paper DOI:
+   ```bash
+   ./arxiv-libgen-searcher doi -i "10.1038/nphys1170"
+   ```
+
+2. Get detailed metadata in JSON format:
+   ```bash
+   ./arxiv-libgen-searcher doi -i "10.1103/PhysRevLett.116.061102" -j
+   ```
+
+### Keyword Suggestions (New!)
+
+The `keywords` command analyzes text and suggests relevant scholarly keywords.
+
+**Command:**
+```bash
+./arxiv-libgen-searcher keywords [flags]
+```
+
+**Flags:**
+- `-t, --text string`: Text to analyze for keywords (required)
+- `-m, --max int`: Maximum number of keywords to return (default 10)
+- `-j, --json`: Output as JSON
+
+**Examples:**
+
+1. Get keyword suggestions for a research topic:
+   ```bash
+   ./arxiv-libgen-searcher keywords -t "Quantum computing uses qubits to perform calculations"
+   ```
+
+2. Limit to 5 keywords with JSON output:
+   ```bash
+   ./arxiv-libgen-searcher keywords -t "Climate change mitigation strategies" -m 5 -j
+   ```
+
+### Work Metrics (New!)
+
+The `metrics` command retrieves citation metrics for a scholarly work.
+
+**Command:**
+```bash
+./arxiv-libgen-searcher metrics [flags]
+```
+
+**Flags:**
+- `-i, --id string`: Work ID (DOI or OpenAlex ID) (required)
+- `-j, --json`: Output as JSON
+
+**Examples:**
+
+1. Get metrics for a work by DOI:
+   ```bash
+   ./arxiv-libgen-searcher metrics -i "10.1038/nphys1170"
+   ```
+
+2. Get metrics for a work by OpenAlex ID with JSON output:
+   ```bash
+   ./arxiv-libgen-searcher metrics -i "W2741809809" -j
+   ```
 
 ### Arxiv Search
 
@@ -155,6 +266,17 @@ The `openalex` command searches for scholarly works on OpenAlex. This command ha
     - `libgen.go`: Implements the `libgen` command (including web scraping - currently needs update).
     - `crossref.go`: Implements the `crossref` command.
     - `openalex.go`: Implements the `openalex` command.
+    - `search.go`: Implements the unified `search` command.
+    - `doi.go`: Implements the `doi` command for DOI resolution.
+    - `keywords.go`: Implements the `keywords` command for keyword suggestions.
+    - `metrics.go`: Implements the `metrics` command for work metrics.
+- `pkg/`: Contains the package implementations.
+    - `arxiv/`: Arxiv API client implementation.
+    - `libgen/`: LibGen scraping implementation.
+    - `crossref/`: Crossref API client implementation.
+    - `openalex/`: OpenAlex API client implementation.
+    - `common/`: Shared utilities and models.
+    - `scholarly/`: New package implementing unified search functionality.
 - `go.mod`, `go.sum`: Go module files.
 - `*.md` research files: Contain notes on API research for each platform.
 
