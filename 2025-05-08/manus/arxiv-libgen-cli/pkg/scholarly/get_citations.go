@@ -154,10 +154,11 @@ func getCitedByWorks(workID string, limit int) (*GetCitationsResponse, error) {
 	
 	// Use filter to get works that cite the given work
 	params := common.SearchParams{
-		Query: "", // Empty query, using filter instead
+		Query: "*", // Using wildcard query since empty query with sort is not allowed
 		MaxResults: limit,
 		Filters: map[string]string{
 			"filter": fmt.Sprintf("cites:%s", workID),
+			"sort": "cited_by_count:desc", // Sort by citation count instead of relevance
 		},
 	}
 	

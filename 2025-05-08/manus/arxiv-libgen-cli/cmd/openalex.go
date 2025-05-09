@@ -1,120 +1,231 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"os"
-	"strings"
 
 	"arxiv-libgen-cli/pkg/common"
 	"arxiv-libgen-cli/pkg/openalex"
 
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-var openalexQuery string
-var openalexPerPage int
-var openalexMailto string
-var openalexFilter string
-var openalexSort string
+// OpenAlexCommand is a glazed command for searching OpenAlex
+type OpenAlexCommand struct {
+	*cmds.CommandDescription
+}
 
-var openalexCmd = &cobra.Command{
-	Use:   "openalex",
-	Short: "Search for scholarly works on OpenAlex",
-	Long: `Search for scholarly works (articles, books, datasets, etc.) using the OpenAlex API.
+// Ensure interface implementation
+var _ cmds.GlazeCommand = &OpenAlexCommand{}
+
+// OpenAlexSettings holds the parameters for OpenAlex search
+type OpenAlexSettings struct {
+	Query   string `glazed.parameter:"query"`
+	PerPage int    `glazed.parameter:"per_page"`
+	Mailto  string `glazed.parameter:"mailto"`
+	Filter  string `glazed.parameter:"oa_filter"`
+	Sort    string `glazed.parameter:"oa_sort"`
+}
+
+// RunIntoGlazeProcessor executes the OpenAlex search and processes results
+func (c *OpenAlexCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	// Parse settings from layers
+	s := &OpenAlexSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, s); err != nil {
+		return err
+	}
+
+	// Validate query or filter
+	if s.Query == "" && s.Filter == "" {
+		return fmt.Errorf("query or filter must be provided")
+	}
+
+	// Warn if mailto is empty
+	if s.Mailto == "" {
+		log.Warn().Msg("No mailto parameter provided for OpenAlex API polite pool.")
+		
+		// Add warning row
+		warningRow := types.NewRow(
+			types.MRP("_type", "warning"),
+			types.MRP("message", "It is highly recommended to provide an email address using --mailto for the OpenAlex polite pool."),
+		)
+		if err := gp.AddRow(ctx, warningRow); err != nil {
+			return err
+		}
+	}
+
+	log.Debug().Str("query", s.Query).Int("per_page", s.PerPage).Str("mailto", s.Mailto).Str("filter", s.Filter).Str("sort", s.Sort).Msg("OpenAlex search initiated")
+
+	// Search OpenAlex
+	client := openalex.NewClient(s.Mailto)
+	params := common.SearchParams{
+		Query:      s.Query,
+		MaxResults: s.PerPage,
+		Filters:    make(map[string]string),
+		EmailAddr: s.Mailto,
+	}
+	
+	// Only add filter and sort if not empty
+	if s.Filter != "" {
+		params.Filters["filter"] = s.Filter
+	}
+	
+	if s.Sort != "" {
+		params.Filters["sort"] = s.Sort
+	}
+
+	results, err := client.Search(params)
+	if err != nil {
+		log.Error().Err(err).Msg("OpenAlex search failed")
+		return err
+	}
+
+	if len(results) == 0 {
+		log.Info().Msg("No results in OpenAlex response")
+		return nil
+	}
+
+	// Process results into rows
+	for _, result := range results {
+		row := types.NewRow(
+			types.MRP("title", result.Title),
+			types.MRP("openalex_id", result.SourceURL),
+			types.MRP("authors", result.Authors),
+			types.MRP("publication_date", result.Published),
+			types.MRP("type", result.Type),
+			types.MRP("citations", result.Citations),
+		)
+
+		// Add optional fields if present
+		if result.DOI != "" {
+			row.Set("doi", result.DOI)
+		}
+		
+		if result.JournalInfo != "" {
+			row.Set("venue", result.JournalInfo)
+		}
+		
+		if result.OAStatus != "" {
+			row.Set("open_access_status", result.OAStatus)
+		}
+		
+		if result.PDFURL != "" {
+			row.Set("pdf_url", result.PDFURL)
+		}
+		
+		if result.License != "" {
+			row.Set("license", result.License)
+		}
+		
+		if result.Abstract != "" {
+			row.Set("abstract", result.Abstract)
+		}
+		
+		if relevance, ok := result.Metadata["relevance_score"].(float64); ok && relevance > 0 {
+			row.Set("relevance_score", relevance)
+		}
+
+		if err := gp.AddRow(ctx, row); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// NewOpenAlexCommand creates a new OpenAlex command
+func NewOpenAlexCommand() (*OpenAlexCommand, error) {
+	// Create the Glazed layer for output formatting
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create command description
+	cmdDesc := cmds.NewCommandDescription(
+		"openalex",
+		cmds.WithShort("Search for scholarly works on OpenAlex"),
+		cmds.WithLong(`Search for scholarly works (articles, books, datasets, etc.) using the OpenAlex API.
 
 Example:
   arxiv-libgen-cli openalex --query "machine learning applications" --per_page 5 --mailto "your.email@example.com"
-  arxiv-libgen-cli openalex -q "bioinformatics" -n 3 -f "publication_year:2022,type:journal-article" -s "cited_by_count:desc" -m "user@example.org"`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if openalexQuery == "" && openalexFilter == "" {
-			fmt.Println("Error: query or filter must be provided.")
-			cmd.Help()
-			os.Exit(1)
-		}
-		if openalexMailto == "" {
-			fmt.Println("Warning: It is highly recommended to provide an email address using --mailto for the OpenAlex polite pool.")
-			log.Warn().Msg("No mailto parameter provided for OpenAlex API polite pool.")
-		}
+  arxiv-libgen-cli openalex -q "bioinformatics" -n 3 -f "publication_year:2022,type:journal-article" -s "cited_by_count:desc" -m "user@example.org"`),
 
-		log.Debug().Str("query", openalexQuery).Int("per_page", openalexPerPage).Str("mailto", openalexMailto).Str("filter", openalexFilter).Str("sort", openalexSort).Msg("OpenAlex search initiated")
+		// Define command flags
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"query",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Search query for OpenAlex (searches title, abstract, fulltext)"),
+				parameters.WithDefault(""),
+				parameters.WithShortFlag("q"),
+			),
+			parameters.NewParameterDefinition(
+				"per_page",
+				parameters.ParameterTypeInteger,
+				parameters.WithHelp("Number of results per page"),
+				parameters.WithDefault(10),
+				parameters.WithShortFlag("n"),
+			),
+			parameters.NewParameterDefinition(
+				"mailto",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Email address for OpenAlex polite pool (highly recommended)"),
+				parameters.WithDefault(""),
+				parameters.WithShortFlag("m"),
+			),
+			parameters.NewParameterDefinition(
+				"oa_filter",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Filter parameters for OpenAlex (e.g., publication_year:2022,type:journal-article)"),
+				parameters.WithDefault(""),
+				parameters.WithShortFlag("f"),
+			),
+			parameters.NewParameterDefinition(
+				"oa_sort",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Sort order (e.g., cited_by_count:desc, publication_date:asc)"),
+				parameters.WithDefault("relevance_score:desc"),
+				parameters.WithShortFlag("s"),
+			),
+		),
 
-		var queryParts []string
-		if openalexQuery != "" {
-			queryParts = append(queryParts, fmt.Sprintf("query=\"%s\"", openalexQuery))
-		}
-		if openalexFilter != "" {
-			queryParts = append(queryParts, fmt.Sprintf("filter=\"%s\"", openalexFilter))
-		}
-		searchDesc := strings.Join(queryParts, ", ")
-		fmt.Printf("Searching OpenAlex for: %s (per_page: %d, sort: '%s')\n", searchDesc, openalexPerPage, openalexSort)
-		
-		client := openalex.NewClient(openalexMailto)
-		params := common.SearchParams{
-			Query:      openalexQuery,
-			MaxResults: openalexPerPage,
-			Filters: map[string]string{
-				"filter": openalexFilter,
-				"sort":   openalexSort,
-			},
-			EmailAddr: openalexMailto,
-		}
+		// Add parameter layers
+		cmds.WithLayersList(
+			glazedLayer,
+		),
+	)
 
-		results, err := client.Search(params)
-		if err != nil {
-			log.Error().Err(err).Msg("OpenAlex search failed")
-			fmt.Printf("Error: %s\n", err.Error())
-			return
-		}
-
-		if len(results) == 0 {
-			fmt.Println("No results found.")
-			log.Info().Msg("No results in OpenAlex response")
-			return
-		}
-
-		fmt.Printf("\nFound results (showing %d):\n", len(results))
-		fmt.Println("--------------------------------------------------")
-
-		for i, result := range results {
-			fmt.Printf("Result %d:\n", i+1)
-			fmt.Printf("  Title: %s\n", result.Title)
-			fmt.Printf("  OpenAlex ID: %s\n", result.SourceURL)
-			if result.DOI != "" {
-				fmt.Printf("  DOI: %s\n", result.DOI)
-			}
-			fmt.Printf("  Authors: %s\n", strings.Join(result.Authors, ", "))
-			fmt.Printf("  Publication Date: %s\n", result.Published)
-			fmt.Printf("  Type: %s\n", result.Type)
-			if result.JournalInfo != "" {
-				fmt.Printf("  Venue: %s\n", result.JournalInfo)
-			}
-			fmt.Printf("  Cited By Count: %d\n", result.Citations)
-			if result.OAStatus != "" {
-				fmt.Printf("  Open Access Status: %s\n", result.OAStatus)
-			}
-			if result.PDFURL != "" {
-				fmt.Printf("  PDF URL: %s\n", result.PDFURL)
-			}
-			if result.License != "" {
-				fmt.Printf("  License: %s\n", result.License)
-			}
-			if result.Abstract != "" {
-				fmt.Printf("  Abstract: %s\n", result.Abstract)
-			}
-			if relevance, ok := result.Metadata["relevance_score"].(float64); ok && relevance > 0 {
-				fmt.Printf("  Relevance Score: %f\n", relevance)
-			}
-			fmt.Println("--------------------------------------------------")
-		}
-	},
+	return &OpenAlexCommand{
+		CommandDescription: cmdDesc,
+	}, nil
 }
 
+// init registers the openalex command
 func init() {
-	rootCmd.AddCommand(openalexCmd)
-	openalexCmd.Flags().StringVarP(&openalexQuery, "query", "q", "", "Search query for OpenAlex (searches title, abstract, fulltext)")
-	openalexCmd.Flags().IntVarP(&openalexPerPage, "per_page", "n", 10, "Number of results per page")
-	openalexCmd.Flags().StringVarP(&openalexMailto, "mailto", "m", "", "Email address for OpenAlex polite pool (highly recommended)")
-	openalexCmd.Flags().StringVarP(&openalexFilter, "filter", "f", "", "Filter parameters for OpenAlex (e.g., publication_year:2022,type:journal-article)")
-	openalexCmd.Flags().StringVarP(&openalexSort, "sort", "s", "relevance_score:desc", "Sort order (e.g., cited_by_count:desc, publication_date:asc)")
+	// Create the openalex command
+	openalexCmd, err := NewOpenAlexCommand()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create openalex command")
+	}
+
+	// Convert to Cobra command
+	oaCobraCmd, err := cli.BuildCobraCommandFromCommand(openalexCmd)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to build openalex cobra command")
+	}
+
+	// Add to root command
+	rootCmd.AddCommand(oaCobraCmd)
 }
