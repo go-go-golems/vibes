@@ -1,0 +1,39 @@
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]echo '=== PTY with Borders and Dynamic Resizing Demo ==='
+=== PTY with Borders and Dynamic Resizing Demo ===
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]echo 'Starting advanced Bubble Tea PTY application...'
+Starting advanced Bubble Tea PTY application...
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]./enhanced-pty-tui
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
