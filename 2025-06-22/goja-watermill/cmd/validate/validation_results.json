@@ -1,0 +1,192 @@
+{
+  "results": [
+    {
+      "test_name": "Basic Functionality",
+      "success": false,
+      "duration": 0,
+      "log_entries": null,
+      "metrics": {},
+      "errors": [
+        "JavaScript execution failed: SyntaxError: SyntaxError: (anonymous): Line 15:44 Unexpected token :"
+      ]
+    },
+    {
+      "test_name": "Message Flow",
+      "success": false,
+      "duration": 0,
+      "log_entries": null,
+      "metrics": {},
+      "errors": [
+        "Expected 3 messages, got 0"
+      ],
+      "message_flow": {
+        "0dd8e299-d584-4d19-8e3a-e6f1fb91b8af": [
+          {
+            "level": "debug",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Publishing message",
+            "message_uuid": "0dd8e299-d584-4d19-8e3a-e6f1fb91b8af",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "trace",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Tracking message",
+            "component": "message_tracker",
+            "message_uuid": "0dd8e299-d584-4d19-8e3a-e6f1fb91b8af",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "debug",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Publishing message to memory pub/sub",
+            "component": "memory_pubsub",
+            "message_uuid": "0dd8e299-d584-4d19-8e3a-e6f1fb91b8af",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "info",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "No subscribers to send message",
+            "component": "watermill",
+            "message_uuid": "0dd8e299-d584-4d19-8e3a-e6f1fb91b8af",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "info",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Message published successfully",
+            "message_uuid": "0dd8e299-d584-4d19-8e3a-e6f1fb91b8af",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          }
+        ],
+        "2ffc9b07-a7fa-4489-9e43-f32ebd2aa1f0": [
+          {
+            "level": "debug",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Publishing message",
+            "message_uuid": "2ffc9b07-a7fa-4489-9e43-f32ebd2aa1f0",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "trace",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Tracking message",
+            "component": "message_tracker",
+            "message_uuid": "2ffc9b07-a7fa-4489-9e43-f32ebd2aa1f0",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "debug",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Publishing message to memory pub/sub",
+            "component": "memory_pubsub",
+            "message_uuid": "2ffc9b07-a7fa-4489-9e43-f32ebd2aa1f0",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "info",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "No subscribers to send message",
+            "component": "watermill",
+            "message_uuid": "2ffc9b07-a7fa-4489-9e43-f32ebd2aa1f0",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "info",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Message published successfully",
+            "message_uuid": "2ffc9b07-a7fa-4489-9e43-f32ebd2aa1f0",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          }
+        ],
+        "a190cef7-75e3-44f4-9b6c-884fe362b4f9": [
+          {
+            "level": "debug",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Publishing message",
+            "message_uuid": "a190cef7-75e3-44f4-9b6c-884fe362b4f9",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "trace",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Tracking message",
+            "component": "message_tracker",
+            "message_uuid": "a190cef7-75e3-44f4-9b6c-884fe362b4f9",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "debug",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Publishing message to memory pub/sub",
+            "component": "memory_pubsub",
+            "message_uuid": "a190cef7-75e3-44f4-9b6c-884fe362b4f9",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "info",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "No subscribers to send message",
+            "component": "watermill",
+            "message_uuid": "a190cef7-75e3-44f4-9b6c-884fe362b4f9",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          },
+          {
+            "level": "info",
+            "time": "2025-06-22T14:34:47-04:00",
+            "message": "Message published successfully",
+            "message_uuid": "a190cef7-75e3-44f4-9b6c-884fe362b4f9",
+            "topic": "flow.test",
+            "pubsub_id": "memory_1750617287680603835"
+          }
+        ]
+      }
+    },
+    {
+      "test_name": "Middleware Chain",
+      "success": false,
+      "duration": 0,
+      "log_entries": null,
+      "metrics": {},
+      "errors": [
+        "Expected 4 middleware log entries, got 0"
+      ]
+    },
+    {
+      "test_name": "Error Handling",
+      "success": false,
+      "duration": 0,
+      "log_entries": null,
+      "metrics": {},
+      "errors": [
+        "Expected 3 successful messages, got 2"
+      ]
+    },
+    {
+      "test_name": "Performance",
+      "success": false,
+      "duration": 0,
+      "log_entries": null,
+      "metrics": {},
+      "errors": [
+        "Expected 100 processed messages, got 92"
+      ]
+    }
+  ],
+  "timestamp": "2025-06-22T14:34:52-04:00"
+}
