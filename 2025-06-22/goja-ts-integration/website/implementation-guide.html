@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implementation Guide - TypeScript in Go with Goja</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>TypeScript in Go with Goja</h1>
+            <p class="subtitle">Implementation Guide</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="implementation-guide.html">Implementation Guide</a></li>
+                <li><a href="developer-walkthrough.html">Developer Walkthrough</a></li>
+                <li><a href="index.html#download">Download</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="documentation container">
+            <div id="markdown-content">
+                <!-- Markdown content will be inserted here -->
+            </div>
+            <a href="index.html" class="back-to-home button">Back to Home</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 TypeScript-in-Go Integration Project</p>
+        </div>
+    </footer>
+
+    <script>
+        // Fetch and render markdown content
+        fetch('implementation-guide.md')
+            .then(response => response.text())
+            .then(markdown => {
+                // Use a markdown library or simple rendering
+                // For now, we'll just insert the raw markdown
+                document.getElementById('markdown-content').innerHTML = `
+                <iframe src="implementation-guide.md" style="width: 100%; height: 800px; border: none;"></iframe>
+                `;
+            });
+    </script>
+</body>
+</html>

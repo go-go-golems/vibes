@@ -1,0 +1,5 @@
+packages:
+  - path: github.com/example/myvm/internal/handlers
+    output: ../web/types/handlers.ts
+    type_mappings:
+      time.Time: string

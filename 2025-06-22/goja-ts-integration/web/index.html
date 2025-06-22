@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeScript in Go with Goja</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>TypeScript in Go with Goja</h1>
+            <p class="subtitle">A battle-tested integration with full type-checking and single-binary deployment</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#documentation">Documentation</a></li>
+                <li><a href="#download">Download</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section id="overview" class="container">
+            <h2>Overview</h2>
+            <div class="flex-container">
+                <div class="content">
+                    <p>This project demonstrates a robust approach to integrating TypeScript with Go using Goja, a pure Go JavaScript interpreter. The integration provides full type-checking, .d.ts generation for Go-native APIs, and a single-binary build that needs no extra runtime dependencies.</p>
+                    <p>With this approach, you can:</p>
+                    <ul>
+                        <li>Write business logic in TypeScript with full type safety</li>
+                        <li>Expose Go functions directly to TypeScript</li>
+                        <li>Deploy a single binary with no Node.js dependency</li>
+                        <li>Enjoy fast development with hot reloading</li>
+                        <li>Get proper error reporting with sourcemaps</li>
+                    </ul>
+                </div>
+                <div class="image">
+                    <div class="code-block">
+<pre><code class="language-typescript">// TypeScript
+function main() {
+  try {
+    console.log("TypeScript starting...");
+    
+    // Call Go function
+    const user = CreateUser({
+      username: "testuser",
+      email: "test@example.com"
+    });
+    
+    console.log(`User created: ${user.id}`);
+    return { success: true, user };
+  } catch (error) {
+    console.error("Error:", error);
+    return { success: false, error };
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="container">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <h3>Type Safety</h3>
+                    <p>Full TypeScript type-checking ensures robust code with IDE support.</p>
+                </div>
+                <div class="feature">
+                    <h3>Single Binary</h3>
+                    <p>No need for Node.js in production - everything is embedded in one Go binary.</p>
+                </div>
+                <div class="feature">
+                    <h3>Go-Native APIs</h3>
+                    <p>Expose Go functions directly to TypeScript with proper type definitions.</p>
+                </div>
+                <div class="feature">
+                    <h3>Hot Reloading</h3>
+                    <p>Fast development cycle with automatic reloading when TypeScript files change.</p>
+                </div>
+                <div class="feature">
+                    <h3>Sourcemaps</h3>
+                    <p>Proper error reporting with TypeScript line numbers for easier debugging.</p>
+                </div>
+                <div class="feature">
+                    <h3>Structured Logging</h3>
+                    <p>Integrated zerolog with caller information for comprehensive debugging.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="documentation" class="container">
+            <h2>Documentation</h2>
+            <div class="docs-container">
+                <div class="doc-card">
+                    <h3>Implementation Guide</h3>
+                    <p>A comprehensive guide to integrating TypeScript with Go using Goja, covering project structure, build pipeline, embedding, and more.</p>
+                    <a href="implementation-guide.html" class="button">Read Guide</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Developer Walkthrough</h3>
+                    <p>A step-by-step walkthrough for building a TypeScript-in-Go application from scratch, with practical examples and code snippets.</p>
+                    <a href="developer-walkthrough.html" class="button">Start Walkthrough</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="download" class="container">
+            <h2>Download</h2>
+            <p>Get the complete source code and documentation in a single package:</p>
+            <div class="download-options">
+                <a href="goja-ts-integration.zip" class="button download-button">Download ZIP</a>
+                <p class="download-info">Includes all source code, documentation, and examples.</p>
+            </div>
+            <div class="code-block">
+<pre><code class="language-bash"># Quick start after download
+unzip goja-ts-integration.zip
+cd goja-ts-integration/myvm
+go run cmd/server/main.go</code></pre>
+            </div>
+        </section>
+
+        <section id="about" class="container">
+            <h2>About</h2>
+            <p>This project was created to demonstrate a robust approach to integrating TypeScript with Go using Goja. It is based on real-world experience and best practices for embedding JavaScript in Go applications.</p>
+            <p>The key components used in this integration are:</p>
+            <ul>
+                <li><a href="https://github.com/dop251/goja" target="_blank">Goja</a> - A pure Go JavaScript interpreter</li>
+                <li><a href="https://github.com/dop251/goja_nodejs" target="_blank">goja_nodejs</a> - Node.js compatibility layer for Goja</li>
+                <li><a href="https://github.com/evanw/esbuild" target="_blank">esbuild</a> - An extremely fast JavaScript bundler</li>
+                <li><a href="https://github.com/microsoft/TypeScript" target="_blank">TypeScript</a> - JavaScript with syntax for types</li>
+                <li><a href="https://github.com/gzuidhof/tygo" target="_blank">tygo</a> - Generate TypeScript types from Go</li>
+                <li><a href="https://github.com/rs/zerolog" target="_blank">zerolog</a> - Zero allocation JSON logger</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 TypeScript-in-Go Integration Project</p>
+        </div>
+    </footer>
+</body>
+</html>
