@@ -1,0 +1,40 @@
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]echo '=== TUI Validation with Text Screenshots ==='
+=== TUI Validation with Text Screenshots ===
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]echo 'This demo shows how text screenshots validate TUI functionality'
+This demo shows how text screenshots validate TUI functionality
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]echo 'Building enhanced TUI application...'
+Building enhanced TUI application...
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]go build -o enhanced-pty-tui enhanced-main.go
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]echo 'Starting TUI with validation points...'
+Starting TUI with validation points...
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/pty-tui-advanced
+[CMD_END]./enhanced-pty-tui
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

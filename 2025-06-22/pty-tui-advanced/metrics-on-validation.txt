@@ -1,0 +1,40 @@
+ 🖥️  Advanced PTY TUI Demo with Dynamic Resizing
+
+
+╭──────────────────────╮
+│ 🎬 AUTO DEMO RUNNING │
+╰──────────────────────╯
+
+╭────────────────────────────────────╮  ╭────────────────────────────────────────────────────────────────╮
+│                                    │  │                                                                │
+│  📏 Terminal: 117x41               │  │ 🔄 PTY output will appear here...                              │
+│  🔲 PTY Size: 60x20                │  │                                                                │
+│  📊 Status: 🎬 Auto demo started   │  │ Press 'a' to start auto demo                                   │
+│  - watch dynamic resizing!         │  │ Press 'c' to send commands                                     │
+│  ⏱️  Uptime: 15s                   │  │ Press 'r' for manual resize                                    │
+│  🔄 Resizes: 0                     │  │                                                                │
+│                                    │  │                                                                │
+│  ❌ Error: PTY not ready           │  │                                                                │
+│                                    │  │                                                                │
+╰────────────────────────────────────╯  │                                                                │
+                                        │                                                                │
+                                        │                                                                │
+                                        │                                                                │
+                                        │                                                                │
+                                        │
+                                       │                                                                │
+                                       │                                                                │
+                                       ╰────────────────────────────────────────────────────────────────╯
+
+
+🎮 Controls: [a] auto demo • [r] manual resize • [c] send command • [1-6] size presets
+🎨 Styling: [b] border style • [t] color theme • [m] toggle metrics • [q] quit
+
+
+
+
+
+
+
+
+
