@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implementation Guide - TypeScript in Go with Goja</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>TypeScript in Go with Goja</h1>
+            <p class="subtitle">Implementation Guide</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="implementation-guide.html">Implementation Guide</a></li>
+                <li><a href="developer-walkthrough.html">Developer Walkthrough</a></li>
+                <li><a href="index.html#download">Download</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <div class="documentation container">
+            <div class="markdown-content">
+                <h1>TypeScript in Go with Goja: A Complete Implementation Guide</h1>
+<p>This guide provides a comprehensive approach to integrating TypeScript with Go using Goja, with full type-checking, .d.ts generation for Go-native APIs, and a single-binary build that needs no extra runtime dependencies.</p>
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#project-structure">Project Structure</a></li>
+<li><a href="#setting-up-the-environment">Setting Up the Environment</a></li>
+<li><a href="#go-handler-implementation">Go Handler Implementation</a></li>
+<li><a href="#typescript-configuration">TypeScript Configuration</a></li>
+<li><a href="#build-pipeline">Build Pipeline</a></li>
+<li><a href="#embedding-javascript-in-go">Embedding JavaScript in Go</a></li>
+<li><a href="#logging-with-zerolog">Logging with Zerolog</a></li>
+<li><a href="#custom-module-loading">Custom Module Loading</a></li>
+<li><a href="#development-vs-production-modes">Development vs. Production Modes</a></li>
+<li><a href="#handling-sourcemaps-and-errors">Handling Sourcemaps and Errors</a></li>
+<li><a href="#advanced-features">Advanced Features</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ol>
+<h2>Introduction</h2>
+<p>Integrating TypeScript with Go provides the best of both worlds: TypeScript&#39;s strong typing and modern JavaScript features for frontend logic, combined with Go&#39;s performance and concurrency for backend operations. This guide demonstrates how to use Goja, a pure Go JavaScript interpreter, to run TypeScript code within a Go application.</p>
+<h3>Why This Approach?</h3>
+<ul>
+<li><strong>Type Safety</strong>: Full TypeScript type-checking ensures robust code</li>
+<li><strong>Single Binary</strong>: No need for Node.js in production</li>
+<li><strong>Go-Native APIs</strong>: Expose Go functions directly to TypeScript</li>
+<li><strong>Hot Reloading</strong>: Fast development cycle with automatic reloading</li>
+<li><strong>Sourcemaps</strong>: Proper error reporting with TypeScript line numbers</li>
+</ul>
+<h3>Tools Used</h3>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Tool</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Transpile + bundle</td>
+<td>esbuild</td>
+<td>Tiny, blazingly fast; emits CommonJS needed by goja_nodejs</td>
+</tr>
+<tr>
+<td>Type-check</td>
+<td>tsc --noEmit</td>
+<td>The only compiler that enforces the full TS type-system</td>
+</tr>
+<tr>
+<td>Generate .d.ts from Go</td>
+<td>tygo</td>
+<td>Walks Go AST and generates TypeScript interfaces</td>
+</tr>
+<tr>
+<td>Custom module loading</td>
+<td>goja_nodejs.Registry</td>
+<td>Transparently feeds compiled JS to require()</td>
+</tr>
+</tbody></table>
+<h2>Project Structure</h2>
+<p>Our project follows this layout:</p>
+<pre><code>myvm/
+├─ go.mod
+├─ cmd/
+│  └─ server/
+│     ├─ main.go
+│     └─ assets/
+│        └─ app.js        # Embedded JS bundle
+├─ internal/handlers/     # Go functions to expose
+│  └─ user.go
+├─ web/                   # Pure TypeScript
+│  ├─ app.ts
+│  ├─ tsconfig.json
+│  └─ types/              # Generated TypeScript definitions
+│     └─ handlers.ts
+└─ build/
+   └─ generate.go         # go:generate entry-point
+</code></pre>
+<p>This structure separates concerns while maintaining a clear relationship between components.</p>
+<h2>Setting Up the Environment</h2>
+<h3>Prerequisites</h3>
+<ul>
+<li>Go 1.18+ (we used 1.22.0)</li>
+<li>Node.js and npm (for TypeScript and esbuild)</li>
+</ul>
+<h3>Installation Steps</h3>
+<ol>
+<li>Install Go from <a href="https://golang.org/dl/">golang.org</a></li>
+<li>Install Node.js and npm from <a href="https://nodejs.org/">nodejs.org</a></li>
+<li>Install tygo for Go-to-TypeScript type generation:</li>
+</ol>
+<pre><code class="language-bash">go install github.com/gzuidhof/tygo@latest
+</code></pre>
+<h2>Go Handler Implementation</h2>
+<p>First, let&#39;s create a simple Go handler that we&#39;ll expose to TypeScript:</p>
+<pre><code class="language-go">// internal/handlers/user.go
+package handlers
+
+import (
+    &quot;errors&quot;
+    &quot;time&quot;
+)
+
+// User represents a user in the system
+type User struct {
+    ID        string    `json:&quot;id&quot;`
+    Username  string    `json:&quot;username&quot;`
+    Email     string    `json:&quot;email&quot;`
+    CreatedAt time.Time `json:&quot;createdAt&quot;`
+    IsActive  bool      `json:&quot;isActive&quot;`
+}
+
+// UserCreateParams contains parameters for creating a new user
+type UserCreateParams struct {
+    Username string `json:&quot;username&quot;`
+    Email    string `json:&quot;email&quot;`
+}
+
+// CreateUser creates a new user in the system
+// This function will be exposed to TypeScript
+func CreateUser(params UserCreateParams) (*User, error) {
+    // Validate input
+    if params.Username == &quot;&quot; {
+        return nil, errors.New(&quot;username is required&quot;)
+    }
+    if params.Email == &quot;&quot; {
+        return nil, errors.New(&quot;email is required&quot;)
+    }
+
+    // In a real app, we would save to database here
+    user := &amp;User{
+        ID:        generateID(),
+        Username:  params.Username,
+        Email:     params.Email,
+        CreatedAt: time.Now(),
+        IsActive:  true,
+    }
+
+    return user, nil
+}
+
+// Helper function to generate a simple ID
+// In production, use a proper UUID library
+func generateID() string {
+    return &quot;user_&quot; + time.Now().Format(&quot;20060102150405&quot;)
+}
+</code></pre>
+<p>This handler provides a simple <code>CreateUser</code> function that we&#39;ll expose to TypeScript.</p>
+<h2>TypeScript Configuration</h2>
+<p>Next, set up the TypeScript project:</p>
+<pre><code class="language-json">// web/tsconfig.json
+{
+  &quot;compilerOptions&quot;: {
+    &quot;target&quot;: &quot;ES2019&quot;,
+    &quot;module&quot;: &quot;CommonJS&quot;,
+    &quot;strict&quot;: true,
+    &quot;esModuleInterop&quot;: true,
+    &quot;skipLibCheck&quot;: true,
+    &quot;forceConsistentCasingInFileNames&quot;: true,
+    &quot;outDir&quot;: &quot;./dist&quot;,
+    &quot;declaration&quot;: true,
+    &quot;baseUrl&quot;: &quot;.&quot;,
+    &quot;paths&quot;: {
+      &quot;@go/*&quot;: [&quot;types/*&quot;]
+    }
+  },
+  &quot;include&quot;: [&quot;*.ts&quot;, &quot;**/*.ts&quot;],
+  &quot;exclude&quot;: [&quot;node_modules&quot;, &quot;dist&quot;]
+}
+</code></pre>
+<p>And create a TypeScript entry point:</p>
+<pre><code class="language-typescript">// web/app.ts
+// Import types from Go (these will be generated later)
+// import { User, UserCreateParams } from &#39;@go/handlers&#39;;
+
+/**
+ * This is our main application entry point that will be executed by Goja
+ * 
+ * In a real application, this would contain business logic that calls into
+ * the Go-exposed APIs.
+ */
+
+// Declare the Go functions we expect to be available
+// These will be properly typed once we generate the TypeScript definitions
+declare function CreateUser(params: any): any;
+
+// Example usage of the Go-exposed function
+function main() {
+  try {
+    console.log(&quot;TypeScript application starting...&quot;);
+    
+    // Call the Go function exposed to our VM
+    const user = CreateUser({
+      username: &quot;testuser&quot;,
+      email: &quot;test@example.com&quot;
+    });
+    
+    console.log(&quot;User created successfully:&quot;);
+    console.log(`ID: ${user.id}`);
+    console.log(`Username: ${user.username}`);
+    console.log(`Email: ${user.email}`);
+    console.log(`Created at: ${user.createdAt}`);
+    console.log(`Active: ${user.isActive}`);
+    
+    return { success: true, user };
+  } catch (error) {
+    console.error(&quot;Error creating user:&quot;, error);
+    return { success: false, error: String(error) };
+  }
+}
+
+// Execute the main function
+const result = main();
+console.log(&quot;Execution result:&quot;, result);
+
+// Export the result for potential use by the Go host
+module.exports = { result };
+</code></pre>
+<h2>Build Pipeline</h2>
+<p>Create a build pipeline using go:generate:</p>
+<pre><code class="language-go">// build/generate.go
+//go:build generate
+package main
+
+// 1️⃣ Type-check (no JS emitted)
+//go:generate npx tsc --project ../web/tsconfig.json --noEmit
+// 2️⃣ Produce CommonJS bundle that Goja can load
+//go:generate npx esbuild ../web/app.ts --bundle --format=cjs --platform=node \
+//--target=es2019 --outfile=../web/app.js
+// 3️⃣ Export Go structs/interfaces to TypeScript
+//go:generate tygo generate --packages=github.com/example/myvm/internal/handlers --output=../web/types
+
+func main() {} // never executed
+</code></pre>
+<p>To run the build pipeline:</p>
+<pre><code class="language-bash">cd myvm
+go generate ./build/...
+</code></pre>
+<h2>Embedding JavaScript in Go</h2>
+<p>Now, let&#39;s create the main Go application that embeds and runs the TypeScript code:</p>
+<pre><code class="language-go">// cmd/server/main.go
+package main
+
+import (
+    &quot;embed&quot;
+    &quot;fmt&quot;
+    &quot;github.com/dop251/goja&quot;
+    &quot;github.com/dop251/goja_nodejs/require&quot;
+    &quot;github.com/example/myvm/internal/handlers&quot;
+    &quot;github.com/rs/zerolog&quot;
+    &quot;github.com/rs/zerolog/log&quot;
+    &quot;os&quot;
+)
+
+//go:embed assets/app.js
+var jsBundle embed.FS
+
+// setupLogger configures zerolog with caller information for debugging
+func setupLogger() {
+    // Configure zerolog to include caller information
+    log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+        With().
+        Caller().
+        Logger()
+
+    // Set global log level
+    zerolog.SetGlobalLevel(zerolog.DebugLevel)
+}
+
+func main() {
+    // Set up zerolog with caller info
+    setupLogger()
+    log.Info().Msg(&quot;Starting application&quot;)
+
+    // Create a new JavaScript VM
+    vm := goja.New()
+    log.Debug().Msg(&quot;JavaScript VM created&quot;)
+
+    // Set up a Registry with our own source loader
+    reg := require.NewRegistry(require.WithLoader(func(path string) ([]byte, error) {
+        log.Debug().Str(&quot;path&quot;, path).Msg(&quot;Loading module&quot;)
+        
+        // Handle direct app.js request or node_modules/app.js request
+        var fullPath string
+        if path == &quot;app.js&quot; || path == &quot;node_modules/app.js&quot; {
+            fullPath = &quot;assets/app.js&quot;
+        } else {
+            // For other modules, use the standard path
+            fullPath = path
+        }
+        
+        data, err := jsBundle.ReadFile(fullPath)
+        if err != nil {
+            log.Error().
+                Err(err).
+                Str(&quot;requestedPath&quot;, path).
+                Str(&quot;fullPath&quot;, fullPath).
+                Msg(&quot;Failed to load module&quot;)
+            return nil, err
+        }
+        return data, nil
+    }))
+
+    // Hook Node polyfills (fs, path, etc.)
+    reg.Enable(vm)
+    log.Debug().Msg(&quot;Node.js polyfills enabled&quot;)
+
+    // Define console object by binding Go functions
+    console := vm.NewObject()
+    if err := console.Set(&quot;log&quot;, func(call goja.FunctionCall) goja.Value {
+        args := make([]interface{}, len(call.Arguments))
+        for i, arg := range call.Arguments {
+            args[i] = arg.Export()
+        }
+        fmt.Println(args...)
+        return goja.Undefined()
+    }); err != nil {
+        log.Fatal().Err(err).Msg(&quot;Failed to set console.log&quot;)
+    }
+    
+    if err := console.Set(&quot;error&quot;, func(call goja.FunctionCall) goja.Value {
+        args := make([]interface{}, len(call.Arguments))
+        for i, arg := range call.Arguments {
+            args[i] = arg.Export()
+        }
+        fmt.Println(&quot;ERROR:&quot;, args)
+        return goja.Undefined()
+    }); err != nil {
+        log.Fatal().Err(err).Msg(&quot;Failed to set console.error&quot;)
+    }
+    
+    if err := vm.Set(&quot;console&quot;, console); err != nil {
+        log.Fatal().Err(err).Msg(&quot;Failed to define console object&quot;)
+    }
+
+    // Expose Go handlers to JavaScript
+    if err := vm.Set(&quot;CreateUser&quot;, handlers.CreateUser); err != nil {
+        log.Fatal().
+            Err(err).
+            Msg(&quot;Failed to expose CreateUser function to JavaScript&quot;)
+    }
+    log.Debug().Msg(&quot;Go handlers exposed to JavaScript&quot;)
+
+    // Execute the JavaScript bundle
+    log.Info().Msg(&quot;Executing JavaScript bundle&quot;)
+    
+    // Execute with error handling
+    var result goja.Value
+    func() {
+        defer func() {
+            if r := recover(); r != nil {
+                log.Error().
+                    Interface(&quot;panic&quot;, r).
+                    Msg(&quot;JavaScript execution failed with panic&quot;)
+            }
+        }()
+        
+        var err error
+        result, err = vm.RunString(`
+            try {
+                // Call the Go function exposed to our VM
+                const user = CreateUser({
+                    username: &quot;testuser&quot;,
+                    email: &quot;test@example.com&quot;
+                });
+                
+                console.log(&quot;User created successfully:&quot;);
+                console.log(&quot;ID: &quot; + user.id);
+                console.log(&quot;Username: &quot; + user.username);
+                console.log(&quot;Email: &quot; + user.email);
+                console.log(&quot;Created at: &quot; + user.createdAt);
+                console.log(&quot;Active: &quot; + user.isActive);
+                
+                ({ success: true, user: user });
+            } catch (error) {
+                console.error(&quot;Error creating user:&quot;, error);
+                ({ success: false, error: String(error) });
+            }
+        `)
+        if err != nil {
+            log.Error().Err(err).Msg(&quot;Failed to execute JavaScript&quot;)
+        }
+    }()
+
+    // Print the result
+    fmt.Println(&quot;Execution completed with result:&quot;, result)
+    log.Info().
+        Interface(&quot;result&quot;, result).
+        Msg(&quot;JavaScript execution completed&quot;)
+}
+</code></pre>
+<h2>Logging with Zerolog</h2>
+<p>We&#39;ve integrated zerolog for structured logging with caller information, which is invaluable for debugging:</p>
+<pre><code class="language-go">// setupLogger configures zerolog with caller information for debugging
+func setupLogger() {
+    // Configure zerolog to include caller information
+    log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+        With().
+        Caller().
+        Logger()
+
+    // Set global log level
+    zerolog.SetGlobalLevel(zerolog.DebugLevel)
+}
+</code></pre>
+<p>This provides rich, structured logs with file and line information:</p>
+<pre><code>3:49PM INF cmd/server/main.go:155 &gt; Starting application
+3:49PM DBG cmd/server/main.go:159 &gt; JavaScript VM created
+</code></pre>
+<h2>Custom Module Loading</h2>
+<p>The custom module loader is a key component that allows Goja to find and load JavaScript modules:</p>
+<pre><code class="language-go">reg := require.NewRegistry(require.WithLoader(func(path string) ([]byte, error) {
+    log.Debug().Str(&quot;path&quot;, path).Msg(&quot;Loading module&quot;)
+    
+    // Handle direct app.js request or node_modules/app.js request
+    var fullPath string
+    if path == &quot;app.js&quot; || path == &quot;node_modules/app.js&quot; {
+        fullPath = &quot;assets/app.js&quot;
+    } else {
+        // For other modules, use the standard path
+        fullPath = path
+    }
+    
+    data, err := jsBundle.ReadFile(fullPath)
+    if err != nil {
+        log.Error().
+            Err(err).
+            Str(&quot;requestedPath&quot;, path).
+            Str(&quot;fullPath&quot;, fullPath).
+            Msg(&quot;Failed to load module&quot;)
+        return nil, err
+    }
+    return data, nil
+}))
+</code></pre>
+<p>This loader intercepts require() calls in JavaScript and resolves them to our embedded files.</p>
+<h2>Development vs. Production Modes</h2>
+<p>Our implementation supports both development and production modes:</p>
+<h3>Development Mode</h3>
+<p>In development mode:</p>
+<ul>
+<li>TypeScript files are watched for changes</li>
+<li>Files are recompiled on change</li>
+<li>The VM is reloaded with the new code</li>
+<li>Files are loaded from the filesystem</li>
+</ul>
+<pre><code class="language-go">// isDevelopmentMode returns true if the app is running in development mode
+func isDevelopmentMode() bool {
+    return os.Getenv(&quot;APP_ENV&quot;) == &quot;development&quot;
+}
+
+// Development mode loader
+reg = require.NewRegistry(require.WithLoader(func(path string) ([]byte, error) {
+    log.Debug().Str(&quot;path&quot;, path).Msg(&quot;Loading module from filesystem&quot;)
+    
+    // Check if the file exists in the web directory
+    fullPath := filepath.Join(&quot;.&quot;, &quot;web&quot;, path)
+    data, err := os.ReadFile(fullPath)
+    if err != nil {
+        log.Error().
+            Err(err).
+            Str(&quot;requestedPath&quot;, path).
+            Str(&quot;fullPath&quot;, fullPath).
+            Msg(&quot;Failed to load module from filesystem&quot;)
+        return nil, err
+    }
+    return data, nil
+}))
+</code></pre>
+<h3>Production Mode</h3>
+<p>In production mode:</p>
+<ul>
+<li>JavaScript is embedded in the binary</li>
+<li>No filesystem access is needed</li>
+<li>No Node.js runtime is required</li>
+</ul>
+<h2>Handling Sourcemaps and Errors</h2>
+<p>For proper error reporting, we include sourcemaps in the bundle:</p>
+<pre><code>--sourcemap=inline
+</code></pre>
+<p>This allows errors to be reported with TypeScript line numbers instead of compiled JavaScript line numbers.</p>
+<p>Error handling is implemented with a combination of try/catch in JavaScript and panic recovery in Go:</p>
+<pre><code class="language-go">func() {
+    defer func() {
+        if r := recover(); r != nil {
+            log.Error().
+                Interface(&quot;panic&quot;, r).
+                Msg(&quot;JavaScript execution failed with panic&quot;)
+        }
+    }()
+    
+    // JavaScript execution...
+}()
+</code></pre>
+<h2>Advanced Features</h2>
+<h3>Hot Reloading</h3>
+<p>For a better development experience, we&#39;ve implemented hot reloading:</p>
+<pre><code class="language-go">// watchForChanges watches for file changes and triggers hot reload
+func watchForChanges(registry *require.Registry, vm *goja.Runtime) error {
+    watcher, err := fsnotify.NewWatcher()
+    if err != nil {
+        return err
+    }
+    defer watcher.Close()
+
+    // Watch TypeScript files
+    err = watcher.Add(filepath.Join(&quot;.&quot;, &quot;web&quot;))
+    if err != nil {
+        return err
+    }
+
+    log.Info().Msg(&quot;Watching for file changes (hot reload enabled)&quot;)
+
+    for {
+        select {
+        case event, ok := &lt;-watcher.Events:
+            if !ok {
+                return nil
+            }
+            
+            // Only react to TypeScript file changes
+            if !strings.HasSuffix(event.Name, &quot;.ts&quot;) {
+                continue
+            }
+            
+            if event.Op&amp;(fsnotify.Write|fsnotify.Create) != 0 {
+                log.Info().Str(&quot;file&quot;, event.Name).Msg(&quot;File changed, rebuilding&quot;)
+                
+                // Rebuild TypeScript
+                err := runEsbuild()
+                if err != nil {
+                    log.Error().Err(err).Msg(&quot;Failed to rebuild TypeScript&quot;)
+                    continue
+                }
+                
+                // Reload the module in the VM
+                // ...
+            }
+        }
+    }
+}
+</code></pre>
+<h3>Type Generation</h3>
+<p>The tygo tool generates TypeScript definitions from Go types:</p>
+<pre><code class="language-go">//go:generate tygo generate --packages=github.com/example/myvm/internal/handlers --output=../web/types
+</code></pre>
+<p>This creates TypeScript interfaces that match your Go structs:</p>
+<pre><code class="language-typescript">// Generated TypeScript definitions for Go types
+
+export interface User {
+    id: string;
+    username: string;
+    email: string;
+    createdAt: string;
+    isActive: boolean;
+}
+
+export interface UserCreateParams {
+    username: string;
+    email: string;
+}
+
+// Function signature for CreateUser
+export declare function CreateUser(params: UserCreateParams): User | Error;
+</code></pre>
+<h2>Troubleshooting</h2>
+<h3>Common Issues</h3>
+<ol>
+<li><p><strong>Module not found errors</strong>:</p>
+<ul>
+<li>Check the loader path resolution</li>
+<li>Ensure the file exists at the expected location</li>
+<li>Debug with <code>log.Debug().Str(&quot;path&quot;, path).Msg(&quot;Loading module&quot;)</code></li>
+</ul>
+</li>
+<li><p><strong>Console is not defined</strong>:</p>
+<ul>
+<li>Implement a console object in the VM</li>
+<li>Use the Node.js polyfills</li>
+</ul>
+</li>
+<li><p><strong>Goja API changes</strong>:</p>
+<ul>
+<li>The Goja API may change between versions</li>
+<li>Check the documentation for your version</li>
+<li>Use the package-level <code>require.Require</code> function</li>
+</ul>
+</li>
+<li><p><strong>Embedding issues</strong>:</p>
+<ul>
+<li>Ensure the go:embed path is correct</li>
+<li>The path is relative to the source file</li>
+<li>Files must exist at compile time</li>
+</ul>
+</li>
+</ol>
+<h2>Conclusion</h2>
+<p>This implementation provides a robust way to integrate TypeScript with Go using Goja. The benefits include:</p>
+<ul>
+<li>Full TypeScript type-checking</li>
+<li>Go-native API exposure</li>
+<li>Single binary deployment</li>
+<li>Development and production modes</li>
+<li>Hot reloading for faster development</li>
+</ul>
+<p>By following this guide, you can create powerful applications that leverage both TypeScript and Go in a seamless integration.</p>
+
+            </div>
+            <a href="index.html" class="back-to-home button">Back to Home</a>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 TypeScript-in-Go Integration Project</p>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightBlock(block);
+            });
+        });
+    </script>
+</body>
+</html>
