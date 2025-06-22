@@ -1,0 +1,1403 @@
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]cd /home/ubuntu/conversation-manager
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]cd /home/ubuntu/conversation-manager
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]cd /home/ubuntu/conversation-manager
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]cd /home/ubuntu/conversation-manager
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]./conversation-manager
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+
+TODAY
+ > 🟢 React Dashboard Design Help                                                                                                2:45 PM
+   🟢 Python Data Analysis Script                                                                                               11:35 AM
+  "Absolutely! Here's how to profile and compare the perform..."
+   🟢 CSS Grid Layout Questions                                                                                                  9:30 AM
+  "Great question! Different height grid items can create la..."
+
+YESTERDAY
+   🟢 Debug Node.js API Issue                                                                                                     Jun 21
+  "Excellent! Proper error handling is crucial for a robust ..."
+   🔵 Creative Writing: Sci-fi Story                                                                                              Jun 21
+  "Excellent! An accidental awakening creates perfect dramat..."
+   🟢 Machine Learning Model Training                                                                                             Jun 21
+  "Excellent improvement! Going from 65% to 94.2% validation..."
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+↑/↓ Navigate • Enter: Open • Space: Preview • /: Search • f: Filters • q: Quit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+
+TODAY
+ > 🟢 React Dashboard Design Help                                                                                                2:45 PM
+   🟢 Python Data Analysis Script                                                                                               11:35 AM
+  "Absolutely! Here's how to profile and compare the perform..."
+   🟢 CSS Grid Layout Questions                                                                                                  9:30 AM
+  "Great question! Different height grid items can create la..."
+
+YESTERDAY
+   🟢 Debug Node.js API Issue                                                                                                     Jun 21
+  "Excellent! Proper error handling is crucial for a robust ..."
+   🔵 Creative Writing: Sci-fi Story                                                                                              Jun 21
+  "Excellent! An accidental awakening creates perfect dramat..."
+   🟢 Machine Learning Model Training                                                                                             Jun 21
+  "Excellent improvement! Going from 65% to 94.2% validation..."
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+↑/↓ Navigate • Enter: Open • Space: Preview • /: Search • f: Filters • q: Quit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+
+TODAY
+ > 🟢 React Dashboard Design Help                                                                                                2:45 PM
+   🟢 Python Data Analysis Script                                                                                               11:35 AM
+  "Absolutely! Here's how to profile and compare the perform..."
+   🟢 CSS Grid Layout Questions                                                                                                  9:30 AM
+  "Great question! Different height grid items can create la..."
+
+YESTERDAY
+   🟢 Debug Node.js API Issue                                                                                                     Jun 21
+  "Excellent! Proper error handling is crucial for a robust ..."
+   🔵 Creative Writing: Sci-fi Story                                                                                              Jun 21
+  "Excellent! An accidental awakening creates perfect dramat..."
+   🟢 Machine Learning Model Training                                                                                             Jun 21
+  "Excellent improvement! Going from 65% to 94.2% validation..."
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+
+TODAY
+ > 🟢 React Dashboard Design Help                                                                                                2:45 PM
+   🟢 Python Data Analysis Script                                                                                               11:35 AM
+  "Absolutely! Here's how to profile and compare the perform..."
+   🟢 CSS Grid Layout Questions                                                                                                  9:30 AM
+  "Great question! Different height grid items can create la..."
+
+YESTERDAY
+   🟢 Debug Node.js API Issue                                                                                                     Jun 21
+  "Excellent! Proper error handling is crucial for a robust ..."
+   🔵 Creative Writing: Sci-fi Story                                                                                              Jun 21
+  "Excellent! An accidental awakening creates perfect dramat..."
+   🟢 Machine Learning Model Training                                                                                             Jun 21
+  "Excellent improvement! Going from 65% to 94.2% validation..."
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: python█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+ > 🔴 Python Data Analysis Script                                                                                                  Today
+  ...Python Data Analysis Script...
+   🔴 Machine Learning Model Training                                                                                          Yesterday
+  ...Classic overfitting problem! The large gap between training (98%) and validat......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: python█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+ > 🔴 Python Data Analysis Script                                                                                                  Today
+  ...Python Data Analysis Script...
+   🔴 Machine Learning Model Training                                                                                          Yesterday
+  ...Classic overfitting problem! The large gap between training (98%) and validat......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: python█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+   🔴 Python Data Analysis Script                                                                                                  Today
+  ...Python Data Analysis Script...
+ > 🔴 Machine Learning Model Training                                                                                          Yesterday
+  ...Classic overfitting problem! The large gap between training (98%) and validat......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: python█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+   🔴 Python Data Analysis Script                                                                                                  Today
+  ...Python Data Analysis Script...
+ > 🔴 Machine Learning Model Training                                                                                          Yesterday
+  ...Classic overfitting problem! The large gap between training (98%) and validat......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: python█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+ > 🔴 Python Data Analysis Script                                                                                                  Today
+  ...Python Data Analysis Script...
+   🔴 Machine Learning Model Training                                                                                          Yesterday
+  ...Classic overfitting problem! The large gap between training (98%) and validat......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: python█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+ > 🔴 Python Data Analysis Script                                                                                                  Today
+  ...Python Data Analysis Script...
+   🔴 Machine Learning Model Training                                                                                          Yesterday
+  ...Classic overfitting problem! The large gap between training (98%) and validat......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+ No conversations found
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+ No conversations found
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: react█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+ > 🔴 React Dashboard Design Help                                                                                                  Today
+  ...React Dashboard Design Help...
+   🔴 Debug Node.js API Issue                                                                                                  Yesterday
+  ...I'm getting a CORS error when trying to call my Node.js API from my React fro......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: react█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+ > 🔴 React Dashboard Design Help                                                                                                  Today
+  ...React Dashboard Design Help...
+   🔴 Debug Node.js API Issue                                                                                                  Yesterday
+  ...I'm getting a CORS error when trying to call my Node.js API from my React fro......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: react█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+   🔴 React Dashboard Design Help                                                                                                  Today
+  ...React Dashboard Design Help...
+ > 🔴 Debug Node.js API Issue                                                                                                  Yesterday
+  ...I'm getting a CORS error when trying to call my Node.js API from my React fro......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: react█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+   🔴 React Dashboard Design Help                                                                                                  Today
+  ...React Dashboard Design Help...
+ > 🔴 Debug Node.js API Issue                                                                                                  Yesterday
+  ...I'm getting a CORS error when trying to call my Node.js API from my React fro......
+
+┌┐
+││
+└┘
+ Welcome to Conversation Manager
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: react█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+   🔴 React Dashboard Design Help                                                                                                  Today
+  ...React Dashboard Design Help...
+ > 🔴 Debug Node.js API Issue                                                                                                  Yesterday
+  ...I'm getting a CORS error when trying to call my Node.js API from my React fro......
+
+┌┐
+││
+└┘
+ Opening conversation: conv-004
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+ 💬 Conversations (6)
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+│ 🔍 Search: react█
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+2 results found
+
+   🔴 React Dashboard Design Help                                                                                                  Today
+  ...React Dashboard Design Help...
+ > 🔴 Debug Node.js API Issue                                                                                                  Yesterday
+  ...I'm getting a CORS error when trying to call my Node.js API from my React fro......
+
+┌┐
+││
+└┘
+ Opening conversation: conv-004
+Type to search • ↑/↓ Navigate • ←/→ Filter nav • Space: Preview • ESC: Back
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]cd /home/ubuntu/conversation-manager
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]./conversation-manager
+Thanks for using the Conversation Manager!
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]cd /home/ubuntu/conversation-manager
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]./conversation-manager
+Thanks for using the Conversation Manager!
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/conversation-manager
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
