@@ -1,0 +1,48 @@
+ ✏️  Editing: Organizational Chart
+Domain: Business
+
+Edit the mermaid diagram below:
+
+┃   1 graph TD
+┃   2     CEO[Chief Executive Officer]
+┃   3     CTO[Chief Technology Officer]
+┃   4     CFO[Chief Financial Officer]
+┃   5     CMO[Chief Marketing Officer]
+┃   6     CEO --> CTO
+┃   7     CEO --> CFO
+┃   8     CEO --> CMO
+┃   9     CTO --> DevMgr[Development Manager]
+┃  10     CTO --> QAMgr[QA Manager]
+┃  11     DevMgr --> SeniorDev[Senior Developer]
+┃  12     DevMgr --> JuniorDev[Junior Developer]
+┃  13     QAMgr --> QALead[QA Lead]
+┃  14     CFO --> Accountant[Senior Accountant]
+┃  15     CFO --> Analyst[Financial Analyst]
+┃  16     CMO --> DigitalMgr[Digital Marketing Manager]
+┃  17     CMO --> ContentMgr[Content Manager]
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+Ctrl+G to generate • Esc to go back • Ctrl+C to quit
+
+
+
+
+
+
+
+

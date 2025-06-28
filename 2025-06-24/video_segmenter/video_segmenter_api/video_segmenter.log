@@ -1,0 +1,78 @@
+2025-06-24 11:27:20,919 - __main__ - INFO - Initializing Flask application
+2025-06-24 11:27:20,920 - __main__ - INFO - Configuring CORS and blueprints
+2025-06-24 11:27:20,926 - __main__ - INFO - Setting up database connection
+2025-06-24 11:27:20,937 - __main__ - INFO - Database tables created successfully
+2025-06-24 11:27:20,938 - __main__ - INFO - Starting Flask application on host=0.0.0.0, port=5000
+2025-06-24 11:27:20,959 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.78:5000
+2025-06-24 11:27:20,959 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-24 11:27:20,964 - werkzeug - INFO -  * Restarting with watchdog (inotify)
+2025-06-24 11:27:22,594 - __main__ - INFO - Initializing Flask application
+2025-06-24 11:27:22,595 - __main__ - INFO - Configuring CORS and blueprints
+2025-06-24 11:27:22,601 - __main__ - INFO - Setting up database connection
+2025-06-24 11:27:22,612 - __main__ - INFO - Database tables created successfully
+2025-06-24 11:27:22,613 - __main__ - INFO - Starting Flask application on host=0.0.0.0, port=5000
+2025-06-24 11:27:22,625 - werkzeug - WARNING -  * Debugger is active!
+2025-06-24 11:27:22,625 - werkzeug - INFO -  * Debugger PIN: 809-401-101
+2025-06-24 11:27:34,015 - src.routes.video - INFO - Video upload request received
+2025-06-24 11:27:34,037 - src.routes.video - INFO - Processing video upload: first_5min_mcps_boring.mp4 -> a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:27:34,058 - src.routes.video - INFO - Video saved to: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:27:34,058 - src.routes.video - INFO - Extracting video information
+2025-06-24 11:27:34,059 - video_processor - INFO - Initializing VideoProcessor for: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:27:34,072 - video_processor - INFO - Video loaded - FPS: 29.99996875003255, Frames: 9000, Duration: 300.00s
+2025-06-24 11:27:34,073 - src.routes.video - INFO - Video info extracted: {'path': '/tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4', 'fps': 29.99996875003255, 'total_frames': 9000, 'duration_seconds': 300.0003125, 'duration_formatted': '0:05:00', 'resolution': (1920, 1080)}
+2025-06-24 11:27:34,078 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:27:34] "POST /api/video/upload HTTP/1.1" 200 -
+2025-06-24 11:27:34,158 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:27:34] "OPTIONS /api/video/analyze HTTP/1.1" 200 -
+2025-06-24 11:27:34,166 - src.routes.video - INFO - Video analysis request received
+2025-06-24 11:27:34,166 - src.routes.video - INFO - Analyzing video: a21f2b0d-bd56-4c73-8080-4699cd24b805, mode: quick, type: developer_shorts
+2025-06-24 11:27:34,166 - src.routes.video - INFO - Found video file: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:27:34,166 - src.routes.video - INFO - Initializing video processor and Gemini analyzer
+2025-06-24 11:27:34,166 - video_processor - INFO - Initializing VideoProcessor for: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:27:34,174 - video_processor - INFO - Video loaded - FPS: 29.99996875003255, Frames: 9000, Duration: 300.00s
+2025-06-24 11:27:34,174 - gemini_video_analyzer - INFO - Initializing GeminiVideoAnalyzer with Gemini 2.5
+2025-06-24 11:27:34,174 - gemini_video_analyzer - INFO - GeminiVideoAnalyzer initialized successfully with Gemini 2.5
+2025-06-24 11:27:34,174 - src.routes.video - INFO - Uploading video to Gemini for native processing
+2025-06-24 11:27:34,174 - gemini_video_analyzer - INFO - Uploading video to Gemini: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:27:34,175 - gemini_video_analyzer - INFO - Video file size: 17096130 bytes, MIME type: video/mp4
+2025-06-24 11:27:39,816 - gemini_video_analyzer - INFO - Video uploaded successfully. URI: https://generativelanguage.googleapis.com/v1beta/files/8o3zcl2dxfh4
+2025-06-24 11:27:39,816 - gemini_video_analyzer - INFO - Waiting for video processing to complete...
+2025-06-24 11:27:54,895 - gemini_video_analyzer - INFO - Video processing completed successfully
+2025-06-24 11:27:54,896 - src.routes.video - INFO - Video uploaded successfully to Gemini: https://generativelanguage.googleapis.com/v1beta/files/8o3zcl2dxfh4
+2025-06-24 11:27:54,904 - src.routes.video - INFO - Starting comprehensive Gemini video analysis
+2025-06-24 11:27:54,904 - gemini_video_analyzer - INFO - Starting comprehensive video analysis for: https://generativelanguage.googleapis.com/v1beta/files/8o3zcl2dxfh4
+2025-06-24 11:27:54,905 - gemini_video_analyzer - INFO - Sending video to Gemini 2.5 for comprehensive analysis
+2025-06-24 11:29:02,955 - gemini_video_analyzer - INFO - Comprehensive video analysis completed successfully
+2025-06-24 11:29:02,955 - src.routes.video - INFO - Comprehensive analysis completed successfully
+2025-06-24 11:29:02,955 - src.routes.video - INFO - Creating developer shorts strategy
+2025-06-24 11:29:02,956 - gemini_video_analyzer - INFO - Creating developer shorts strategy from comprehensive analysis
+2025-06-24 11:29:32,159 - gemini_video_analyzer - INFO - Developer shorts strategy created successfully
+2025-06-24 11:29:32,159 - src.routes.video - INFO - Analyzing top segments in detail
+2025-06-24 11:29:32,159 - src.routes.video - INFO - Analyzing segment 1/3: 00:00:59 - 00:01:28
+2025-06-24 11:29:32,159 - gemini_video_analyzer - INFO - Analyzing video segment 00:00:59 to 00:01:28
+2025-06-24 11:29:49,569 - gemini_video_analyzer - INFO - Segment analysis completed for 00:00:59-00:01:28
+2025-06-24 11:29:49,569 - src.routes.video - INFO - Analyzing segment 2/3: 00:02:13 - 00:03:08
+2025-06-24 11:29:49,570 - gemini_video_analyzer - INFO - Analyzing video segment 00:02:13 to 00:03:08
+2025-06-24 11:30:17,122 - gemini_video_analyzer - INFO - Segment analysis completed for 00:02:13-00:03:08
+2025-06-24 11:30:17,122 - src.routes.video - INFO - Analyzing segment 3/3: 00:03:47 - 00:04:20
+2025-06-24 11:30:17,122 - gemini_video_analyzer - INFO - Analyzing video segment 00:03:47 to 00:04:20
+2025-06-24 11:30:41,441 - gemini_video_analyzer - INFO - Segment analysis completed for 00:03:47-00:04:20
+2025-06-24 11:30:41,441 - src.routes.video - INFO - Preparing analysis response
+2025-06-24 11:30:41,441 - src.routes.video - INFO - Saving analysis results
+2025-06-24 11:30:41,443 - src.routes.video - INFO - Gemini video analysis completed successfully for a21f2b0d-bd56-4c73-8080-4699cd24b805
+2025-06-24 11:30:41,445 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:30:41] "POST /api/video/analyze HTTP/1.1" 200 -
+2025-06-24 11:31:16,602 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:31:16] "OPTIONS /api/video/analyze HTTP/1.1" 200 -
+2025-06-24 11:31:16,606 - src.routes.video - INFO - Video analysis request received
+2025-06-24 11:31:16,606 - src.routes.video - INFO - Analyzing video: a21f2b0d-bd56-4c73-8080-4699cd24b805, mode: full, type: developer_shorts
+2025-06-24 11:31:16,607 - src.routes.video - INFO - Found video file: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:31:16,607 - src.routes.video - INFO - Initializing video processor and Gemini analyzer
+2025-06-24 11:31:16,607 - video_processor - INFO - Initializing VideoProcessor for: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:31:16,614 - video_processor - INFO - Video loaded - FPS: 29.99996875003255, Frames: 9000, Duration: 300.00s
+2025-06-24 11:31:16,614 - gemini_video_analyzer - INFO - Initializing GeminiVideoAnalyzer with Gemini 2.5
+2025-06-24 11:31:16,615 - gemini_video_analyzer - INFO - GeminiVideoAnalyzer initialized successfully with Gemini 2.5
+2025-06-24 11:31:16,615 - src.routes.video - INFO - Uploading video to Gemini for native processing
+2025-06-24 11:31:16,615 - gemini_video_analyzer - INFO - Uploading video to Gemini: /tmp/video_uploads/a21f2b0d-bd56-4c73-8080-4699cd24b805.mp4
+2025-06-24 11:31:16,615 - gemini_video_analyzer - INFO - Video file size: 17096130 bytes, MIME type: video/mp4
+2025-06-24 11:31:21,723 - gemini_video_analyzer - INFO - Video uploaded successfully. URI: https://generativelanguage.googleapis.com/v1beta/files/waqkx9ajzc0h
+2025-06-24 11:31:21,723 - gemini_video_analyzer - INFO - Waiting for video processing to complete...

@@ -1,0 +1,11 @@
+{
+  "step_id": 3,
+  "timestamp": "2025-06-24T11:52:02.102057",
+  "step_type": "analysis_start",
+  "description": "Starting video analysis",
+  "data": {
+    "video_url": "https://www.youtube.com/watch?v=J3oJqan2Gv8",
+    "mode": "comprehensive"
+  },
+  "elapsed_time": 0.00332
+}

@@ -1,0 +1,38 @@
+2025-06-24 11:49:44,792 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.0.78:5001
+2025-06-24 11:49:44,792 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-24 11:49:44,796 - werkzeug - INFO -  * Restarting with watchdog (inotify)
+2025-06-24 11:49:45,667 - werkzeug - WARNING -  * Debugger is active!
+2025-06-24 11:49:45,667 - werkzeug - INFO -  * Debugger PIN: 361-441-886
+2025-06-24 11:49:50,248 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:49:50] "GET / HTTP/1.1" 200 -
+2025-06-24 11:49:50,372 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:49:50] "GET /static/css/style.css HTTP/1.1" 200 -
+2025-06-24 11:49:50,373 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:49:50] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-06-24 11:49:50,653 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:49:50] "GET /health HTTP/1.1" 200 -
+2025-06-24 11:49:50,670 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:49:50] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-06-24 11:50:07,360 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:07] "POST /analyze HTTP/1.1" 200 -
+2025-06-24 11:50:07,361 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:07] "GET /events HTTP/1.1" 200 -
+2025-06-24 11:50:07,366 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-06-24 11:50:20,491 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 500 Internal Server Error"
+2025-06-24 11:50:36,290 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:36] "GET / HTTP/1.1" 200 -
+2025-06-24 11:50:36,350 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:36] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-06-24 11:50:36,353 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:36] "[36mGET /static/js/app.js HTTP/1.1[0m" 304 -
+2025-06-24 11:50:36,496 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:36] "GET /health HTTP/1.1" 200 -
+2025-06-24 11:50:43,266 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:43] "POST /analyze HTTP/1.1" 200 -
+2025-06-24 11:50:43,268 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:50:43] "GET /events HTTP/1.1" 200 -
+2025-06-24 11:50:43,272 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-06-24 11:51:23,381 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent "HTTP/1.1 200 OK"
+2025-06-24 11:51:23,382 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-06-24 11:51:56,919 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:51:56] "GET / HTTP/1.1" 200 -
+2025-06-24 11:51:56,979 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:51:56] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-06-24 11:51:56,981 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:51:56] "GET /static/js/app.js HTTP/1.1" 200 -
+2025-06-24 11:51:57,070 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:51:57] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-06-24 11:51:57,184 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:51:57] "GET /health HTTP/1.1" 200 -
+2025-06-24 11:52:02,099 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:52:02] "POST /analyze HTTP/1.1" 200 -
+2025-06-24 11:52:02,102 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:52:02] "GET /events HTTP/1.1" 200 -
+2025-06-24 11:52:02,109 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-06-24 11:53:33,792 - httpx - INFO - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent "HTTP/1.1 200 OK"
+2025-06-24 11:53:33,794 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-06-24 11:55:22,897 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:55:22] "GET /results/web_20250624_115202 HTTP/1.1" 200 -
+2025-06-24 11:55:25,770 - werkzeug - INFO - 127.0.0.1 - - [24/Jun/2025 11:55:25] "GET /results/web_20250624_115202 HTTP/1.1" 200 -

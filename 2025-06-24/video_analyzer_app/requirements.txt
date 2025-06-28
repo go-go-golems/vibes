@@ -1,0 +1,33 @@
+# Enhanced Video Analyzer Web Application Requirements
+# Core web framework
+Flask==3.1.1
+
+# Google AI packages (use either one)
+google-genai==1.21.1
+google-generativeai==0.8.5
+
+# Essential dependencies
+requests==2.32.4
+Jinja2==3.1.6
+Werkzeug==3.1.3
+click==8.2.1
+itsdangerous==2.2.0
+MarkupSafe==3.0.2
+blinker==1.9.0
+
+# Google Auth (required for API access)
+google-auth==2.40.3
+google-api-core==2.25.1
+
+# HTTP client libraries
+httpx==0.28.1
+httpcore==1.0.9
+
+# Additional utilities
+tenacity==8.5.0
+typing-extensions==4.14.0
+pydantic==2.11.7
+anyio==4.9.0
+websockets==15.0.1
+certifi==2025.6.15
+

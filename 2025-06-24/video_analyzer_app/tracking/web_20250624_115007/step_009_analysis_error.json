@@ -1,0 +1,8 @@
+{
+  "step_id": 9,
+  "timestamp": "2025-06-24T11:50:20.492170",
+  "step_type": "analysis_error",
+  "description": "Analysis failed: 500 INTERNAL. {'error': {'code': 500, 'message': 'An internal error has occurred. Please retry or report in https://developers.generativeai.google/guide/troubleshooting', 'status': 'INTERNAL'}}",
+  "data": null,
+  "elapsed_time": 13.13203
+}

@@ -1,0 +1,48 @@
+ ✏️  Editing: Organizational Chart
+Domain: Business
+
+Edit the mermaid diagram below:
+
+> -> DigitalMgr[Digital Marketing Manager]     CMO --> ContentMgr[Content Manager]
+
+Ctrl+G to generate • Esc to go back • Ctrl+C to quit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

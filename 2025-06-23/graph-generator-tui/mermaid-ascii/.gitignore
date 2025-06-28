@@ -1,0 +1,15 @@
+# Dev artifacts
+.direnv
+*.mermaid
+
+# Editor
+.idea
+*.patch
+
+# Build artifacts
+build
+dist/
+mermaid-ascii
+*.tar.gz
+*.tar.zst
+result

@@ -1,0 +1,48 @@
+───┐
+                                                            │                                  │     │                                   │
+    │                                  │     │                                  │  │  │                   │  │  │
+ ✏️  Editing: Network Topology
+Domain: Technology
+
+Edit the mermaid diagram below:
+
+┃   1 graph LR
+┃   2     Internet((Internet))
+┃   3     Firewall[Firewall]
+┃   4     Router[Main Router]
+┃   5     CoreSwitch[Core Switch]
+┃   6     Switch1[Access Switch 1]
+┃   7     Switch2[Access Switch 2]
+┃   8     Server1[Web Server]
+┃   9     Server2[Database Server]
+┃  10     Server3[File Server]
+┃  11     PC1[Workstation 1]
+┃  12     PC2[Workstation 2]
+┃  13     PC3[Workstation 3]
+┃  14     Printer[Network Printer]
+┃  15
+┃  16     Internet --> Firewall
+┃  17     Firewall --> Router
+┃  18     Router --> CoreSwitch
+┃  19     CoreSwitch --> Switch1
+┃  20     CoreSwitch --> Switch2
+┃  21     CoreSwitch --> Server1
+┃  22     CoreSwitch --> Server2
+┃  23     CoreSwitch --> Server3
+┃  24     Switch1 --> PC1
+┃  25     Switch1 --> PC2
+┃  26     Switch2 --> PC3
+┃  27     Switch2 --> Printer
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+Ctrl+G to generate • Esc to go back • Ctrl+C to quit
+
+
+
+
+
