@@ -59,6 +59,108 @@ func (a *Analyzer) Close() error {
 	return nil
 }
 
+// AnalyzeVideoStream performs the complete video analysis with streaming output
+func (a *Analyzer) AnalyzeVideoStream(videoURL string, progressCallback models.ProgressCallback, streamCallback func(string)) (*models.AnalysisResult, error) {
+	defer a.Close()
+
+	a.logStep("Starting streaming video analysis", "processing", map[string]interface{}{
+		"video_url": videoURL,
+	})
+
+	if progressCallback != nil {
+		progressCallback("Initializing streaming analysis", 10)
+	}
+
+	// Step 1: Validate video URL
+	if err := a.validateVideoURL(videoURL); err != nil {
+		a.logStep("Video URL validation failed", "error", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+
+	if progressCallback != nil {
+		progressCallback("Video URL validated", 20)
+	}
+
+	// Step 2: Prepare analysis context
+	a.logStep("Preparing streaming analysis context", "processing", map[string]interface{}{
+		"mode":  a.config.Mode,
+		"model": a.config.GetModelName(),
+	})
+
+	if progressCallback != nil {
+		progressCallback("Context prepared", 30)
+	}
+
+	// Step 3: Execute Gemini streaming analysis
+	a.logStep("Executing Gemini streaming video analysis", "processing", map[string]interface{}{
+		"api_endpoint": "gemini_video_analysis_stream",
+	})
+
+	if progressCallback != nil {
+		progressCallback("Starting streaming API call", 40)
+	}
+
+	ctx := context.Background()
+	analysis, err := a.gemini.AnalyzeVideoStream(ctx, videoURL, streamCallback)
+	if err != nil {
+		a.logStep("Gemini streaming analysis failed", "error", map[string]interface{}{
+			"error": err.Error(),
+		})
+		return nil, fmt.Errorf("streaming video analysis failed: %w", err)
+	}
+
+	if progressCallback != nil {
+		progressCallback("Streaming analysis completed", 70)
+	}
+
+	// Step 4: Process and validate results
+	a.logStep("Processing streaming analysis results", "processing", map[string]interface{}{
+		"response_length": len(analysis.RawResponse),
+		"technologies":    len(analysis.Technologies),
+		"timestamps":      len(analysis.KeyTimestamps),
+	})
+
+	if progressCallback != nil {
+		progressCallback("Results processed", 85)
+	}
+
+	// Step 5: Finalize results
+	result := &models.AnalysisResult{
+		SessionID:   a.sessionID,
+		VideoURL:    videoURL,
+		Mode:        a.config.Mode,
+		Model:       a.config.GetModelName(),
+		Timestamp:   a.startTime,
+		TotalSteps:  len(a.steps),
+		APICalls:    len(a.apiCalls),
+		TotalTime:   time.Since(a.startTime).Seconds(),
+		Analysis:    analysis,
+		Steps:       a.steps,
+		APICallLogs: a.apiCalls,
+		Metadata: map[string]interface{}{
+			"go_version":    "1.21",
+			"cli_version":   "1.0.0",
+			"analysis_type": "streaming_technical_video_analysis",
+		},
+	}
+
+	a.logStep("Streaming analysis completed successfully", "success", map[string]interface{}{
+		"total_time":      result.TotalTime,
+		"total_steps":     result.TotalSteps,
+		"api_calls":       result.APICalls,
+		"technical_score": analysis.TechnicalScore,
+		"viral_potential": analysis.ViralPotential,
+	})
+
+	if progressCallback != nil {
+		progressCallback("Streaming analysis complete", 100)
+	}
+
+	return result, nil
+}
+
 // AnalyzeVideo performs the complete video analysis
 func (a *Analyzer) AnalyzeVideo(videoURL string, progressCallback models.ProgressCallback) (*models.AnalysisResult, error) {
 	defer a.Close()

@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "YouTube Analyzer: Quick Mode",
+      "type": "go",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.go",
+      "args": [
+        "https://www.youtube.com/watch?v=zDwRn5A1UIo",
+        "--mode", "quick", "--verbose"
+      ],
+      "envFile": "${workspaceFolder}/.envrc"
+    },
+    {
+      "name": "YouTube Analyzer: Comprehensive Mode",
+      "type": "go",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.go",
+      "args": [
+        "https://www.youtube.com/watch?v=zDwRn5A1UIo",
+        "--mode", "comprehensive", "--verbose"
+      ],
+      "envFile": "${workspaceFolder}/.envrc"
+    }
+  ]
+} 
