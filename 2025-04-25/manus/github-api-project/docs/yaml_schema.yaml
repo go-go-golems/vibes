@@ -1,0 +1,102 @@
+# YAML Schema for GitHub Project Management DSL
+
+# This schema defines the structure for the YAML DSL
+# It will be used for validation in the Golang implementation
+
+schema:
+  config:
+    type: object
+    required: [auth, organization]
+    properties:
+      auth:
+        type: object
+        required: [token]
+        properties:
+          token:
+            type: string
+            description: "GitHub Personal Access Token for authentication"
+      organization:
+        type: string
+        description: "GitHub organization or username"
+  
+  project:
+    type: object
+    required: [name]
+    properties:
+      name:
+        type: string
+        description: "Project name"
+      id:
+        type: string
+        description: "Optional project ID for updates to existing projects"
+      description:
+        type: string
+        description: "Project description"
+      public:
+        type: boolean
+        description: "Boolean indicating if the project is public"
+        default: false
+      columns:
+        type: array
+        items:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+              description: "Column name"
+            id:
+              type: string
+              description: "Optional column ID for updates to existing columns"
+  
+  issues:
+    type: array
+    items:
+      type: object
+      oneOf:
+        - required: [title, body]  # For new issues
+        - required: [id]           # For existing issues
+      properties:
+        title:
+          type: string
+          description: "Issue title"
+        id:
+          type: string
+          description: "Optional issue ID for updates to existing issues"
+        body:
+          type: string
+          description: "Issue description"
+        status:
+          type: string
+          description: "Current status (maps to column name)"
+        assignees:
+          type: array
+          items:
+            type: string
+            description: "GitHub username to assign"
+        labels:
+          type: array
+          items:
+            type: object
+            required: [name]
+            properties:
+              name:
+                type: string
+                description: "Label name"
+              color:
+                type: string
+                description: "Label color (hex code without #)"
+                pattern: "^[0-9a-fA-F]{6}$"
+        sub_issues:
+          type: array
+          items:
+            $ref: "#/schema/issues/items"  # Recursive reference to issue structure
+        comments:
+          type: array
+          items:
+            type: object
+            required: [body]
+            properties:
+              body:
+                type: string
+                description: "Comment text"
