@@ -4,7 +4,7 @@ go 1.23.0
 
 toolchain go1.23.10
 
-require github.com/charmbracelet/lipgloss/v2 v2.0.0-beta1
+require github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.2
 
 require (
 	github.com/charmbracelet/colorprofile v0.3.1 // indirect
