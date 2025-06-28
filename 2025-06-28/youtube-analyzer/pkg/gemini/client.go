@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
 	"github.com/user/youtube-analyzer-go/internal/config"
@@ -65,6 +66,92 @@ func New(cfg *config.Config, log *logger.Logger) (*Client, error) {
 // Close closes the Gemini client
 func (c *Client) Close() error {
 	return c.client.Close()
+}
+
+// AnalyzeVideoStream analyzes a YouTube video using Gemini's video understanding with streaming
+func (c *Client) AnalyzeVideoStream(ctx context.Context, videoURL string, onChunk func(string)) (*models.TechnicalAnalysis, error) {
+	c.callCount++
+	startTime := time.Now()
+
+	// Create the prompt
+	prompt := c.createTechnicalPrompt()
+	
+	c.logger.Info(fmt.Sprintf("🎬 Starting streaming video analysis for: %s", videoURL))
+	c.logger.Info(fmt.Sprintf("📝 Using prompt length: %d characters", len(prompt)))
+
+	// Create the request parts - video must come first, then prompt
+	var parts []genai.Part
+
+	// Handle video input properly
+	if strings.Contains(videoURL, "youtube.com") || strings.Contains(videoURL, "youtu.be") {
+		// Use FileData for YouTube URLs as per Gemini documentation
+		parts = append(parts, genai.FileData{
+			URI:      videoURL,
+			MIMEType: "video/mp4", // YouTube videos are treated as MP4
+		})
+		c.logger.Info("📹 Added YouTube video as file data for streaming analysis")
+	} else {
+		// For other video files, we would need to handle file upload to Cloud Storage first
+		// For now, return an error suggesting proper usage
+		return nil, fmt.Errorf("only YouTube URLs are currently supported. Please provide a YouTube URL (youtube.com or youtu.be)")
+	}
+
+	// Add the text prompt after the video
+	parts = append(parts, genai.Text(prompt))
+
+	// Make the streaming API call
+	iter := c.model.GenerateContentStream(ctx, parts...)
+	
+	var fullResponse strings.Builder
+	
+	// Process streaming chunks
+	for {
+		resp, err := iter.Next()
+		if err != nil {
+			// Check for iterator completion using the standard Google API pattern
+			if err == iterator.Done {
+				break
+			}
+			duration := time.Since(startTime)
+			c.logger.APICall(c.callCount, c.config.GetModelName(), "video_analysis_stream", duration, false)
+			return nil, fmt.Errorf("streaming API call failed: %w", err)
+		}
+
+		// Extract text from the current chunk
+		if resp != nil && len(resp.Candidates) > 0 {
+			for _, candidate := range resp.Candidates {
+				if candidate.Content != nil {
+					for _, part := range candidate.Content.Parts {
+						if textPart, ok := part.(genai.Text); ok {
+							chunkText := string(textPart)
+							fullResponse.WriteString(chunkText)
+							
+							// Call the callback with the chunk
+							if onChunk != nil {
+								onChunk(chunkText)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	duration := time.Since(startTime)
+	c.logger.APICall(c.callCount, c.config.GetModelName(), "video_analysis_stream", duration, true)
+
+	responseText := fullResponse.String()
+	if responseText == "" {
+		return nil, fmt.Errorf("empty response from streaming Gemini API")
+	}
+
+	c.logger.Info(fmt.Sprintf("✅ Received streaming response: %d characters", len(responseText)))
+
+	// Parse the complete response into structured data
+	analysis := c.parseResponse(responseText)
+	analysis.RawResponse = responseText
+
+	return analysis, nil
 }
 
 // AnalyzeVideo analyzes a YouTube video using Gemini's video understanding
