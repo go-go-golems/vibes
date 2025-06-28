@@ -25,7 +25,10 @@
 - Use `var _ Interface = &Foo{}` pattern to verify interface implementations
 - Use context.Context argument when appropriate
 - Use "defaults" package name instead of "default" (reserved in Go)
-- Use zerolog for logging and be extremely generous with logging so that we can better debug issues. Default log level should be debug.
+
+IMPORTANT:
+
+- Use zerolog for logging and be extremely generous with logging so that we can better debug issues. Default log level should be debug. Enable caller information.
 
 ## Dependencies
 

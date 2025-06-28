@@ -27,3 +27,5 @@ go.work.sum
 node_modules/
 
 .history
+
+.envrc
