@@ -1,0 +1,48 @@
+ 🎨 Graph Generator
+
+   Graph Generator - Select Graph Type
+
+│ Organizational Chart
+│ [Business] Company hierarchy and reporting structure
+
+  Network Topology
+  [Technology] Network infrastructure and connections
+
+  Software Development Lifecycle
+  [Software Engineering] SDLC process flow with feedback loops
+
+  E-commerce Order Flow
+  [E-commerce] Customer order processing workflow
+
+  Data Pipeline Architecture
+  [Data Engineering] Data processing and analytics pipeline
+
+  Microservices Architecture
+  [System Architecture] Distributed system with microservices
+
+  Machine Learning Pipeline
+  [Machine Learning] ML model training and deployment workflow
+
+  Customer Support Workflow
+  [Customer Service] Customer service ticket resolution process
+
+  CI/CD Pipeline
+  [DevOps] Continuous integration and deployment pipeline
+
+  Supply Chain Management
+  [Operations] End-to-end supply chain process
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ↑/k up • ↓/j down • / filter • q quit • ? more
+Enter to select • / to filter • q to quit

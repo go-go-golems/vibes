@@ -1,0 +1,55 @@
+ ✏️  Editing: Simple Process Flow
+Domain: Process
+
+Edit the mermaid diagram below:
+
+┃   1 graph TD
+┃   2     Start[Start Process]
+┃   3     Input[Gather Input]
+┃   4     Process[Process Data]
+┃   5     Decision{Valid Data?}
+┃   6     Output[Generate Output]
+┃   7     Error[Handle Error]
+┃   8     End[End Process]
+┃   9     Start --> Input
+┃  10     Input --> Process
+┃  11     Process --> Decision
+┃  12     Decision -->|Yes| Output
+┃  13     Decision -->|No| Error
+┃  14     Output --> End
+┃  15     Error --> Input
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+┃
+Ctrl+G to generate • Esc to go back • Ctrl+C to quit
+
+
+
+
+
+
+
+

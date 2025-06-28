@@ -1,0 +1,48 @@
+ 🎨 Graph Generator
+
+   Graph Generator - Select Graph Type
+
+│ Organizational Chart
+│ [Business] Company hierarchy and reporting structure
+
+  Network Topology
+  [Technology] Network infrastructure and connections
+
+  Simple Process Flow
+  [Process] Basic workflow with decision points
+
+  System Architecture
+  [Architecture] Software system components
+
+  Decision Tree
+  [Logic] Decision making process
+
+  Database Schema
+  [Database] Entity relationship diagram
+
+  Git Workflow
+  [Development] Version control branching strategy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ↑/k up • ↓/j down • / filter • q quit • ? more
+Enter to select • / to filter • q to quit
+
+

@@ -1,0 +1,94 @@
+=== FINAL CLI DEMONSTRATION ===
+Demonstrating working progress tracking with Pelican Genome Sequencer
+
+🦆 Pelican Genome Sequencer CLI
+Species: Pelecanus conspicillatus - Found across Australia and New Guinea
+Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+Starting sequencing...
+
+[00:00:00] 📥 FETCH: 0/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 10/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 20/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 30/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 40/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 50/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 60/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 70/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 80/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 90/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 100/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 110/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 120/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 130/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 140/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 150/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 160/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🐌 FETCH (Rate Limited): 170/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 180/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 190/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 📥 FETCH: 200/200 records fetched
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 10/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 20/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 30/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 40/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 50/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 60/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 70/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 80/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 90/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 100/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 110/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 120/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 130/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 140/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 150/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 160/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 170/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 180/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 190/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] 🧬 ANALYZE: 200/200 records indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+[00:00:00] ✅ COMPLETED: 200 fetched, 200 indexed
+    Job ID: d8109449-66f3-42bb-9973-7c7265148ba4
+
+🎉 Genome sequencing completed successfully!

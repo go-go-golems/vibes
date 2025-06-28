@@ -1,0 +1,297 @@
+{
+  "mode": "quick",
+  "video_info": {
+    "path": "/home/ubuntu/video_segmenter/videos/sample_short.mp4",
+    "fps": 30.0,
+    "total_frames": 452,
+    "duration_seconds": 15.066666666666666,
+    "duration_formatted": "0:00:15",
+    "resolution": [
+      1280,
+      720
+    ]
+  },
+  "frame_analyses": [
+    {
+      "step1_observation": {
+        "visual_description": "The frame shows a stylized representation of a television test card.  It features a circular arrangement of brightly colored vertical bars (cyan, magenta, yellow, green, blue, red) within a larger circle.  A smaller, black rectangle with a white border is positioned towards the right within the colored section.  A horizontal band of a rainbow gradient is situated beneath the colored bars. The background is composed of black, white, and the edges of the colored bars.",
+        "key_elements": [
+          "colored bars",
+          "circular arrangement",
+          "rainbow gradient",
+          "black rectangle"
+        ],
+        "scene_type": "abstract/digital",
+        "people_count": 0,
+        "text_detected": "None"
+      },
+      "step2_emotional": {
+        "primary_emotions": [
+          "curiosity",
+          "nostalgia"
+        ],
+        "emotional_intensity": 4,
+        "viewer_response": "A sense of mild curiosity, possibly triggering nostalgic feelings in older viewers familiar with old television test patterns.",
+        "emotional_triggers": [
+          "nostalgia",
+          "curiosity"
+        ]
+      },
+      "step3_engagement": {
+        "visual_appeal": 6,
+        "scroll_stopping_power": 7,
+        "relatability": 4,
+        "shareability": 6,
+        "hook_strength": 5,
+        "comment_potential": 5
+      },
+      "step4_technical": {
+        "image_quality": 8,
+        "lighting_quality": "N/A (abstract image)",
+        "composition": 7,
+        "mobile_friendly": 9,
+        "professional_level": 7
+      },
+      "step5_viral_reasoning": {
+        "viral_potential": 6,
+        "best_platforms": [
+          "TikTok",
+          "Instagram"
+        ],
+        "target_audience": "Younger audiences interested in retro aesthetics, visual art, and digital design; older audiences with nostalgia for television test cards.",
+        "viral_characteristics": [
+          "visually striking",
+          "retro/nostalgic",
+          "easily digestible"
+        ],
+        "performance_prediction": "This frame has moderate viral potential due to its unique visual appeal and potential for nostalgia. The bright colors and simple design are likely to grab attention on platforms like TikTok and Instagram. However, the lack of clear narrative may limit its reach compared to content with more explicit storytelling."
+      },
+      "step6_reflection": {
+        "confidence_level": 7,
+        "potential_biases": [
+          "personal preference for retro aesthetics"
+        ],
+        "missing_context": [
+          "the full video content",
+          "audio accompanying the frame",
+          "intended message/narrative"
+        ],
+        "analysis_limitations": "The analysis is based solely on a single frame. The complete video's narrative, pacing, and overall context are crucial for accurate prediction of viral potential."
+      },
+      "final_scores": {
+        "overall_viral_potential": 6,
+        "social_media_appeal": 7,
+        "engagement_prediction": 6
+      },
+      "actionable_insights": {
+        "suggested_caption": "Is this bringing back memories?  #TestCard #RetroVibes #Nostalgia #DigitalArt #VintageTV",
+        "hashtag_suggestions": [
+          "#testcard",
+          "#retro",
+          "#vintage",
+          "#digitalart",
+          "#nostalgia",
+          "#brightcolors",
+          "#visualart"
+        ],
+        "optimization_tips": [
+          "Use trending audio on TikTok",
+          "Consider adding a related narrative to the video",
+          "Experiment with different transitions and effects"
+        ],
+        "best_use_case": "Use this frame as a unique and eye-catching introduction or transition within a longer video that explores themes of nostalgia, retro technology, or digital art."
+      },
+      "success": true,
+      "analysis_type": "chain_of_thought",
+      "model_used": "flash"
+    },
+    {
+      "step1_observation": {
+        "visual_description": "The frame shows a color bar test pattern, common in video and television broadcasting.  It consists of a circular arrangement of vertical colored bars (red, cyan, magenta, yellow, green, and blue) surrounding a central, smaller circle. A horizontal bar at the bottom displays a color gradient. A small black and white square is visible near the right edge of the red segment. The background shows distinct divisions of black, white, and shades of cyan. The image is clearly a technical test pattern, not a naturally occurring scene.",
+        "key_elements": [
+          "color bars",
+          "color gradient",
+          "test pattern",
+          "black and white square"
+        ],
+        "scene_type": "digital/abstract",
+        "people_count": 0,
+        "text_detected": "A small indistinct element resembling a number 2, pixelated in a black square."
+      },
+      "step2_emotional": {
+        "primary_emotions": [],
+        "emotional_intensity": 1,
+        "viewer_response": "No significant emotional response expected.  May evoke mild curiosity or confusion, depending on the viewer's context.",
+        "emotional_triggers": []
+      },
+      "step3_engagement": {
+        "visual_appeal": 2,
+        "scroll_stopping_power": 2,
+        "relatability": 1,
+        "shareability": 2,
+        "hook_strength": 1,
+        "comment_potential": 1
+      },
+      "step4_technical": {
+        "image_quality": 7,
+        "lighting_quality": 7,
+        "composition": 5,
+        "mobile_friendly": 10,
+        "professional_level": 8
+      },
+      "step5_viral_reasoning": {
+        "viral_potential": 2,
+        "best_platforms": [],
+        "target_audience": "Very niche audience; possibly professionals in video or television broadcasting, or those with an interest in technical aspects of media.",
+        "viral_characteristics": [],
+        "performance_prediction": "This frame is unlikely to go viral.  The content is highly technical and uninteresting to the vast majority of social media users.  Its lack of emotional resonance, relatability, and narrative prevents it from grabbing attention."
+      },
+      "step6_reflection": {
+        "confidence_level": 8,
+        "potential_biases": [
+          "Potential bias toward evaluating content based on typical viral trends, which this content clearly lacks."
+        ],
+        "missing_context": [
+          "The video's surrounding content.  This frame in isolation is meaningless.  If the video utilizes this pattern creatively or uses it within a humorous or unusual context, it would change the analysis drastically.",
+          "Target audience for the entire video. Who is the intended audience?"
+        ],
+        "analysis_limitations": "The analysis is limited by the fact that only one frame of a larger video is provided. The full video context is crucial to evaluating viral potential."
+      },
+      "final_scores": {
+        "overall_viral_potential": 2,
+        "social_media_appeal": 2,
+        "engagement_prediction": 2
+      },
+      "actionable_insights": {
+        "suggested_caption": "N/A (Without further video context, a suitable caption cannot be suggested.)",
+        "hashtag_suggestions": [
+          "#testpattern",
+          "#videoproduction"
+        ],
+        "optimization_tips": [
+          "Not applicable in its current form. If used creatively within a broader video, standard video optimization techniques would apply."
+        ],
+        "best_use_case": "This frame might be used within a video about color grading, broadcasting technology, or as a humorous contrast with other visually engaging content."
+      },
+      "success": true,
+      "analysis_type": "chain_of_thought",
+      "model_used": "flash"
+    },
+    {
+      "step1_observation": {
+        "visual_description": "The frame shows a vibrant, geometric pattern reminiscent of a test card used in television broadcasting.  It features a semi-circular arrangement of bold, saturated color blocks in primary and secondary hues (red, cyan, magenta, yellow, green, blue). A horizontal gradient bar displaying a spectrum of colors runs across the middle.  A small, pixelated black and white square is present in the upper right corner. The overall style is simplistic and highly stylized.",
+        "key_elements": [
+          "color blocks",
+          "gradient bar",
+          "pixelated square",
+          "geometric pattern"
+        ],
+        "scene_type": "abstract",
+        "people_count": 0,
+        "text_detected": "None (the black and white square is not legible text)"
+      },
+      "step2_emotional": {
+        "primary_emotions": [
+          "curiosity",
+          "mild amusement"
+        ],
+        "emotional_intensity": 3,
+        "viewer_response": "Likely to evoke mild curiosity and a slight sense of amusement due to the retro and unconventional nature of the image.  It\u2019s not emotionally intense.",
+        "emotional_triggers": [
+          "nostalgia",
+          "surprise"
+        ]
+      },
+      "step3_engagement": {
+        "visual_appeal": 7,
+        "scroll_stopping_power": 6,
+        "relatability": 4,
+        "shareability": 5,
+        "hook_strength": 6,
+        "comment_potential": 4
+      },
+      "step4_technical": {
+        "image_quality": 8,
+        "lighting_quality": "N/A (Abstract image, lighting doesn't apply)",
+        "composition": 7,
+        "mobile_friendly": 10,
+        "professional_level": 7
+      },
+      "step5_viral_reasoning": {
+        "viral_potential": 5,
+        "best_platforms": [
+          "TikTok",
+          "Instagram"
+        ],
+        "target_audience": "Individuals interested in graphic design, retro aesthetics, abstract art, or who appreciate visually striking and unconventional content.  A younger demographic might find it more appealing.",
+        "viral_characteristics": [
+          "visually striking",
+          "unconventional",
+          "short and attention-grabbing",
+          "potential for creative interpretation"
+        ],
+        "performance_prediction": "This frame has moderate viral potential. Its highly saturated colors and unique visual style could be effective in grabbing attention, especially on platforms like TikTok and Instagram.  However, the lack of clear narrative or relatable content limits its overall reach. It could perform better with added context or animation."
+      },
+      "step6_reflection": {
+        "confidence_level": 7,
+        "potential_biases": [
+          "preference for visually appealing content",
+          "familiarity with social media trends"
+        ],
+        "missing_context": [
+          "the surrounding video content",
+          "audio accompanying the video",
+          "intended message or theme"
+        ],
+        "analysis_limitations": "The analysis is limited to a single frame.  The context of the entire video and its accompanying audio/narration would significantly influence the overall assessment."
+      },
+      "final_scores": {
+        "overall_viral_potential": 5,
+        "social_media_appeal": 6,
+        "engagement_prediction": 5
+      },
+      "actionable_insights": {
+        "suggested_caption": "Is this the future of television? \ud83e\udd14 Retro vibes meets modern design! #RetroTech #ColorVibes #AbstractArt #TestCard",
+        "hashtag_suggestions": [
+          "#RetroTech",
+          "#ColorVibes",
+          "#AbstractArt",
+          "#TestCard",
+          "#Visuals",
+          "#Design",
+          "#TikTok",
+          "#InstaArt"
+        ],
+        "optimization_tips": [
+          "Consider adding transitions or animation to the color blocks",
+          "Experiment with different aspect ratios",
+          "Integrate trending audio"
+        ],
+        "best_use_case": "Use this as a short, attention-grabbing intro or transition sequence in a video related to technology, art, or design."
+      },
+      "success": true,
+      "analysis_type": "chain_of_thought",
+      "model_used": "flash"
+    }
+  ],
+  "sequence_analyses": [
+    {
+      "success": false,
+      "raw_response": "```json\n{\n  \"sequence_analysis\": {\n    \"coherence_score\": 2,\n    \"narrative_flow\": \"Minimal narrative flow. The only change is a counter incrementing, suggesting a test pattern or countdown.\",\n    \"transition_quality\": 10,\n    \"pacing_assessment\": \"Slow.  The counter changes slowly, and the overall visual is static.\"\n  },\n  \"content_classification\": {\n    \"primary_category\": \"Abstract/Experimental\",\n    \"secondary_categories\": [\"Technology\"],\n    \"narrative_structure\": \"None\",\n    \"key_moments\": [\n      {\n        \"timestamp\": \"0s\",\n        \"description\": \"Counter starts at 1\",\n        \"importance\": 3\n      },\n      {\n        \"timestamp\": \"2.5s\",\n        \"description\": \"Counter changes to 2\",\n        \"importance\": 2\n      },\n      {\n        \"timestamp\": \"5s\",\n        \"description\": \"Counter changes to 5\",\n        \"importance\": 2\n      }\n    ]\n  },\n  \"audience_prediction\": {\n    \"primary_demographics\": [\"Tech-savvy individuals\", \"Those nostalgic for retro technology\"],\n    \"engagement_drivers\": [\"Curiosity (initially)\", \"Nostalgia\"],\n    \"drop_off_risks\": [\"Lack of dynamic content\", \"Repetitive nature\"],\n    \"completion_rate_prediction\": 20\n  },\n  \"platform_optimization\": {\n    \"tiktok\": {\n      \"fit_score\": 1,\n      \"optimization_notes\": \"Not suitable for TikTok. Lacks dynamic content and trends.\",\n      \"trend_potential\": 1\n    },\n    \"instagram\": {\n      \"fit_score\": 2,\n      \"optimization_notes\": \"Low potential for Instagram Reels.  Could possibly work as part of a larger, more dynamic piece.\",\n      \"aesthetic_appeal\": 3 \n    },\n    \"youtube_shorts\": {\n      \"fit_score\": 1,\n      \"optimization_notes\": \"Not suitable. Lacks narrative and educational value.\",\n      \"educational_value\": 1\n    },\n    \"twitter\": {\n      \"fit_score\": 2,\n      \"optimization_notes\": \"Limited potential.  Might spark some discussion if framed within a specific context (e.g., history of television).\",\n      \"discussion_potential\": 3\n    }\n  },\n  \"viral_mechanics\": {\n    \"hook_effectiveness\": 2,\n    \"emotional_journey\": \"Minimal emotional response. Perhaps mild nostalgia.\",\n    \"surprise_elements\": [],\n    \"engagement_drivers\": [\"Initial curiosity\"],\n    \"memetic_potential\": 1\n  },\n  \"strategic_recommendations\": {\n    \"best_platform\": \"None (as standalone content). Consider niche communities interested in retro tech.\",\n    \"posting_strategy\": \"If posted, frame within a larger context.  For example, a post discussing the history of test patterns.\",\n    \"content_modifications\": [\"Add music or sound effects\", \"Incorporate the test pattern into a larger, more dynamic video\"],\n    \"series_potential\": \"Low, unless significantly reimagined.\",\n    \"follow_up_opportunities\": [\"Explore related retro technology themes\"]\n  },\n  \"competitive_analysis\": {\n    \"uniqueness_score\": 3, // Unique in its simplicity, but not inherently engaging.\n    \"competitive_advantages\": [\"Nostalgia factor for a specific demographic\"],\n    \"market_positioning\": \"Niche appeal to those interested in retro broadcasting technology.\",\n    \"differentiation_factors\": [\"Visual simplicity\"]\n  },\n    \"overall_assessment\": {\n        \"viral_potential\": 1,\n        \"commercial_viability\": 1,\n        \"content_quality\": 2,  // Technically sound, but lacks engaging content.\n        \"strategic_value\": 1 // Limited strategic value unless repurposed.\n    }\n}\n```",
+      "analysis_type": "multi_step_reasoning",
+      "model_used": "pro",
+      "frames_analyzed": 3,
+      "error": "JSON parsing failed"
+    },
+    {
+      "success": false,
+      "raw_response": "```json\n{\n  \"sequence_analysis\": {\n    \"coherence_score\": 2,\n    \"narrative_flow\": \"Minimal narrative flow. The only change is the counter incrementing, suggesting a passage of time, but no actual story unfolds.\",\n    \"transition_quality\": 10,\n    \"pacing_assessment\": \"Slow. The counter changes slowly, and the static image remains largely unchanged, creating a monotonous pace.\"\n  },\n  \"content_classification\": {\n    \"primary_category\": \"Abstract\",\n    \"secondary_categories\": [\"Experimental\"],\n    \"narrative_structure\": \"None\",\n    \"key_moments\": [\n      {\"timestamp\": \"Start\", \"description\": \"Counter begins at 0.\", \"importance\": 3},\n      {\"timestamp\": \"Middle\", \"description\": \"Counter increments.\", \"importance\": 2},\n      {\"timestamp\": \"End\", \"description\": \"Counter reaches 2.\", \"importance\": 3}\n    ]\n  },\n  \"audience_prediction\": {\n    \"primary_demographics\": [\"None - limited appeal\"],\n    \"engagement_drivers\": [\"Curiosity (initially)\", \"Nostalgia (for those familiar with test patterns)\"],\n    \"drop_off_risks\": [\"Lack of engaging content\", \"Monotonous visuals and pacing\"],\n    \"completion_rate_prediction\": 10\n  },\n  \"platform_optimization\": {\n    \"tiktok\": {\n      \"fit_score\": 1,\n      \"optimization_notes\": \"Not suitable for TikTok. Needs dynamic content and a clear hook.\",\n      \"trend_potential\": 1\n    },\n    \"instagram\": {\n      \"fit_score\": 2,\n      \"optimization_notes\": \"Low potential.  Could potentially work with highly creative editing or as part of a larger, more dynamic piece.\",\n      \"aesthetic_appeal\": 3\n    },\n    \"youtube_shorts\": {\n      \"fit_score\": 1,\n      \"optimization_notes\": \"Not suitable for YouTube Shorts.  Lacks educational or entertainment value.\",\n      \"educational_value\": 1\n    },\n    \"twitter\": {\n      \"fit_score\": 2,\n      \"optimization_notes\": \"Low potential.  Could potentially spark discussion if framed within a relevant context (e.g., discussion about obsolete technology).\",\n      \"discussion_potential\": 3\n    }\n  },\n  \"viral_mechanics\": {\n    \"hook_effectiveness\": 2,\n    \"emotional_journey\": \"None\",\n    \"surprise_elements\": [],\n    \"engagement_drivers\": [],\n    \"memetic_potential\": 1\n  },\n  \"strategic_recommendations\": {\n    \"best_platform\": \"None (as is)\",\n    \"posting_strategy\": \"Not recommended to post in current form.\",\n    \"content_modifications\": [\"Introduce dynamic elements\", \"Create a narrative or story\", \"Add music or sound effects\"],\n    \"series_potential\": \"Could be part of a larger series exploring themes of broadcasting, nostalgia, or technology.\",\n    \"follow_up_opportunities\": [\"Behind-the-scenes of creation process\", \"User-generated content incorporating the test pattern\"]\n  },\n  \"competitive_analysis\": {\n    \"uniqueness_score\": 3, //Visually unique, but not conceptually.\n    \"competitive_advantages\": [\"Nostalgia factor\"],\n    \"market_positioning\": \"Niche. Appeals to a very specific audience interested in retro technology or broadcasting.\",\n    \"differentiation_factors\": [\"Visual distinctness (test pattern)\"]\n  },\n  \"overall_assessment\": {\n    \"viral_potential\": 1,\n    \"commercial_viability\": 1,\n    \"content_quality\": 2,\n    \"strategic_value\": 1\n  }\n}\n```",
+      "analysis_type": "multi_step_reasoning",
+      "model_used": "pro",
+      "frames_analyzed": 3,
+      "error": "JSON parsing failed"
+    }
+  ],
+  "strategic_plan": null,
+  "self_evaluation": null
+}

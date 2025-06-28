@@ -1,0 +1,50 @@
+[watermill] 2025/06/23 00:45:40.062773 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=7885b2d4-93b3-4325-bd93-7c0b7b9b0a68 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.093152 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=6e0f87c4-4f7d-40c6-8381-de269c554dbc pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.123476 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=e237c528-12d9-4b4b-a899-0dece3be6ed0 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.153763 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=8b2ec932-ead4-483a-a5dc-84cafa6ed23f pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.184121 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=7f4e1e2b-d53d-4cbf-aaf5-de81d3f8844c pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.214448 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=1e7cb2fe-4c6b-4d15-9dbe-bdbcff912db8 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.244682 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=fcbcfe06-1646-4647-8dcc-147d96a8c7f9 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.274936 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=981a1995-9809-4367-bb38-dca3323aeac4 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.305170 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=dacdaaf3-aea1-45e3-aec5-6043ef7ff456 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.335408 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=ead24564-8109-4813-9395-d035cf1df251 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.365718 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=4829f530-a6c5-48fb-8a49-55948c98e639 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.396036 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=0c249b67-afd1-469c-8f20-f2f8bcb4d772 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.426356 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=13ff70b3-77cb-4443-b283-318307b8f8f6 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.456607 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=a2f3ceb1-e4d5-4207-8f7a-a70220a858f6 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.486937 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=4275f769-aaaf-4ee4-9e39-732148923727 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.517282 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=23ba3f52-b745-4a42-9d87-ece1627bc09a pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.547610 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=c9dbbc42-1a90-4ab5-ad24-8a890c76c5ee pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.577863 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=b7ede001-f50f-4716-b796-c0c66a52b348 pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.608199 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=259bf9b5-3a36-431d-859f-5bb2d1fe8bfc pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+[watermill] 2025/06/23 00:45:40.608243 pubsub.go:145: 	level=INFO  msg="No subscribers to send message" message_uuid=15abac18-c673-4ed6-8d62-d4e15a45ff2b pubsub_uuid=i3Jn6e2ZeGcaZ8oycEK3ef topic=jobs.00089fe2-bcad-4d9f-91f8-7ad5c0a516cb.progress 
+2025/06/23 00:45:43 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 41.588µs
+2025/06/23 00:45:53 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 31.273µs
+2025/06/23 00:45:53 "GET http://localhost:8080/jobs/00089fe2-bcad-4d9f-91f8-7ad5c0a516cb/events HTTP/1.1" from 127.0.0.1:34132 - 000 0B in 14.995355523s
+2025/06/23 00:45:55 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 38.088µs
+2025/06/23 00:45:55 "GET http://localhost:8080/jobs/298f2204-1c04-49ae-8120-9328582d4544/events HTTP/1.1" from [::1]:60102 - 504 0B in 1m0.000672142s
+2025/06/23 00:45:57 "GET http://localhost:8080/metrics HTTP/1.1" from [::1]:60102 - 200 2529B in 3.382398ms
+2025/06/23 00:45:57 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 24.597µs
+2025/06/23 00:45:59 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 27.861µs
+2025/06/23 00:46:03 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 27.415µs
+2025/06/23 00:46:05 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 25.336µs
+2025/06/23 00:46:13 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 27.122µs
+2025/06/23 00:46:21 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 26.838µs
+2025/06/23 00:46:23 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 26.204µs
+2025/06/23 00:46:28 "GET http://localhost:8080/ HTTP/1.1" from [::1]:60102 - 200 5078B in 62.391µs
+2025/06/23 00:46:28 "GET http://localhost:8080/static/main.js HTTP/1.1" from [::1]:60102 - 304 0B in 103.781µs
+2025/06/23 00:46:29 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 27.064µs
+2025/06/23 00:46:31 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 25.339µs
+2025/06/23 00:46:33 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 25.44µs
+2025/06/23 00:46:39 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 29.621µs
+2025/06/23 00:46:43 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 33.252µs
+2025/06/23 00:46:45 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 35.527µs
+2025/06/23 00:46:53 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 31.073µs
+2025/06/23 00:47:03 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 39.622µs
+2025/06/23 00:47:13 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 34.975µs
+2025/06/23 00:47:23 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 32.237µs
+2025/06/23 00:47:33 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 35.259µs
+2025/06/23 00:47:43 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 46.484µs
+2025/06/23 00:47:53 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 51.95µs
+2025/06/23 00:47:55 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 34.694µs
+2025/06/23 00:47:57 "POST http://127.0.0.1:8080/ HTTP/1.1" from 127.0.0.1:39202 - 405 0B in 60.786µs
