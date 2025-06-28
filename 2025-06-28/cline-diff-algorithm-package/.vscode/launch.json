@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Gemini Test (with .envrc)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/go-file-editor/cmd/gemini-test/main.go",
+      "envFile": "${workspaceFolder}/.envrc",
+      "env": {},
+      // "preLaunchTask": "source-dotenvrc"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "source-dotenvrc",
+      "type": "shell",
+      "command": "set -a && source .envrc && set +a"
+    }
+  ]
+} 
