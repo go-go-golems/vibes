@@ -33,6 +33,13 @@ func NewInputModel(common CommonState) InputModel {
 	}
 }
 
+// NewInputModelWithURL creates a new input model with a pre-filled URL
+func NewInputModelWithURL(common CommonState, url string) InputModel {
+	m := NewInputModel(common)
+	m.textInput.SetValue(url)
+	return m
+}
+
 // Init initializes the input model
 func (m InputModel) Init() tea.Cmd {
 	return textinput.Blink
@@ -62,7 +69,7 @@ func (m InputModel) Update(msg tea.Msg) (InputModel, tea.Cmd) {
 			m.err = nil
 			return m, func() tea.Msg {
 				return ScreenChangeMsg{
-					Screen:   ScreenLoading,
+					Screen:   ScreenStreaming,
 					VideoURL: url,
 				}
 			}
