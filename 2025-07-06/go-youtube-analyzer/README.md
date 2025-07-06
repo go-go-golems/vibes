@@ -6,6 +6,7 @@ A high-performance CLI tool written in Go that provides AI-powered YouTube video
 
 - **🚀 High Performance**: Fast, concurrent processing with minimal memory footprint
 - **🎯 Technical Focus**: Specialized analysis for developer/programming content
+- **🖥️ Interactive TUI**: Beautiful terminal user interface with real-time progress
 - **📊 Comprehensive Logging**: Detailed step-by-step tracking with colored output
 - **🔧 Professional CLI**: Built with Cobra framework for excellent UX
 - **📱 Cross-Platform**: Single binary for Linux, macOS, and Windows
@@ -38,6 +39,18 @@ make install
 ```
 
 ### Basic Usage
+
+#### Interactive TUI (Recommended)
+
+```bash
+# Launch the interactive Terminal User Interface
+youtube-analyzer tui --api-key YOUR_API_KEY
+
+# TUI with comprehensive mode
+youtube-analyzer tui --api-key YOUR_API_KEY --mode comprehensive
+```
+
+#### Command Line Interface
 
 ```bash
 # Quick analysis

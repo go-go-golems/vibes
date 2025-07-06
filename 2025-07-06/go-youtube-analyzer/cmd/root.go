@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/fatih/color"
 	"github.com/schollz/progressbar/v3"
@@ -19,7 +20,9 @@ import (
 	"github.com/user/youtube-analyzer-go/internal/analyzer"
 	"github.com/user/youtube-analyzer-go/internal/config"
 	"github.com/user/youtube-analyzer-go/internal/logger"
+	"github.com/user/youtube-analyzer-go/pkg/gemini"
 	"github.com/user/youtube-analyzer-go/pkg/models"
+	uimodel "github.com/user/youtube-analyzer-go/pkg/ui/model"
 )
 
 var (
@@ -97,6 +100,9 @@ func init() {
 	viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 	viper.BindPFlag("quiet", rootCmd.PersistentFlags().Lookup("quiet"))
+
+	// Add TUI command
+	rootCmd.AddCommand(createTUICmd())
 }
 
 func initConfig() {
@@ -316,17 +322,25 @@ type RequestPreview struct {
 
 // APICallStructure represents the actual genai API call structure
 type APICallStructure struct {
-	Method    string            `json:"method" yaml:"method"`
-	ModelName string            `json:"model_name" yaml:"model_name"`
-	Contents  []*genai.Content  `json:"contents" yaml:"contents"`
-	Options   interface{}       `json:"options" yaml:"options"`
+	Method    string           `json:"method" yaml:"method"`
+	ModelName string           `json:"model_name" yaml:"model_name"`
+	Contents  []*genai.Content `json:"contents" yaml:"contents"`
+	Options   interface{}      `json:"options" yaml:"options"`
 }
 
 // showInteractiveConfirmation shows the request preview and asks for confirmation
 func showInteractiveConfirmation(cfg *config.Config, videoURL string) error {
-	// Create the actual prompt that will be sent
-	prompt := createTechnicalPrompt(cfg.Mode)
-	
+	// Create a temporary gemini client to get the actual prompt that will be sent
+	tempLogger := logger.New(cfg, "temp")
+	geminiClient, err := gemini.New(cfg, tempLogger)
+	if err != nil {
+		return fmt.Errorf("failed to create gemini client for preview: %w", err)
+	}
+	defer geminiClient.Close()
+
+	// Get the actual prompt using the same logic as the real analysis
+	prompt := geminiClient.CreateTechnicalPrompt()
+
 	// Create the exact genai.Content structure that will be sent
 	modelName := cfg.GetModelName()
 	contents := []*genai.Content{
@@ -338,7 +352,7 @@ func showInteractiveConfirmation(cfg *config.Config, videoURL string) error {
 			Role: "user",
 		},
 	}
-	
+
 	// Create API call structure for display
 	apiCall := APICallStructure{
 		Method:    "client.Models.GenerateContent",
@@ -346,7 +360,7 @@ func showInteractiveConfirmation(cfg *config.Config, videoURL string) error {
 		Contents:  contents,
 		Options:   nil,
 	}
-	
+
 	// Create request preview
 	preview := RequestPreview{
 		Model:       modelName,
@@ -368,7 +382,7 @@ func showInteractiveConfirmation(cfg *config.Config, videoURL string) error {
 	yellow := color.New(color.FgYellow)
 	green := color.New(color.FgGreen)
 	blue := color.New(color.FgBlue)
-	
+
 	fmt.Println()
 	cyan.Println("📋 Request Preview")
 	fmt.Println(strings.Repeat("=", 50))
@@ -413,108 +427,92 @@ func showInteractiveConfirmation(cfg *config.Config, videoURL string) error {
 	return nil
 }
 
-// createTechnicalPrompt creates the technical analysis prompt (simplified version for preview)
-func createTechnicalPrompt(mode string) string {
-	basePrompt := `You are an expert technical video analyst specializing in developer content analysis for social media optimization.
-
-Analyze this video with comprehensive focus on:
-
-## 1. TECHNICAL CONTENT ASSESSMENT
-- Programming languages, frameworks, and technologies discussed
-- Code quality and best practices demonstrated  
-- Technical accuracy and depth of explanations
-- Educational value for developers
-- Architecture patterns and design principles mentioned
-
-## 2. DEVELOPER AUDIENCE ANALYSIS
-- Target skill level (beginner, intermediate, advanced)
-- Specific developer roles (frontend, backend, DevOps, full-stack, etc.)
-- Technical concepts complexity and accessibility
-- Prerequisites and assumed knowledge
-
-## 3. SOCIAL MEDIA OPTIMIZATION FOR TECH COMMUNITY
-- Viral potential in developer communities (score 1-10)
-- Key moments that would engage technical audiences
-- Shareable technical insights or "aha" moments
-- Hook potential for different platforms:
-  * Twitter/X: Technical threads and quick tips
-  * LinkedIn: Professional development insights
-  * YouTube Shorts: Quick coding demos
-  * TikTok: Trending tech concepts
-  * Reddit: Deep technical discussions
-
-## 4. CONTENT STRUCTURE & ENGAGEMENT
-- Introduction effectiveness and hook strength
-- Technical demonstration quality and clarity
-- Code examples and explanation effectiveness
-- Pacing and information density
-- Conclusion and call-to-action strength
-
-## 5. TIMESTAMP ANALYSIS
-Identify key moments with timestamps (MM:SS format):
-- Technical concept introductions
-- Code demonstration highlights
-- "Aha" moments and insights
-- Potential clip-worthy segments
-- Engagement peaks and valleys
-
-## 6. SCORING & RECOMMENDATIONS
-Provide numerical scores (1-10) for:
-- Technical Accuracy
-- Educational Value  
-- Viral Potential
-- Code Quality (if applicable)
-- Overall Developer Relevance
-
-## OUTPUT FORMAT
-Structure your response with clear sections and specific, actionable recommendations. Include:
-- Executive summary (2-3 sentences)
-- Technical assessment with specific technologies identified
-- Key timestamps with descriptions
-- Platform-specific content recommendations
-- Viral potential analysis with reasoning
-- Specific improvements for social media optimization
-
-Focus on practical, actionable insights that would help optimize this content for maximum reach and engagement in developer communities.`
-
-	if mode == "comprehensive" {
-		basePrompt += `
-
-## COMPREHENSIVE ANALYSIS ADDITIONS
-
-## 7. COMPETITIVE ANALYSIS
-- How this content compares to similar technical content
-- Unique value propositions and differentiators
-- Market positioning in tech education space
-- Opportunities for improvement
-
-## 8. ADVANCED TECHNICAL EVALUATION
-- Performance considerations discussed
-- Security implications and best practices
-- Scalability and maintainability aspects
-- Industry standards compliance
-- Code review quality and thoroughness
-
-## 9. CONTENT STRATEGY RECOMMENDATIONS
-- Series potential and follow-up content ideas
-- Cross-platform content adaptation strategies
-- Community engagement optimization
-- Long-term audience building recommendations
-
-## 10. DETAILED METRICS PREDICTION
-- Expected engagement rates by platform
-- Audience retention predictions
-- Share-ability factors analysis
-- Comment and discussion potential`
-	}
-
-	return basePrompt
-}
-
 // truncateForDisplay truncates text for display purposes
 func truncateForDisplay(text string, maxLength int) string {
 	if len(text) <= maxLength {
 		return text
 	}
 	return text[:maxLength] + "\n... [truncated - showing first " + fmt.Sprintf("%d", maxLength) + " characters of " + fmt.Sprintf("%d", len(text)) + " total]"
+}
+
+// createTUICmd creates the TUI command
+func createTUICmd() *cobra.Command {
+	var tuiAPIKey string
+	var tuiMode string
+	var tuiModel string
+	var tuiLogLevel string
+	var tuiVerbose bool
+
+	tuiCmd := &cobra.Command{
+		Use:   "tui",
+		Short: "Launch the Terminal User Interface",
+		Long: `🎬 YouTube Analyzer - Interactive Terminal UI
+
+Launch an interactive terminal user interface for analyzing YouTube videos.
+The TUI provides a user-friendly interface with real-time progress updates,
+results display, and easy navigation between different analysis screens.
+
+Features:
+• Interactive URL input with validation
+• Real-time progress display during analysis
+• Comprehensive results viewer with scrolling
+• Keyboard shortcuts and help system
+• Error handling and retry options
+
+Usage:
+  youtube-analyzer tui --api-key YOUR_API_KEY
+  youtube-analyzer tui --api-key YOUR_API_KEY --mode comprehensive`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runTUI(tuiAPIKey, tuiMode, tuiModel, tuiLogLevel, tuiVerbose)
+		},
+	}
+
+	tuiCmd.Flags().StringVarP(&tuiAPIKey, "api-key", "k", "", "Google Gemini API key (required)")
+	tuiCmd.Flags().StringVarP(&tuiMode, "mode", "m", "quick", "analysis mode: quick, comprehensive")
+	tuiCmd.Flags().StringVar(&tuiModel, "model", "", "Gemini model to use")
+	tuiCmd.Flags().StringVar(&tuiLogLevel, "log-level", "info", "log level (debug, info, warn, error)")
+	tuiCmd.Flags().BoolVarP(&tuiVerbose, "verbose", "v", false, "verbose output")
+
+	tuiCmd.MarkFlagRequired("api-key")
+
+	return tuiCmd
+}
+
+// runTUI runs the TUI application
+func runTUI(apiKey, mode, model, logLevel string, verbose bool) error {
+	// Initialize configuration
+	cfg := &config.Config{
+		APIKey:   apiKey,
+		Mode:     mode,
+		Model:    model,
+		LogLevel: logLevel,
+		Verbose:  verbose,
+	}
+
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("configuration error: %w", err)
+	}
+
+	// Initialize logger
+	logger := logger.New(cfg, "tui")
+
+	// Initialize Gemini client
+	geminiClient, err := gemini.New(cfg, logger)
+	if err != nil {
+		return fmt.Errorf("failed to initialize Gemini client: %w", err)
+	}
+	defer geminiClient.Close()
+
+	// Create the main model
+	m := uimodel.NewMainModel(geminiClient, cfg, logger)
+
+	// Create tea program
+	p := tea.NewProgram(m, tea.WithAltScreen())
+
+	// Run the program
+	if _, err := p.Run(); err != nil {
+		return fmt.Errorf("error running TUI: %w", err)
+	}
+
+	return nil
 }
