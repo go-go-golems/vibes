@@ -18,6 +18,7 @@ const (
 	ScreenLoading
 	ScreenResults
 	ScreenError
+	ScreenStreaming
 )
 
 // CommonState holds shared state across all screens
@@ -32,16 +33,18 @@ type CommonState struct {
 
 // MainModel is the root model that manages screen transitions
 type MainModel struct {
-	Common        CommonState
-	CurrentScreen Screen
-	InputModel    InputModel
-	LoadingModel  LoadingModel
-	ResultsModel  ResultsModel
-	ErrorModel    ErrorModel
+	Common          CommonState
+	CurrentScreen   Screen
+	InputModel      InputModel
+	LoadingModel    LoadingModel
+	ResultsModel    ResultsModel
+	ErrorModel      ErrorModel
+	StreamingModel  StreamingModel
+	InitialVideoURL string
 }
 
 // NewMainModel creates a new main model
-func NewMainModel(geminiClient *gemini.Client, cfg *config.Config, log *logger.Logger) MainModel {
+func NewMainModel(geminiClient *gemini.Client, cfg *config.Config, log *logger.Logger, initialVideoURL string) MainModel {
 	common := CommonState{
 		Width:        80,
 		Height:       24,
@@ -51,18 +54,31 @@ func NewMainModel(geminiClient *gemini.Client, cfg *config.Config, log *logger.L
 		Help:         help.New(),
 	}
 
+	// Determine initial screen based on whether video URL is provided
+	initialScreen := ScreenInput
+	if initialVideoURL != "" {
+		initialScreen = ScreenStreaming
+	}
+
 	return MainModel{
-		Common:        common,
-		CurrentScreen: ScreenInput,
-		InputModel:    NewInputModel(common),
-		LoadingModel:  NewLoadingModel(common),
-		ResultsModel:  NewResultsModel(common),
-		ErrorModel:    NewErrorModel(common),
+		Common:          common,
+		CurrentScreen:   initialScreen,
+		InputModel:      NewInputModel(common),
+		LoadingModel:    NewLoadingModel(common),
+		ResultsModel:    NewResultsModel(common),
+		ErrorModel:      NewErrorModel(common),
+		StreamingModel:  NewStreamingModel(common),
+		InitialVideoURL: initialVideoURL,
 	}
 }
 
 // Init initializes the main model
 func (m MainModel) Init() tea.Cmd {
+	if m.InitialVideoURL != "" {
+		// Set the video URL in the streaming model and start streaming
+		m.StreamingModel.VideoURL = m.InitialVideoURL
+		return m.StreamingModel.Init()
+	}
 	return m.InputModel.Init()
 }
 
@@ -79,6 +95,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.LoadingModel.Common = m.Common
 		m.ResultsModel.Common = m.Common
 		m.ErrorModel.Common = m.Common
+		m.StreamingModel.Common = m.Common
 
 	case ScreenChangeMsg:
 		m.CurrentScreen = msg.Screen
@@ -94,6 +111,9 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.ErrorModel.Init()
 		case ScreenInput:
 			return m, m.InputModel.Init()
+		case ScreenStreaming:
+			m.StreamingModel.VideoURL = msg.VideoURL
+			return m, m.StreamingModel.Init()
 		}
 
 	case tea.KeyMsg:
@@ -113,6 +133,8 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.ResultsModel, cmd = m.ResultsModel.Update(msg)
 	case ScreenError:
 		m.ErrorModel, cmd = m.ErrorModel.Update(msg)
+	case ScreenStreaming:
+		m.StreamingModel, cmd = m.StreamingModel.Update(msg)
 	}
 
 	return m, cmd
@@ -129,6 +151,8 @@ func (m MainModel) View() string {
 		return m.ResultsModel.View()
 	case ScreenError:
 		return m.ErrorModel.View()
+	case ScreenStreaming:
+		return m.StreamingModel.View()
 	default:
 		return "Unknown screen"
 	}

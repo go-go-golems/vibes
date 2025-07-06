@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +11,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/huh"
 	"github.com/fatih/color"
 	"github.com/schollz/progressbar/v3"
@@ -81,7 +84,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable colored output")
 
 	// Analysis flags
-	rootCmd.Flags().StringVarP(&apiKey, "api-key", "k", "", "Google Gemini API key (required)")
+	rootCmd.Flags().StringVarP(&apiKey, "api-key", "k", "", "Google Gemini API key (or set GEMINI_API_KEY env var)")
 	rootCmd.Flags().StringVarP(&mode, "mode", "m", "quick", "analysis mode: quick, comprehensive")
 	rootCmd.Flags().StringVar(&model, "model", "", "Gemini model to use (default: gemini-2.5-flash for quick, gemini-2.5-pro for comprehensive)")
 	rootCmd.Flags().StringVarP(&outputFile, "output", "o", "", "output file path (default: auto-generated)")
@@ -89,8 +92,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&jsonOutput, "json", "j", false, "output results in JSON format only")
 	rootCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "interactive mode with request preview and confirmation")
 
-	// Mark required flags
-	rootCmd.MarkFlagRequired("api-key")
+	// Don't mark API key as required since we support environment variable fallback
 
 	// Bind flags to viper
 	viper.BindPFlag("api-key", rootCmd.Flags().Lookup("api-key"))
@@ -103,6 +105,9 @@ func init() {
 
 	// Add TUI command
 	rootCmd.AddCommand(createTUICmd())
+	
+	// Add stream command
+	rootCmd.AddCommand(createStreamCmd())
 }
 
 func initConfig() {
@@ -140,6 +145,11 @@ func runAnalysis(cmd *cobra.Command, args []string) error {
 		Verbose:   viper.GetBool("verbose"),
 		Quiet:     viper.GetBool("quiet"),
 		NoColor:   noColor,
+	}
+
+	// Fallback to environment variable if API key is not set
+	if cfg.APIKey == "" {
+		cfg.APIKey = os.Getenv("GEMINI_API_KEY")
 	}
 
 	// Validate configuration
@@ -461,25 +471,34 @@ Features:
 
 Usage:
   youtube-analyzer tui --api-key YOUR_API_KEY
-  youtube-analyzer tui --api-key YOUR_API_KEY --mode comprehensive`,
+  youtube-analyzer tui --api-key YOUR_API_KEY --mode comprehensive
+  
+  Or set environment variable:
+  export GEMINI_API_KEY="your-api-key"
+  youtube-analyzer tui`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runTUI(tuiAPIKey, tuiMode, tuiModel, tuiLogLevel, tuiVerbose)
 		},
 	}
 
-	tuiCmd.Flags().StringVarP(&tuiAPIKey, "api-key", "k", "", "Google Gemini API key (required)")
+	tuiCmd.Flags().StringVarP(&tuiAPIKey, "api-key", "k", "", "Google Gemini API key (or set GEMINI_API_KEY env var)")
 	tuiCmd.Flags().StringVarP(&tuiMode, "mode", "m", "quick", "analysis mode: quick, comprehensive")
 	tuiCmd.Flags().StringVar(&tuiModel, "model", "", "Gemini model to use")
 	tuiCmd.Flags().StringVar(&tuiLogLevel, "log-level", "info", "log level (debug, info, warn, error)")
 	tuiCmd.Flags().BoolVarP(&tuiVerbose, "verbose", "v", false, "verbose output")
 
-	tuiCmd.MarkFlagRequired("api-key")
+	// Remove required flag since we support environment variable fallback
 
 	return tuiCmd
 }
 
 // runTUI runs the TUI application
 func runTUI(apiKey, mode, model, logLevel string, verbose bool) error {
+	// Fallback to environment variable if API key is not set
+	if apiKey == "" {
+		apiKey = os.Getenv("GEMINI_API_KEY")
+	}
+
 	// Initialize configuration
 	cfg := &config.Config{
 		APIKey:   apiKey,
@@ -503,8 +522,8 @@ func runTUI(apiKey, mode, model, logLevel string, verbose bool) error {
 	}
 	defer geminiClient.Close()
 
-	// Create the main model
-	m := uimodel.NewMainModel(geminiClient, cfg, logger)
+	// Create the main model (no initial video URL for regular TUI)
+	m := uimodel.NewMainModel(geminiClient, cfg, logger, "")
 
 	// Create tea program
 	p := tea.NewProgram(m, tea.WithAltScreen())
@@ -514,5 +533,145 @@ func runTUI(apiKey, mode, model, logLevel string, verbose bool) error {
 		return fmt.Errorf("error running TUI: %w", err)
 	}
 
+	return nil
+}
+
+func createStreamCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "stream",
+		Short: "Stream text generation with Gemini",
+		Long:  `Stream text generation with Gemini using simple prompts to demonstrate streaming functionality.`,
+		RunE:  runStreamCmd,
+	}
+
+	cmd.Flags().StringP("prompt", "p", "", "Prompt to send to Gemini (if not provided, will prompt interactively)")
+	cmd.Flags().StringP("model", "m", "gemini-2.0-flash-exp", "Gemini model to use")
+	cmd.Flags().StringP("style", "s", "dark", "Glamour style (dark, light, auto)")
+
+	return cmd
+}
+
+func runStreamCmd(cmd *cobra.Command, args []string) error {
+	// Get flags
+	prompt, _ := cmd.Flags().GetString("prompt")
+	model, _ := cmd.Flags().GetString("model")
+	style, _ := cmd.Flags().GetString("style")
+
+	// Get config
+	cfg := &config.Config{
+		APIKey:   viper.GetString("api-key"),
+		Model:    model,
+		Mode:     "quick",
+		LogLevel: viper.GetString("log-level"),
+	}
+
+	// Fallback to environment variable if API key is not set
+	if cfg.APIKey == "" {
+		cfg.APIKey = os.Getenv("GEMINI_API_KEY")
+	}
+
+	// Validate config
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("configuration error: %w", err)
+	}
+
+	// Get prompt if not provided
+	if prompt == "" {
+		fmt.Print("Enter your prompt: ")
+		reader := bufio.NewReader(os.Stdin)
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			return fmt.Errorf("error reading input: %w", err)
+		}
+		prompt = strings.TrimSpace(input)
+	}
+
+	if prompt == "" {
+		return fmt.Errorf("prompt cannot be empty")
+	}
+
+	// Initialize logger
+	log := logger.New(cfg, "stream")
+
+	// Create Gemini client
+	client, err := gemini.New(cfg, log)
+	if err != nil {
+		return fmt.Errorf("failed to create Gemini client: %w", err)
+	}
+	defer client.Close()
+
+	// Run streaming demo
+	return runStreamingDemo(client, prompt, style)
+}
+
+func runStreamingDemo(client *gemini.Client, prompt, style string) error {
+	fmt.Printf("🚀 Starting streaming demo with Gemini\n")
+	fmt.Printf("📝 Prompt: %s\n", prompt)
+	fmt.Printf("🎨 Style: %s\n", style)
+	fmt.Printf("%s\n\n", strings.Repeat("=", 50))
+
+	// Initialize glamour renderer
+	renderer, err := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+		glamour.WithWordWrap(80),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create glamour renderer: %w", err)
+	}
+
+	// Set up streaming callback
+	var accumulatedContent strings.Builder
+	startTime := time.Now()
+	
+	callback := func(content string) {
+		accumulatedContent.WriteString(content)
+		
+		// Clear screen and show updated content
+		fmt.Print("\033[H\033[2J") // Clear screen
+		
+		// Show header
+		elapsed := time.Since(startTime)
+		fmt.Printf("🔄 Streaming Response (%.1fs elapsed)\n", elapsed.Seconds())
+		fmt.Printf("%s\n\n", strings.Repeat("=", 50))
+		
+		// Render markdown
+		rendered, err := renderer.Render(accumulatedContent.String())
+		if err != nil {
+			// Fallback to plain text if rendering fails
+			fmt.Print(accumulatedContent.String())
+		} else {
+			fmt.Print(rendered)
+		}
+		
+		// Add streaming indicator
+		fmt.Printf("\n%s\n", strings.Repeat(".", int(elapsed.Seconds())%4+1))
+	}
+
+	// Start streaming
+	fmt.Printf("🎬 Starting streaming generation...\n\n")
+	
+	ctx := context.Background()
+	response, err := client.GenerateContentStreaming(ctx, prompt, callback)
+	if err != nil {
+		return fmt.Errorf("streaming generation failed: %w", err)
+	}
+
+	// Final render
+	fmt.Print("\033[H\033[2J") // Clear screen
+	elapsed := time.Since(startTime)
+	fmt.Printf("✅ Streaming Complete (%.1fs total)\n", elapsed.Seconds())
+	fmt.Printf("%s\n\n", strings.Repeat("=", 50))
+	
+	// Final render of complete content
+	rendered, err := renderer.Render(response)
+	if err != nil {
+		fmt.Print(response)
+	} else {
+		fmt.Print(rendered)
+	}
+	
+	fmt.Printf("\n%s\n", strings.Repeat("=", 50))
+	fmt.Printf("📊 Stats: %d characters, %.1fs duration\n", len(response), elapsed.Seconds())
+	
 	return nil
 }

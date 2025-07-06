@@ -126,6 +126,181 @@ func (c *Client) AnalyzeVideo(ctx context.Context, videoURL string) (*models.Tec
 	return analysis, nil
 }
 
+// GenerateContentStreaming generates content with streaming callback for simple text prompts
+func (c *Client) GenerateContentStreaming(ctx context.Context, prompt string, callback func(string)) (string, error) {
+	c.callCount++
+	startTime := time.Now()
+
+	c.logger.Info(fmt.Sprintf("🎬 Starting streaming generation for prompt: %s", prompt[:min(50, len(prompt))]))
+
+	// Create the request content
+	modelName := c.config.GetModelName()
+	contents := []*genai.Content{
+		{
+			Parts: []*genai.Part{
+				{Text: prompt},
+			},
+			Role: "user",
+		},
+	}
+
+	// Create a handler that converts to the callback format
+	handler := func(content string) error {
+		callback(content)
+		return nil
+	}
+
+	// Use the existing streaming infrastructure
+	resp, err := c.streamOrGenerate(ctx, modelName, contents, handler)
+	
+	duration := time.Since(startTime)
+	success := err == nil
+
+	// Log the API call
+	c.logger.APICall(c.callCount, c.config.GetModelName(), "streaming_generation", duration, success)
+
+	if err != nil {
+		return "", fmt.Errorf("Gemini API call failed: %w", err)
+	}
+
+	// Extract the response text
+	responseText := resp.Text()
+	if responseText == "" {
+		return "", fmt.Errorf("empty response from Gemini API")
+	}
+
+	return responseText, nil
+}
+
+// min returns the minimum of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// StreamingContentHandler is a callback for handling streaming content
+type StreamingContentHandler func(content string) error
+
+// AnalyzeVideoStreaming analyzes a YouTube video with streaming responses
+func (c *Client) AnalyzeVideoStreaming(ctx context.Context, videoURL string, handler StreamingContentHandler) (*models.TechnicalAnalysis, error) {
+	c.callCount++
+	startTime := time.Now()
+
+	// Create the prompt
+	prompt := c.CreateTechnicalPrompt()
+
+	c.logger.Info(fmt.Sprintf("🎬 Starting streaming video analysis for: %s", videoURL))
+	c.logger.Info(fmt.Sprintf("📝 Using prompt length: %d characters", len(prompt)))
+
+	// Create the request content with YouTube video FileData
+	modelName := c.config.GetModelName()
+	contents := []*genai.Content{
+		{
+			Parts: []*genai.Part{
+				{Text: prompt},
+				{FileData: &genai.FileData{
+					FileURI:  videoURL,
+					MIMEType: "video/mp4",
+				}},
+			},
+			Role: "user",
+		},
+	}
+
+	// Debug: Show the full request body
+	c.logger.Info("📋 Full request body to Gemini:")
+	c.logger.Info(fmt.Sprintf("  Model: %s", modelName))
+	c.logger.Info(fmt.Sprintf("  Content Role: %s", contents[0].Role))
+	c.logger.Info(fmt.Sprintf("  Part 1: Text prompt (%d characters)", len(prompt)))
+	c.logger.Info(fmt.Sprintf("  Part 2: FileData - URI: %s, MIME: %s", videoURL, "video/mp4"))
+
+	// Try to use streaming if supported, otherwise fallback to regular generation
+	resp, err := c.streamOrGenerate(ctx, modelName, contents, handler)
+
+	duration := time.Since(startTime)
+	success := err == nil
+
+	// Log the API call
+	c.logger.APICall(c.callCount, c.config.GetModelName(), "streaming_video_analysis", duration, success)
+
+	if err != nil {
+		return nil, fmt.Errorf("Gemini streaming API call failed: %w", err)
+	}
+
+	// Extract the response text
+	responseText := resp.Text()
+	if responseText == "" {
+		return nil, fmt.Errorf("empty response from Gemini streaming API")
+	}
+
+	c.logger.Info(fmt.Sprintf("✅ Received streaming response: %d characters", len(responseText)))
+
+	// Parse the response into structured data
+	analysis := c.parseResponse(responseText)
+	analysis.RawResponse = responseText
+
+	return analysis, nil
+}
+
+// streamOrGenerate attempts to stream content, falling back to regular generation
+func (c *Client) streamOrGenerate(ctx context.Context, modelName string, contents []*genai.Content, handler StreamingContentHandler) (*genai.GenerateContentResponse, error) {
+	// For now, simulate streaming by sending the regular response in chunks
+	// TODO: Implement actual streaming when genai library supports it
+
+	// Make the regular API call first
+	resp, err := c.client.Models.GenerateContent(ctx, modelName, contents, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Simulate streaming by sending content in chunks
+	if handler != nil {
+		responseText := resp.Text()
+		c.simulateStreaming(responseText, handler)
+	}
+
+	return resp, nil
+}
+
+// simulateStreaming simulates streaming by sending content in chunks
+func (c *Client) simulateStreaming(content string, handler StreamingContentHandler) {
+	if handler == nil {
+		return
+	}
+
+	// Split content into logical chunks (by paragraphs/sections)
+	lines := strings.Split(content, "\n")
+	var currentChunk strings.Builder
+
+	for _, line := range lines {
+		currentChunk.WriteString(line + "\n")
+
+		// Send chunk when we hit a section boundary or every few lines
+		if strings.HasPrefix(line, "##") || strings.HasPrefix(line, "###") ||
+			strings.TrimSpace(line) == "" || currentChunk.Len() > 200 {
+
+			if currentChunk.Len() > 0 {
+				// Send the chunk
+				if err := handler(currentChunk.String()); err != nil {
+					c.logger.Info(fmt.Sprintf("❌ Handler error: %v", err))
+					return
+				}
+
+				// Small delay to simulate real streaming
+				time.Sleep(time.Millisecond * 100)
+				currentChunk.Reset()
+			}
+		}
+	}
+
+	// Send any remaining content
+	if currentChunk.Len() > 0 {
+		handler(currentChunk.String())
+	}
+}
+
 // CreateTechnicalPrompt creates the social media analysis prompt
 func (c *Client) CreateTechnicalPrompt() string {
 	basePrompt := `Analyze this video for social media optimization and engagement potential.

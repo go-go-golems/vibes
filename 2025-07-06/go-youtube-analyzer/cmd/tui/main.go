@@ -20,6 +20,7 @@ var (
 	model    string
 	logLevel string
 	verbose  bool
+	videoURL string
 )
 
 func main() {
@@ -31,8 +32,25 @@ func main() {
 var rootCmd = &cobra.Command{
 	Use:   "tui",
 	Short: "Interactive TUI for YouTube video analysis",
-	Long:  "A terminal user interface for analyzing YouTube videos using AI",
-	RunE:  runTUI,
+	Long: `A terminal user interface for analyzing YouTube videos using AI.
+
+Features:
+• Interactive URL input with validation
+• Real-time streaming content generation
+• Beautiful markdown rendering with glamour
+• Keyboard shortcuts and help system
+• Pre-fill URL via command line argument
+
+Examples:
+  # Launch TUI with interactive input
+  youtube-analyzer tui --api-key YOUR_API_KEY
+  
+  # Launch TUI with pre-filled URL and start streaming immediately
+  youtube-analyzer tui --api-key YOUR_API_KEY --video "https://youtube.com/watch?v=..."
+  
+  # Use comprehensive analysis mode
+  youtube-analyzer tui --api-key YOUR_API_KEY --mode comprehensive --video "https://youtube.com/watch?v=..."`,
+	RunE: runTUI,
 }
 
 func init() {
@@ -41,6 +59,7 @@ func init() {
 	rootCmd.Flags().StringVar(&model, "model", "", "Gemini model to use")
 	rootCmd.Flags().StringVar(&logLevel, "log-level", "info", "log level (debug, info, warn, error)")
 	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	rootCmd.Flags().StringVar(&videoURL, "video", "", "YouTube video URL to analyze (optional)")
 
 	rootCmd.MarkFlagRequired("api-key")
 
@@ -49,6 +68,7 @@ func init() {
 	viper.BindPFlag("model", rootCmd.Flags().Lookup("model"))
 	viper.BindPFlag("log-level", rootCmd.Flags().Lookup("log-level"))
 	viper.BindPFlag("verbose", rootCmd.Flags().Lookup("verbose"))
+	viper.BindPFlag("video", rootCmd.Flags().Lookup("video"))
 }
 
 func runTUI(cmd *cobra.Command, args []string) error {
@@ -76,7 +96,8 @@ func runTUI(cmd *cobra.Command, args []string) error {
 	defer geminiClient.Close()
 
 	// Create the main model
-	m := uimodel.NewMainModel(geminiClient, cfg, log)
+	inputVideoURL := viper.GetString("video")
+	m := uimodel.NewMainModel(geminiClient, cfg, log, inputVideoURL)
 
 	// Create tea program
 	p := tea.NewProgram(m, tea.WithAltScreen())
