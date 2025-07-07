@@ -83,6 +83,10 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "quiet mode (minimal output)")
 	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable colored output")
 
+	// Add logging flags
+	rootCmd.PersistentFlags().String("log-file", "", "log file path (default: ./logs/youtube-analyzer.log)")
+	rootCmd.PersistentFlags().Bool("log-debug", false, "enable debug logging")
+
 	// Analysis flags
 	rootCmd.Flags().StringVarP(&apiKey, "api-key", "k", "", "Google Gemini API key (or set GEMINI_API_KEY env var)")
 	rootCmd.Flags().StringVarP(&mode, "mode", "m", "quick", "analysis mode: quick, comprehensive")
@@ -102,12 +106,17 @@ func init() {
 	viper.BindPFlag("log-level", rootCmd.PersistentFlags().Lookup("log-level"))
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 	viper.BindPFlag("quiet", rootCmd.PersistentFlags().Lookup("quiet"))
+	viper.BindPFlag("log-file", rootCmd.PersistentFlags().Lookup("log-file"))
+	viper.BindPFlag("log-debug", rootCmd.PersistentFlags().Lookup("log-debug"))
 
 	// Add TUI command
 	rootCmd.AddCommand(createTUICmd())
 	
 	// Add stream command
 	rootCmd.AddCommand(createStreamCmd())
+	
+	// Add video stream command
+	rootCmd.AddCommand(createVideoStreamCmd())
 }
 
 func initConfig() {
@@ -222,7 +231,7 @@ func runAnalysis(cmd *cobra.Command, args []string) error {
 			}
 		}
 		if cfg.Verbose && !cfg.Quiet {
-			log.Info(fmt.Sprintf("Step: %s (%d%%)", step, progress))
+			log.Info().Msgf("Step: %s (%d%%)", step, progress)
 		}
 	}
 
@@ -276,7 +285,7 @@ func saveResults(result *models.AnalysisResult, outputFile string, cfg *config.C
 		return err
 	}
 
-	log.Info(fmt.Sprintf("Results saved to: %s", outputFile))
+	log.Info().Msgf("Results saved to: %s", outputFile)
 	return nil
 }
 
@@ -672,6 +681,124 @@ func runStreamingDemo(client *gemini.Client, prompt, style string) error {
 	
 	fmt.Printf("\n%s\n", strings.Repeat("=", 50))
 	fmt.Printf("📊 Stats: %d characters, %.1fs duration\n", len(response), elapsed.Seconds())
+	
+	return nil
+}
+
+// createVideoStreamCmd creates the video streaming command
+func createVideoStreamCmd() *cobra.Command {
+	var model string
+	var style string
+
+	cmd := &cobra.Command{
+		Use:   "video-stream [YouTube URL]",
+		Short: "Stream YouTube video analysis with real-time output",
+		Long: `Stream YouTube video analysis with real-time output using Gemini AI.
+		
+This command analyzes a YouTube video and shows the analysis results as they stream in real-time.`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runVideoStream(args[0], model, style)
+		},
+	}
+
+	cmd.Flags().StringVarP(&model, "model", "m", "gemini-2.5-flash", "Gemini model to use")
+	cmd.Flags().StringVarP(&style, "style", "s", "dark", "Glamour style (dark, light, auto)")
+
+	return cmd
+}
+
+// runVideoStream runs the video streaming analysis
+func runVideoStream(videoURL, model, style string) error {
+	// Initialize configuration
+	cfg := &config.Config{
+		APIKey:   viper.GetString("api-key"),
+		Mode:     "quick",
+		Model:    model,
+		LogLevel: viper.GetString("log-level"),
+		Verbose:  viper.GetBool("verbose"),
+		Quiet:    viper.GetBool("quiet"),
+		NoColor:  noColor,
+	}
+
+	// Fallback to environment variable if API key is not set
+	if cfg.APIKey == "" {
+		cfg.APIKey = os.Getenv("GEMINI_API_KEY")
+	}
+
+	// Validate configuration
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("configuration error: %w", err)
+	}
+
+	// Generate session ID
+	sessionID := fmt.Sprintf("video_stream_%s", time.Now().Format("20060102_150405"))
+
+	// Initialize logger
+	log := logger.New(cfg, sessionID)
+	defer log.Close()
+
+	// Initialize Gemini client
+	geminiClient, err := gemini.New(cfg, log)
+	if err != nil {
+		return fmt.Errorf("failed to initialize Gemini client: %w", err)
+	}
+	defer geminiClient.Close()
+
+	// Initialize glamour renderer
+	renderer, err := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+		glamour.WithWordWrap(80),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create renderer: %w", err)
+	}
+
+	fmt.Printf("🚀 Starting streaming video analysis with Gemini\n")
+	fmt.Printf("📺 Video URL: %s\n", videoURL)
+	fmt.Printf("🤖 Model: %s\n", cfg.GetModelName())
+	fmt.Printf("🎨 Style: %s\n", style)
+	fmt.Println("==================================================")
+	fmt.Println()
+
+	var content strings.Builder
+	
+	// Create streaming handler
+	handler := func(chunk string) error {
+		// Add chunk to accumulated content
+		content.WriteString(chunk)
+		
+		// Render and display the chunk
+		rendered, err := renderer.Render(chunk)
+		if err != nil {
+			// Fallback to raw text if rendering fails
+			fmt.Print(chunk)
+		} else {
+			fmt.Print(rendered)
+		}
+		
+		return nil
+	}
+
+	ctx := context.Background()
+	start := time.Now()
+
+	fmt.Printf("🎬 Starting streaming video analysis...\n\n")
+
+	// Start the streaming analysis
+	analysis, err := geminiClient.AnalyzeVideoStreaming(ctx, videoURL, handler)
+	if err != nil {
+		return fmt.Errorf("streaming video analysis failed: %w", err)
+	}
+
+	elapsed := time.Since(start)
+	
+	fmt.Printf("\n\n==================================================\n")
+	fmt.Printf("✅ Streaming analysis complete!\n")
+	fmt.Printf("📊 Stats: %d characters, %.1fs duration\n", len(content.String()), elapsed.Seconds())
+	fmt.Printf("🎯 Technical Score: %.1f/10\n", analysis.TechnicalScore)
+	fmt.Printf("🚀 Viral Potential: %.1f/10\n", analysis.ViralPotential)
+	fmt.Printf("👥 Target Audience: %s\n", analysis.TargetAudience)
 	
 	return nil
 }
