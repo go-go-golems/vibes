@@ -39,8 +39,20 @@ type MainModel struct {
 	LoadingModel    LoadingModel
 	ResultsModel    ResultsModel
 	ErrorModel      ErrorModel
-	StreamingModel  StreamingModel
+	StreamingModel  *StreamingModel
 	InitialVideoURL string
+}
+
+// SetProgram sets the tea.Program reference for streaming
+func (m *MainModel) SetProgram(program *tea.Program) {
+	if m.Common.Logger != nil {
+		m.Common.Logger.Debug().
+			Str("component", "main_model").
+			Str("function", "SetProgram").
+			Bool("programNotNil", program != nil).
+			Msg("Setting program reference for streaming model")
+	}
+	m.StreamingModel.program = program
 }
 
 // NewMainModel creates a new main model
@@ -60,6 +72,11 @@ func NewMainModel(geminiClient *gemini.Client, cfg *config.Config, log *logger.L
 		initialScreen = ScreenStreaming
 	}
 
+	streamingModel := NewStreamingModel(common)
+	// Set the Gemini client in the streaming model
+	streamingModel.geminiClient = geminiClient
+	streamingModel.logger = log
+
 	return MainModel{
 		Common:          common,
 		CurrentScreen:   initialScreen,
@@ -67,7 +84,7 @@ func NewMainModel(geminiClient *gemini.Client, cfg *config.Config, log *logger.L
 		LoadingModel:    NewLoadingModel(common),
 		ResultsModel:    NewResultsModel(common),
 		ErrorModel:      NewErrorModel(common),
-		StreamingModel:  NewStreamingModel(common),
+		StreamingModel:  &streamingModel,
 		InitialVideoURL: initialVideoURL,
 	}
 }
@@ -98,6 +115,15 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.StreamingModel.Common = m.Common
 
 	case ScreenChangeMsg:
+		if m.Common.Logger != nil {
+			m.Common.Logger.Info().
+				Str("component", "screen").
+				Int("newScreen", int(msg.Screen)).
+				Str("videoURL", msg.VideoURL).
+				Str("prompt", msg.Prompt).
+				Msg("Received screen change message")
+		}
+		
 		m.CurrentScreen = msg.Screen
 		switch msg.Screen {
 		case ScreenLoading:
@@ -112,9 +138,25 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ScreenInput:
 			return m, m.InputModel.Init()
 		case ScreenStreaming:
+			if m.Common.Logger != nil {
+				m.Common.Logger.Info().
+					Str("component", "screen").
+					Str("videoURL", msg.VideoURL).
+					Str("prompt", msg.Prompt).
+					Msg("Transitioning to streaming screen")
+			}
+			
 			m.StreamingModel.VideoURL = msg.VideoURL
 			m.StreamingModel.Prompt = msg.Prompt
 			m.StreamingModel.logger = m.Common.Logger
+			m.StreamingModel.geminiClient = m.Common.GeminiClient
+			
+			if m.Common.Logger != nil {
+				m.Common.Logger.Info().
+					Str("component", "screen").
+					Msg("Calling StreamingModel.Init()")
+			}
+			
 			return m, m.StreamingModel.Init()
 		}
 
@@ -136,7 +178,9 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ScreenError:
 		m.ErrorModel, cmd = m.ErrorModel.Update(msg)
 	case ScreenStreaming:
-		m.StreamingModel, cmd = m.StreamingModel.Update(msg)
+		streamingModel, streamingCmd := m.StreamingModel.Update(msg)
+		m.StreamingModel = streamingModel
+		cmd = streamingCmd
 	}
 
 	return m, cmd

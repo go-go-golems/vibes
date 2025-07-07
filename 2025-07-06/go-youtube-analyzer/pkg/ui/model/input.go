@@ -51,13 +51,33 @@ func (m InputModel) Update(msg tea.Msg) (InputModel, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if m.Common.Logger != nil {
+			m.Common.Logger.Debug().
+				Str("component", "input").
+				Str("key", msg.String()).
+				Msg("Received key message")
+		}
+		
 		switch {
 		case msg.String() == "ctrl+c":
 			return m, tea.Quit
 		case msg.String() == "enter":
 			input := strings.TrimSpace(m.textInput.Value())
+			
+			if m.Common.Logger != nil {
+				m.Common.Logger.Debug().
+					Str("component", "input").
+					Str("input", input).
+					Msg("Processing enter key with input")
+			}
+			
 			if input == "" {
 				m.err = nil
+				if m.Common.Logger != nil {
+					m.Common.Logger.Debug().
+						Str("component", "input").
+						Msg("Empty input - ignoring")
+				}
 				return m, nil
 			}
 
@@ -65,6 +85,14 @@ func (m InputModel) Update(msg tea.Msg) (InputModel, tea.Cmd) {
 			if isValidYouTubeURL(input) {
 				// Handle as video URL
 				m.err = nil
+				
+				if m.Common.Logger != nil {
+					m.Common.Logger.Info().
+						Str("component", "input").
+						Str("videoURL", input).
+						Msg("Valid YouTube URL detected - transitioning to streaming")
+				}
+				
 				return m, func() tea.Msg {
 					return ScreenChangeMsg{
 						Screen:   ScreenStreaming,
@@ -74,6 +102,14 @@ func (m InputModel) Update(msg tea.Msg) (InputModel, tea.Cmd) {
 			} else {
 				// Handle as simple text prompt
 				m.err = nil
+				
+				if m.Common.Logger != nil {
+					m.Common.Logger.Info().
+						Str("component", "input").
+						Str("prompt", input).
+						Msg("Text prompt detected - transitioning to streaming")
+				}
+				
 				return m, func() tea.Msg {
 					return ScreenChangeMsg{
 						Screen: ScreenStreaming,

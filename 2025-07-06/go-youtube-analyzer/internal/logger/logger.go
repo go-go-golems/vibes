@@ -32,7 +32,7 @@ func New(cfg *config.Config, sessionID string) *Logger {
 	if logLevelStr == "" {
 		logLevelStr = cfg.LogLevel
 	}
-	
+
 	switch logLevelStr {
 	case "debug":
 		level = zerolog.DebugLevel

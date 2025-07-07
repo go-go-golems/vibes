@@ -14,8 +14,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/user/youtube-analyzer-go/internal/logger"
+	"github.com/user/youtube-analyzer-go/pkg/gemini"
 	"github.com/user/youtube-analyzer-go/pkg/models"
 )
+
+// min returns the minimum of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
 
 // StreamingModel represents the streaming analysis screen
 type StreamingModel struct {
@@ -37,6 +46,9 @@ type StreamingModel struct {
 	statusMessage  string
 	lastUpdateTime time.Time
 	logger         *logger.Logger
+	geminiClient   interface{}  // Will be set to *gemini.Client
+	program        *tea.Program // Reference to the tea program for sending messages
+	initialized    bool         // Track if streaming has been initialized
 }
 
 // StreamingKeyMap defines key bindings for streaming screen
@@ -141,19 +153,58 @@ func NewStreamingModel(common CommonState) StreamingModel {
 }
 
 // Init initializes the streaming model
-func (m StreamingModel) Init() tea.Cmd {
-	return tea.Batch(
-		m.startStreaming(),
-		tea.Tick(time.Millisecond*100, func(time.Time) tea.Msg {
-			return StreamingTickMsg{}
-		}),
-	)
+func (m *StreamingModel) Init() tea.Cmd {
+	if m.logger != nil {
+		m.logger.Debug().
+			Str("component", "streaming").
+			Str("function", "Init").
+			Bool("hasProgram", m.program != nil).
+			Bool("initialized", m.initialized).
+			Msg("StreamingModel.Init() called")
+	}
+	
+	if m.program != nil && !m.initialized {
+		if m.logger != nil {
+			m.logger.Info().
+				Str("component", "streaming").
+				Msg("Program available and not initialized - starting streaming")
+		}
+		
+		m.initialized = true
+		return tea.Batch(
+			m.startStreaming(),
+			tea.Tick(time.Millisecond*100, func(time.Time) tea.Msg {
+				return StreamingTickMsg{}
+			}),
+		)
+	}
+
+	if m.logger != nil {
+		m.logger.Debug().
+			Str("component", "streaming").
+			Bool("hasProgram", m.program != nil).
+			Bool("initialized", m.initialized).
+			Msg("Program not available yet - returning tick to check later")
+	}
+
+	// If program reference is not available yet, just return a tick to check again later
+	return tea.Tick(time.Millisecond*100, func(time.Time) tea.Msg {
+		return StreamingTickMsg{}
+	})
 }
 
 // Update handles messages for the streaming model
-func (m StreamingModel) Update(msg tea.Msg) (StreamingModel, tea.Cmd) {
+func (m *StreamingModel) Update(msg tea.Msg) (*StreamingModel, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
+
+	if m.logger != nil {
+		m.logger.Debug().
+			Str("component", "streaming").
+			Str("function", "Update").
+			Str("msgType", fmt.Sprintf("%T", msg)).
+			Msg("Processing message in streaming model")
+	}
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -212,7 +263,37 @@ func (m StreamingModel) Update(msg tea.Msg) (StreamingModel, tea.Cmd) {
 		}
 
 	case StreamingTickMsg:
+		if m.logger != nil {
+			m.logger.Debug().
+				Str("component", "streaming").
+				Bool("initialized", m.initialized).
+				Bool("hasProgram", m.program != nil).
+				Bool("isStreaming", m.isStreaming).
+				Msg("Received StreamingTickMsg")
+		}
+		
+		// Check if we need to start streaming now that program reference is available
+		if !m.initialized && m.program != nil {
+			if m.logger != nil {
+				m.logger.Info().
+					Str("component", "streaming").
+					Msg("Program now available - initializing streaming")
+			}
+			m.initialized = true
+			cmds = append(cmds, m.startStreaming())
+		}
+
 		if m.isStreaming {
+			cmds = append(cmds, tea.Tick(time.Millisecond*100, func(time.Time) tea.Msg {
+				return StreamingTickMsg{}
+			}))
+		} else if !m.initialized {
+			// Keep ticking until we're initialized
+			if m.logger != nil {
+				m.logger.Debug().
+					Str("component", "streaming").
+					Msg("Not initialized yet - scheduling next tick")
+			}
 			cmds = append(cmds, tea.Tick(time.Millisecond*100, func(time.Time) tea.Msg {
 				return StreamingTickMsg{}
 			}))
@@ -286,7 +367,7 @@ func (m StreamingModel) Update(msg tea.Msg) (StreamingModel, tea.Cmd) {
 }
 
 // View renders the streaming screen
-func (m StreamingModel) View() string {
+func (m *StreamingModel) View() string {
 	var sections []string
 
 	// Header
@@ -333,7 +414,7 @@ func (m StreamingModel) View() string {
 }
 
 // startStreaming starts the streaming analysis
-func (m StreamingModel) startStreaming() tea.Cmd {
+func (m *StreamingModel) startStreaming() tea.Cmd {
 	return func() tea.Msg {
 		if m.logger != nil {
 			m.logger.Debug().
@@ -378,6 +459,11 @@ func (m StreamingModel) startStreaming() tea.Cmd {
 					Msg("Starting performStreamingAnalysis goroutine")
 			}
 			m.performStreamingAnalysis(ctx)
+			if m.logger != nil {
+				m.logger.Debug().
+					Str("component", "streaming").
+					Msg("Finished performStreamingAnalysis goroutine")
+			}
 		}()
 
 		if m.VideoURL != "" {
@@ -403,7 +489,7 @@ func (m StreamingModel) startStreaming() tea.Cmd {
 }
 
 // performStreamingAnalysis performs the actual streaming analysis using Gemini client
-func (m StreamingModel) performStreamingAnalysis(ctx context.Context) {
+func (m *StreamingModel) performStreamingAnalysis(ctx context.Context) {
 	if m.logger != nil {
 		m.logger.Debug().
 			Str("component", "streaming").
@@ -413,7 +499,37 @@ func (m StreamingModel) performStreamingAnalysis(ctx context.Context) {
 			Msg("Starting streaming analysis goroutine")
 	}
 
-	var simulatedContent []string
+	// Create a streaming handler that sends messages to the TUI
+	handler := func(content string) error {
+		if m.logger != nil {
+			m.logger.Info().
+				Str("component", "streaming").
+				Int("contentLength", len(content)).
+				Bool("hasProgramRef", m.program != nil).
+				Msg("Handler received streaming content from Gemini")
+		}
+
+		// Send the content to the TUI via a tea command
+		if m.program != nil {
+			if m.logger != nil {
+				m.logger.Info().
+					Str("component", "streaming").
+					Str("contentPreview", content[:min(50, len(content))]).
+					Msg("Sending StreamingContentMsg via program.Send()")
+			}
+			m.program.Send(StreamingContentMsg{Content: content})
+		} else {
+			if m.logger != nil {
+				m.logger.Error().
+					Str("component", "streaming").
+					Msg("Program reference is nil, cannot send streaming content")
+			}
+		}
+		return nil
+	}
+
+	var analysis *models.TechnicalAnalysis
+	var err error
 
 	if m.VideoURL != "" {
 		if m.logger != nil {
@@ -421,104 +537,66 @@ func (m StreamingModel) performStreamingAnalysis(ctx context.Context) {
 				Str("component", "streaming").
 				Str("analysisType", "video").
 				Str("videoURL", m.VideoURL).
-				Msg("Preparing video analysis simulation")
+				Msg("Starting real video analysis streaming")
 		}
 
-		// Simulate video analysis streaming content
-		simulatedContent = []string{
-			"## 🎬 Video Analysis Started\n\n",
-			"**Analyzing video content...**\n\n",
-			"### 📊 Initial Assessment\n",
-			"- Video URL validated ✅\n",
-			"- Connecting to AI service ✅\n",
-			"- Processing video frames...\n\n",
-			"### 🔍 Content Analysis\n",
-			"- Extracting key topics...\n",
-			"- Analyzing engagement factors...\n",
-			"- Evaluating technical content...\n\n",
-			"### 🎯 Target Audience Detection\n",
-			"- Identifying primary demographics...\n",
-			"- Analyzing content complexity...\n",
-			"- Mapping to interest categories...\n\n",
-			"### 📈 Engagement Metrics\n",
-			"- Calculating viral potential...\n",
-			"- Assessing social media readiness...\n",
-			"- Generating recommendations...\n\n",
-			"### ✅ Analysis Complete\n",
-			"Finalizing results and structured data...\n\n",
+		// Use real Gemini streaming for video analysis
+		if geminiClient, ok := m.geminiClient.(*gemini.Client); ok {
+			if m.logger != nil {
+				m.logger.Debug().
+					Str("component", "streaming").
+					Str("function", "performStreamingAnalysis").
+					Msg("Found gemini client for video streaming")
+			}
+			analysis, err = geminiClient.AnalyzeVideoStreaming(ctx, m.VideoURL, handler)
+		} else {
+			if m.logger != nil {
+				m.logger.Error().
+					Str("component", "streaming").
+					Str("function", "performStreamingAnalysis").
+					Str("clientType", fmt.Sprintf("%T", m.geminiClient)).
+					Msg("Gemini client not available for video streaming")
+			}
+			err = fmt.Errorf("Gemini client not available for video streaming")
 		}
+
 	} else if m.Prompt != "" {
 		if m.logger != nil {
 			m.logger.Info().
 				Str("component", "streaming").
 				Str("analysisType", "text").
 				Str("prompt", m.Prompt).
-				Msg("Preparing text generation simulation")
+				Msg("Starting real text generation streaming")
 		}
 
-		// Simulate text generation streaming content
-		simulatedContent = []string{
-			"## 🤖 AI Text Generation Started\n\n",
-			fmt.Sprintf("**Processing prompt:** %s\n\n", m.Prompt),
-			"### 🧠 Thinking Process\n",
-			"- Understanding prompt context ✅\n",
-			"- Generating creative response...\n",
-			"- Applying language model knowledge...\n\n",
-			"### ✍️ Content Generation\n",
-			"- Crafting introduction...\n",
-			"- Developing main content...\n",
-			"- Adding creative elements...\n\n",
-			"### 🎨 Styling & Formatting\n",
-			"- Applying markdown formatting...\n",
-			"- Enhancing readability...\n",
-			"- Adding final touches...\n\n",
-			"### ✅ Generation Complete\n",
-			"Your creative content is ready!\n\n",
+		// Use real Gemini streaming for text generation
+		if geminiClient, ok := m.geminiClient.(*gemini.Client); ok {
+			textCallback := func(content string) {
+				handler(content) // Convert to error-returning handler
+			}
+			_, err = geminiClient.GenerateContentStreaming(ctx, m.Prompt, textCallback)
+		} else {
+			err = fmt.Errorf("Gemini client not available for text streaming")
 		}
 	}
 
-	if m.logger != nil {
-		m.logger.Debug().
-			Str("component", "streaming").
-			Int("contentChunks", len(simulatedContent)).
-			Msg("Starting content simulation loop")
-	}
-
-	for i, contentPart := range simulatedContent {
-		select {
-		case <-ctx.Done():
+	// Send completion message
+	if m.program != nil {
+		if err != nil {
 			if m.logger != nil {
-				m.logger.Warn().
+				m.logger.Error().
+					Err(err).
 					Str("component", "streaming").
-					Int("chunkIndex", i).
-					Int("totalChunks", len(simulatedContent)).
-					Msg("Streaming cancelled by context")
+					Msg("Streaming analysis failed")
 			}
-			return
-		default:
+			m.program.Send(StreamingErrorMsg{Error: err})
+		} else {
 			if m.logger != nil {
-				m.logger.Debug().
+				m.logger.Info().
 					Str("component", "streaming").
-					Int("chunkIndex", i).
-					Int("totalChunks", len(simulatedContent)).
-					Int("contentLength", len(contentPart)).
-					Msg("Processing content chunk")
+					Msg("Streaming analysis completed successfully")
 			}
-
-			// Send content update
-			time.Sleep(time.Millisecond * 500)
-			// In real implementation, this would be sent via tea.Cmd
-			// For now, we'll simulate the final result
-			_ = contentPart // Use the content part
-			if i == len(simulatedContent)-1 {
-				if m.logger != nil {
-					m.logger.Info().
-						Str("component", "streaming").
-						Msg("Simulation complete - all content chunks processed")
-				}
-				// Complete the analysis
-				break
-			}
+			m.program.Send(StreamingCompleteMsg{Analysis: analysis, Error: nil})
 		}
 	}
 
@@ -531,14 +609,14 @@ func (m StreamingModel) performStreamingAnalysis(ctx context.Context) {
 }
 
 // updateViewport updates the viewport content and scrolls to bottom
-func (m StreamingModel) updateViewport() {
+func (m *StreamingModel) updateViewport() {
 	content := m.getRenderedContent()
 	m.viewport.SetContent(content)
 	m.viewport.GotoBottom()
 }
 
 // getRenderedContent returns the rendered markdown content
-func (m StreamingModel) getRenderedContent() string {
+func (m *StreamingModel) getRenderedContent() string {
 	if m.renderer == nil {
 		return m.content
 	}

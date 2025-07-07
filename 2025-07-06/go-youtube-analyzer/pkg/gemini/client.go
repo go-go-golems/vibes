@@ -217,7 +217,7 @@ func (c *Client) GenerateContentStreaming(ctx context.Context, prompt string, ca
 
 	// Use the existing streaming infrastructure
 	resp, err := c.streamOrGenerate(ctx, modelName, contents, handler)
-	
+
 	duration := time.Since(startTime)
 	success := err == nil
 
