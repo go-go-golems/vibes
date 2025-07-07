@@ -10,7 +10,7 @@ import (
 	"github.com/user/youtube-analyzer-go/pkg/ui/view"
 )
 
-// InputModel handles the URL input screen
+// InputModel handles the URL/prompt input screen
 type InputModel struct {
 	Common    CommonState
 	textInput textinput.Model
@@ -21,10 +21,10 @@ type InputModel struct {
 // NewInputModel creates a new input model
 func NewInputModel(common CommonState) InputModel {
 	ti := textinput.New()
-	ti.Placeholder = "Enter YouTube URL (e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ)"
+	ti.Placeholder = "Enter YouTube URL or simple text prompt..."
 	ti.Focus()
-	ti.CharLimit = 256
-	ti.Width = 50
+	ti.CharLimit = 512
+	ti.Width = 60
 
 	return InputModel{
 		Common:    common,
@@ -55,22 +55,30 @@ func (m InputModel) Update(msg tea.Msg) (InputModel, tea.Cmd) {
 		case msg.String() == "ctrl+c":
 			return m, tea.Quit
 		case msg.String() == "enter":
-			url := strings.TrimSpace(m.textInput.Value())
-			if url == "" {
+			input := strings.TrimSpace(m.textInput.Value())
+			if input == "" {
 				m.err = nil
 				return m, nil
 			}
 
-			if !isValidYouTubeURL(url) {
-				m.err = NewInvalidURLError(url)
-				return m, nil
-			}
-
-			m.err = nil
-			return m, func() tea.Msg {
-				return ScreenChangeMsg{
-					Screen:   ScreenStreaming,
-					VideoURL: url,
+			// Check if it's a YouTube URL or a simple prompt
+			if isValidYouTubeURL(input) {
+				// Handle as video URL
+				m.err = nil
+				return m, func() tea.Msg {
+					return ScreenChangeMsg{
+						Screen:   ScreenStreaming,
+						VideoURL: input,
+					}
+				}
+			} else {
+				// Handle as simple text prompt
+				m.err = nil
+				return m, func() tea.Msg {
+					return ScreenChangeMsg{
+						Screen: ScreenStreaming,
+						Prompt: input,
+					}
 				}
 			}
 		case msg.String() == "esc":
@@ -96,14 +104,14 @@ func (m InputModel) View() string {
 	header := view.RenderHeader("🎬 YouTube Analyzer", width)
 
 	// Title and description
-	title := view.Styles.Title.Render("Enter YouTube URL")
+	title := view.Styles.Title.Render("Enter YouTube URL or Text Prompt")
 	description := view.Styles.Value.Render(
-		"Paste a YouTube URL to analyze the video for technical content,\n" +
-			"engagement potential, and social media optimization.",
+		"Paste a YouTube URL to analyze video content, or enter a simple text prompt\n" +
+			"for AI text generation with streaming output.",
 	)
 
 	// Input field
-	inputLabel := view.Styles.Label.Render("YouTube URL:")
+	inputLabel := view.Styles.Label.Render("Input:")
 
 	// Style the text input based on focus
 	var inputField string

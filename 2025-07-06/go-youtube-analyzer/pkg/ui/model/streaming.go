@@ -3,7 +3,6 @@ package model
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -14,6 +13,7 @@ import (
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/user/youtube-analyzer-go/internal/logger"
 	"github.com/user/youtube-analyzer-go/pkg/models"
 )
 
@@ -21,12 +21,13 @@ import (
 type StreamingModel struct {
 	Common         CommonState
 	VideoURL       string
+	Prompt         string
 	viewport       viewport.Model
 	progress       progress.Model
 	help           help.Model
 	keyMap         StreamingKeyMap
 	renderer       *glamour.TermRenderer
-	content        strings.Builder
+	content        string
 	isStreaming    bool
 	isPaused       bool
 	streamContext  context.Context
@@ -35,6 +36,7 @@ type StreamingModel struct {
 	err            error
 	statusMessage  string
 	lastUpdateTime time.Time
+	logger         *logger.Logger
 }
 
 // StreamingKeyMap defines key bindings for streaming screen
@@ -129,11 +131,12 @@ func NewStreamingModel(common CommonState) StreamingModel {
 		help:           help.New(),
 		keyMap:         DefaultStreamingKeyMap(),
 		renderer:       renderer,
-		content:        strings.Builder{},
+		content:        "",
 		isStreaming:    false,
 		isPaused:       false,
 		statusMessage:  "Initializing...",
 		lastUpdateTime: time.Now(),
+		logger:         nil, // Will be set by the main model
 	}
 }
 
@@ -216,23 +219,60 @@ func (m StreamingModel) Update(msg tea.Msg) (StreamingModel, tea.Cmd) {
 		}
 
 	case StreamingContentMsg:
+		if m.logger != nil {
+			m.logger.Debug().
+				Str("component", "streaming").
+				Int("contentLength", len(msg.Content)).
+				Bool("isPaused", m.isPaused).
+				Msg("Received streaming content message")
+		}
+
 		if !m.isPaused {
-			m.content.WriteString(msg.Content)
+			m.content += msg.Content
 			m.updateViewport()
-			m.statusMessage = fmt.Sprintf("Streaming... (%.1f KB received)", float64(m.content.Len())/1024)
+			m.statusMessage = fmt.Sprintf("Streaming... (%.1f KB received)", float64(len(m.content))/1024)
 			m.lastUpdateTime = time.Now()
+
+			if m.logger != nil {
+				m.logger.Debug().
+					Str("component", "streaming").
+					Int("totalContentLength", len(m.content)).
+					Float64("contentSizeKB", float64(len(m.content))/1024).
+					Msg("Updated streaming content")
+			}
 		}
 
 	case StreamingCompleteMsg:
+		if m.logger != nil {
+			m.logger.Info().
+				Str("component", "streaming").
+				Bool("hasAnalysis", msg.Analysis != nil).
+				Bool("hasError", msg.Error != nil).
+				Msg("Received streaming complete message")
+		}
+
 		m.isStreaming = false
 		m.analysis = msg.Analysis
 		m.statusMessage = "Analysis complete! Press Enter to view results."
 		if msg.Error != nil {
 			m.err = msg.Error
 			m.statusMessage = fmt.Sprintf("Error: %v", msg.Error)
+			if m.logger != nil {
+				m.logger.Error().
+					Err(msg.Error).
+					Str("component", "streaming").
+					Msg("Streaming completed with error")
+			}
 		}
 
 	case StreamingErrorMsg:
+		if m.logger != nil {
+			m.logger.Error().
+				Err(msg.Error).
+				Str("component", "streaming").
+				Msg("Received streaming error message")
+		}
+
 		m.isStreaming = false
 		m.err = msg.Error
 		m.statusMessage = fmt.Sprintf("Streaming error: %v", msg.Error)
@@ -295,8 +335,24 @@ func (m StreamingModel) View() string {
 // startStreaming starts the streaming analysis
 func (m StreamingModel) startStreaming() tea.Cmd {
 	return func() tea.Msg {
-		if m.VideoURL == "" {
-			return StreamingErrorMsg{Error: fmt.Errorf("no video URL provided")}
+		if m.logger != nil {
+			m.logger.Debug().
+				Str("component", "streaming").
+				Str("function", "startStreaming").
+				Str("videoURL", m.VideoURL).
+				Str("prompt", m.Prompt).
+				Msg("Starting streaming analysis")
+		}
+
+		if m.VideoURL == "" && m.Prompt == "" {
+			err := fmt.Errorf("no video URL or prompt provided")
+			if m.logger != nil {
+				m.logger.Error().
+					Err(err).
+					Str("component", "streaming").
+					Msg("No input provided for streaming")
+			}
+			return StreamingErrorMsg{Error: err}
 		}
 
 		// Create context for streaming
@@ -305,81 +361,192 @@ func (m StreamingModel) startStreaming() tea.Cmd {
 		m.streamCancel = cancel
 		m.isStreaming = true
 
+		if m.logger != nil {
+			m.logger.Info().
+				Str("component", "streaming").
+				Bool("isStreaming", m.isStreaming).
+				Bool("hasVideoURL", m.VideoURL != "").
+				Bool("hasPrompt", m.Prompt != "").
+				Msg("Streaming context created")
+		}
+
 		// Start streaming analysis in a goroutine
 		go func() {
+			if m.logger != nil {
+				m.logger.Debug().
+					Str("component", "streaming").
+					Msg("Starting performStreamingAnalysis goroutine")
+			}
 			m.performStreamingAnalysis(ctx)
 		}()
 
-		return StreamingContentMsg{Content: "🚀 Starting analysis...\n\n"}
+		if m.VideoURL != "" {
+			if m.logger != nil {
+				m.logger.Info().
+					Str("component", "streaming").
+					Str("type", "video_analysis").
+					Str("videoURL", m.VideoURL).
+					Msg("Starting video analysis streaming")
+			}
+			return StreamingContentMsg{Content: "🚀 Starting video analysis...\n\n"}
+		} else {
+			if m.logger != nil {
+				m.logger.Info().
+					Str("component", "streaming").
+					Str("type", "text_generation").
+					Str("prompt", m.Prompt).
+					Msg("Starting text generation streaming")
+			}
+			return StreamingContentMsg{Content: "🚀 Starting text generation...\n\n"}
+		}
 	}
 }
 
 // performStreamingAnalysis performs the actual streaming analysis using Gemini client
 func (m StreamingModel) performStreamingAnalysis(ctx context.Context) {
-	// This method will be called in a goroutine
-	// We need to send messages back to the TUI through channels or similar mechanism
+	if m.logger != nil {
+		m.logger.Debug().
+			Str("component", "streaming").
+			Str("function", "performStreamingAnalysis").
+			Str("videoURL", m.VideoURL).
+			Str("prompt", m.Prompt).
+			Msg("Starting streaming analysis goroutine")
+	}
 
-	// For now, let's simulate streaming content as the real implementation would require
-	// integration with the tea.Program to send messages back
+	var simulatedContent []string
 
-	// Simulate streaming content
-	simulatedContent := []string{
-		"## 🎬 Video Analysis Started\n\n",
-		"**Analyzing video content...**\n\n",
-		"### 📊 Initial Assessment\n",
-		"- Video URL validated ✅\n",
-		"- Connecting to AI service ✅\n",
-		"- Processing video frames...\n\n",
-		"### 🔍 Content Analysis\n",
-		"- Extracting key topics...\n",
-		"- Analyzing engagement factors...\n",
-		"- Evaluating technical content...\n\n",
-		"### 🎯 Target Audience Detection\n",
-		"- Identifying primary demographics...\n",
-		"- Analyzing content complexity...\n",
-		"- Mapping to interest categories...\n\n",
-		"### 📈 Engagement Metrics\n",
-		"- Calculating viral potential...\n",
-		"- Assessing social media readiness...\n",
-		"- Generating recommendations...\n\n",
-		"### ✅ Analysis Complete\n",
-		"Finalizing results and structured data...\n\n",
+	if m.VideoURL != "" {
+		if m.logger != nil {
+			m.logger.Info().
+				Str("component", "streaming").
+				Str("analysisType", "video").
+				Str("videoURL", m.VideoURL).
+				Msg("Preparing video analysis simulation")
+		}
+
+		// Simulate video analysis streaming content
+		simulatedContent = []string{
+			"## 🎬 Video Analysis Started\n\n",
+			"**Analyzing video content...**\n\n",
+			"### 📊 Initial Assessment\n",
+			"- Video URL validated ✅\n",
+			"- Connecting to AI service ✅\n",
+			"- Processing video frames...\n\n",
+			"### 🔍 Content Analysis\n",
+			"- Extracting key topics...\n",
+			"- Analyzing engagement factors...\n",
+			"- Evaluating technical content...\n\n",
+			"### 🎯 Target Audience Detection\n",
+			"- Identifying primary demographics...\n",
+			"- Analyzing content complexity...\n",
+			"- Mapping to interest categories...\n\n",
+			"### 📈 Engagement Metrics\n",
+			"- Calculating viral potential...\n",
+			"- Assessing social media readiness...\n",
+			"- Generating recommendations...\n\n",
+			"### ✅ Analysis Complete\n",
+			"Finalizing results and structured data...\n\n",
+		}
+	} else if m.Prompt != "" {
+		if m.logger != nil {
+			m.logger.Info().
+				Str("component", "streaming").
+				Str("analysisType", "text").
+				Str("prompt", m.Prompt).
+				Msg("Preparing text generation simulation")
+		}
+
+		// Simulate text generation streaming content
+		simulatedContent = []string{
+			"## 🤖 AI Text Generation Started\n\n",
+			fmt.Sprintf("**Processing prompt:** %s\n\n", m.Prompt),
+			"### 🧠 Thinking Process\n",
+			"- Understanding prompt context ✅\n",
+			"- Generating creative response...\n",
+			"- Applying language model knowledge...\n\n",
+			"### ✍️ Content Generation\n",
+			"- Crafting introduction...\n",
+			"- Developing main content...\n",
+			"- Adding creative elements...\n\n",
+			"### 🎨 Styling & Formatting\n",
+			"- Applying markdown formatting...\n",
+			"- Enhancing readability...\n",
+			"- Adding final touches...\n\n",
+			"### ✅ Generation Complete\n",
+			"Your creative content is ready!\n\n",
+		}
+	}
+
+	if m.logger != nil {
+		m.logger.Debug().
+			Str("component", "streaming").
+			Int("contentChunks", len(simulatedContent)).
+			Msg("Starting content simulation loop")
 	}
 
 	for i, contentPart := range simulatedContent {
 		select {
 		case <-ctx.Done():
+			if m.logger != nil {
+				m.logger.Warn().
+					Str("component", "streaming").
+					Int("chunkIndex", i).
+					Int("totalChunks", len(simulatedContent)).
+					Msg("Streaming cancelled by context")
+			}
 			return
 		default:
+			if m.logger != nil {
+				m.logger.Debug().
+					Str("component", "streaming").
+					Int("chunkIndex", i).
+					Int("totalChunks", len(simulatedContent)).
+					Int("contentLength", len(contentPart)).
+					Msg("Processing content chunk")
+			}
+
 			// Send content update
 			time.Sleep(time.Millisecond * 500)
 			// In real implementation, this would be sent via tea.Cmd
 			// For now, we'll simulate the final result
 			_ = contentPart // Use the content part
 			if i == len(simulatedContent)-1 {
+				if m.logger != nil {
+					m.logger.Info().
+						Str("component", "streaming").
+						Msg("Simulation complete - all content chunks processed")
+				}
 				// Complete the analysis
 				break
 			}
 		}
 	}
+
+	if m.logger != nil {
+		m.logger.Debug().
+			Str("component", "streaming").
+			Str("function", "performStreamingAnalysis").
+			Msg("Streaming analysis goroutine completed")
+	}
 }
 
 // updateViewport updates the viewport content and scrolls to bottom
-func (m *StreamingModel) updateViewport() {
-	m.viewport.SetContent(m.getRenderedContent())
+func (m StreamingModel) updateViewport() {
+	content := m.getRenderedContent()
+	m.viewport.SetContent(content)
 	m.viewport.GotoBottom()
 }
 
 // getRenderedContent returns the rendered markdown content
 func (m StreamingModel) getRenderedContent() string {
 	if m.renderer == nil {
-		return m.content.String()
+		return m.content
 	}
 
-	rendered, err := m.renderer.Render(m.content.String())
+	rendered, err := m.renderer.Render(m.content)
 	if err != nil {
 		// Fallback to raw content if rendering fails
-		return m.content.String()
+		return m.content
 	}
 
 	return rendered

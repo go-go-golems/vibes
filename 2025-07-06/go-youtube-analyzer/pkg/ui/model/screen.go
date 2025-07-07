@@ -113,6 +113,8 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.InputModel.Init()
 		case ScreenStreaming:
 			m.StreamingModel.VideoURL = msg.VideoURL
+			m.StreamingModel.Prompt = msg.Prompt
+			m.StreamingModel.logger = m.Common.Logger
 			return m, m.StreamingModel.Init()
 		}
 
@@ -162,6 +164,7 @@ func (m MainModel) View() string {
 type ScreenChangeMsg struct {
 	Screen   Screen
 	VideoURL string
+	Prompt   string
 	Analysis *models.TechnicalAnalysis
 	Error    error
 }

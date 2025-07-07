@@ -50,7 +50,7 @@ func New(cfg *config.Config, log *logger.Logger) (*Client, error) {
 	}
 
 	modelName := cfg.GetModelName()
-	log.Info(fmt.Sprintf("🤖 Initialized Gemini client with model: %s", modelName))
+	log.Info().Msgf("🤖 Initialized Gemini client with model: %s", modelName)
 
 	return &Client{
 		client: client,
@@ -70,11 +70,21 @@ func (c *Client) AnalyzeVideo(ctx context.Context, videoURL string) (*models.Tec
 	c.callCount++
 	startTime := time.Now()
 
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "AnalyzeVideo").
+		Str("videoURL", videoURL).
+		Int("callCount", c.callCount).
+		Msg("Starting video analysis")
+
 	// Create the prompt
 	prompt := c.CreateTechnicalPrompt()
 
-	c.logger.Info(fmt.Sprintf("🎬 Starting video analysis for: %s", videoURL))
-	c.logger.Info(fmt.Sprintf("📝 Using prompt length: %d characters", len(prompt)))
+	c.logger.Debug().
+		Str("component", "gemini").
+		Int("promptLength", len(prompt)).
+		Str("promptPreview", prompt[:min(200, len(prompt))]).
+		Msg("Created technical prompt")
 
 	// Create the request content with YouTube video FileData
 	modelName := c.config.GetModelName()
@@ -91,14 +101,22 @@ func (c *Client) AnalyzeVideo(ctx context.Context, videoURL string) (*models.Tec
 		},
 	}
 
-	// Debug: Show the full request body
-	c.logger.Info("📋 Full request body to Gemini:")
-	c.logger.Info(fmt.Sprintf("  Model: %s", modelName))
-	c.logger.Info(fmt.Sprintf("  Content Role: %s", contents[0].Role))
-	c.logger.Info(fmt.Sprintf("  Part 1: Text prompt (%d characters)", len(prompt)))
-	c.logger.Info(fmt.Sprintf("  Part 2: FileData - URI: %s, MIME: %s", videoURL, "video/mp4"))
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("modelName", modelName).
+		Str("contentRole", contents[0].Role).
+		Int("contentParts", len(contents[0].Parts)).
+		Str("fileURI", videoURL).
+		Str("mimeType", "video/mp4").
+		Msg("Created request content with video FileData")
 
 	// Make the API call
+	c.logger.Info().
+		Str("component", "gemini").
+		Str("videoURL", videoURL).
+		Str("modelName", modelName).
+		Msg("Making Gemini API call for video analysis")
+
 	resp, err := c.client.Models.GenerateContent(ctx, modelName, contents, nil)
 
 	duration := time.Since(startTime)
@@ -108,20 +126,51 @@ func (c *Client) AnalyzeVideo(ctx context.Context, videoURL string) (*models.Tec
 	c.logger.APICall(c.callCount, c.config.GetModelName(), "video_analysis", duration, success)
 
 	if err != nil {
+		c.logger.Error().
+			Err(err).
+			Str("component", "gemini").
+			Str("function", "AnalyzeVideo").
+			Str("videoURL", videoURL).
+			Dur("duration", duration).
+			Msg("Video analysis API call failed")
 		return nil, fmt.Errorf("Gemini API call failed: %w", err)
 	}
 
 	// Extract the response text
 	responseText := resp.Text()
 	if responseText == "" {
+		c.logger.Error().
+			Str("component", "gemini").
+			Str("function", "AnalyzeVideo").
+			Str("videoURL", videoURL).
+			Msg("Empty response from Gemini API")
 		return nil, fmt.Errorf("empty response from Gemini API")
 	}
 
-	c.logger.Info(fmt.Sprintf("✅ Received response: %d characters", len(responseText)))
+	c.logger.Info().
+		Str("component", "gemini").
+		Str("function", "AnalyzeVideo").
+		Str("videoURL", videoURL).
+		Int("responseLength", len(responseText)).
+		Dur("duration", duration).
+		Msg("Video analysis completed successfully")
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("responsePreview", responseText[:min(500, len(responseText))]).
+		Msg("Response preview")
 
 	// Parse the response into structured data
 	analysis := c.parseResponse(responseText)
 	analysis.RawResponse = responseText
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "AnalyzeVideo").
+		Int("technologiesCount", len(analysis.Technologies)).
+		Float64("technicalScore", analysis.TechnicalScore).
+		Float64("viralPotential", analysis.ViralPotential).
+		Msg("Video analysis parsing completed")
 
 	return analysis, nil
 }
@@ -131,7 +180,12 @@ func (c *Client) GenerateContentStreaming(ctx context.Context, prompt string, ca
 	c.callCount++
 	startTime := time.Now()
 
-	c.logger.Info(fmt.Sprintf("🎬 Starting streaming generation for prompt: %s", prompt[:min(50, len(prompt))]))
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "GenerateContentStreaming").
+		Int("promptLength", len(prompt)).
+		Str("promptPreview", prompt[:min(50, len(prompt))]).
+		Msg("Starting streaming generation")
 
 	// Create the request content
 	modelName := c.config.GetModelName()
@@ -144,8 +198,19 @@ func (c *Client) GenerateContentStreaming(ctx context.Context, prompt string, ca
 		},
 	}
 
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("modelName", modelName).
+		Int("contentParts", len(contents[0].Parts)).
+		Msg("Created request content for streaming generation")
+
 	// Create a handler that converts to the callback format
 	handler := func(content string) error {
+		c.logger.Debug().
+			Str("component", "gemini").
+			Int("contentLength", len(content)).
+			Str("contentPreview", content[:min(50, len(content))]).
+			Msg("Streaming content chunk received")
 		callback(content)
 		return nil
 	}
@@ -160,14 +225,31 @@ func (c *Client) GenerateContentStreaming(ctx context.Context, prompt string, ca
 	c.logger.APICall(c.callCount, c.config.GetModelName(), "streaming_generation", duration, success)
 
 	if err != nil {
+		c.logger.Error().
+			Err(err).
+			Str("component", "gemini").
+			Str("function", "GenerateContentStreaming").
+			Dur("duration", duration).
+			Msg("Streaming generation failed")
 		return "", fmt.Errorf("Gemini API call failed: %w", err)
 	}
 
 	// Extract the response text
 	responseText := resp.Text()
 	if responseText == "" {
+		c.logger.Error().
+			Str("component", "gemini").
+			Str("function", "GenerateContentStreaming").
+			Msg("Empty response from Gemini API")
 		return "", fmt.Errorf("empty response from Gemini API")
 	}
+
+	c.logger.Info().
+		Str("component", "gemini").
+		Str("function", "GenerateContentStreaming").
+		Int("responseLength", len(responseText)).
+		Dur("duration", duration).
+		Msg("Streaming generation completed successfully")
 
 	return responseText, nil
 }
@@ -188,11 +270,22 @@ func (c *Client) AnalyzeVideoStreaming(ctx context.Context, videoURL string, han
 	c.callCount++
 	startTime := time.Now()
 
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "AnalyzeVideoStreaming").
+		Str("videoURL", videoURL).
+		Int("callCount", c.callCount).
+		Bool("hasHandler", handler != nil).
+		Msg("Starting streaming video analysis")
+
 	// Create the prompt
 	prompt := c.CreateTechnicalPrompt()
 
-	c.logger.Info(fmt.Sprintf("🎬 Starting streaming video analysis for: %s", videoURL))
-	c.logger.Info(fmt.Sprintf("📝 Using prompt length: %d characters", len(prompt)))
+	c.logger.Debug().
+		Str("component", "gemini").
+		Int("promptLength", len(prompt)).
+		Str("promptPreview", prompt[:min(200, len(prompt))]).
+		Msg("Created technical prompt for streaming")
 
 	// Create the request content with YouTube video FileData
 	modelName := c.config.GetModelName()
@@ -209,14 +302,22 @@ func (c *Client) AnalyzeVideoStreaming(ctx context.Context, videoURL string, han
 		},
 	}
 
-	// Debug: Show the full request body
-	c.logger.Info("📋 Full request body to Gemini:")
-	c.logger.Info(fmt.Sprintf("  Model: %s", modelName))
-	c.logger.Info(fmt.Sprintf("  Content Role: %s", contents[0].Role))
-	c.logger.Info(fmt.Sprintf("  Part 1: Text prompt (%d characters)", len(prompt)))
-	c.logger.Info(fmt.Sprintf("  Part 2: FileData - URI: %s, MIME: %s", videoURL, "video/mp4"))
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("modelName", modelName).
+		Str("contentRole", contents[0].Role).
+		Int("contentParts", len(contents[0].Parts)).
+		Str("fileURI", videoURL).
+		Str("mimeType", "video/mp4").
+		Msg("Created request content for streaming video analysis")
 
 	// Try to use streaming if supported, otherwise fallback to regular generation
+	c.logger.Info().
+		Str("component", "gemini").
+		Str("videoURL", videoURL).
+		Str("modelName", modelName).
+		Msg("Starting streaming API call for video analysis")
+
 	resp, err := c.streamOrGenerate(ctx, modelName, contents, handler)
 
 	duration := time.Since(startTime)
@@ -226,34 +327,84 @@ func (c *Client) AnalyzeVideoStreaming(ctx context.Context, videoURL string, han
 	c.logger.APICall(c.callCount, c.config.GetModelName(), "streaming_video_analysis", duration, success)
 
 	if err != nil {
+		c.logger.Error().
+			Err(err).
+			Str("component", "gemini").
+			Str("function", "AnalyzeVideoStreaming").
+			Str("videoURL", videoURL).
+			Dur("duration", duration).
+			Msg("Streaming video analysis API call failed")
 		return nil, fmt.Errorf("Gemini streaming API call failed: %w", err)
 	}
 
 	// Extract the response text
 	responseText := resp.Text()
 	if responseText == "" {
+		c.logger.Error().
+			Str("component", "gemini").
+			Str("function", "AnalyzeVideoStreaming").
+			Str("videoURL", videoURL).
+			Msg("Empty response from Gemini streaming API")
 		return nil, fmt.Errorf("empty response from Gemini streaming API")
 	}
 
-	c.logger.Info(fmt.Sprintf("✅ Received streaming response: %d characters", len(responseText)))
+	c.logger.Info().
+		Str("component", "gemini").
+		Str("function", "AnalyzeVideoStreaming").
+		Str("videoURL", videoURL).
+		Int("responseLength", len(responseText)).
+		Dur("duration", duration).
+		Msg("Streaming video analysis completed successfully")
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("responsePreview", responseText[:min(500, len(responseText))]).
+		Msg("Streaming response preview")
 
 	// Parse the response into structured data
 	analysis := c.parseResponse(responseText)
 	analysis.RawResponse = responseText
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "AnalyzeVideoStreaming").
+		Int("technologiesCount", len(analysis.Technologies)).
+		Float64("technicalScore", analysis.TechnicalScore).
+		Float64("viralPotential", analysis.ViralPotential).
+		Msg("Streaming video analysis parsing completed")
 
 	return analysis, nil
 }
 
 // streamOrGenerate attempts to stream content, falling back to regular generation
 func (c *Client) streamOrGenerate(ctx context.Context, modelName string, contents []*genai.Content, handler StreamingContentHandler) (*genai.GenerateContentResponse, error) {
-	// For now, simulate streaming by sending the regular response in chunks
-	// TODO: Implement actual streaming when genai library supports it
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "streamOrGenerate").
+		Str("modelName", modelName).
+		Int("contentCount", len(contents)).
+		Bool("hasHandler", handler != nil).
+		Msg("Starting stream or generate")
 
 	// Make the regular API call first
+	c.logger.Debug().
+		Str("component", "gemini").
+		Msg("Making regular API call for streaming simulation")
+
 	resp, err := c.client.Models.GenerateContent(ctx, modelName, contents, nil)
 	if err != nil {
+		c.logger.Error().
+			Err(err).
+			Str("component", "gemini").
+			Str("function", "streamOrGenerate").
+			Msg("Regular API call failed")
 		return nil, err
 	}
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Int("responseLength", len(resp.Text())).
+		Msg("Regular API call completed, starting streaming simulation")
 
 	// Simulate streaming by sending content in chunks
 	if handler != nil {
@@ -261,20 +412,41 @@ func (c *Client) streamOrGenerate(ctx context.Context, modelName string, content
 		c.simulateStreaming(responseText, handler)
 	}
 
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "streamOrGenerate").
+		Msg("Stream or generate completed")
+
 	return resp, nil
 }
 
 // simulateStreaming simulates streaming by sending content in chunks
 func (c *Client) simulateStreaming(content string, handler StreamingContentHandler) {
 	if handler == nil {
+		c.logger.Debug().
+			Str("component", "gemini").
+			Str("function", "simulateStreaming").
+			Msg("No handler provided, skipping streaming simulation")
 		return
 	}
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "simulateStreaming").
+		Int("contentLength", len(content)).
+		Msg("Starting streaming simulation")
 
 	// Split content into logical chunks (by paragraphs/sections)
 	lines := strings.Split(content, "\n")
 	var currentChunk strings.Builder
+	chunkIndex := 0
 
-	for _, line := range lines {
+	c.logger.Debug().
+		Str("component", "gemini").
+		Int("totalLines", len(lines)).
+		Msg("Processing content lines for streaming")
+
+	for lineIndex, line := range lines {
 		currentChunk.WriteString(line + "\n")
 
 		// Send chunk when we hit a section boundary or every few lines
@@ -282,9 +454,23 @@ func (c *Client) simulateStreaming(content string, handler StreamingContentHandl
 			strings.TrimSpace(line) == "" || currentChunk.Len() > 200 {
 
 			if currentChunk.Len() > 0 {
+				chunkIndex++
+				c.logger.Debug().
+					Str("component", "gemini").
+					Int("chunkIndex", chunkIndex).
+					Int("chunkLength", currentChunk.Len()).
+					Int("lineIndex", lineIndex).
+					Str("trigger", getTrigger(line)).
+					Msg("Sending streaming chunk")
+
 				// Send the chunk
 				if err := handler(currentChunk.String()); err != nil {
-					c.logger.Info(fmt.Sprintf("❌ Handler error: %v", err))
+					c.logger.Error().
+						Err(err).
+						Str("component", "gemini").
+						Str("function", "simulateStreaming").
+						Int("chunkIndex", chunkIndex).
+						Msg("Handler error during streaming")
 					return
 				}
 
@@ -297,8 +483,42 @@ func (c *Client) simulateStreaming(content string, handler StreamingContentHandl
 
 	// Send any remaining content
 	if currentChunk.Len() > 0 {
-		handler(currentChunk.String())
+		chunkIndex++
+		c.logger.Debug().
+			Str("component", "gemini").
+			Int("chunkIndex", chunkIndex).
+			Int("chunkLength", currentChunk.Len()).
+			Msg("Sending final streaming chunk")
+
+		if err := handler(currentChunk.String()); err != nil {
+			c.logger.Error().
+				Err(err).
+				Str("component", "gemini").
+				Str("function", "simulateStreaming").
+				Int("chunkIndex", chunkIndex).
+				Msg("Handler error during final streaming chunk")
+		}
 	}
+
+	c.logger.Debug().
+		Str("component", "gemini").
+		Str("function", "simulateStreaming").
+		Int("totalChunks", chunkIndex).
+		Msg("Streaming simulation completed")
+}
+
+// getTrigger returns the trigger that caused a chunk to be sent
+func getTrigger(line string) string {
+	if strings.HasPrefix(line, "##") {
+		return "h2_header"
+	}
+	if strings.HasPrefix(line, "###") {
+		return "h3_header"
+	}
+	if strings.TrimSpace(line) == "" {
+		return "empty_line"
+	}
+	return "size_limit"
 }
 
 // CreateTechnicalPrompt creates the social media analysis prompt
@@ -406,7 +626,7 @@ func (c *Client) parseResponse(response string) *models.TechnicalAnalysis {
 	structuredData, err := c.extractStructuredData(response)
 	if err != nil {
 		if c.logger != nil {
-			c.logger.Info(fmt.Sprintf("⚠️  Failed to extract structured data: %v", err))
+			c.logger.Info().Msgf("⚠️  Failed to extract structured data: %v", err)
 		}
 		// Fall back to mock data if structured extraction fails
 		c.populateWithFallbackData(analysis)
@@ -450,7 +670,7 @@ func (c *Client) extractStructuredData(response string) (*StructuredData, error)
 	}
 
 	if c.logger != nil {
-		c.logger.Info(fmt.Sprintf("✅ Successfully extracted structured data with %d topics", len(data.Topics)))
+		c.logger.Info().Msgf("✅ Successfully extracted structured data with %d topics", len(data.Topics))
 	}
 	return &data, nil
 }
@@ -493,7 +713,7 @@ func (c *Client) extractYAMLBlock(response string) string {
 // populateWithFallbackData populates the analysis with fallback data if YAML extraction fails
 func (c *Client) populateWithFallbackData(analysis *models.TechnicalAnalysis) {
 	if c.logger != nil {
-		c.logger.Info("🔄 Using fallback data due to YAML parsing failure")
+		c.logger.Info().Msg("🔄 Using fallback data due to YAML parsing failure")
 	}
 
 	analysis.Technologies = []string{"Content analysis", "Social media optimization", "Video engagement"}
