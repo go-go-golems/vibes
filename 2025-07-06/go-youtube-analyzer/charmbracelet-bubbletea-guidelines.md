@@ -70,6 +70,69 @@ func (m model) View() string { return renderUI(m) }
 * Never mutate the model from a goroutine; instead return a `tea.Cmd` and handle its message in `Update`.
 * Routinely handle `tea.WindowSizeMsg` at the root model and propagate it to child components so everyone can re-flow. ([github.com][5], [leg100.github.io][1])
 
+##### 4.1 Injecting Async Events 🔄
+
+When working with async operations (API calls, streaming data, long-running tasks), use these patterns:
+
+**Pattern 1: tea.Cmd for simple async operations**
+```go
+func callAPI() tea.Cmd {
+    return func() tea.Msg {
+        result, err := someAPICall()
+        if err != nil {
+            return errMsg{err}
+        }
+        return apiResultMsg{result}
+    }
+}
+```
+
+**Pattern 2: program.Send() for streaming/continuous updates**
+```go
+type Model struct {
+    program *tea.Program  // Reference to the tea program
+}
+
+func (m Model) startStreaming() tea.Cmd {
+    return func() tea.Msg {
+        go func() {
+            for chunk := range streamingSource {
+                // Send messages from goroutine to TUI
+                m.program.Send(streamingMsg{chunk})
+            }
+            m.program.Send(streamingCompleteMsg{})
+        }()
+        return streamingStartedMsg{}
+    }
+}
+```
+
+**Pattern 3: Tick-based polling**
+```go
+func (m Model) Init() tea.Cmd {
+    return tea.Tick(time.Second, func(time.Time) tea.Msg {
+        return tickMsg{}
+    })
+}
+
+func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+    switch msg := msg.(type) {
+    case tickMsg:
+        // Check for updates, send next tick
+        return m, tea.Tick(time.Second, func(time.Time) tea.Msg {
+            return tickMsg{}
+        })
+    }
+}
+```
+
+**Important Rules:**
+- ✅ Use `program.Send()` for streaming/real-time updates from goroutines
+- ✅ Use `tea.Cmd` for single async operations that return once
+- ✅ Use `tea.Tick()` for periodic polling/updates
+- ❌ Never directly mutate the model from a goroutine
+- ❌ Never call UI methods from goroutines (use messages instead)
+
 ---
 
 #### 5. Prefer official **Bubbles** before rolling your own 🧩

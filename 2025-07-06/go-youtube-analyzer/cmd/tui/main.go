@@ -100,7 +100,10 @@ func runTUI(cmd *cobra.Command, args []string) error {
 	m := uimodel.NewMainModel(geminiClient, cfg, log, inputVideoURL)
 
 	// Create tea program
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	p := tea.NewProgram(m)
+
+	// Set the program reference for streaming
+	m.SetProgram(p)
 
 	// Run the program
 	if _, err := p.Run(); err != nil {

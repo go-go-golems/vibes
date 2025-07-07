@@ -111,10 +111,10 @@ func init() {
 
 	// Add TUI command
 	rootCmd.AddCommand(createTUICmd())
-	
+
 	// Add stream command
 	rootCmd.AddCommand(createStreamCmd())
-	
+
 	// Add video stream command
 	rootCmd.AddCommand(createVideoStreamCmd())
 }
@@ -537,6 +537,9 @@ func runTUI(apiKey, mode, model, logLevel string, verbose bool) error {
 	// Create tea program
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
+	// Set the program reference for streaming
+	m.SetProgram(p)
+
 	// Run the program
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("error running TUI: %w", err)
@@ -631,18 +634,18 @@ func runStreamingDemo(client *gemini.Client, prompt, style string) error {
 	// Set up streaming callback
 	var accumulatedContent strings.Builder
 	startTime := time.Now()
-	
+
 	callback := func(content string) {
 		accumulatedContent.WriteString(content)
-		
+
 		// Clear screen and show updated content
 		fmt.Print("\033[H\033[2J") // Clear screen
-		
+
 		// Show header
 		elapsed := time.Since(startTime)
 		fmt.Printf("🔄 Streaming Response (%.1fs elapsed)\n", elapsed.Seconds())
 		fmt.Printf("%s\n\n", strings.Repeat("=", 50))
-		
+
 		// Render markdown
 		rendered, err := renderer.Render(accumulatedContent.String())
 		if err != nil {
@@ -651,14 +654,14 @@ func runStreamingDemo(client *gemini.Client, prompt, style string) error {
 		} else {
 			fmt.Print(rendered)
 		}
-		
+
 		// Add streaming indicator
 		fmt.Printf("\n%s\n", strings.Repeat(".", int(elapsed.Seconds())%4+1))
 	}
 
 	// Start streaming
 	fmt.Printf("🎬 Starting streaming generation...\n\n")
-	
+
 	ctx := context.Background()
 	response, err := client.GenerateContentStreaming(ctx, prompt, callback)
 	if err != nil {
@@ -670,7 +673,7 @@ func runStreamingDemo(client *gemini.Client, prompt, style string) error {
 	elapsed := time.Since(startTime)
 	fmt.Printf("✅ Streaming Complete (%.1fs total)\n", elapsed.Seconds())
 	fmt.Printf("%s\n\n", strings.Repeat("=", 50))
-	
+
 	// Final render of complete content
 	rendered, err := renderer.Render(response)
 	if err != nil {
@@ -678,10 +681,10 @@ func runStreamingDemo(client *gemini.Client, prompt, style string) error {
 	} else {
 		fmt.Print(rendered)
 	}
-	
+
 	fmt.Printf("\n%s\n", strings.Repeat("=", 50))
 	fmt.Printf("📊 Stats: %d characters, %.1fs duration\n", len(response), elapsed.Seconds())
-	
+
 	return nil
 }
 
@@ -762,12 +765,12 @@ func runVideoStream(videoURL, model, style string) error {
 	fmt.Println()
 
 	var content strings.Builder
-	
+
 	// Create streaming handler
 	handler := func(chunk string) error {
 		// Add chunk to accumulated content
 		content.WriteString(chunk)
-		
+
 		// Render and display the chunk
 		rendered, err := renderer.Render(chunk)
 		if err != nil {
@@ -776,7 +779,7 @@ func runVideoStream(videoURL, model, style string) error {
 		} else {
 			fmt.Print(rendered)
 		}
-		
+
 		return nil
 	}
 
@@ -792,13 +795,13 @@ func runVideoStream(videoURL, model, style string) error {
 	}
 
 	elapsed := time.Since(start)
-	
+
 	fmt.Printf("\n\n==================================================\n")
 	fmt.Printf("✅ Streaming analysis complete!\n")
 	fmt.Printf("📊 Stats: %d characters, %.1fs duration\n", len(content.String()), elapsed.Seconds())
 	fmt.Printf("🎯 Technical Score: %.1f/10\n", analysis.TechnicalScore)
 	fmt.Printf("🚀 Viral Potential: %.1f/10\n", analysis.ViralPotential)
 	fmt.Printf("👥 Target Audience: %s\n", analysis.TargetAudience)
-	
+
 	return nil
 }
