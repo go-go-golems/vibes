@@ -1,0 +1,71 @@
+# Drone Workflow Platform Configuration
+
+# Service Configuration
+services:
+  workflow:
+    port: 50051
+    timeout: 30s
+    
+  stage:
+    port: 50052
+    timeout: 30s
+    
+  quality:
+    port: 50053
+    timeout: 30s
+    
+  documentation:
+    port: 50054
+    timeout: 30s
+
+# Redis Configuration
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+  pool_size: 10
+  timeout: 5s
+
+# Watermill Configuration
+watermill:
+  consumer_group: "drone-workflow-platform"
+  log_level: "INFO"
+  
+# Workflow Configuration
+workflow:
+  default_timeout: "1h"
+  max_parallel_stages: 10
+  retry_attempts: 3
+  
+# Quality Configuration
+quality:
+  default_threshold: 0.95
+  check_timeout: "5m"
+  
+# Documentation Configuration
+documentation:
+  base_path: "/docs/manufacturing/"
+  document_server: "https://docs.company.com/"
+  cache_ttl: "1h"
+  
+# Monitoring Configuration
+monitoring:
+  dashboard_refresh: "5s"
+  health_check_interval: "30s"
+  metrics_retention: "24h"
+  
+# Security Configuration
+security:
+  clearance_levels:
+    - "public"
+    - "internal" 
+    - "restricted"
+    - "confidential"
+  default_clearance: "internal"
+  
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"
+  output: "stdout"
+

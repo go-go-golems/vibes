@@ -1,0 +1,407 @@
+syntax = "proto3";
+
+package drone.workflow.v1;
+
+option go_package = "github.com/drone-workflow-platform/pkg/models";
+
+message Workflow {
+  string name = 1;
+  string version = 2;
+  string drone_model = 3;
+  WorkflowSettings settings = 4;
+  Documentation documentation = 5;
+  repeated Material materials = 6;
+  repeated Stage stages = 7;
+}
+
+message WorkflowSettings {
+  int32 parallel_stations = 1;
+  float quality_threshold = 2;
+  int32 batch_size = 3;
+}
+
+message Documentation {
+  string base_path = 1;
+  string document_server = 2;
+
+  repeated DocumentStandard standards = 3;
+  repeated DocumentProcedure procedures = 4;
+  repeated DocumentSpecification specifications = 5;
+  repeated DocumentDrawing drawings = 6;
+  repeated DocumentLink document_links = 7;
+}
+
+message DocumentStandard {
+  string id = 1;
+  string title = 2;
+  string type = 3; // enum iso, iec, faa, ce, fcc, internal
+  string number = 4;
+  string version = 5;
+  string url = 6;
+  repeated string sections = 7;
+  bool mandatory = 8;
+}
+
+message DocumentProcedure {
+  string id = 1;
+  string title = 2;
+  string type = 3; // enum sop, work_instruction, safety, quality
+  string document_id = 4;
+  string version = 5;
+  string url = 6;
+  string last_updated = 7;
+  string approval_level = 8; // enum operator, supervisor, engineer, manager
+}
+
+message DocumentSpecification {
+  string id = 1;
+  string title = 2;
+  string type = 3; // enum component, assembly, testing, material
+  string part_number = 4;
+  string revision = 5;
+  string url = 6;
+  repeated string drawing_numbers = 7;
+}
+
+message DocumentDrawing {
+  string id = 1;
+  string title = 2;
+  string type = 3; // enum assembly, detail, schematic, layout
+  string drawing_number = 4;
+  string revision = 5;
+  string scale = 6;
+  string format = 7; // enum pdf, dwg, step, iges
+  string url = 8;
+  int32 sheets = 9;
+}
+
+message DocumentLink {
+  string from_doc = 1;
+  string to_doc = 2;
+  string relationship = 3; // enum references, supersedes, supplements, implements
+  string notes = 4;
+}
+
+message Material {
+  string id = 1;
+  string name = 2;
+  string type = 3; // enum component, raw_material, tool
+  int32 quantity = 4;
+  string supplier = 5;
+  bool inspection_required = 6;
+}
+
+message Stage {
+  string id = 1;
+  string name = 2;
+  string type = 3; // enum assembly, inspection, testing, packaging
+
+  repeated string depends_on = 4;
+
+  StageInputs inputs = 5;
+  StageProcess process = 6;
+  repeated QualityCheck quality_checks = 7;
+  repeated StageOutput outputs = 8;
+  FailureHandling on_failure = 9;
+}
+
+message StageInputs {
+  repeated string materials = 1;
+  repeated string tools = 2;
+}
+
+message StageProcess {
+  string duration = 1;
+  int32 workers = 2;
+  string skill_level = 3; // enum basic, intermediate, advanced
+  string instructions = 4;
+
+  StageReferences references = 5;
+  DocumentAccess doc_access = 6;
+}
+
+message StageReferences {
+  repeated string procedures = 1;
+  repeated string specifications = 2;
+  repeated string drawings = 3;
+  repeated string standards = 4;
+  repeated string safety_docs = 5;
+}
+
+message DocumentAccess {
+  repeated string required_clearance = 1; // enum public, internal, restricted, confidential
+  bool digital_signature = 2;
+  bool print_required = 3;
+  bool verification = 4;
+}
+
+message QualityCheck {
+  string type = 1; // enum visual, electrical, mechanical, software
+  string criteria = 2;
+  bool required = 3;
+  repeated string reference_docs = 4;
+  repeated string test_procedures = 5;
+  repeated string acceptance_standards = 6;
+}
+
+message StageOutput {
+  string id = 1;
+  string type = 2; // enum subassembly, completed_unit, waste
+  int32 quantity = 3;
+}
+
+message FailureHandling {
+  string action = 1; // enum retry, rework, escalate, discard
+  int32 max_retries = 2;
+  string rework_stage = 3;
+}
+
+// Service definitions for microservices
+
+service WorkflowService {
+  rpc CreateWorkflow(CreateWorkflowRequest) returns (CreateWorkflowResponse);
+  rpc GetWorkflow(GetWorkflowRequest) returns (GetWorkflowResponse);
+  rpc UpdateWorkflow(UpdateWorkflowRequest) returns (UpdateWorkflowResponse);
+  rpc DeleteWorkflow(DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
+  rpc ListWorkflows(ListWorkflowsRequest) returns (ListWorkflowsResponse);
+  rpc ExecuteWorkflow(ExecuteWorkflowRequest) returns (ExecuteWorkflowResponse);
+}
+
+service StageService {
+  rpc ExecuteStage(ExecuteStageRequest) returns (ExecuteStageResponse);
+  rpc GetStageStatus(GetStageStatusRequest) returns (GetStageStatusResponse);
+  rpc UpdateStageStatus(UpdateStageStatusRequest) returns (UpdateStageStatusResponse);
+}
+
+service QualityService {
+  rpc PerformQualityCheck(PerformQualityCheckRequest) returns (PerformQualityCheckResponse);
+  rpc GetQualityReport(GetQualityReportRequest) returns (GetQualityReportResponse);
+}
+
+service DocumentationService {
+  rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse);
+  rpc ValidateDocumentAccess(ValidateDocumentAccessRequest) returns (ValidateDocumentAccessResponse);
+}
+
+// Request/Response messages
+
+message CreateWorkflowRequest {
+  Workflow workflow = 1;
+}
+
+message CreateWorkflowResponse {
+  string workflow_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message GetWorkflowRequest {
+  string workflow_id = 1;
+}
+
+message GetWorkflowResponse {
+  Workflow workflow = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message UpdateWorkflowRequest {
+  string workflow_id = 1;
+  Workflow workflow = 2;
+}
+
+message UpdateWorkflowResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message DeleteWorkflowRequest {
+  string workflow_id = 1;
+}
+
+message DeleteWorkflowResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ListWorkflowsRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+}
+
+message ListWorkflowsResponse {
+  repeated Workflow workflows = 1;
+  int32 total_count = 2;
+  bool success = 3;
+  string message = 4;
+}
+
+message ExecuteWorkflowRequest {
+  string workflow_id = 1;
+  string batch_id = 2;
+}
+
+message ExecuteWorkflowResponse {
+  string execution_id = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message ExecuteStageRequest {
+  string workflow_id = 1;
+  string stage_id = 2;
+  string execution_id = 3;
+  repeated string input_materials = 4;
+}
+
+message ExecuteStageResponse {
+  string stage_execution_id = 1;
+  StageStatus status = 2;
+  bool success = 3;
+  string message = 4;
+}
+
+message GetStageStatusRequest {
+  string stage_execution_id = 1;
+}
+
+message GetStageStatusResponse {
+  StageStatus status = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message UpdateStageStatusRequest {
+  string stage_execution_id = 1;
+  StageStatus status = 2;
+}
+
+message UpdateStageStatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message PerformQualityCheckRequest {
+  string stage_execution_id = 1;
+  QualityCheck quality_check = 2;
+}
+
+message PerformQualityCheckResponse {
+  QualityCheckResult result = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message GetQualityReportRequest {
+  string execution_id = 1;
+}
+
+message GetQualityReportResponse {
+  QualityReport report = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message GetDocumentRequest {
+  string document_id = 1;
+  string user_clearance = 2;
+}
+
+message GetDocumentResponse {
+  Document document = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+message ValidateDocumentAccessRequest {
+  string document_id = 1;
+  string user_clearance = 2;
+  DocumentAccess required_access = 3;
+}
+
+message ValidateDocumentAccessResponse {
+  bool access_granted = 1;
+  string message = 2;
+}
+
+// Additional message types
+
+message StageStatus {
+  string stage_execution_id = 1;
+  string stage_id = 2;
+  string status = 3; // enum pending, in_progress, completed, failed, rework
+  string started_at = 4;
+  string completed_at = 5;
+  string worker_id = 6;
+  repeated QualityCheckResult quality_results = 7;
+  string error_message = 8;
+}
+
+message QualityCheckResult {
+  string check_id = 1;
+  string type = 2;
+  bool passed = 3;
+  string criteria = 4;
+  string result_details = 5;
+  string inspector_id = 6;
+  string timestamp = 7;
+}
+
+message QualityReport {
+  string execution_id = 1;
+  string workflow_id = 2;
+  repeated QualityCheckResult results = 3;
+  float overall_score = 4;
+  bool passed = 5;
+  string generated_at = 6;
+}
+
+message Document {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string url = 4;
+  string version = 5;
+  repeated string clearance_levels = 6;
+}
+
+// Event messages for Watermill
+
+message WorkflowStartedEvent {
+  string workflow_id = 1;
+  string execution_id = 2;
+  string batch_id = 3;
+  string timestamp = 4;
+}
+
+message StageStartedEvent {
+  string workflow_id = 1;
+  string stage_id = 2;
+  string execution_id = 3;
+  string stage_execution_id = 4;
+  string timestamp = 5;
+}
+
+message StageCompletedEvent {
+  string workflow_id = 1;
+  string stage_id = 2;
+  string execution_id = 3;
+  string stage_execution_id = 4;
+  StageStatus status = 5;
+  string timestamp = 6;
+}
+
+message QualityCheckCompletedEvent {
+  string stage_execution_id = 1;
+  QualityCheckResult result = 2;
+  string timestamp = 3;
+}
+
+message WorkflowCompletedEvent {
+  string workflow_id = 1;
+  string execution_id = 2;
+  string status = 3; // enum completed, failed
+  QualityReport quality_report = 4;
+  string timestamp = 5;
+}
+
