@@ -1,0 +1,30 @@
+
+ ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+ │                                                                                                                    │
+ │ Welcome to the Chat REPL with Command Palette!                                                                     │
+
+
+    ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+    │                                                                                                                │
+    │ Command Palette                                                                                                │
+    │                                                                                                                │
+    │  > Type to search commands...                                                                                  │
+    │                                                                                                                │
+    │  help - Show help information                                                                                  │
+    │  clear - Clear chat messages                                                                                   │
+    │  quit - Exit the application                                                                                   │
+    │  echo - Echo a test message                                                                                    │
+    │  time - Show current time                                                                                      │
+    │  date - Show current date                                                                                      │
+    │  about - Show application information                                                                          │
+    │  theme - Change application theme                                                                              │
+    │                                                                                                                │
+    │ ↑↓ navigate • Enter select • Esc close                                                                         │
+    │                                                                                                                │
+    ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ >                                                                                                                  │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Press Ctrl+P for command palette • Ctrl+C or 'q' to quit • Try /help, /clear, /quit

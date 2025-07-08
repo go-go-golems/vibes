@@ -1,0 +1,30 @@
+
+ ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+ │                                                                                                                    │
+ │ Welcome to the Chat REPL with Command Palette!                                                                     │
+ │ Type your messages and press Enter to send.                                                                        │
+ │ Press Ctrl+P to open the command palette.                                                                          │
+ │ Try commands: help, clear, echo, time, date, about, theme, quit                                                    │
+ │ System: Available commands:                                                                                        │
+ │   • help - Show this help                                                                                          │
+ │   • clear - Clear chat messages                                                                                    │
+ │   • echo - Echo a test message                                                                                     │
+ │   • time - Show current time                                                                                       │
+ │   • date - Show current date                                                                                       │
+ │   • about - Show application info                                                                                  │
+ │   • theme - Change theme                                                                                           │
+ │   • quit - Exit application                                                                                        │
+ │ Press Ctrl+P to open command palette                                                                               │
+ │                                                                                                                    │
+ │                                                                                                                    │
+ │                                                                                                                    │
+ │                                                                                                                    │
+ │                                                                                                                    │
+ │                                                                                                                    │
+ │                                                                                                                    │
+ ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ >                                                                                                                  │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+Press Ctrl+P for command palette • Ctrl+C or 'q' to quit • Try /help, /clear, /quit
