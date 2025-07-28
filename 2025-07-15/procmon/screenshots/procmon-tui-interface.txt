@@ -1,0 +1,24 @@
+│ Process Monitor                  Processes: 145 | Memory: 33.2% |   14:54:22
+╰───────────────────────────────────────────────────────────────────────────────
+╭─────────────╮╭───────────╮╭──────────╮╭───────────╮╭─────────╮╭──────────╮
+│  Processes  ││  Threads  ││  Memory  ││  Thermal  ││  Power  ││  System  │
+╰─────────────╯╰───────────╯╰──────────╯╰───────────╯╰─────────╯╰──────────╯
+PID      Name                 CPU%     Memory   Threads  State    Command
+----------------------------------------------------------------------------
+9997     procmon-simple       3.0      20       10       Sleeping ./procmon-simp
+427      python               1.0      185      8        Sleeping /opt/.manus/.s
+51       rpciod               0.0      0        1        Unknown
+8995     bash                 0.0      7        1        Sleeping bash
+54       xprtiod              0.0      0        1        Unknown
+39       kauditd              0.0      0        1        Sleeping
+16       kworker/0:1-events   0.0      0        1        Unknown
+1006     chromium-browse      0.0      115      11       Sleeping /usr/lib/chrom
+43       kcompactd0           0.0      0        1        Sleeping
+32       kworker/3:0H-even... 0.0      0        1        Unknown
+999      kworker/u8:0-ext4... 0.0      0        1        Unknown
+6        netns                0.0      0        1        Unknown
+81       kswapd0              0.0      0        1        Sleeping
+╭───────────────────────────────────────────────────────────────────────────────
+│ Tab/←→: Switch tabs | 1-6: Direct tab | s: Sort | r: Reverse | k: Toggle
+│ kernel | q: Quit
+╰───────────────────────────────────────────────────────────────────────────────

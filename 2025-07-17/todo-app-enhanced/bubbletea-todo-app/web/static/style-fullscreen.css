@@ -1,0 +1,253 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
+    background: #000;
+    color: #fff;
+}
+
+#terminal-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+}
+
+#terminal {
+    width: 100%;
+    height: 100%;
+}
+
+/* Xterm.js styling overrides for full-screen */
+.xterm {
+    height: 100% !important;
+    width: 100% !important;
+    padding: 1rem;
+    background: #000 !important;
+}
+
+.xterm .xterm-viewport {
+    background: #000 !important;
+}
+
+.xterm .xterm-screen {
+    background: #000 !important;
+}
+
+.xterm .xterm-cursor-layer {
+    z-index: 2;
+}
+
+.xterm .xterm-selection-layer {
+    z-index: 1;
+}
+
+/* Connection status indicator - minimal and unobtrusive */
+.connection-status {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.connection-status:hover {
+    opacity: 1;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ef4444;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.status-indicator.connected {
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-indicator.connecting {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    transition: opacity 0.5s ease;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #333;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    color: #a0aec0;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Focus management */
+#terminal:focus {
+    outline: none;
+}
+
+/* Scrollbar styling for webkit browsers */
+.xterm .xterm-viewport::-webkit-scrollbar {
+    width: 8px;
+}
+
+.xterm .xterm-viewport::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.xterm .xterm-viewport::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.xterm .xterm-viewport::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .xterm {
+        padding: 0.5rem;
+    }
+    
+    .connection-status {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+    
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .xterm {
+        padding: 0.25rem;
+    }
+    
+    /* Ensure touch events work properly */
+    #terminal {
+        touch-action: manipulation;
+    }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .xterm {
+        /* Let xterm.js handle high DPI rendering */
+    }
+}
+
+/* Prevent text selection on mobile */
+@media (max-width: 768px) {
+    body {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* But allow selection within the terminal */
+    .xterm {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+}
+
+/* Dark mode support (though we're already dark) */
+@media (prefers-color-scheme: light) {
+    /* Keep dark theme even in light mode preference */
+    html, body, #terminal-container {
+        background: #000;
+        color: #fff;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .status-indicator {
+        animation: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+        border-top-color: #667eea;
+    }
+    
+    .loading-overlay {
+        transition: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .status-indicator {
+        border: 1px solid #fff;
+    }
+    
+    .loading-spinner {
+        border-color: #fff;
+        border-top-color: #667eea;
+    }
+}
+
