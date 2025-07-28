@@ -1,0 +1,63 @@
+{
+  "scenario": "complex_prompt_pipeline",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available personas: analyst, advisor. Current persona: analyst. Use '/persona \u003cname\u003e' to switch."
+      },
+      {
+        "role": "system",
+        "content": "Task: Quarterly Analysis | Context: Q3 2024 Performance Review"
+      },
+      {
+        "role": "user",
+        "content": "Analyze: Sales increased 20%"
+      },
+      {
+        "role": "assistant",
+        "content": "Positive trend analysis"
+      },
+      {
+        "role": "system",
+        "content": "Persona: analyst - You are a data analyst. Provide objective, data-driven insights."
+      },
+      {
+        "role": "system",
+        "content": "Please respond with valid JSON matching this schema: {\"summary\": \"string\", \"sentiment\": \"string\", \"confidence\": \"number\"}"
+      },
+      {
+        "role": "user",
+        "content": "Analyze the quarterly performance data\n\nLet's analyze this systematically."
+      }
+    ],
+    "context": {
+      "cot_used": true,
+      "current_persona": "analyst",
+      "enable_cot": true,
+      "examples_injected": 1,
+      "injection_mode": 0,
+      "schema_error": "invalid character 'I' looking for beginning of value",
+      "schema_output_key": "analysis_result",
+      "schema_text": "{\"summary\": \"string\", \"sentiment\": \"string\", \"confidence\": \"number\"}",
+      "schema_valid": false,
+      "selected_examples": [
+        {
+          "user": "Analyze: Sales increased 20%",
+          "assistant": "Positive trend analysis"
+        }
+      ],
+      "template_applied": true,
+      "template_content": "Task: Quarterly Analysis | Context: Q3 2024 Performance Review",
+      "template_vars": {
+        "Context": "Q3 2024 Performance Review",
+        "Task": "Quarterly Analysis"
+      }
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the middleware architecture."
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "context_store": {
+    "cache_hit": false,
+    "current_mode": "creative",
+    "schema_error": "invalid character 'H' looking for beginning of value",
+    "schema_valid": false,
+    "structured_response": {
+      "author": "string",
+      "content": "string",
+      "publishDate": "date",
+      "tags": [
+        "string"
+      ],
+      "title": "string"
+    }
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "Create a blog schema"
+    },
+    {
+      "role": "user",
+      "content": "Generate a plan"
+    }
+  ],
+  "scenario": "complex_turn2",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 1,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Create a blog schema"
+      },
+      {
+        "role": "system",
+        "content": "Mode: creative - Creative mode: think outside the box with moderate confidence."
+      },
+      {
+        "role": "system",
+        "content": "Return JSON matching this schema: {\"answer\": \"string\", \"confidence\": \"number\", \"reasoning\": \"string\"}"
+      },
+      {
+        "role": "user",
+        "content": "Generate a plan"
+      }
+    ],
+    "context": {
+      "cache_hit": false,
+      "current_mode": "analytical",
+      "schema_valid": true,
+      "structured_response": {
+        "author": "string",
+        "content": "string",
+        "publishDate": "date",
+        "tags": [
+          "string"
+        ],
+        "title": "string"
+      }
+    },
+    "output": {
+      "cache_hit": false,
+      "current_mode": "creative",
+      "raw": "Here's a plan:\n1. Analyze requirements\n2. Design architecture\n3. Implement core features\n4. Test thoroughly\n5. Deploy and monitor",
+      "schema_error": "invalid character 'H' looking for beginning of value",
+      "schema_valid": false
+    }
+  }
+}

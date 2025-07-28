@@ -1,0 +1,49 @@
+{
+  "scenario": "concurrent_turn_1",
+  "timestamp": "2025-07-28T10:11:50.470195773-04:00",
+  "turn": {
+    "id": "20250728101150.366982",
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain machine learning",
+        "timestamp": "2025-07-28T10:11:50.366996262-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand your request. This is a mock response for testing the async middleware architecture.",
+        "timestamp": "2025-07-28T10:11:50.468845715-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {
+        "cache_hit": false
+      }
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the async middleware architecture.",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "CONCURRENT": 101787311
+        },
+        "token_count": {
+          "input": 6,
+          "output": 15,
+          "total": 21
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:50.366995405-04:00",
+    "end_time": "2025-07-28T10:11:50.468846081-04:00",
+    "duration": 101850691,
+    "status": "completed"
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "scenario": "complex_pipeline",
+  "timestamp": "2025-07-28T10:11:52.77770532-04:00",
+  "turn": {
+    "id": "20250728101152.726128",
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available personas: analyst, strategist, specialist. Current persona: analyst. Use '/persona \u003cname\u003e' to switch.",
+        "timestamp": "2025-07-28T10:11:52.727374732-04:00",
+        "metadata": {
+          "source": "persona_middleware",
+          "type": "banner"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Assess risk factors",
+        "timestamp": "2025-07-28T10:11:52.727357625-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Risk assessment reveals moderate exposure",
+        "timestamp": "2025-07-28T10:11:52.727358395-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Analyze market trends",
+        "timestamp": "2025-07-28T10:11:52.727359081-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Market analysis shows upward trend",
+        "timestamp": "2025-07-28T10:11:52.727359561-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Persona: analyst - You are a senior analyst. Provide comprehensive analysis.",
+        "timestamp": "2025-07-28T10:11:52.727376898-04:00",
+        "metadata": {
+          "persona": "analyst",
+          "source": "persona_middleware"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Please respond with valid JSON matching this schema: {\"summary\": \"string\", \"insights\": [\"string\"], \"confidence\": \"number\", \"next_steps\": [\"string\"]}",
+        "timestamp": "2025-07-28T10:11:52.727387468-04:00",
+        "metadata": {
+          "source": "schema_middleware"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Perform comprehensive market analysis",
+        "timestamp": "2025-07-28T10:11:52.726137228-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand your request. This is a mock response for testing the async middleware architecture.",
+        "timestamp": "2025-07-28T10:11:52.777585619-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {
+        "current_persona": {
+          "id": "current_persona",
+          "type": "persona",
+          "version": 1,
+          "data": {
+            "history": [],
+            "name": "analyst",
+            "prompt": "You are a senior analyst. Provide comprehensive analysis."
+          },
+          "created_at": "2025-07-28T10:11:52.727379744-04:00",
+          "updated_at": "2025-07-28T10:11:52.727379956-04:00"
+        },
+        "injected_examples": {
+          "id": "injected_examples",
+          "type": "example",
+          "version": 1,
+          "data": [
+            {
+              "user": "Assess risk factors",
+              "assistant": "Risk assessment reveals moderate exposure",
+              "weight": 1.8
+            },
+            {
+              "user": "Analyze market trends",
+              "assistant": "Market analysis shows upward trend",
+              "weight": 2
+            }
+          ],
+          "created_at": "2025-07-28T10:11:52.727362328-04:00",
+          "updated_at": "2025-07-28T10:11:52.727362387-04:00",
+          "metadata": {
+            "count": 2,
+            "mode": 2,
+            "total_examples": 3
+          }
+        }
+      },
+      "variables": {
+        "current_persona": "analyst",
+        "examples_injected": 2,
+        "injection_mode": 2,
+        "schema_error": "invalid character 'I' looking for beginning of value",
+        "schema_output_key": "structured_analysis",
+        "schema_text": "{\"summary\": \"string\", \"insights\": [\"string\"], \"confidence\": \"number\", \"next_steps\": [\"string\"]}",
+        "selected_examples": [
+          {
+            "user": "Assess risk factors",
+            "assistant": "Risk assessment reveals moderate exposure",
+            "weight": 1.8
+          },
+          {
+            "user": "Analyze market trends",
+            "assistant": "Market analysis shows upward trend",
+            "weight": 2
+          }
+        ]
+      },
+      "flags": {
+        "analysis_used": false,
+        "cache_hit": false,
+        "schema_valid": false
+      },
+      "warnings": [
+        {
+          "code": "TEMPLATE_VARS_MISSING",
+          "message": "Template variables not found at key: analysis_vars",
+          "source": "template_middleware",
+          "timestamp": "2025-07-28T10:11:52.727321974-04:00"
+        },
+        {
+          "code": "SCHEMA_PARSE_ERROR",
+          "message": "invalid character 'I' looking for beginning of value",
+          "source": "schema_middleware",
+          "timestamp": "2025-07-28T10:11:52.777619199-04:00"
+        }
+      ]
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the async middleware architecture.",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "COMPLEX": 51500216
+        },
+        "token_count": {
+          "input": 119,
+          "output": 15,
+          "total": 134
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:52.726136955-04:00",
+    "end_time": "2025-07-28T10:11:52.777586253-04:00",
+    "duration": 51449300,
+    "status": "completed"
+  }
+}

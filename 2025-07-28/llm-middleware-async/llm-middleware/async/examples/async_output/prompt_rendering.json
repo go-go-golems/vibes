@@ -1,0 +1,182 @@
+{
+  "scenario": "prompt_rendering",
+  "timestamp": "2025-07-28T10:11:50.521572259-04:00",
+  "turn": {
+    "id": "20250728101150.470602",
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available personas: analyst, advisor, expert. Current persona: analyst. Use '/persona \u003cname\u003e' to switch.",
+        "timestamp": "2025-07-28T10:11:50.470724172-04:00",
+        "metadata": {
+          "source": "persona_middleware",
+          "type": "banner"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Summarize findings",
+        "timestamp": "2025-07-28T10:11:50.4707011-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Here's a concise summary of key findings",
+        "timestamp": "2025-07-28T10:11:50.470701662-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Analyze sales data",
+        "timestamp": "2025-07-28T10:11:50.470702168-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "I'll analyze the sales trends and patterns",
+        "timestamp": "2025-07-28T10:11:50.470702393-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Persona: analyst - You are a data analyst. Provide objective, data-driven insights.",
+        "timestamp": "2025-07-28T10:11:50.47073015-04:00",
+        "metadata": {
+          "persona": "analyst",
+          "source": "persona_middleware"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Please respond with valid JSON matching this schema: {\"analysis\": \"string\", \"confidence\": \"number\", \"recommendations\": [\"string\"]}",
+        "timestamp": "2025-07-28T10:11:50.470754788-04:00",
+        "metadata": {
+          "source": "schema_middleware"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Analyze the quarterly performance data",
+        "timestamp": "2025-07-28T10:11:50.47061249-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand your request. This is a mock response for testing the async middleware architecture.",
+        "timestamp": "2025-07-28T10:11:50.521464748-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {
+        "current_persona": {
+          "id": "current_persona",
+          "type": "persona",
+          "version": 1,
+          "data": {
+            "history": [],
+            "name": "analyst",
+            "prompt": "You are a data analyst. Provide objective, data-driven insights."
+          },
+          "created_at": "2025-07-28T10:11:50.470742495-04:00",
+          "updated_at": "2025-07-28T10:11:50.470742571-04:00"
+        },
+        "injected_examples": {
+          "id": "injected_examples",
+          "type": "example",
+          "version": 1,
+          "data": [
+            {
+              "user": "Summarize findings",
+              "assistant": "Here's a concise summary of key findings",
+              "weight": 1.2
+            },
+            {
+              "user": "Analyze sales data",
+              "assistant": "I'll analyze the sales trends and patterns",
+              "weight": 1
+            }
+          ],
+          "created_at": "2025-07-28T10:11:50.470714631-04:00",
+          "updated_at": "2025-07-28T10:11:50.470714713-04:00",
+          "metadata": {
+            "count": 2,
+            "mode": 2,
+            "total_examples": 3
+          }
+        }
+      },
+      "variables": {
+        "current_persona": "analyst",
+        "examples_injected": 2,
+        "injection_mode": 2,
+        "schema_error": "invalid character 'I' looking for beginning of value",
+        "schema_output_key": "analysis_result",
+        "schema_text": "{\"analysis\": \"string\", \"confidence\": \"number\", \"recommendations\": [\"string\"]}",
+        "selected_examples": [
+          {
+            "user": "Summarize findings",
+            "assistant": "Here's a concise summary of key findings",
+            "weight": 1.2
+          },
+          {
+            "user": "Analyze sales data",
+            "assistant": "I'll analyze the sales trends and patterns",
+            "weight": 1
+          }
+        ]
+      },
+      "flags": {
+        "cot_used": false,
+        "schema_valid": false
+      },
+      "warnings": [
+        {
+          "code": "TEMPLATE_VARS_MISSING",
+          "message": "Template variables not found at key: template_vars",
+          "source": "template_middleware",
+          "timestamp": "2025-07-28T10:11:50.470656595-04:00"
+        },
+        {
+          "code": "SCHEMA_PARSE_ERROR",
+          "message": "invalid character 'I' looking for beginning of value",
+          "source": "schema_middleware",
+          "timestamp": "2025-07-28T10:11:50.521488441-04:00"
+        }
+      ]
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the async middleware architecture.",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "PROMPT": 50876307
+        },
+        "token_count": {
+          "input": 115,
+          "output": 15,
+          "total": 130
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:50.470612043-04:00",
+    "end_time": "2025-07-28T10:11:50.521465258-04:00",
+    "duration": 50853215,
+    "status": "completed"
+  }
+}

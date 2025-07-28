@@ -1,0 +1,34 @@
+{
+  "scenario": "cancellation_error",
+  "timestamp": "2025-07-28T10:11:52.584853193-04:00",
+  "turn": {
+    "id": "20250728101152.574549",
+    "index": 1,
+    "messages": [
+      {
+        "role": "user",
+        "content": "This will be cancelled",
+        "timestamp": "2025-07-28T10:11:52.574563892-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {}
+    },
+    "output": {
+      "raw": "",
+      "artifacts": {}
+    },
+    "start_time": "2025-07-28T10:11:52.574563246-04:00",
+    "end_time": "2025-07-28T10:11:52.584835745-04:00",
+    "duration": 10272502,
+    "status": "failed",
+    "error": {
+      "code": "TURN_FAILED",
+      "message": "context canceled",
+      "source": "ERROR",
+      "timestamp": "2025-07-28T10:11:52.584835745-04:00"
+    }
+  }
+}

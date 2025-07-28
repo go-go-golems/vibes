@@ -1,0 +1,41 @@
+{
+  "context_store": {
+    "current_mode": "final"
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "Explain middleware patterns"
+    },
+    {
+      "role": "user",
+      "content": "Generate a plan for implementation"
+    }
+  ],
+  "scenario": "mode_final",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 1,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain middleware patterns"
+      },
+      {
+        "role": "system",
+        "content": "Mode: final - Final mode: concise and definitive answers."
+      },
+      {
+        "role": "user",
+        "content": "Generate a plan for implementation"
+      }
+    ],
+    "context": {
+      "current_mode": "draft"
+    },
+    "output": {
+      "current_mode": "final",
+      "raw": "Here's a plan:\n1. Analyze requirements\n2. Design architecture\n3. Implement core features\n4. Test thoroughly\n5. Deploy and monitor"
+    }
+  }
+}

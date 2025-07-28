@@ -1,0 +1,49 @@
+{
+  "context_store": {
+    "parsed_blog": {
+      "author": "string",
+      "content": "string",
+      "publishDate": "date",
+      "tags": [
+        "string"
+      ],
+      "title": "string"
+    },
+    "schema_valid": true
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "Create a blog schema"
+    }
+  ],
+  "scenario": "schema_example",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Return JSON matching this schema: {\"title\": \"string\", \"content\": \"string\", \"author\": \"string\", \"publishDate\": \"date\", \"tags\": [\"string\"]}"
+      },
+      {
+        "role": "user",
+        "content": "Create a blog schema"
+      }
+    ],
+    "context": {},
+    "output": {
+      "parsed_blog": {
+        "author": "string",
+        "content": "string",
+        "publishDate": "date",
+        "tags": [
+          "string"
+        ],
+        "title": "string"
+      },
+      "raw": "{\"title\": \"string\", \"content\": \"string\", \"author\": \"string\", \"publishDate\": \"date\", \"tags\": [\"string\"]}",
+      "schema_valid": true
+    }
+  }
+}

@@ -1,0 +1,253 @@
+{
+  "scenario": "complex_pipeline_switched",
+  "timestamp": "2025-07-28T10:11:52.830358209-04:00",
+  "turn": {
+    "id": "20250728101152.778038",
+    "index": 1,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available personas: analyst, strategist, specialist. Current persona: analyst. Use '/persona \u003cname\u003e' to switch.",
+        "timestamp": "2025-07-28T10:11:52.727374732-04:00",
+        "metadata": {
+          "source": "persona_middleware",
+          "type": "banner"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Assess risk factors",
+        "timestamp": "2025-07-28T10:11:52.727357625-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Risk assessment reveals moderate exposure",
+        "timestamp": "2025-07-28T10:11:52.727358395-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Analyze market trends",
+        "timestamp": "2025-07-28T10:11:52.727359081-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Market analysis shows upward trend",
+        "timestamp": "2025-07-28T10:11:52.727359561-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Persona: analyst - You are a senior analyst. Provide comprehensive analysis.",
+        "timestamp": "2025-07-28T10:11:52.727376898-04:00",
+        "metadata": {
+          "persona": "analyst",
+          "source": "persona_middleware"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Please respond with valid JSON matching this schema: {\"summary\": \"string\", \"insights\": [\"string\"], \"confidence\": \"number\", \"next_steps\": [\"string\"]}",
+        "timestamp": "2025-07-28T10:11:52.727387468-04:00",
+        "metadata": {
+          "source": "schema_middleware"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Perform comprehensive market analysis",
+        "timestamp": "2025-07-28T10:11:52.726137228-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand your request. This is a mock response for testing the async middleware architecture.",
+        "timestamp": "2025-07-28T10:11:52.777585619-04:00"
+      },
+      {
+        "role": "user",
+        "content": "Review financial data",
+        "timestamp": "2025-07-28T10:11:52.780012827-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Financial review indicates strong performance",
+        "timestamp": "2025-07-28T10:11:52.780013613-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "user",
+        "content": "Assess risk factors",
+        "timestamp": "2025-07-28T10:11:52.780014564-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "assistant",
+        "content": "Risk assessment reveals moderate exposure",
+        "timestamp": "2025-07-28T10:11:52.780014872-04:00",
+        "metadata": {
+          "source": "example_injection",
+          "type": "example"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Persona: strategist - You are a strategic advisor. Focus on long-term implications.",
+        "timestamp": "2025-07-28T10:11:52.780028318-04:00",
+        "metadata": {
+          "persona": "strategist",
+          "source": "persona_middleware"
+        }
+      },
+      {
+        "role": "system",
+        "content": "Please respond with valid JSON matching this schema: {\"summary\": \"string\", \"insights\": [\"string\"], \"confidence\": \"number\", \"next_steps\": [\"string\"]}",
+        "timestamp": "2025-07-28T10:11:52.780039838-04:00",
+        "metadata": {
+          "source": "schema_middleware"
+        }
+      },
+      {
+        "role": "user",
+        "content": "What are the strategic implications?",
+        "timestamp": "2025-07-28T10:11:52.778050161-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand your request. This is a mock response for testing the async middleware architecture.",
+        "timestamp": "2025-07-28T10:11:52.830259322-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {
+        "current_persona": {
+          "id": "current_persona",
+          "type": "persona",
+          "version": 1,
+          "data": {
+            "history": [
+              {
+                "from": "analyst",
+                "to": "strategist",
+                "timestamp": "2025-07-28T10:11:52.778024809-04:00",
+                "turn_id": "test-turn"
+              }
+            ],
+            "name": "strategist",
+            "prompt": "You are a strategic advisor. Focus on long-term implications."
+          },
+          "created_at": "2025-07-28T10:11:52.780030857-04:00",
+          "updated_at": "2025-07-28T10:11:52.780030929-04:00"
+        },
+        "injected_examples": {
+          "id": "injected_examples",
+          "type": "example",
+          "version": 1,
+          "data": [
+            {
+              "user": "Review financial data",
+              "assistant": "Financial review indicates strong performance",
+              "weight": 1.5
+            },
+            {
+              "user": "Assess risk factors",
+              "assistant": "Risk assessment reveals moderate exposure",
+              "weight": 1.8
+            }
+          ],
+          "created_at": "2025-07-28T10:11:52.780018409-04:00",
+          "updated_at": "2025-07-28T10:11:52.780018499-04:00",
+          "metadata": {
+            "count": 2,
+            "mode": 2,
+            "total_examples": 3
+          }
+        }
+      },
+      "variables": {
+        "current_persona": "strategist",
+        "examples_injected": 2,
+        "injection_mode": 2,
+        "schema_error": "invalid character 'I' looking for beginning of value",
+        "schema_output_key": "structured_analysis",
+        "schema_text": "{\"summary\": \"string\", \"insights\": [\"string\"], \"confidence\": \"number\", \"next_steps\": [\"string\"]}",
+        "selected_examples": [
+          {
+            "user": "Review financial data",
+            "assistant": "Financial review indicates strong performance",
+            "weight": 1.5
+          },
+          {
+            "user": "Assess risk factors",
+            "assistant": "Risk assessment reveals moderate exposure",
+            "weight": 1.8
+          }
+        ]
+      },
+      "flags": {
+        "analysis_used": false,
+        "cache_hit": false,
+        "schema_valid": false
+      },
+      "warnings": [
+        {
+          "code": "TEMPLATE_VARS_MISSING",
+          "message": "Template variables not found at key: analysis_vars",
+          "source": "template_middleware",
+          "timestamp": "2025-07-28T10:11:52.779965226-04:00"
+        },
+        {
+          "code": "SCHEMA_PARSE_ERROR",
+          "message": "invalid character 'I' looking for beginning of value",
+          "source": "schema_middleware",
+          "timestamp": "2025-07-28T10:11:52.830278588-04:00"
+        }
+      ]
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the async middleware architecture.",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "COMPLEX": 52223189
+        },
+        "token_count": {
+          "input": 239,
+          "output": 15,
+          "total": 254
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:52.77804923-04:00",
+    "end_time": "2025-07-28T10:11:52.830259883-04:00",
+    "duration": 52210651,
+    "status": "completed"
+  }
+}

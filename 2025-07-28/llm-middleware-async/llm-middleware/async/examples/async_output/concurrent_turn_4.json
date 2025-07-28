@@ -1,0 +1,49 @@
+{
+  "scenario": "concurrent_turn_4",
+  "timestamp": "2025-07-28T10:11:50.470456666-04:00",
+  "turn": {
+    "id": "20250728101150.367114",
+    "index": 1,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Translate hello to French",
+        "timestamp": "2025-07-28T10:11:50.367136461-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "Bonjour, comment allez-vous?",
+        "timestamp": "2025-07-28T10:11:50.468837859-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {
+        "cache_hit": false
+      }
+    },
+    "output": {
+      "raw": "Bonjour, comment allez-vous?",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "CONCURRENT": 101671971
+        },
+        "token_count": {
+          "input": 6,
+          "output": 3,
+          "total": 9
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:50.367135869-04:00",
+    "end_time": "2025-07-28T10:11:50.468839037-04:00",
+    "duration": 101703156,
+    "status": "completed"
+  }
+}

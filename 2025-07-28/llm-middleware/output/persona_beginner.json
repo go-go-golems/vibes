@@ -1,0 +1,23 @@
+{
+  "scenario": "persona_beginner",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 1,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Persona: beginner - You are a friendly teacher. Explain things simply and clearly."
+      },
+      {
+        "role": "user",
+        "content": "Explain machine learning"
+      }
+    ],
+    "context": {
+      "current_persona": "beginner"
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the middleware architecture."
+    }
+  }
+}

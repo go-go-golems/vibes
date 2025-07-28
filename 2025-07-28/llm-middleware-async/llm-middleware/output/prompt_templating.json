@@ -1,0 +1,29 @@
+{
+  "scenario": "prompt_templating",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Translate the following English text to French: 'Hello, how are you?'"
+      },
+      {
+        "role": "user",
+        "content": "Hello, how are you?"
+      }
+    ],
+    "context": {
+      "template_applied": true,
+      "template_content": "Translate the following English text to French: 'Hello, how are you?'",
+      "template_vars": {
+        "Language": "English",
+        "TargetLanguage": "French",
+        "Text": "Hello, how are you?"
+      }
+    },
+    "output": {
+      "raw": "Hello! How can I help you today?"
+    }
+  }
+}

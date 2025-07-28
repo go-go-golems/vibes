@@ -1,0 +1,49 @@
+{
+  "scenario": "concurrent_turn_3",
+  "timestamp": "2025-07-28T10:11:50.470381389-04:00",
+  "turn": {
+    "id": "20250728101150.367297",
+    "index": 4,
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather like?",
+        "timestamp": "2025-07-28T10:11:50.367356206-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I don't have access to real-time weather data, but I can help you with other questions.",
+        "timestamp": "2025-07-28T10:11:50.469975424-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {
+        "cache_hit": false
+      }
+    },
+    "output": {
+      "raw": "I don't have access to real-time weather data, but I can help you with other questions.",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "CONCURRENT": 102555543
+        },
+        "token_count": {
+          "input": 6,
+          "output": 16,
+          "total": 22
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:50.367353801-04:00",
+    "end_time": "2025-07-28T10:11:50.469976018-04:00",
+    "duration": 102622204,
+    "status": "completed"
+  }
+}
