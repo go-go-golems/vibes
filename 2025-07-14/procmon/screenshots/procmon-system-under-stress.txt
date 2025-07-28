@@ -1,0 +1,24 @@
+Total allocated: 200MB
+Holding memory for 60 seconds...
+cd /home/ubuntu/procmon && ./procmon-simple --system
+Error discovering hwmon sensors: open /sys/class/hwmon: no such file or director
+y
+System Information
+==================
+Timestamp: 2025-07-14 14:53:58
+
+Memory:
+  Total: 3.8 GB
+  Used: 32.8%
+  Pressure: none
+  Thrashing: Not detected
+
+Thermal:
+  State: normal
+
+Power:
+  AC Power: Disconnected
+  Power Saving: false
+  CPU Governor:
+  CPU Frequency: 0 MHz (avg)
+ubuntu@5b88bcf6f7b7:~/procmon$
