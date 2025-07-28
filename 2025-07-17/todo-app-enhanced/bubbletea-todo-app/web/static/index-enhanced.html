@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubbletea Todo App - Enhanced Web Terminal</title>
+    
+    <!-- Xterm.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.5.0/xterm.css" />
+    
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="/static/style-enhanced.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🫧 Bubbletea Todo App</h1>
+            <p>Enhanced terminal with full ANSI color support</p>
+        </div>
+        
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <div class="terminal-button close"></div>
+                    <div class="terminal-button minimize"></div>
+                    <div class="terminal-button maximize"></div>
+                </div>
+                <div class="terminal-title">bubbletea-todo-enhanced</div>
+                <div class="connection-status" id="connection-status">
+                    <span class="status-indicator" id="status-indicator"></span>
+                    <span id="status-text">Connecting...</span>
+                </div>
+            </div>
+            
+            <div id="terminal" class="terminal-wrapper"></div>
+        </div>
+        
+        <div class="info">
+            <div class="info-section">
+                <h3>🎨 Enhanced Features:</h3>
+                <ul>
+                    <li><span class="feature">Full ANSI Colors</span> - Rich terminal styling</li>
+                    <li><span class="feature">True Terminal Emulation</span> - Powered by xterm.js</li>
+                    <li><span class="feature">Real-time Sync</span> - WebSocket communication</li>
+                    <li><span class="feature">Mobile Friendly</span> - Touch and keyboard support</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h3>⌨️ Keyboard Controls:</h3>
+                <div class="controls-grid">
+                    <div class="control-item">
+                        <kbd>↑</kbd><kbd>k</kbd>
+                        <span>Move up</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>↓</kbd><kbd>j</kbd>
+                        <span>Move down</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>Space</kbd><kbd>Enter</kbd>
+                        <span>Toggle todo</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>a</kbd>
+                        <span>Add new todo</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>d</kbd><kbd>x</kbd>
+                        <span>Delete todo</span>
+                    </div>
+                    <div class="control-item">
+                        <kbd>Esc</kbd>
+                        <span>Cancel (when adding)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Built with <a href="https://github.com/charmbracelet/bubbletea" target="_blank">Bubbletea</a> and <a href="https://xtermjs.org/" target="_blank">xterm.js</a></p>
+        </div>
+    </div>
+
+    <!-- Xterm.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.5.0/xterm.js"></script>
+    
+    <!-- Enhanced terminal JavaScript -->
+    <script src="/static/terminal-fullscreen.js"></script>
+</body>
+</html>
+

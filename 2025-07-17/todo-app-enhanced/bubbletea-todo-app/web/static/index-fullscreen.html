@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubbletea Todo App</title>
+    
+    <!-- Xterm.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.5.0/xterm.css" />
+    
+    <!-- Full-screen terminal styles -->
+    <link rel="stylesheet" href="/static/style-fullscreen.css">
+</head>
+<body>
+    <div id="terminal-container">
+        <div id="terminal"></div>
+        
+        <!-- Connection status indicator (minimal) -->
+        <div id="connection-status" class="connection-status">
+            <span id="status-indicator" class="status-indicator"></span>
+        </div>
+        
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Connecting to terminal...</div>
+        </div>
+    </div>
+
+    <!-- Xterm.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/5.5.0/xterm.js"></script>
+    
+    <!-- Full-screen terminal JavaScript -->
+    <script src="/static/terminal-fullscreen.js"></script>
+</body>
+</html>
+

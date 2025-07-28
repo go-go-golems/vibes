@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubbletea Todo App - Web Terminal</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🫧 Bubbletea Todo App</h1>
+            <p>A terminal-based todo application running in your browser</p>
+        </div>
+        
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <div class="terminal-button close"></div>
+                    <div class="terminal-button minimize"></div>
+                    <div class="terminal-button maximize"></div>
+                </div>
+                <div class="terminal-title">todo-app</div>
+            </div>
+            
+            <div id="terminal" class="terminal">
+                <div id="terminal-content" class="terminal-content">
+                    <div class="loading">Connecting to terminal...</div>
+                </div>
+                <div id="cursor" class="cursor"></div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3>How to use:</h3>
+            <ul>
+                <li><kbd>↑</kbd>/<kbd>k</kbd> - Move up</li>
+                <li><kbd>↓</kbd>/<kbd>j</kbd> - Move down</li>
+                <li><kbd>Space</kbd>/<kbd>Enter</kbd> - Toggle todo</li>
+                <li><kbd>a</kbd> - Add new todo</li>
+                <li><kbd>d</kbd>/<kbd>x</kbd> - Delete todo</li>
+                <li><kbd>Esc</kbd> - Cancel (when adding)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/static/terminal.js"></script>
+</body>
+</html>
+

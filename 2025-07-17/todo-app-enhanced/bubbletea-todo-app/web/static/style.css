@@ -1,0 +1,208 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.terminal-container {
+    background: #2d3748;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.terminal-header {
+    background: #4a5568;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #2d3748;
+}
+
+.terminal-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-right: 1rem;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.terminal-button.close {
+    background: #ff5f56;
+}
+
+.terminal-button.minimize {
+    background: #ffbd2e;
+}
+
+.terminal-button.maximize {
+    background: #27ca3f;
+}
+
+.terminal-title {
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.terminal {
+    background: #1a202c;
+    color: #e2e8f0;
+    padding: 1.5rem;
+    min-height: 400px;
+    position: relative;
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', 'Droid Sans Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.terminal-content {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    outline: none;
+}
+
+.loading {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 20px;
+    background: #e2e8f0;
+    animation: blink 1s infinite;
+    position: absolute;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.info {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.info h3 {
+    margin-bottom: 1rem;
+    color: #2d3748;
+    font-size: 1.2rem;
+}
+
+.info ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+}
+
+.info li {
+    display: flex;
+    align-items: center;
+    color: #4a5568;
+}
+
+kbd {
+    background: #edf2f7;
+    border: 1px solid #cbd5e0;
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ANSI Color Support */
+.ansi-black { color: #2d3748; }
+.ansi-red { color: #f56565; }
+.ansi-green { color: #48bb78; }
+.ansi-yellow { color: #ed8936; }
+.ansi-blue { color: #4299e1; }
+.ansi-magenta { color: #9f7aea; }
+.ansi-cyan { color: #38b2ac; }
+.ansi-white { color: #e2e8f0; }
+.ansi-bright-black { color: #4a5568; }
+.ansi-bright-red { color: #fc8181; }
+.ansi-bright-green { color: #68d391; }
+.ansi-bright-yellow { color: #f6e05e; }
+.ansi-bright-blue { color: #63b3ed; }
+.ansi-bright-magenta { color: #b794f6; }
+.ansi-bright-cyan { color: #4fd1c7; }
+.ansi-bright-white { color: #f7fafc; }
+
+.ansi-bg-black { background-color: #2d3748; }
+.ansi-bg-red { background-color: #f56565; }
+.ansi-bg-green { background-color: #48bb78; }
+.ansi-bg-yellow { background-color: #ed8936; }
+.ansi-bg-blue { background-color: #4299e1; }
+.ansi-bg-magenta { background-color: #9f7aea; }
+.ansi-bg-cyan { background-color: #38b2ac; }
+.ansi-bg-white { background-color: #e2e8f0; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-dim { opacity: 0.7; }
+.ansi-italic { font-style: italic; }
+.ansi-underline { text-decoration: underline; }
+.ansi-strikethrough { text-decoration: line-through; }
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .terminal {
+        font-size: 12px;
+        padding: 1rem;
+    }
+    
+    .info ul {
+        grid-template-columns: 1fr;
+    }
+}
+
