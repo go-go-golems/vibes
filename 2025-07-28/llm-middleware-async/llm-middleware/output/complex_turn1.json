@@ -1,0 +1,61 @@
+{
+  "context_store": {
+    "cache_hit": false,
+    "current_mode": "analytical",
+    "schema_valid": true,
+    "structured_response": {
+      "author": "string",
+      "content": "string",
+      "publishDate": "date",
+      "tags": [
+        "string"
+      ],
+      "title": "string"
+    }
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "Create a blog schema"
+    }
+  ],
+  "scenario": "complex_turn1",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available modes: creative, analytical. Current mode: analytical"
+      },
+      {
+        "role": "system",
+        "content": "Mode: analytical - Analytical mode: provide detailed reasoning and high confidence scores."
+      },
+      {
+        "role": "system",
+        "content": "Return JSON matching this schema: {\"answer\": \"string\", \"confidence\": \"number\", \"reasoning\": \"string\"}"
+      },
+      {
+        "role": "user",
+        "content": "Create a blog schema"
+      }
+    ],
+    "context": {},
+    "output": {
+      "cache_hit": false,
+      "current_mode": "analytical",
+      "raw": "{\"title\": \"string\", \"content\": \"string\", \"author\": \"string\", \"publishDate\": \"date\", \"tags\": [\"string\"]}",
+      "schema_valid": true,
+      "structured_response": {
+        "author": "string",
+        "content": "string",
+        "publishDate": "date",
+        "tags": [
+          "string"
+        ],
+        "title": "string"
+      }
+    }
+  }
+}

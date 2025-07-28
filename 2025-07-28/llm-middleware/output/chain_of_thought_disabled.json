@@ -1,0 +1,20 @@
+{
+  "scenario": "chain_of_thought_disabled",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 1,
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is 3+3?"
+      }
+    ],
+    "context": {
+      "cot_used": false,
+      "enable_cot": false
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the middleware architecture."
+    }
+  }
+}

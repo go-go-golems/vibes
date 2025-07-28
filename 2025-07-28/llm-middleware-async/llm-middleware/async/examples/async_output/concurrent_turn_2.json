@@ -1,0 +1,49 @@
+{
+  "scenario": "concurrent_turn_2",
+  "timestamp": "2025-07-28T10:11:50.470289689-04:00",
+  "turn": {
+    "id": "20250728101150.367278",
+    "index": 3,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Create a simple plan",
+        "timestamp": "2025-07-28T10:11:50.367282525-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand your request. This is a mock response for testing the async middleware architecture.",
+        "timestamp": "2025-07-28T10:11:50.468749447-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {
+        "cache_hit": false
+      }
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the async middleware architecture.",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "CONCURRENT": 101461849
+        },
+        "token_count": {
+          "input": 5,
+          "output": 15,
+          "total": 20
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:50.367282323-04:00",
+    "end_time": "2025-07-28T10:11:50.468750407-04:00",
+    "duration": 101468084,
+    "status": "completed"
+  }
+}

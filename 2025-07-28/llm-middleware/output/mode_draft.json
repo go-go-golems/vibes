@@ -1,0 +1,35 @@
+{
+  "context_store": {
+    "current_mode": "draft"
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "Explain middleware patterns"
+    }
+  ],
+  "scenario": "mode_draft",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available modes: draft, review, final. Current mode: draft"
+      },
+      {
+        "role": "system",
+        "content": "Mode: draft - Draft mode: free-form reasoning and exploration."
+      },
+      {
+        "role": "user",
+        "content": "Explain middleware patterns"
+      }
+    ],
+    "context": {},
+    "output": {
+      "current_mode": "draft",
+      "raw": "Middleware is a software component that sits between different parts of an application, providing services like logging, authentication, and data transformation."
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "context_store": {
+    "cache_hit": false
+  },
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "What is the weather like?"
+    }
+  ],
+  "scenario": "cache_miss",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather like?"
+      }
+    ],
+    "context": {},
+    "output": {
+      "cache_hit": false,
+      "raw": "I don't have access to real-time weather data, but I can help you with other questions."
+    }
+  }
+}

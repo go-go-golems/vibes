@@ -1,0 +1,26 @@
+{
+  "scenario": "structured_schema",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Please respond with valid JSON matching this schema: {\n\t\t\"analysis\": \"string\",\n\t\t\"confidence\": \"number\",\n\t\t\"recommendations\": [\"string\"]\n\t}"
+      },
+      {
+        "role": "user",
+        "content": "Analyze this data and provide structured output"
+      }
+    ],
+    "context": {
+      "schema_error": "invalid character 'I' looking for beginning of value",
+      "schema_output_key": "structured_output",
+      "schema_text": "{\n\t\t\"analysis\": \"string\",\n\t\t\"confidence\": \"number\",\n\t\t\"recommendations\": [\"string\"]\n\t}",
+      "schema_valid": false
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the middleware architecture."
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "scenario": "persona_expert",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Available personas: expert, beginner, creative. Current persona: expert. Use '/persona \u003cname\u003e' to switch."
+      },
+      {
+        "role": "system",
+        "content": "Persona: expert - You are a technical expert. Provide detailed, precise analysis."
+      },
+      {
+        "role": "user",
+        "content": "Explain machine learning"
+      }
+    ],
+    "context": {
+      "current_persona": "expert"
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the middleware architecture."
+    }
+  }
+}

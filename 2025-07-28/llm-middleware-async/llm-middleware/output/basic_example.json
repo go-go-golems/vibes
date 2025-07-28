@@ -1,0 +1,24 @@
+{
+  "context_store": {},
+  "conversation_history": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "scenario": "basic_example",
+  "timestamp": "2025-07-28T08:28:53-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello, how are you?"
+      }
+    ],
+    "context": {},
+    "output": {
+      "raw": "Hello! How can I help you today?"
+    }
+  }
+}

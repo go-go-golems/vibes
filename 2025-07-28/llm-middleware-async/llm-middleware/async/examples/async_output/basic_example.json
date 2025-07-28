@@ -1,0 +1,47 @@
+{
+  "scenario": "basic_example",
+  "timestamp": "2025-07-28T10:11:50.366369431-04:00",
+  "turn": {
+    "id": "20250728101150.315821",
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello, how are you?",
+        "timestamp": "2025-07-28T10:11:50.315951916-04:00"
+      },
+      {
+        "role": "assistant",
+        "content": "Hello! How can I help you today?",
+        "timestamp": "2025-07-28T10:11:50.366271993-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {}
+    },
+    "output": {
+      "raw": "Hello! How can I help you today?",
+      "artifacts": {},
+      "metrics": {
+        "execution_time": 0,
+        "middleware_timings": {
+          "BASIC": 50286456
+        },
+        "token_count": {
+          "input": 4,
+          "output": 7,
+          "total": 11
+        },
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "error_count": 0
+      }
+    },
+    "start_time": "2025-07-28T10:11:50.315951426-04:00",
+    "end_time": "2025-07-28T10:11:50.366275905-04:00",
+    "duration": 50324478,
+    "status": "completed"
+  }
+}

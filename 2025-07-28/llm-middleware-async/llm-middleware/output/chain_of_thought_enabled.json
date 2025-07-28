@@ -1,0 +1,20 @@
+{
+  "scenario": "chain_of_thought_enabled",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is 2+2?\n\nLet's think step by step."
+      }
+    ],
+    "context": {
+      "cot_used": true,
+      "enable_cot": true
+    },
+    "output": {
+      "raw": "Let me think through this step by step:\n1. First, I need to understand the problem\n2. Then, I'll analyze the key factors\n3. Finally, I'll provide a solution\n\nThe answer is 42."
+    }
+  }
+}

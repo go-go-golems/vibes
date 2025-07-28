@@ -1,0 +1,46 @@
+{
+  "scenario": "example_injection",
+  "timestamp": "2025-07-28T09:37:55-04:00",
+  "turn": {
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "It's okay, nothing special."
+      },
+      {
+        "role": "assistant",
+        "content": "Neutral sentiment"
+      },
+      {
+        "role": "user",
+        "content": "This is terrible."
+      },
+      {
+        "role": "assistant",
+        "content": "Negative sentiment"
+      },
+      {
+        "role": "user",
+        "content": "Analyze sentiment: The weather is nice today."
+      }
+    ],
+    "context": {
+      "examples_injected": 2,
+      "injection_mode": 1,
+      "selected_examples": [
+        {
+          "user": "It's okay, nothing special.",
+          "assistant": "Neutral sentiment"
+        },
+        {
+          "user": "This is terrible.",
+          "assistant": "Negative sentiment"
+        }
+      ]
+    },
+    "output": {
+      "raw": "I understand your request. This is a mock response for testing the middleware architecture."
+    }
+  }
+}

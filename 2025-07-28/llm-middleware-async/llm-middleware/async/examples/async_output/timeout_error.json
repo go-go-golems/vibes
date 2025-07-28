@@ -1,0 +1,34 @@
+{
+  "scenario": "timeout_error",
+  "timestamp": "2025-07-28T10:11:52.574284582-04:00",
+  "turn": {
+    "id": "20250728101150.573068",
+    "index": 0,
+    "messages": [
+      {
+        "role": "user",
+        "content": "This will timeout",
+        "timestamp": "2025-07-28T10:11:50.57308722-04:00"
+      }
+    ],
+    "context": {
+      "artifacts": {},
+      "variables": {},
+      "flags": {}
+    },
+    "output": {
+      "raw": "",
+      "artifacts": {}
+    },
+    "start_time": "2025-07-28T10:11:50.573086105-04:00",
+    "end_time": "2025-07-28T10:11:52.574332144-04:00",
+    "duration": 2001245546,
+    "status": "failed",
+    "error": {
+      "code": "TURN_FAILED",
+      "message": "context deadline exceeded",
+      "source": "ERROR",
+      "timestamp": "2025-07-28T10:11:52.574332144-04:00"
+    }
+  }
+}
