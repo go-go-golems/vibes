@@ -26,10 +26,10 @@ if ! command -v tmux &> /dev/null; then
 fi
 
 # Check if Redis is running
-# if ! command -v redis-server &> /dev/null; then
-#     echo -e "${YELLOW}⚠️  Redis not found. Installing Redis...${NC}"
-#     sudo apt update && sudo apt install -y redis-server
-# fi
+if ! command -v redis-server &> /dev/null; then
+    echo -e "${YELLOW}⚠️  Redis not found. Installing Redis...${NC}"
+    sudo apt update && sudo apt install -y redis-server
+fi
 
 # Kill existing session if it exists
 if tmux has-session -t $SESSION_NAME 2>/dev/null; then
@@ -38,11 +38,11 @@ if tmux has-session -t $SESSION_NAME 2>/dev/null; then
 fi
 
 # Start Redis if not running
-# if ! pgrep redis-server > /dev/null; then
-#     echo -e "${YELLOW}🔄 Starting Redis server...${NC}"
-#     sudo systemctl start redis-server || redis-server --daemonize yes
-#     sleep 2
-# fi
+if ! pgrep redis-server > /dev/null; then
+    echo -e "${YELLOW}🔄 Starting Redis server...${NC}"
+    sudo systemctl start redis-server || redis-server --daemonize yes
+    sleep 2
+fi
 
 # Verify Redis is running
 if ! redis-cli ping > /dev/null 2>&1; then
