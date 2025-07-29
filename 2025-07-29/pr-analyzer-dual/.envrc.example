@@ -1,0 +1,15 @@
+# GitHub API Configuration
+# Copy this file to .envrc and set your actual token
+# Then run: direnv allow (if using direnv)
+
+# GitHub Personal Access Token
+# Create one at: https://github.com/settings/tokens
+# Required scopes: repo (for private repos) or public_repo (for public repos only)
+export GITHUB_TOKEN=ghp_your_github_token_here
+
+# Optional: GitHub API Base URL (for GitHub Enterprise)
+# export GITHUB_API_BASE=https://api.github.com
+
+# Optional: Enable debug mode
+# export DEBUG=true
+
