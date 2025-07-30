@@ -59,7 +59,7 @@ func (c *FunctionHistoryDualCommand) Run(ctx context.Context, parsedLayers *laye
 		// Extract commit information safely
 		var sha, message, authorName string
 		var commitDate string
-		
+
 		if commit.SHA != nil {
 			sha = *commit.SHA
 		}
@@ -172,7 +172,7 @@ func (c *FunctionHistoryDualCommand) RunIntoGlazeProcessor(
 		// Extract commit information safely
 		var sha, message, authorName string
 		var commitDate string
-		
+
 		if commit.SHA != nil {
 			sha = *commit.SHA
 		}

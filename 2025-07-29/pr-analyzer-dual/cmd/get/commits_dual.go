@@ -67,11 +67,11 @@ func (c *CommitsDualCommand) Run(ctx context.Context, parsedLayers *layers.Parse
 		fmt.Printf("## %d. %s\n\n", i+1, message)
 		fmt.Printf("- **SHA:** `%s`\n", sha[:8])
 		fmt.Printf("- **Author:** %s <%s>\n", authorName, authorEmail)
-		
+
 		if !commitDate.IsZero() {
 			fmt.Printf("- **Date:** %s\n", commitDate.Format("2006-01-02 15:04:05"))
 		}
-		
+
 		fmt.Printf("\n")
 	}
 
@@ -177,4 +177,3 @@ func NewCommitsDualCommand() (*CommitsDualCommand, error) {
 		CommandDescription: cmdDesc,
 	}, nil
 }
-

@@ -11,6 +11,7 @@ import (
 	help_cmd "github.com/go-go-golems/glazed/pkg/help/cmd"
 	"github.com/pr-analyzer/pr-analyzer/cmd/analyze"
 	"github.com/pr-analyzer/pr-analyzer/cmd/get"
+	"github.com/pr-analyzer/pr-analyzer/pkg/doc"
 	"github.com/spf13/cobra"
 )
 
@@ -120,6 +121,14 @@ and glazed for structured output. Supports both human-readable reports and struc
 
 	// Setup enhanced help system for the complete application
 	helpSystem := help.NewHelpSystem()
+	
+	// Add documentation to help system
+	err = doc.AddDocToHelpSystem(helpSystem)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading documentation: %v\n", err)
+		// Don't exit, just continue without docs
+	}
+	
 	help_cmd.SetupCobraRootCommand(helpSystem, rootCmd)
 
 	// Execute
@@ -127,4 +136,3 @@ and glazed for structured output. Supports both human-readable reports and struc
 		os.Exit(1)
 	}
 }
-
