@@ -9,9 +9,9 @@ import (
 
 // DiffLine represents a line in a diff
 type DiffLine struct {
-	Type    string // "add", "remove", "context"
-	Content string
-	LineNo  int // Line number in the new file (for add/context)
+	Type      string // "add", "remove", "context"
+	Content   string
+	LineNo    int // Line number in the new file (for add/context)
 	OldLineNo int // Line number in the old file (for remove/context)
 }
 
@@ -26,20 +26,20 @@ type FileDiff struct {
 func ParseDiff(diffContent string) ([]*FileDiff, error) {
 	var fileDiffs []*FileDiff
 	var currentFile *FileDiff
-	
+
 	scanner := bufio.NewScanner(strings.NewReader(diffContent))
-	
+
 	// Regex patterns for diff parsing
 	fileHeaderRegex := regexp.MustCompile(`^diff --git a/(.*) b/(.*)$`)
 	oldFileRegex := regexp.MustCompile(`^--- a/(.*)$`)
 	newFileRegex := regexp.MustCompile(`^\+\+\+ b/(.*)$`)
 	hunkHeaderRegex := regexp.MustCompile(`^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@`)
-	
+
 	var oldLineNo, newLineNo int
-	
+
 	for scanner.Scan() {
 		line := scanner.Text()
-		
+
 		// Check for file header
 		if matches := fileHeaderRegex.FindStringSubmatch(line); matches != nil {
 			if currentFile != nil {
@@ -52,7 +52,7 @@ func ParseDiff(diffContent string) ([]*FileDiff, error) {
 			}
 			continue
 		}
-		
+
 		// Check for old file marker
 		if matches := oldFileRegex.FindStringSubmatch(line); matches != nil {
 			if currentFile != nil {
@@ -60,7 +60,7 @@ func ParseDiff(diffContent string) ([]*FileDiff, error) {
 			}
 			continue
 		}
-		
+
 		// Check for new file marker
 		if matches := newFileRegex.FindStringSubmatch(line); matches != nil {
 			if currentFile != nil {
@@ -68,7 +68,7 @@ func ParseDiff(diffContent string) ([]*FileDiff, error) {
 			}
 			continue
 		}
-		
+
 		// Check for hunk header
 		if matches := hunkHeaderRegex.FindStringSubmatch(line); matches != nil {
 			oldStart, _ := strconv.Atoi(matches[1])
@@ -77,7 +77,7 @@ func ParseDiff(diffContent string) ([]*FileDiff, error) {
 			newLineNo = newStart
 			continue
 		}
-		
+
 		// Parse diff lines
 		if currentFile != nil && len(line) > 0 {
 			switch line[0] {
@@ -107,12 +107,12 @@ func ParseDiff(diffContent string) ([]*FileDiff, error) {
 			}
 		}
 	}
-	
+
 	// Add the last file
 	if currentFile != nil {
 		fileDiffs = append(fileDiffs, currentFile)
 	}
-	
+
 	return fileDiffs, scanner.Err()
 }
 
@@ -179,4 +179,3 @@ func (fd *FileDiff) GetStats() (added, removed, modified int) {
 	}
 	return
 }
-

@@ -136,7 +136,7 @@ func (c *ContextDualCommand) RunIntoGlazeProcessor(
 				functions, err := parser.ExtractFunctions([]byte(content))
 				if err == nil {
 					totalFunctions = len(functions)
-					
+
 					// Determine which functions were changed
 					for _, fn := range functions {
 						if analysis.IsFunctionChanged(fn, fileChange.ChangedLines) {
@@ -210,4 +210,3 @@ func NewContextDualCommand() (*ContextDualCommand, error) {
 		CommandDescription: cmdDesc,
 	}, nil
 }
-

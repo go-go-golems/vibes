@@ -109,4 +109,3 @@ func NewDiffCommand() (*cobra.Command, error) {
 
 	return cobraCommand, nil
 }
-

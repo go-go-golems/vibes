@@ -145,4 +145,3 @@ func NewCommitsCommand() (*cobra.Command, error) {
 
 	return cobraCommand, nil
 }
-

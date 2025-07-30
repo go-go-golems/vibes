@@ -21,4 +21,3 @@ func NewAnalyzeCommand() (*cobra.Command, error) {
 
 	return analyzeCmd, nil
 }
-

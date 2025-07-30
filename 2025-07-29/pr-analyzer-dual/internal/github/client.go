@@ -78,7 +78,7 @@ func (c *Client) GetPullRequestCommits(ctx context.Context, owner, repo string, 
 // GetFileCommits retrieves commit history for a specific file
 func (c *Client) GetFileCommits(ctx context.Context, owner, repo, path string) ([]*github.RepositoryCommit, error) {
 	opts := &github.CommitsListOptions{
-		Path: path,
+		Path:        path,
 		ListOptions: github.ListOptions{PerPage: 100},
 	}
 	var allCommits []*github.RepositoryCommit
@@ -141,4 +141,3 @@ func (c *Client) GetFileContent(ctx context.Context, owner, repo, path, ref stri
 
 	return content, nil
 }
-
