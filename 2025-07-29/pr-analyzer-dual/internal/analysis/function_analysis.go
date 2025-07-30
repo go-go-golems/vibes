@@ -25,7 +25,7 @@ func ParseDiffForAnalysis(diffContent string) ([]*FileChange, error) {
 	var fileChanges []*FileChange
 	for _, fileDiff := range fileDiffs {
 		added, removed, modified := fileDiff.GetStats()
-		
+
 		fileChange := &FileChange{
 			FilePath:      fileDiff.NewFile,
 			LinesAdded:    added,
@@ -33,7 +33,7 @@ func ParseDiffForAnalysis(diffContent string) ([]*FileChange, error) {
 			LinesModified: modified,
 			ChangedLines:  fileDiff.GetChangedLines(),
 		}
-		
+
 		fileChanges = append(fileChanges, fileChange)
 	}
 
@@ -60,4 +60,3 @@ func GetGoFiles(fileChanges []*FileChange) []*FileChange {
 	}
 	return goFiles
 }
-

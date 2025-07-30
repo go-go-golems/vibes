@@ -159,4 +159,3 @@ func NewFileHistoryCommand() (*cobra.Command, error) {
 
 	return cobraCommand, nil
 }
-
