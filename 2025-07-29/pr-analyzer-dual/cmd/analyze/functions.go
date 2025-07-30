@@ -19,11 +19,11 @@ import (
 )
 
 type FunctionsSettings struct {
-	Owner      string `glazed.parameter:"owner"`
-	Repo       string `glazed.parameter:"repo"`
-	PRNumber   int    `glazed.parameter:"pr-number"`
-	ShowBody   bool   `glazed.parameter:"show-body"`
-	OnlyChanged bool  `glazed.parameter:"only-changed"`
+	Owner       string `glazed.parameter:"owner"`
+	Repo        string `glazed.parameter:"repo"`
+	PRNumber    int    `glazed.parameter:"pr-number"`
+	ShowBody    bool   `glazed.parameter:"show-body"`
+	OnlyChanged bool   `glazed.parameter:"only-changed"`
 }
 
 // FunctionsCommand analyzes functions in PR changes
@@ -216,4 +216,3 @@ func NewFunctionsCommand() (*cobra.Command, error) {
 
 	return cobraCommand, nil
 }
-

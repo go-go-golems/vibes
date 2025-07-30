@@ -280,4 +280,3 @@ func NewFunctionsDualCommand() (*FunctionsDualCommand, error) {
 		CommandDescription: cmdDesc,
 	}, nil
 }
-

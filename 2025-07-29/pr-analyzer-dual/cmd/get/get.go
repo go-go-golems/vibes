@@ -39,4 +39,3 @@ func NewGetCommand() (*cobra.Command, error) {
 
 	return getCmd, nil
 }
-

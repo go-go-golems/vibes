@@ -205,4 +205,3 @@ func NewContextCommand() (*cobra.Command, error) {
 
 	return cobraCommand, nil
 }
-

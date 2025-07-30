@@ -17,7 +17,7 @@ type Parser struct {
 func NewParser() *Parser {
 	parser := sitter.NewParser()
 	parser.SetLanguage(golang.GetLanguage())
-	
+
 	return &Parser{parser: parser}
 }
 
@@ -52,7 +52,7 @@ func (p *Parser) ExtractFunctions(sourceCode []byte) ([]*Function, error) {
 	defer tree.Close()
 
 	var functions []*Function
-	
+
 	// Use a simpler approach - traverse the tree manually
 	p.traverseNode(tree.RootNode(), sourceCode, &functions)
 
@@ -62,7 +62,7 @@ func (p *Parser) ExtractFunctions(sourceCode []byte) ([]*Function, error) {
 // traverseNode recursively traverses the AST to find function and method declarations
 func (p *Parser) traverseNode(node *sitter.Node, sourceCode []byte, functions *[]*Function) {
 	nodeType := node.Type()
-	
+
 	if nodeType == "function_declaration" {
 		fn := p.extractFunctionFromNode(node, sourceCode)
 		if fn != nil {
@@ -74,7 +74,7 @@ func (p *Parser) traverseNode(node *sitter.Node, sourceCode []byte, functions *[
 			*functions = append(*functions, fn)
 		}
 	}
-	
+
 	// Recursively traverse child nodes
 	for i := 0; i < int(node.ChildCount()); i++ {
 		child := node.Child(i)
@@ -161,11 +161,11 @@ func (p *Parser) extractSignature(node *sitter.Node, sourceCode []byte) string {
 	// Extract from start of function to start of body
 	startByte := node.StartByte()
 	endByte := bodyNode.StartByte()
-	
+
 	if endByte > startByte {
 		return string(sourceCode[startByte:endByte])
 	}
-	
+
 	return node.Content(sourceCode)
 }
 
@@ -221,4 +221,3 @@ func (p *Parser) GetChangedFunctions(sourceCode []byte, changedLines []int) ([]*
 
 	return changedFunctions, nil
 }
-
