@@ -95,6 +95,25 @@ and glazed for structured output. Supports both human-readable reports and struc
 	}
 	analyzeCmd.AddCommand(functionsCobraCmd)
 
+	functionHistoryCmd, err := analyze.NewFunctionHistoryDualCommand()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating function-history command: %v\n", err)
+		os.Exit(1)
+	}
+	functionHistoryCobraCmd, err := cli.BuildCobraCommand(functionHistoryCmd,
+		cli.WithDualMode(true),
+		cli.WithGlazeToggleFlag("with-glaze-output"),
+		cli.WithParserConfig(cli.CobraParserConfig{
+			ShortHelpLayers: []string{layers.DefaultSlug},
+			MiddlewaresFunc: cli.CobraCommandDefaultMiddlewares,
+		}),
+	)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error building function-history command: %v\n", err)
+		os.Exit(1)
+	}
+	analyzeCmd.AddCommand(functionHistoryCobraCmd)
+
 	// Add command groups to root
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(analyzeCmd)
