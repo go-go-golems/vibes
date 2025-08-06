@@ -13,17 +13,24 @@ import (
 	"github.com/yuin/goldmark/ast"
 	
 	"diary-cli/pkg/config"
+	"diary-cli/pkg/rendering"
 	"diary-cli/pkg/types"
 )
 
 // MarkdownStorage handles reading and writing diary entries to markdown files
 type MarkdownStorage struct {
-	config *config.Config
+	config   *config.Config
+	renderer *rendering.Renderer
 }
 
 // NewMarkdownStorage creates a new markdown storage instance
 func NewMarkdownStorage(cfg *config.Config) *MarkdownStorage {
-	return &MarkdownStorage{config: cfg}
+	renderer, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		// If renderer creation fails, we'll handle it gracefully
+		renderer = nil
+	}
+	return &MarkdownStorage{config: cfg, renderer: renderer}
 }
 
 // AddEntry adds a new entry to the appropriate markdown file
@@ -113,22 +120,37 @@ func (ms *MarkdownStorage) createDailyFile(filePath string, date time.Time) erro
 	return os.WriteFile(filePath, []byte(template), 0644)
 }
 
-// formatEntry formats a diary entry according to its format type
+// formatEntry formats a diary entry using templates
 func (ms *MarkdownStorage) formatEntry(entry *types.DiaryEntry) string {
-	timestamp := entry.Date.Format("2006-01-02 15:04")
+	if ms.renderer == nil {
+		// Fallback to simple formatting if renderer is not available
+		return ms.formatSimpleEntry(entry)
+	}
 	
+	// Determine template name based on format
+	var templateName string
 	switch entry.Format {
 	case types.FormatTask:
-		return ms.formatTaskEntry(entry, timestamp)
+		templateName = "task.md.tmpl"
 	case types.FormatMarkdown:
-		return ms.formatMarkdownEntry(entry, timestamp)
+		templateName = "markdown.md.tmpl"
 	default: // FormatDefault
-		return ms.formatDefaultEntry(entry, timestamp)
+		templateName = "default.md.tmpl"
 	}
+	
+	// Render using template
+	output, err := ms.renderer.Render(templateName, entry)
+	if err != nil {
+		// Fallback to simple formatting if template rendering fails
+		fmt.Printf("Template rendering failed for %s: %v\n", templateName, err)
+		return ms.formatSimpleEntry(entry)
+	}
+	
+	return output
 }
 
-// formatDefaultEntry formats entry in simple markdown format
-func (ms *MarkdownStorage) formatDefaultEntry(entry *types.DiaryEntry, timestamp string) string {
+// formatSimpleEntry provides a simple fallback formatting when templates are not available
+func (ms *MarkdownStorage) formatSimpleEntry(entry *types.DiaryEntry) string {
 	var sb strings.Builder
 	
 	// Title
@@ -142,132 +164,17 @@ func (ms *MarkdownStorage) formatDefaultEntry(entry *types.DiaryEntry, timestamp
 	
 	sb.WriteString(fmt.Sprintf("## %s: %s\n", strings.Title(string(entry.Type)), title))
 	
-	// Subtitle if present
-	if entry.SubtitleSlug != "" {
-		sb.WriteString(fmt.Sprintf("### %s\n", entry.SubtitleSlug))
-	}
-	
 	// Content (if different from title)
 	if entry.Title != "" {
 		sb.WriteString(entry.Content + "\n")
 	}
 	
-	// URL for links
-	if entry.Type == types.EntryTypeLink && entry.URL != "" {
-		sb.WriteString(fmt.Sprintf("\nURL: %s\n", entry.URL))
-	}
-	
-	sb.WriteString(fmt.Sprintf("\n*Added: %s*\n\n", timestamp))
+	sb.WriteString(fmt.Sprintf("\n*Added: %s*\n\n", entry.Date.Format("2006-01-02 15:04")))
 	
 	return sb.String()
 }
 
-// formatMarkdownEntry formats entry in enhanced markdown format
-func (ms *MarkdownStorage) formatMarkdownEntry(entry *types.DiaryEntry, timestamp string) string {
-	var sb strings.Builder
-	
-	// Title with metadata
-	title := entry.Title
-	if title == "" {
-		title = entry.Content
-		if len(title) > 50 {
-			title = title[:50] + "..."
-		}
-	}
-	
-	sb.WriteString(fmt.Sprintf("## %s: %s\n", strings.Title(string(entry.Type)), title))
-	
-	// Metadata
-	sb.WriteString(fmt.Sprintf("**Type:** %s  \n", entry.Type))
-	sb.WriteString(fmt.Sprintf("**Date:** %s  \n", timestamp))
-	if len(entry.Tags) > 0 {
-		sb.WriteString(fmt.Sprintf("**Tags:** %s  \n", strings.Join(entry.Tags, ", ")))
-	}
-	sb.WriteString("\n")
-	
-	// Subtitle if present
-	if entry.SubtitleSlug != "" {
-		sb.WriteString(fmt.Sprintf("### %s\n", entry.SubtitleSlug))
-	}
-	
-	// Content
-	if entry.Title != "" {
-		sb.WriteString(entry.Content + "\n")
-	}
-	
-	// URL for links
-	if entry.Type == types.EntryTypeLink && entry.URL != "" {
-		sb.WriteString(fmt.Sprintf("\n**URL:** [%s](%s)\n", entry.URL, entry.URL))
-	}
-	
-	sb.WriteString("\n---\n\n")
-	
-	return sb.String()
-}
 
-// formatTaskEntry formats entry in Obsidian Tasks format
-func (ms *MarkdownStorage) formatTaskEntry(entry *types.DiaryEntry, timestamp string) string {
-	var sb strings.Builder
-	
-	// Task checkbox
-	checkbox := "- [ ]"
-	if entry.Completed {
-		checkbox = "- [x]"
-	}
-	
-	// Main task line
-	if entry.Type == types.EntryTypeTodo {
-		sb.WriteString(fmt.Sprintf("%s %s", checkbox, entry.Content))
-		
-		// Due date for todos
-		if entry.DueDate != nil {
-			sb.WriteString(fmt.Sprintf(" 📅 %s", entry.DueDate.Format(ms.config.DateFormat)))
-		}
-		
-		// Tags
-		tags := []string{"#todo", "#toProcess"}
-		if len(entry.Tags) > 0 {
-			tags = append(tags, entry.Tags...)
-		}
-		sb.WriteString(fmt.Sprintf(" %s\n", strings.Join(tags, " ")))
-		
-		// Priority and metadata
-		if entry.Priority != "" {
-			sb.WriteString(fmt.Sprintf("  - Priority: %s\n", entry.Priority))
-		}
-		if entry.TaskID != "" {
-			sb.WriteString(fmt.Sprintf("  - ID: %s\n", entry.TaskID))
-		}
-		
-	} else {
-		// Regular entry in task format
-		title := entry.Title
-		if title == "" {
-			title = entry.Content
-			if len(title) > 50 {
-				title = title[:50] + "..."
-			}
-		}
-		
-		sb.WriteString(fmt.Sprintf("%s **%s**: %s #toProcess #%s\n", 
-			checkbox, strings.ToUpper(string(entry.Type)), title, entry.Type))
-		
-		// Content as sub-item if different from title
-		if entry.Title != "" {
-			sb.WriteString(fmt.Sprintf("  - %s\n", entry.Content))
-		}
-		
-		// Subtitle as sub-item
-		if entry.SubtitleSlug != "" {
-			sb.WriteString(fmt.Sprintf("  - **%s**: %s\n", entry.SubtitleSlug, entry.Content))
-		}
-	}
-	
-	sb.WriteString(fmt.Sprintf("  - Added: %s\n", timestamp))
-	sb.WriteString("\n")
-	
-	return sb.String()
-}
 
 // appendToFile appends content to a file, inserting in the "To Process" section
 func (ms *MarkdownStorage) appendToFile(filePath, content string) error {
@@ -833,5 +740,10 @@ func (ms *MarkdownStorage) SearchEntries(query string, since time.Time, entryTyp
 	}
 	
 	return results, nil
+}
+
+// FilePathForEntry returns the file path for the given entry
+func (ms *MarkdownStorage) FilePathForEntry(entry *types.DiaryEntry) string {
+	return ms.config.GetDateFile(entry.Date)
 }
 

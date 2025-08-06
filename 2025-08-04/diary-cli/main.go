@@ -60,6 +60,7 @@ func main() {
 	appendCmd := commands.NewAppendCommand(cfg)
 	configCmd := commands.NewConfigCommand(cfg)
 	initCmd := commands.NewInitCommand(cfg)
+	testCmd := commands.NewTestCommand(cfg)
 
 	// Convert glaze commands to cobra commands with ShortHelpLayer
 	listCobraCmd, err := cli.BuildCobraCommand(listCmd,
@@ -104,6 +105,7 @@ func main() {
 	rootCmd.AddCommand(appendCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(testCmd)
 
 	// Execute
 	if err := rootCmd.ExecuteContext(context.Background()); err != nil {
