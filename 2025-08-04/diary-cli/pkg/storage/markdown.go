@@ -28,7 +28,7 @@ func NewMarkdownStorage(cfg *config.Config) *MarkdownStorage {
 
 // AddEntry adds a new entry to the appropriate markdown file
 func (ms *MarkdownStorage) AddEntry(entry *types.DiaryEntry) error {
-	filePath := ms.config.GetDateFile(entry.Date.Format(ms.config.DateFormat))
+	filePath := ms.config.GetDateFile(entry.Date)
 	
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
@@ -53,13 +53,17 @@ func (ms *MarkdownStorage) AddEntry(entry *types.DiaryEntry) error {
 func (ms *MarkdownStorage) GetEntries(since time.Time, entryType types.EntryType) ([]*types.DiaryEntry, error) {
 	var entries []*types.DiaryEntry
 	
-	logsDir := ms.config.GetLogsDir()
-	if _, err := os.Stat(logsDir); os.IsNotExist(err) {
+	// For template-based paths, we need to search in the base logs directory
+	// and also check for date-specific subdirectories
+	baseLogsDir := ms.config.GetLogsDir()
+	
+	// Check if base logs directory exists
+	if _, err := os.Stat(baseLogsDir); os.IsNotExist(err) {
 		return entries, nil // No logs directory yet
 	}
 
-	// Walk through log files
-	err := filepath.Walk(logsDir, func(path string, info os.FileInfo, err error) error {
+	// Walk through log files in base directory and any date-specific subdirectories
+	err := filepath.Walk(baseLogsDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
