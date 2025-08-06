@@ -10,13 +10,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// RenderingConfig represents template rendering configuration
+type RenderingConfig struct {
+	Templates map[string]string `yaml:"templates,omitempty"`
+}
+
 // Config represents the application configuration
 type Config struct {
-	VaultPath    string `yaml:"vault_path"`
-	LogsPath     string `yaml:"logs_path"`
-	DateFormat   string `yaml:"date_format"`
-	DefaultLimit int    `yaml:"default_limit"`
-	Editor       string `yaml:"editor,omitempty"`
+	VaultPath    string           `yaml:"vault_path"`
+	LogsPath     string           `yaml:"logs_path"`
+	DateFormat   string           `yaml:"date_format"`
+	DefaultLimit int              `yaml:"default_limit"`
+	Editor       string           `yaml:"editor,omitempty"`
+	Rendering    *RenderingConfig `yaml:"rendering,omitempty"`
 }
 
 // DefaultConfig returns a configuration with default values
