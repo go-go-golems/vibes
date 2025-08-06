@@ -80,8 +80,8 @@ func (c *Config) Save() error {
 	return nil
 }
 
-// processPathTemplate replaces YYYY-MM-DD placeholders in a path with the actual date
-func (c *Config) processPathTemplate(path string, date time.Time) string {
+// ProcessPathTemplate replaces YYYY-MM-DD placeholders in a path with the actual date
+func (c *Config) ProcessPathTemplate(path string, date time.Time) string {
 	// Replace YYYY-MM-DD with the actual date
 	dateStr := date.Format("2006-01-02")
 	result := strings.ReplaceAll(path, "YYYY-MM-DD", dateStr)
@@ -108,8 +108,8 @@ func (c *Config) GetLogsDir() string {
 
 // GetLogsDirForDate returns the logs directory path with template processing for a specific date
 func (c *Config) GetLogsDirForDate(date time.Time) string {
-	processedVaultPath := c.processPathTemplate(c.VaultPath, date)
-	processedLogsPath := c.processPathTemplate(c.LogsPath, date)
+	processedVaultPath := c.ProcessPathTemplate(c.VaultPath, date)
+	processedLogsPath := c.ProcessPathTemplate(c.LogsPath, date)
 	return filepath.Join(processedVaultPath, processedLogsPath)
 }
 
@@ -158,6 +158,11 @@ func (c *Config) GetEditor() string {
 func getConfigPath() string {
 	homeDir, _ := os.UserHomeDir()
 	return filepath.Join(homeDir, ".config", "diary-cli", "config.yaml")
+}
+
+// GetConfigPath returns the path to the configuration file
+func GetConfigPath() string {
+	return getConfigPath()
 }
 
 // getCurrentDateString returns the current date as a string

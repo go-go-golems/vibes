@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -28,12 +29,16 @@ Examples:
   diary config                                    # Show all config
   diary config vault_path                         # Show vault path
   diary config vault_path /path/to/vault          # Set vault path
-  diary config default_limit 20                   # Set default limit`,
+  diary config default_limit 20                   # Set default limit
+  diary config edit                               # Edit config file in editor`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			switch len(args) {
 			case 0:
 				return showAllConfig(cfg)
 			case 1:
+				if args[0] == "edit" {
+					return editConfig(cfg)
+				}
 				return showConfigValue(cfg, args[0])
 			case 2:
 				return setConfigValue(cfg, args[0], args[1])
@@ -54,6 +59,11 @@ func showAllConfig(cfg *config.Config) error {
 	fmt.Printf("  date_format:    %s\n", cfg.DateFormat)
 	fmt.Printf("  default_limit:  %d\n", cfg.DefaultLimit)
 	fmt.Printf("  editor:         %s\n", cfg.Editor)
+	fmt.Println()
+	
+	// Show config file path
+	fmt.Println("Configuration file:")
+	fmt.Printf("  config_file:    %s\n", config.GetConfigPath())
 	fmt.Println()
 	
 	// Show computed paths
@@ -155,6 +165,35 @@ func setConfigValue(cfg *config.Config, key, value string) error {
 	}
 
 	fmt.Printf("✓ Set %s = %s\n", key, value)
+	return nil
+}
+
+// editConfig opens the configuration file in the user's preferred editor
+func editConfig(cfg *config.Config) error {
+	configPath := config.GetConfigPath()
+	editor := cfg.GetEditor()
+	
+	fmt.Printf("Opening config file in %s: %s\n", editor, configPath)
+	
+	// Check if config file exists, create if not
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		fmt.Println("Config file does not exist, creating default configuration...")
+		if err := cfg.Save(); err != nil {
+			return fmt.Errorf("failed to create config file: %w", err)
+		}
+	}
+	
+	// Open editor
+	cmd := exec.Command(editor, configPath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to open editor: %w", err)
+	}
+	
+	fmt.Println("✓ Configuration file edited successfully")
 	return nil
 }
 
