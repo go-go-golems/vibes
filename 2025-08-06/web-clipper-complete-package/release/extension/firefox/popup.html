@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Web Clipper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📎 Web Clipper</h1>
+    </header>
+    
+    <form id="clipForm">
+      <div class="field-group">
+        <label for="url">URL:</label>
+        <input type="text" id="url" readonly>
+      </div>
+      
+      <div class="field-group">
+        <label for="pageTitle">Page Title:</label>
+        <input type="text" id="pageTitle" readonly>
+      </div>
+      
+      <div class="field-group">
+        <label for="selectedText">Selected Text:</label>
+        <textarea id="selectedText" rows="3" readonly placeholder="No text selected"></textarea>
+      </div>
+      
+      <div class="field-group">
+        <label for="title">Clip Title: <span class="required">*</span></label>
+        <input type="text" id="title" required placeholder="Enter a title for this clip">
+      </div>
+      
+      <div class="field-group">
+        <label for="category">Category: <span class="required">*</span></label>
+        <select id="category" required>
+          <option value="">Select category</option>
+          <option value="article">📄 Article</option>
+          <option value="TIL">💡 TIL (Today I Learned)</option>
+          <option value="thought">💭 Thought</option>
+          <option value="quote">💬 Quote</option>
+        </select>
+      </div>
+      
+      <div class="field-group">
+        <label for="note">Notes:</label>
+        <textarea id="note" rows="4" placeholder="Add your notes here (optional)"></textarea>
+      </div>
+      
+      <div class="actions">
+        <button type="submit" id="saveBtn">💾 Save Clip</button>
+        <button type="button" id="cancelBtn">❌ Cancel</button>
+      </div>
+    </form>
+    
+    <div id="status" class="status hidden"></div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
+

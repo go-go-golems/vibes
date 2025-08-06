@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "Web Clipper",
+  "version": "1.0.0",
+  "description": "Clip web content with notes and categories, save to local files",
+  
+  "applications": {
+    "gecko": {
+      "id": "web-clipper@example.com"
+    }
+  },
+  
+  "permissions": [
+    "activeTab",
+    "nativeMessaging",
+    "storage"
+  ],
+  
+  "browser_action": {
+    "default_popup": "../shared/popup.html",
+    "default_title": "Web Clipper"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["../shared/content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "background": {
+    "scripts": ["../shared/background.js"],
+    "persistent": false
+  },
+  
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
+
