@@ -1,0 +1,10 @@
+{
+  "name": "com.clipper.host",
+  "description": "Web Clipper Native Messaging Host",
+  "path": "/home/ubuntu/clipper-extension/backend/clipper-backend",
+  "type": "stdio",
+  "allowed_extensions": [
+    "web-clipper@example.com"
+  ]
+}
+
