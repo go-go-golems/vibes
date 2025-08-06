@@ -15,6 +15,8 @@ import (
 	"diary-cli/pkg/config"
 	"diary-cli/pkg/rendering"
 	"diary-cli/pkg/types"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/text"
 )
 
 // MarkdownStorage handles reading and writing diary entries to markdown files
@@ -227,41 +229,41 @@ func (ms *MarkdownStorage) appendToFile(filePath, content string) error {
 	return os.WriteFile(filePath, []byte(strings.Join(lines, "\n")), 0644)
 }
 
-// parseEntriesFromFile parses diary entries from a markdown file
+// parseEntriesFromFile parses entries from a markdown file using Goldmark AST
 func (ms *MarkdownStorage) parseEntriesFromFile(filePath string, fileDate time.Time) ([]*types.DiaryEntry, error) {
-	var entries []*types.DiaryEntry
-	
-	file, err := os.Open(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
+		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	lineNum := 0
-	
-	for scanner.Scan() {
-		lineNum++
-		line := strings.TrimSpace(scanner.Text())
-		
-		// Parse task format entries
-		if strings.HasPrefix(line, "- [ ]") || strings.HasPrefix(line, "- [x]") {
-			entry := ms.parseTaskLine(line, filePath, lineNum, fileDate)
+	// Parse Markdown into AST
+	md := goldmark.New()
+	doc := md.Parser().Parse(text.NewReader(data))
+
+	var entries []*types.DiaryEntry
+	// Walk AST nodes
+	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		// Headings (level 2) as entries
+		if heading, ok := node.(*ast.Heading); ok && heading.Level == 2 {
+			entry := ms.parseEntryFromHeading(heading, data, filePath, fileDate)
 			if entry != nil {
 				entries = append(entries, entry)
 			}
 		}
-		
-		// Parse markdown format entries (headers)
-		if strings.HasPrefix(line, "## ") && !strings.Contains(line, "To Process") {
-			entry := ms.parseMarkdownHeader(line, filePath, lineNum, fileDate)
+		// Task list items
+		if listItem, ok := node.(*ast.ListItem); ok && ms.isTaskItem(listItem, data) {
+			entry := ms.parseTaskEntry(listItem, data, filePath, fileDate)
 			if entry != nil {
 				entries = append(entries, entry)
 			}
 		}
-	}
+		return ast.WalkContinue, nil
+	})
 
-	return entries, scanner.Err()
+	return entries, nil
 }
 
 // parseTaskLine parses a task format line into a diary entry
@@ -745,5 +747,11 @@ func (ms *MarkdownStorage) SearchEntries(query string, since time.Time, entryTyp
 // FilePathForEntry returns the file path for the given entry
 func (ms *MarkdownStorage) FilePathForEntry(entry *types.DiaryEntry) string {
 	return ms.config.GetDateFile(entry.Date)
+}
+
+
+// RenderEntry returns the rendered entry text as a string
+func (ms *MarkdownStorage) RenderEntry(entry *types.DiaryEntry) string {
+	return ms.formatEntry(entry)
 }
 
