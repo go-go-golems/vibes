@@ -107,9 +107,10 @@ func (c *Config) ProcessPathTemplate(path string, date time.Time) string {
 	return result
 }
 
-// GetLogsDir returns the full path to the logs directory
+// GetLogsDir returns the full path to the logs directory with template processing for today
 func (c *Config) GetLogsDir() string {
-	return filepath.Join(c.VaultPath, c.LogsPath)
+	today := getCurrentDate()
+	return c.GetLogsDirForDate(today)
 }
 
 // GetLogsDirForDate returns the logs directory path with template processing for a specific date

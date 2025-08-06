@@ -62,53 +62,73 @@ func (ms *MarkdownStorage) AddEntry(entry *types.DiaryEntry) error {
 func (ms *MarkdownStorage) GetEntries(since time.Time, entryType types.EntryType) ([]*types.DiaryEntry, error) {
 	var entries []*types.DiaryEntry
 	
-	// For template-based paths, we need to search in the base logs directory
-	// and also check for date-specific subdirectories
-	baseLogsDir := ms.config.GetLogsDir()
+	// Search in both the computed logs directory (with template expansion) 
+	// and the base logs directory (for files that don't follow template structure)
+	searchDirs := []string{
+		ms.config.GetLogsDir(),                                               // Template-expanded path
+		filepath.Join(ms.config.VaultPath, "Logs"),                         // Base logs directory
+	}
 	
-	// Check if base logs directory exists
-	if _, err := os.Stat(baseLogsDir); os.IsNotExist(err) {
-		return entries, nil // No logs directory yet
+	// Track processed files to avoid duplicates
+	processedFiles := make(map[string]bool)
+	
+	for _, baseLogsDir := range searchDirs {
+		
+		// Check if logs directory exists
+		if _, err := os.Stat(baseLogsDir); os.IsNotExist(err) {
+			continue // No logs directory yet, try next
+		}
+
+		// Walk through log files in directory and any subdirectories
+		err := filepath.Walk(baseLogsDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !strings.HasSuffix(path, ".md") {
+				return nil
+			}
+
+			// Skip if we've already processed this file
+			absPath, _ := filepath.Abs(path)
+			if processedFiles[absPath] {
+				return nil
+			}
+			processedFiles[absPath] = true
+
+			// Parse date from filename
+			filename := strings.TrimSuffix(filepath.Base(path), ".md")
+			fileDate, err := time.Parse(ms.config.DateFormat, filename)
+			if err != nil {
+				return nil // Skip files that don't match date format
+			}
+
+			if fileDate.Before(since) {
+				return nil
+			}
+
+			// Parse entries from file
+			fileEntries, err := ms.parseEntriesFromFile(path, fileDate)
+			if err != nil {
+				return err
+			}
+
+			// Filter by type if specified
+			for _, entry := range fileEntries {
+				if entryType == "" || entry.Type == entryType {
+					entries = append(entries, entry)
+				}
+			}
+
+			return nil
+		})
+		
+		if err != nil {
+			return entries, err
+		}
 	}
 
-	// Walk through log files in base directory and any date-specific subdirectories
-	err := filepath.Walk(baseLogsDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !strings.HasSuffix(path, ".md") {
-			return nil
-		}
-
-		// Parse date from filename
-		filename := strings.TrimSuffix(filepath.Base(path), ".md")
-		fileDate, err := time.Parse(ms.config.DateFormat, filename)
-		if err != nil {
-			return nil // Skip files that don't match date format
-		}
-
-		if fileDate.Before(since) {
-			return nil
-		}
-
-		// Parse entries from file
-		fileEntries, err := ms.parseEntriesFromFile(path, fileDate)
-		if err != nil {
-			return err
-		}
-
-		// Filter by type if specified
-		for _, entry := range fileEntries {
-			if entryType == "" || entry.Type == entryType {
-				entries = append(entries, entry)
-			}
-		}
-
-		return nil
-	})
-
-	return entries, err
+	return entries, nil
 }
 
 // createDailyFile creates a new daily markdown file with template
@@ -466,11 +486,12 @@ func (ms *MarkdownStorage) getNodeText(node ast.Node, content []byte) string {
 // parseHeadingContent parses entry type and title from heading text
 func (ms *MarkdownStorage) parseHeadingContent(headingText string) (string, string) {
 	// Match patterns like "TIL: Title", "Thought: Title", "Link: Title", etc.
+	// Use case-insensitive patterns with (?i) flag
 	patterns := map[string]string{
-		`^TIL:\s*(.*)`:     "til",
-		`^Thought:\s*(.*)`: "thought", 
-		`^Did:\s*(.*)`:     "did",
-		`^Link:\s*(.*)`:    "link",
+		`(?i)^TIL:\s*(.*)`:     "til",
+		`(?i)^Thought:\s*(.*)`: "thought", 
+		`(?i)^Did:\s*(.*)`:     "did",
+		`(?i)^Link:\s*(.*)`:    "link",
 	}
 
 	for pattern, entryType := range patterns {
