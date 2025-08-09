@@ -7,11 +7,10 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"math"
-	"turn-inspector/ent/block"
 	"turn-inspector/ent/predicate"
 	"turn-inspector/ent/run"
+	"turn-inspector/ent/runmetadata"
 	"turn-inspector/ent/turn"
-	"turn-inspector/ent/turnmetadata"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,56 +18,54 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// TurnQuery is the builder for querying Turn entities.
-type TurnQuery struct {
+// RunQuery is the builder for querying Run entities.
+type RunQuery struct {
 	config
 	ctx          *QueryContext
-	order        []turn.OrderOption
+	order        []run.OrderOption
 	inters       []Interceptor
-	predicates   []predicate.Turn
-	withRun      *RunQuery
-	withMetadata *TurnMetadataQuery
-	withBlocks   *BlockQuery
-	withFKs      bool
+	predicates   []predicate.Run
+	withTurns    *TurnQuery
+	withMetadata *RunMetadataQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the TurnQuery builder.
-func (_q *TurnQuery) Where(ps ...predicate.Turn) *TurnQuery {
+// Where adds a new predicate for the RunQuery builder.
+func (_q *RunQuery) Where(ps ...predicate.Run) *RunQuery {
 	_q.predicates = append(_q.predicates, ps...)
 	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (_q *TurnQuery) Limit(limit int) *TurnQuery {
+func (_q *RunQuery) Limit(limit int) *RunQuery {
 	_q.ctx.Limit = &limit
 	return _q
 }
 
 // Offset to start from.
-func (_q *TurnQuery) Offset(offset int) *TurnQuery {
+func (_q *RunQuery) Offset(offset int) *RunQuery {
 	_q.ctx.Offset = &offset
 	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (_q *TurnQuery) Unique(unique bool) *TurnQuery {
+func (_q *RunQuery) Unique(unique bool) *RunQuery {
 	_q.ctx.Unique = &unique
 	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (_q *TurnQuery) Order(o ...turn.OrderOption) *TurnQuery {
+func (_q *RunQuery) Order(o ...run.OrderOption) *RunQuery {
 	_q.order = append(_q.order, o...)
 	return _q
 }
 
-// QueryRun chains the current query on the "run" edge.
-func (_q *TurnQuery) QueryRun() *RunQuery {
-	query := (&RunClient{config: _q.config}).Query()
+// QueryTurns chains the current query on the "turns" edge.
+func (_q *RunQuery) QueryTurns() *TurnQuery {
+	query := (&TurnClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -78,9 +75,9 @@ func (_q *TurnQuery) QueryRun() *RunQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(turn.Table, turn.FieldID, selector),
-			sqlgraph.To(run.Table, run.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, turn.RunTable, turn.RunColumn),
+			sqlgraph.From(run.Table, run.FieldID, selector),
+			sqlgraph.To(turn.Table, turn.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, run.TurnsTable, run.TurnsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -89,8 +86,8 @@ func (_q *TurnQuery) QueryRun() *RunQuery {
 }
 
 // QueryMetadata chains the current query on the "metadata" edge.
-func (_q *TurnQuery) QueryMetadata() *TurnMetadataQuery {
-	query := (&TurnMetadataClient{config: _q.config}).Query()
+func (_q *RunQuery) QueryMetadata() *RunMetadataQuery {
+	query := (&RunMetadataClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -100,9 +97,9 @@ func (_q *TurnQuery) QueryMetadata() *TurnMetadataQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(turn.Table, turn.FieldID, selector),
-			sqlgraph.To(turnmetadata.Table, turnmetadata.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, turn.MetadataTable, turn.MetadataColumn),
+			sqlgraph.From(run.Table, run.FieldID, selector),
+			sqlgraph.To(runmetadata.Table, runmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, run.MetadataTable, run.MetadataColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -110,43 +107,21 @@ func (_q *TurnQuery) QueryMetadata() *TurnMetadataQuery {
 	return query
 }
 
-// QueryBlocks chains the current query on the "blocks" edge.
-func (_q *TurnQuery) QueryBlocks() *BlockQuery {
-	query := (&BlockClient{config: _q.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := _q.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := _q.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(turn.Table, turn.FieldID, selector),
-			sqlgraph.To(block.Table, block.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, turn.BlocksTable, turn.BlocksColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// First returns the first Turn entity from the query.
-// Returns a *NotFoundError when no Turn was found.
-func (_q *TurnQuery) First(ctx context.Context) (*Turn, error) {
+// First returns the first Run entity from the query.
+// Returns a *NotFoundError when no Run was found.
+func (_q *RunQuery) First(ctx context.Context) (*Run, error) {
 	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{turn.Label}
+		return nil, &NotFoundError{run.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (_q *TurnQuery) FirstX(ctx context.Context) *Turn {
+func (_q *RunQuery) FirstX(ctx context.Context) *Run {
 	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -154,22 +129,22 @@ func (_q *TurnQuery) FirstX(ctx context.Context) *Turn {
 	return node
 }
 
-// FirstID returns the first Turn ID from the query.
-// Returns a *NotFoundError when no Turn ID was found.
-func (_q *TurnQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Run ID from the query.
+// Returns a *NotFoundError when no Run ID was found.
+func (_q *RunQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{turn.Label}
+		err = &NotFoundError{run.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (_q *TurnQuery) FirstIDX(ctx context.Context) int {
+func (_q *RunQuery) FirstIDX(ctx context.Context) int {
 	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -177,10 +152,10 @@ func (_q *TurnQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Turn entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Turn entity is found.
-// Returns a *NotFoundError when no Turn entities are found.
-func (_q *TurnQuery) Only(ctx context.Context) (*Turn, error) {
+// Only returns a single Run entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Run entity is found.
+// Returns a *NotFoundError when no Run entities are found.
+func (_q *RunQuery) Only(ctx context.Context) (*Run, error) {
 	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
@@ -189,14 +164,14 @@ func (_q *TurnQuery) Only(ctx context.Context) (*Turn, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{turn.Label}
+		return nil, &NotFoundError{run.Label}
 	default:
-		return nil, &NotSingularError{turn.Label}
+		return nil, &NotSingularError{run.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (_q *TurnQuery) OnlyX(ctx context.Context) *Turn {
+func (_q *RunQuery) OnlyX(ctx context.Context) *Run {
 	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -204,10 +179,10 @@ func (_q *TurnQuery) OnlyX(ctx context.Context) *Turn {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Turn ID in the query.
-// Returns a *NotSingularError when more than one Turn ID is found.
+// OnlyID is like Only, but returns the only Run ID in the query.
+// Returns a *NotSingularError when more than one Run ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (_q *TurnQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *RunQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
@@ -216,15 +191,15 @@ func (_q *TurnQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{turn.Label}
+		err = &NotFoundError{run.Label}
 	default:
-		err = &NotSingularError{turn.Label}
+		err = &NotSingularError{run.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (_q *TurnQuery) OnlyIDX(ctx context.Context) int {
+func (_q *RunQuery) OnlyIDX(ctx context.Context) int {
 	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -232,18 +207,18 @@ func (_q *TurnQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of Turns.
-func (_q *TurnQuery) All(ctx context.Context) ([]*Turn, error) {
+// All executes the query and returns a list of Runs.
+func (_q *RunQuery) All(ctx context.Context) ([]*Run, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	qr := querierAll[[]*Turn, *TurnQuery]()
-	return withInterceptors[[]*Turn](ctx, _q, qr, _q.inters)
+	qr := querierAll[[]*Run, *RunQuery]()
+	return withInterceptors[[]*Run](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (_q *TurnQuery) AllX(ctx context.Context) []*Turn {
+func (_q *RunQuery) AllX(ctx context.Context) []*Run {
 	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
@@ -251,20 +226,20 @@ func (_q *TurnQuery) AllX(ctx context.Context) []*Turn {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Turn IDs.
-func (_q *TurnQuery) IDs(ctx context.Context) (ids []int, err error) {
+// IDs executes the query and returns a list of Run IDs.
+func (_q *RunQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if _q.ctx.Unique == nil && _q.path != nil {
 		_q.Unique(true)
 	}
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
-	if err = _q.Select(turn.FieldID).Scan(ctx, &ids); err != nil {
+	if err = _q.Select(run.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (_q *TurnQuery) IDsX(ctx context.Context) []int {
+func (_q *RunQuery) IDsX(ctx context.Context) []int {
 	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -273,16 +248,16 @@ func (_q *TurnQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (_q *TurnQuery) Count(ctx context.Context) (int, error) {
+func (_q *RunQuery) Count(ctx context.Context) (int, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
 	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, _q, querierCount[*TurnQuery](), _q.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*RunQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (_q *TurnQuery) CountX(ctx context.Context) int {
+func (_q *RunQuery) CountX(ctx context.Context) int {
 	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -291,7 +266,7 @@ func (_q *TurnQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (_q *TurnQuery) Exist(ctx context.Context) (bool, error) {
+func (_q *RunQuery) Exist(ctx context.Context) (bool, error) {
 	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
 	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
@@ -304,7 +279,7 @@ func (_q *TurnQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (_q *TurnQuery) ExistX(ctx context.Context) bool {
+func (_q *RunQuery) ExistX(ctx context.Context) bool {
 	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -312,42 +287,41 @@ func (_q *TurnQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the TurnQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the RunQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (_q *TurnQuery) Clone() *TurnQuery {
+func (_q *RunQuery) Clone() *RunQuery {
 	if _q == nil {
 		return nil
 	}
-	return &TurnQuery{
+	return &RunQuery{
 		config:       _q.config,
 		ctx:          _q.ctx.Clone(),
-		order:        append([]turn.OrderOption{}, _q.order...),
+		order:        append([]run.OrderOption{}, _q.order...),
 		inters:       append([]Interceptor{}, _q.inters...),
-		predicates:   append([]predicate.Turn{}, _q.predicates...),
-		withRun:      _q.withRun.Clone(),
+		predicates:   append([]predicate.Run{}, _q.predicates...),
+		withTurns:    _q.withTurns.Clone(),
 		withMetadata: _q.withMetadata.Clone(),
-		withBlocks:   _q.withBlocks.Clone(),
 		// clone intermediate query.
 		sql:  _q.sql.Clone(),
 		path: _q.path,
 	}
 }
 
-// WithRun tells the query-builder to eager-load the nodes that are connected to
-// the "run" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TurnQuery) WithRun(opts ...func(*RunQuery)) *TurnQuery {
-	query := (&RunClient{config: _q.config}).Query()
+// WithTurns tells the query-builder to eager-load the nodes that are connected to
+// the "turns" edge. The optional arguments are used to configure the query builder of the edge.
+func (_q *RunQuery) WithTurns(opts ...func(*TurnQuery)) *RunQuery {
+	query := (&TurnClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	_q.withRun = query
+	_q.withTurns = query
 	return _q
 }
 
 // WithMetadata tells the query-builder to eager-load the nodes that are connected to
 // the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TurnQuery) WithMetadata(opts ...func(*TurnMetadataQuery)) *TurnQuery {
-	query := (&TurnMetadataClient{config: _q.config}).Query()
+func (_q *RunQuery) WithMetadata(opts ...func(*RunMetadataQuery)) *RunQuery {
+	query := (&RunMetadataClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -355,44 +329,55 @@ func (_q *TurnQuery) WithMetadata(opts ...func(*TurnMetadataQuery)) *TurnQuery {
 	return _q
 }
 
-// WithBlocks tells the query-builder to eager-load the nodes that are connected to
-// the "blocks" edge. The optional arguments are used to configure the query builder of the edge.
-func (_q *TurnQuery) WithBlocks(opts ...func(*BlockQuery)) *TurnQuery {
-	query := (&BlockClient{config: _q.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	_q.withBlocks = query
-	return _q
-}
-
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (_q *TurnQuery) GroupBy(field string, fields ...string) *TurnGroupBy {
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Run.Query().
+//		GroupBy(run.FieldName).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+func (_q *RunQuery) GroupBy(field string, fields ...string) *RunGroupBy {
 	_q.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &TurnGroupBy{build: _q}
+	grbuild := &RunGroupBy{build: _q}
 	grbuild.flds = &_q.ctx.Fields
-	grbuild.label = turn.Label
+	grbuild.label = run.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (_q *TurnQuery) Select(fields ...string) *TurnSelect {
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Run.Query().
+//		Select(run.FieldName).
+//		Scan(ctx, &v)
+func (_q *RunQuery) Select(fields ...string) *RunSelect {
 	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
-	sbuild := &TurnSelect{TurnQuery: _q}
-	sbuild.label = turn.Label
+	sbuild := &RunSelect{RunQuery: _q}
+	sbuild.label = run.Label
 	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
-// Aggregate returns a TurnSelect configured with the given aggregations.
-func (_q *TurnQuery) Aggregate(fns ...AggregateFunc) *TurnSelect {
+// Aggregate returns a RunSelect configured with the given aggregations.
+func (_q *RunQuery) Aggregate(fns ...AggregateFunc) *RunSelect {
 	return _q.Select().Aggregate(fns...)
 }
 
-func (_q *TurnQuery) prepareQuery(ctx context.Context) error {
+func (_q *RunQuery) prepareQuery(ctx context.Context) error {
 	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
@@ -404,7 +389,7 @@ func (_q *TurnQuery) prepareQuery(ctx context.Context) error {
 		}
 	}
 	for _, f := range _q.ctx.Fields {
-		if !turn.ValidColumn(f) {
+		if !run.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -418,28 +403,20 @@ func (_q *TurnQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (_q *TurnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Turn, error) {
+func (_q *RunQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Run, error) {
 	var (
-		nodes       = []*Turn{}
-		withFKs     = _q.withFKs
+		nodes       = []*Run{}
 		_spec       = _q.querySpec()
-		loadedTypes = [3]bool{
-			_q.withRun != nil,
+		loadedTypes = [2]bool{
+			_q.withTurns != nil,
 			_q.withMetadata != nil,
-			_q.withBlocks != nil,
 		}
 	)
-	if _q.withRun != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, turn.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
-		return (*Turn).scanValues(nil, columns)
+		return (*Run).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Turn{config: _q.config}
+		node := &Run{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -453,64 +430,26 @@ func (_q *TurnQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Turn, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := _q.withRun; query != nil {
-		if err := _q.loadRun(ctx, query, nodes, nil,
-			func(n *Turn, e *Run) { n.Edges.Run = e }); err != nil {
+	if query := _q.withTurns; query != nil {
+		if err := _q.loadTurns(ctx, query, nodes,
+			func(n *Run) { n.Edges.Turns = []*Turn{} },
+			func(n *Run, e *Turn) { n.Edges.Turns = append(n.Edges.Turns, e) }); err != nil {
 			return nil, err
 		}
 	}
 	if query := _q.withMetadata; query != nil {
 		if err := _q.loadMetadata(ctx, query, nodes,
-			func(n *Turn) { n.Edges.Metadata = []*TurnMetadata{} },
-			func(n *Turn, e *TurnMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := _q.withBlocks; query != nil {
-		if err := _q.loadBlocks(ctx, query, nodes,
-			func(n *Turn) { n.Edges.Blocks = []*Block{} },
-			func(n *Turn, e *Block) { n.Edges.Blocks = append(n.Edges.Blocks, e) }); err != nil {
+			func(n *Run) { n.Edges.Metadata = []*RunMetadata{} },
+			func(n *Run, e *RunMetadata) { n.Edges.Metadata = append(n.Edges.Metadata, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (_q *TurnQuery) loadRun(ctx context.Context, query *RunQuery, nodes []*Turn, init func(*Turn), assign func(*Turn, *Run)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Turn)
-	for i := range nodes {
-		if nodes[i].run_turns == nil {
-			continue
-		}
-		fk := *nodes[i].run_turns
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(run.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "run_turns" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (_q *TurnQuery) loadMetadata(ctx context.Context, query *TurnMetadataQuery, nodes []*Turn, init func(*Turn), assign func(*Turn, *TurnMetadata)) error {
+func (_q *RunQuery) loadTurns(ctx context.Context, query *TurnQuery, nodes []*Run, init func(*Run), assign func(*Run, *Turn)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Turn)
+	nodeids := make(map[int]*Run)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -519,29 +458,29 @@ func (_q *TurnQuery) loadMetadata(ctx context.Context, query *TurnMetadataQuery,
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.TurnMetadata(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(turn.MetadataColumn), fks...))
+	query.Where(predicate.Turn(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(run.TurnsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.turn_metadata
+		fk := n.run_turns
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "turn_metadata" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "run_turns" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "turn_metadata" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "run_turns" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
-func (_q *TurnQuery) loadBlocks(ctx context.Context, query *BlockQuery, nodes []*Turn, init func(*Turn), assign func(*Turn, *Block)) error {
+func (_q *RunQuery) loadMetadata(ctx context.Context, query *RunMetadataQuery, nodes []*Run, init func(*Run), assign func(*Run, *RunMetadata)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Turn)
+	nodeids := make(map[int]*Run)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -550,28 +489,28 @@ func (_q *TurnQuery) loadBlocks(ctx context.Context, query *BlockQuery, nodes []
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Block(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(turn.BlocksColumn), fks...))
+	query.Where(predicate.RunMetadata(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(run.MetadataColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.turn_blocks
+		fk := n.run_metadata
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "turn_blocks" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "run_metadata" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "turn_blocks" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "run_metadata" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
 	return nil
 }
 
-func (_q *TurnQuery) sqlCount(ctx context.Context) (int, error) {
+func (_q *RunQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := _q.querySpec()
 	_spec.Node.Columns = _q.ctx.Fields
 	if len(_q.ctx.Fields) > 0 {
@@ -580,8 +519,8 @@ func (_q *TurnQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (_q *TurnQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(turn.Table, turn.Columns, sqlgraph.NewFieldSpec(turn.FieldID, field.TypeInt))
+func (_q *RunQuery) querySpec() *sqlgraph.QuerySpec {
+	_spec := sqlgraph.NewQuerySpec(run.Table, run.Columns, sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt))
 	_spec.From = _q.sql
 	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -590,9 +529,9 @@ func (_q *TurnQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, turn.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, run.FieldID)
 		for i := range fields {
-			if fields[i] != turn.FieldID {
+			if fields[i] != run.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -620,12 +559,12 @@ func (_q *TurnQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (_q *TurnQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (_q *RunQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(_q.driver.Dialect())
-	t1 := builder.Table(turn.Table)
+	t1 := builder.Table(run.Table)
 	columns := _q.ctx.Fields
 	if len(columns) == 0 {
-		columns = turn.Columns
+		columns = run.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if _q.sql != nil {
@@ -652,28 +591,28 @@ func (_q *TurnQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// TurnGroupBy is the group-by builder for Turn entities.
-type TurnGroupBy struct {
+// RunGroupBy is the group-by builder for Run entities.
+type RunGroupBy struct {
 	selector
-	build *TurnQuery
+	build *RunQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (_g *TurnGroupBy) Aggregate(fns ...AggregateFunc) *TurnGroupBy {
+func (_g *RunGroupBy) Aggregate(fns ...AggregateFunc) *RunGroupBy {
 	_g.fns = append(_g.fns, fns...)
 	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_g *TurnGroupBy) Scan(ctx context.Context, v any) error {
+func (_g *RunGroupBy) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
 	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TurnQuery, *TurnGroupBy](ctx, _g.build, _g, _g.build.inters, v)
+	return scanWithInterceptors[*RunQuery, *RunGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (_g *TurnGroupBy) sqlScan(ctx context.Context, root *TurnQuery, v any) error {
+func (_g *RunGroupBy) sqlScan(ctx context.Context, root *RunQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
 	aggregation := make([]string, 0, len(_g.fns))
 	for _, fn := range _g.fns {
@@ -700,28 +639,28 @@ func (_g *TurnGroupBy) sqlScan(ctx context.Context, root *TurnQuery, v any) erro
 	return sql.ScanSlice(rows, v)
 }
 
-// TurnSelect is the builder for selecting fields of Turn entities.
-type TurnSelect struct {
-	*TurnQuery
+// RunSelect is the builder for selecting fields of Run entities.
+type RunSelect struct {
+	*RunQuery
 	selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (_s *TurnSelect) Aggregate(fns ...AggregateFunc) *TurnSelect {
+func (_s *RunSelect) Aggregate(fns ...AggregateFunc) *RunSelect {
 	_s.fns = append(_s.fns, fns...)
 	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (_s *TurnSelect) Scan(ctx context.Context, v any) error {
+func (_s *RunSelect) Scan(ctx context.Context, v any) error {
 	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
 	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TurnQuery, *TurnSelect](ctx, _s.TurnQuery, _s, _s.inters, v)
+	return scanWithInterceptors[*RunQuery, *RunSelect](ctx, _s.RunQuery, _s, _s.inters, v)
 }
 
-func (_s *TurnSelect) sqlScan(ctx context.Context, root *TurnQuery, v any) error {
+func (_s *RunSelect) sqlScan(ctx context.Context, root *RunQuery, v any) error {
 	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(_s.fns))
 	for _, fn := range _s.fns {

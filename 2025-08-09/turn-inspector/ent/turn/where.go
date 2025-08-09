@@ -54,6 +54,29 @@ func IDLTE(id int) predicate.Turn {
 	return predicate.Turn(sql.FieldLTE(FieldID, id))
 }
 
+// HasRun applies the HasEdge predicate on the "run" edge.
+func HasRun() predicate.Turn {
+	return predicate.Turn(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RunTable, RunColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRunWith applies the HasEdge predicate on the "run" edge with a given conditions (other predicates).
+func HasRunWith(preds ...predicate.Run) predicate.Turn {
+	return predicate.Turn(func(s *sql.Selector) {
+		step := newRunStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasMetadata applies the HasEdge predicate on the "metadata" edge.
 func HasMetadata() predicate.Turn {
 	return predicate.Turn(func(s *sql.Selector) {

@@ -4,43 +4,59 @@ package ent
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"turn-inspector/ent/block"
 	"turn-inspector/ent/run"
+	"turn-inspector/ent/runmetadata"
 	"turn-inspector/ent/turn"
-	"turn-inspector/ent/turnmetadata"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
 
-// TurnCreate is the builder for creating a Turn entity.
-type TurnCreate struct {
+// RunCreate is the builder for creating a Run entity.
+type RunCreate struct {
 	config
-	mutation *TurnMutation
+	mutation *RunMutation
 	hooks    []Hook
 }
 
-// SetRunID sets the "run" edge to the Run entity by ID.
-func (_c *TurnCreate) SetRunID(id int) *TurnCreate {
-	_c.mutation.SetRunID(id)
+// SetName sets the "name" field.
+func (_c *RunCreate) SetName(v string) *RunCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
-// SetRun sets the "run" edge to the Run entity.
-func (_c *TurnCreate) SetRun(v *Run) *TurnCreate {
-	return _c.SetRunID(v.ID)
+// SetNillableName sets the "name" field if the given value is not nil.
+func (_c *RunCreate) SetNillableName(v *string) *RunCreate {
+	if v != nil {
+		_c.SetName(*v)
+	}
+	return _c
 }
 
-// AddMetadatumIDs adds the "metadata" edge to the TurnMetadata entity by IDs.
-func (_c *TurnCreate) AddMetadatumIDs(ids ...int) *TurnCreate {
+// AddTurnIDs adds the "turns" edge to the Turn entity by IDs.
+func (_c *RunCreate) AddTurnIDs(ids ...int) *RunCreate {
+	_c.mutation.AddTurnIDs(ids...)
+	return _c
+}
+
+// AddTurns adds the "turns" edges to the Turn entity.
+func (_c *RunCreate) AddTurns(v ...*Turn) *RunCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddTurnIDs(ids...)
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the RunMetadata entity by IDs.
+func (_c *RunCreate) AddMetadatumIDs(ids ...int) *RunCreate {
 	_c.mutation.AddMetadatumIDs(ids...)
 	return _c
 }
 
-// AddMetadata adds the "metadata" edges to the TurnMetadata entity.
-func (_c *TurnCreate) AddMetadata(v ...*TurnMetadata) *TurnCreate {
+// AddMetadata adds the "metadata" edges to the RunMetadata entity.
+func (_c *RunCreate) AddMetadata(v ...*RunMetadata) *RunCreate {
 	ids := make([]int, len(v))
 	for i := range v {
 		ids[i] = v[i].ID
@@ -48,33 +64,18 @@ func (_c *TurnCreate) AddMetadata(v ...*TurnMetadata) *TurnCreate {
 	return _c.AddMetadatumIDs(ids...)
 }
 
-// AddBlockIDs adds the "blocks" edge to the Block entity by IDs.
-func (_c *TurnCreate) AddBlockIDs(ids ...int) *TurnCreate {
-	_c.mutation.AddBlockIDs(ids...)
-	return _c
-}
-
-// AddBlocks adds the "blocks" edges to the Block entity.
-func (_c *TurnCreate) AddBlocks(v ...*Block) *TurnCreate {
-	ids := make([]int, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
-	}
-	return _c.AddBlockIDs(ids...)
-}
-
-// Mutation returns the TurnMutation object of the builder.
-func (_c *TurnCreate) Mutation() *TurnMutation {
+// Mutation returns the RunMutation object of the builder.
+func (_c *RunCreate) Mutation() *RunMutation {
 	return _c.mutation
 }
 
-// Save creates the Turn in the database.
-func (_c *TurnCreate) Save(ctx context.Context) (*Turn, error) {
+// Save creates the Run in the database.
+func (_c *RunCreate) Save(ctx context.Context) (*Run, error) {
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *TurnCreate) SaveX(ctx context.Context) *Turn {
+func (_c *RunCreate) SaveX(ctx context.Context) *Run {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -83,27 +84,24 @@ func (_c *TurnCreate) SaveX(ctx context.Context) *Turn {
 }
 
 // Exec executes the query.
-func (_c *TurnCreate) Exec(ctx context.Context) error {
+func (_c *RunCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *TurnCreate) ExecX(ctx context.Context) {
+func (_c *RunCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *TurnCreate) check() error {
-	if len(_c.mutation.RunIDs()) == 0 {
-		return &ValidationError{Name: "run", err: errors.New(`ent: missing required edge "Turn.run"`)}
-	}
+func (_c *RunCreate) check() error {
 	return nil
 }
 
-func (_c *TurnCreate) sqlSave(ctx context.Context) (*Turn, error) {
+func (_c *RunCreate) sqlSave(ctx context.Context) (*Run, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -121,53 +119,40 @@ func (_c *TurnCreate) sqlSave(ctx context.Context) (*Turn, error) {
 	return _node, nil
 }
 
-func (_c *TurnCreate) createSpec() (*Turn, *sqlgraph.CreateSpec) {
+func (_c *RunCreate) createSpec() (*Run, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Turn{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(turn.Table, sqlgraph.NewFieldSpec(turn.FieldID, field.TypeInt))
+		_node = &Run{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(run.Table, sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt))
 	)
-	if nodes := _c.mutation.RunIDs(); len(nodes) > 0 {
+	if value, ok := _c.mutation.Name(); ok {
+		_spec.SetField(run.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if nodes := _c.mutation.TurnsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   turn.RunTable,
-			Columns: []string{turn.RunColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   run.TurnsTable,
+			Columns: []string{run.TurnsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(turn.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.run_turns = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := _c.mutation.MetadataIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   turn.MetadataTable,
-			Columns: []string{turn.MetadataColumn},
+			Table:   run.MetadataTable,
+			Columns: []string{run.MetadataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(turnmetadata.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := _c.mutation.BlocksIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   turn.BlocksTable,
-			Columns: []string{turn.BlocksColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(block.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(runmetadata.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -178,26 +163,26 @@ func (_c *TurnCreate) createSpec() (*Turn, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// TurnCreateBulk is the builder for creating many Turn entities in bulk.
-type TurnCreateBulk struct {
+// RunCreateBulk is the builder for creating many Run entities in bulk.
+type RunCreateBulk struct {
 	config
 	err      error
-	builders []*TurnCreate
+	builders []*RunCreate
 }
 
-// Save creates the Turn entities in the database.
-func (_c *TurnCreateBulk) Save(ctx context.Context) ([]*Turn, error) {
+// Save creates the Run entities in the database.
+func (_c *RunCreateBulk) Save(ctx context.Context) ([]*Run, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*Turn, len(_c.builders))
+	nodes := make([]*Run, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*TurnMutation)
+				mutation, ok := m.(*RunMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -244,7 +229,7 @@ func (_c *TurnCreateBulk) Save(ctx context.Context) ([]*Turn, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *TurnCreateBulk) SaveX(ctx context.Context) []*Turn {
+func (_c *RunCreateBulk) SaveX(ctx context.Context) []*Run {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -253,13 +238,13 @@ func (_c *TurnCreateBulk) SaveX(ctx context.Context) []*Turn {
 }
 
 // Exec executes the query.
-func (_c *TurnCreateBulk) Exec(ctx context.Context) error {
+func (_c *RunCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *TurnCreateBulk) ExecX(ctx context.Context) {
+func (_c *RunCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

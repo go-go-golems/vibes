@@ -12,12 +12,21 @@ const (
 	Label = "turn"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// EdgeRun holds the string denoting the run edge name in mutations.
+	EdgeRun = "run"
 	// EdgeMetadata holds the string denoting the metadata edge name in mutations.
 	EdgeMetadata = "metadata"
 	// EdgeBlocks holds the string denoting the blocks edge name in mutations.
 	EdgeBlocks = "blocks"
 	// Table holds the table name of the turn in the database.
 	Table = "turns"
+	// RunTable is the table that holds the run relation/edge.
+	RunTable = "turns"
+	// RunInverseTable is the table name for the Run entity.
+	// It exists in this package in order to avoid circular dependency with the "run" package.
+	RunInverseTable = "runs"
+	// RunColumn is the table column denoting the run relation/edge.
+	RunColumn = "run_turns"
 	// MetadataTable is the table that holds the metadata relation/edge.
 	MetadataTable = "turn_metadata"
 	// MetadataInverseTable is the table name for the TurnMetadata entity.
@@ -39,10 +48,21 @@ var Columns = []string{
 	FieldID,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "turns"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"run_turns",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -55,6 +75,13 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByRunField orders the results by run field.
+func ByRunField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRunStep(), sql.OrderByField(field, opts...))
+	}
 }
 
 // ByMetadataCount orders the results by metadata count.
@@ -83,6 +110,13 @@ func ByBlocks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newBlocksStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
+}
+func newRunStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RunInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, RunTable, RunColumn),
+	)
 }
 func newMetadataStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

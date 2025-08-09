@@ -79,6 +79,7 @@ func runShowTurn(cmd *cobra.Command, args []string) error {
 	// Query turn with all related data
 	t, err := client.Turn.Query().
 		Where(turn.IDEQ(showTurnIDFlag)).
+		WithRun().
 		WithMetadata().
 		WithBlocks(func(bq *ent.BlockQuery) {
 			bq.Order(ent.Asc(block.FieldOrder)).WithMetadata()
@@ -92,6 +93,7 @@ func runShowTurn(cmd *cobra.Command, args []string) error {
 		// JSON output
 		output := map[string]interface{}{
 			"id":         t.ID,
+			"run":        t.Edges.Run,
 			"metadata":   t.Edges.Metadata,
 			"blocks":     t.Edges.Blocks,
 		}
@@ -102,7 +104,11 @@ func runShowTurn(cmd *cobra.Command, args []string) error {
 		fmt.Println(string(jsonData))
 	} else {
 		// Table output
-		fmt.Printf("Turn ID: %d\n\n", t.ID)
+		fmt.Printf("Turn ID: %d\n", t.ID)
+		if t.Edges.Run != nil {
+			fmt.Printf("Run ID: %d\n", t.Edges.Run.ID)
+		}
+		fmt.Println()
 
 		// Turn metadata
 		if t.Edges.Metadata != nil && len(t.Edges.Metadata) > 0 {

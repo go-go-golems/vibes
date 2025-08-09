@@ -36,8 +36,11 @@ func Execute(ctx context.Context) error {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Initialize database connection
+	// Initialize database connection, except for help
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
+		if cmd.Name() == "help" {
+			return nil
+		}
 		return initDatabase()
 	}
 

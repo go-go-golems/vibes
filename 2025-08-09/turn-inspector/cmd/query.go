@@ -10,6 +10,7 @@ import (
 
 	"turn-inspector/ent"
 	"turn-inspector/ent/block"
+	"turn-inspector/ent/run"
 	"turn-inspector/ent/turn"
 	"turn-inspector/ent/turnmetadata"
 )
@@ -47,6 +48,7 @@ var (
 	metadataValueFlag string
 	textSearchFlag    string
 	blockKindFlag     string
+	runFilterID       int
 )
 
 func init() {
@@ -57,6 +59,7 @@ func init() {
 	queryTurnsCmd.Flags().StringVar(&metadataValueFlag, "metadata-value", "", "Search by metadata value")
 	queryTurnsCmd.Flags().StringVar(&textSearchFlag, "text", "", "Search for text in block payloads")
 	queryTurnsCmd.Flags().StringVar(&blockKindFlag, "block-kind", "", "Search by block kind")
+	queryTurnsCmd.Flags().IntVar(&runFilterID, "run-id", 0, "Filter by run ID")
 }
 
 func runQueryTurns(cmd *cobra.Command, args []string) error {
@@ -68,6 +71,10 @@ func runQueryTurns(cmd *cobra.Command, args []string) error {
 
 	// Build query based on flags
 	query := client.Turn.Query().WithMetadata().WithBlocks()
+
+	if runFilterID != 0 {
+		query = query.Where(turn.HasRunWith(run.IDEQ(runFilterID)))
+	}
 
 	// Filter by metadata
 	if metadataKeyFlag != "" {
@@ -144,10 +151,14 @@ func runQueryTurns(cmd *cobra.Command, args []string) error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tMetadata Count\tBlocks Count\tMatching Criteria")
-	fmt.Fprintln(w, "--\t--------------\t------------\t-----------------")
+	fmt.Fprintln(w, "ID\tRun ID\tMetadata Count\tBlocks Count\tMatching Criteria")
+	fmt.Fprintln(w, "--\t------\t--------------\t------------\t-----------------")
 
 	for _, t := range turns {
+		runID := 0
+		if t.Edges.Run != nil {
+			runID = t.Edges.Run.ID
+		}
 		metadataCount := 0
 		if t.Edges.Metadata != nil {
 			metadataCount = len(t.Edges.Metadata)
@@ -159,7 +170,7 @@ func runQueryTurns(cmd *cobra.Command, args []string) error {
 		}
 
 		criteria := buildCriteriaString()
-		fmt.Fprintf(w, "%d\t%d\t%d\t%s\n", t.ID, metadataCount, blocksCount, criteria)
+		fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%s\n", t.ID, runID, metadataCount, blocksCount, criteria)
 	}
 
 	w.Flush()
@@ -219,6 +230,12 @@ func buildCriteriaString() string {
 			criteria += ", "
 		}
 		criteria += fmt.Sprintf("block-kind:%s", blockKindFlag)
+	}
+	if runFilterID != 0 {
+		if criteria != "" {
+			criteria += ", "
+		}
+		criteria += fmt.Sprintf("run-id:%d", runFilterID)
 	}
 	return criteria
 }

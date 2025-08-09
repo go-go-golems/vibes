@@ -13,6 +13,8 @@ import (
 
 	"turn-inspector/ent/block"
 	"turn-inspector/ent/blockmetadata"
+	"turn-inspector/ent/run"
+	"turn-inspector/ent/runmetadata"
 	"turn-inspector/ent/turn"
 	"turn-inspector/ent/turnmetadata"
 
@@ -31,6 +33,10 @@ type Client struct {
 	Block *BlockClient
 	// BlockMetadata is the client for interacting with the BlockMetadata builders.
 	BlockMetadata *BlockMetadataClient
+	// Run is the client for interacting with the Run builders.
+	Run *RunClient
+	// RunMetadata is the client for interacting with the RunMetadata builders.
+	RunMetadata *RunMetadataClient
 	// Turn is the client for interacting with the Turn builders.
 	Turn *TurnClient
 	// TurnMetadata is the client for interacting with the TurnMetadata builders.
@@ -48,6 +54,8 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Block = NewBlockClient(c.config)
 	c.BlockMetadata = NewBlockMetadataClient(c.config)
+	c.Run = NewRunClient(c.config)
+	c.RunMetadata = NewRunMetadataClient(c.config)
 	c.Turn = NewTurnClient(c.config)
 	c.TurnMetadata = NewTurnMetadataClient(c.config)
 }
@@ -144,6 +152,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:        cfg,
 		Block:         NewBlockClient(cfg),
 		BlockMetadata: NewBlockMetadataClient(cfg),
+		Run:           NewRunClient(cfg),
+		RunMetadata:   NewRunMetadataClient(cfg),
 		Turn:          NewTurnClient(cfg),
 		TurnMetadata:  NewTurnMetadataClient(cfg),
 	}, nil
@@ -167,6 +177,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:        cfg,
 		Block:         NewBlockClient(cfg),
 		BlockMetadata: NewBlockMetadataClient(cfg),
+		Run:           NewRunClient(cfg),
+		RunMetadata:   NewRunMetadataClient(cfg),
 		Turn:          NewTurnClient(cfg),
 		TurnMetadata:  NewTurnMetadataClient(cfg),
 	}, nil
@@ -197,19 +209,21 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Block.Use(hooks...)
-	c.BlockMetadata.Use(hooks...)
-	c.Turn.Use(hooks...)
-	c.TurnMetadata.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Block, c.BlockMetadata, c.Run, c.RunMetadata, c.Turn, c.TurnMetadata,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Block.Intercept(interceptors...)
-	c.BlockMetadata.Intercept(interceptors...)
-	c.Turn.Intercept(interceptors...)
-	c.TurnMetadata.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Block, c.BlockMetadata, c.Run, c.RunMetadata, c.Turn, c.TurnMetadata,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -219,6 +233,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Block.mutate(ctx, m)
 	case *BlockMetadataMutation:
 		return c.BlockMetadata.mutate(ctx, m)
+	case *RunMutation:
+		return c.Run.mutate(ctx, m)
+	case *RunMetadataMutation:
+		return c.RunMetadata.mutate(ctx, m)
 	case *TurnMutation:
 		return c.Turn.mutate(ctx, m)
 	case *TurnMetadataMutation:
@@ -542,6 +560,320 @@ func (c *BlockMetadataClient) mutate(ctx context.Context, m *BlockMetadataMutati
 	}
 }
 
+// RunClient is a client for the Run schema.
+type RunClient struct {
+	config
+}
+
+// NewRunClient returns a client for the Run from the given config.
+func NewRunClient(c config) *RunClient {
+	return &RunClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `run.Hooks(f(g(h())))`.
+func (c *RunClient) Use(hooks ...Hook) {
+	c.hooks.Run = append(c.hooks.Run, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `run.Intercept(f(g(h())))`.
+func (c *RunClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Run = append(c.inters.Run, interceptors...)
+}
+
+// Create returns a builder for creating a Run entity.
+func (c *RunClient) Create() *RunCreate {
+	mutation := newRunMutation(c.config, OpCreate)
+	return &RunCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Run entities.
+func (c *RunClient) CreateBulk(builders ...*RunCreate) *RunCreateBulk {
+	return &RunCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RunClient) MapCreateBulk(slice any, setFunc func(*RunCreate, int)) *RunCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RunCreateBulk{err: fmt.Errorf("calling to RunClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RunCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RunCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Run.
+func (c *RunClient) Update() *RunUpdate {
+	mutation := newRunMutation(c.config, OpUpdate)
+	return &RunUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RunClient) UpdateOne(_m *Run) *RunUpdateOne {
+	mutation := newRunMutation(c.config, OpUpdateOne, withRun(_m))
+	return &RunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RunClient) UpdateOneID(id int) *RunUpdateOne {
+	mutation := newRunMutation(c.config, OpUpdateOne, withRunID(id))
+	return &RunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Run.
+func (c *RunClient) Delete() *RunDelete {
+	mutation := newRunMutation(c.config, OpDelete)
+	return &RunDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RunClient) DeleteOne(_m *Run) *RunDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RunClient) DeleteOneID(id int) *RunDeleteOne {
+	builder := c.Delete().Where(run.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RunDeleteOne{builder}
+}
+
+// Query returns a query builder for Run.
+func (c *RunClient) Query() *RunQuery {
+	return &RunQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRun},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Run entity by its id.
+func (c *RunClient) Get(ctx context.Context, id int) (*Run, error) {
+	return c.Query().Where(run.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RunClient) GetX(ctx context.Context, id int) *Run {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTurns queries the turns edge of a Run.
+func (c *RunClient) QueryTurns(_m *Run) *TurnQuery {
+	query := (&TurnClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(run.Table, run.FieldID, id),
+			sqlgraph.To(turn.Table, turn.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, run.TurnsTable, run.TurnsColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetadata queries the metadata edge of a Run.
+func (c *RunClient) QueryMetadata(_m *Run) *RunMetadataQuery {
+	query := (&RunMetadataClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(run.Table, run.FieldID, id),
+			sqlgraph.To(runmetadata.Table, runmetadata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, run.MetadataTable, run.MetadataColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RunClient) Hooks() []Hook {
+	return c.hooks.Run
+}
+
+// Interceptors returns the client interceptors.
+func (c *RunClient) Interceptors() []Interceptor {
+	return c.inters.Run
+}
+
+func (c *RunClient) mutate(ctx context.Context, m *RunMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RunCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RunUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RunDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Run mutation op: %q", m.Op())
+	}
+}
+
+// RunMetadataClient is a client for the RunMetadata schema.
+type RunMetadataClient struct {
+	config
+}
+
+// NewRunMetadataClient returns a client for the RunMetadata from the given config.
+func NewRunMetadataClient(c config) *RunMetadataClient {
+	return &RunMetadataClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `runmetadata.Hooks(f(g(h())))`.
+func (c *RunMetadataClient) Use(hooks ...Hook) {
+	c.hooks.RunMetadata = append(c.hooks.RunMetadata, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `runmetadata.Intercept(f(g(h())))`.
+func (c *RunMetadataClient) Intercept(interceptors ...Interceptor) {
+	c.inters.RunMetadata = append(c.inters.RunMetadata, interceptors...)
+}
+
+// Create returns a builder for creating a RunMetadata entity.
+func (c *RunMetadataClient) Create() *RunMetadataCreate {
+	mutation := newRunMetadataMutation(c.config, OpCreate)
+	return &RunMetadataCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of RunMetadata entities.
+func (c *RunMetadataClient) CreateBulk(builders ...*RunMetadataCreate) *RunMetadataCreateBulk {
+	return &RunMetadataCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *RunMetadataClient) MapCreateBulk(slice any, setFunc func(*RunMetadataCreate, int)) *RunMetadataCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &RunMetadataCreateBulk{err: fmt.Errorf("calling to RunMetadataClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*RunMetadataCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &RunMetadataCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for RunMetadata.
+func (c *RunMetadataClient) Update() *RunMetadataUpdate {
+	mutation := newRunMetadataMutation(c.config, OpUpdate)
+	return &RunMetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RunMetadataClient) UpdateOne(_m *RunMetadata) *RunMetadataUpdateOne {
+	mutation := newRunMetadataMutation(c.config, OpUpdateOne, withRunMetadata(_m))
+	return &RunMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RunMetadataClient) UpdateOneID(id int) *RunMetadataUpdateOne {
+	mutation := newRunMetadataMutation(c.config, OpUpdateOne, withRunMetadataID(id))
+	return &RunMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for RunMetadata.
+func (c *RunMetadataClient) Delete() *RunMetadataDelete {
+	mutation := newRunMetadataMutation(c.config, OpDelete)
+	return &RunMetadataDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RunMetadataClient) DeleteOne(_m *RunMetadata) *RunMetadataDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *RunMetadataClient) DeleteOneID(id int) *RunMetadataDeleteOne {
+	builder := c.Delete().Where(runmetadata.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RunMetadataDeleteOne{builder}
+}
+
+// Query returns a query builder for RunMetadata.
+func (c *RunMetadataClient) Query() *RunMetadataQuery {
+	return &RunMetadataQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeRunMetadata},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a RunMetadata entity by its id.
+func (c *RunMetadataClient) Get(ctx context.Context, id int) (*RunMetadata, error) {
+	return c.Query().Where(runmetadata.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RunMetadataClient) GetX(ctx context.Context, id int) *RunMetadata {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryRun queries the run edge of a RunMetadata.
+func (c *RunMetadataClient) QueryRun(_m *RunMetadata) *RunQuery {
+	query := (&RunClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(runmetadata.Table, runmetadata.FieldID, id),
+			sqlgraph.To(run.Table, run.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, runmetadata.RunTable, runmetadata.RunColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RunMetadataClient) Hooks() []Hook {
+	return c.hooks.RunMetadata
+}
+
+// Interceptors returns the client interceptors.
+func (c *RunMetadataClient) Interceptors() []Interceptor {
+	return c.inters.RunMetadata
+}
+
+func (c *RunMetadataClient) mutate(ctx context.Context, m *RunMetadataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RunMetadataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RunMetadataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RunMetadataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RunMetadataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown RunMetadata mutation op: %q", m.Op())
+	}
+}
+
 // TurnClient is a client for the Turn schema.
 type TurnClient struct {
 	config
@@ -648,6 +980,22 @@ func (c *TurnClient) GetX(ctx context.Context, id int) *Turn {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryRun queries the run edge of a Turn.
+func (c *TurnClient) QueryRun(_m *Turn) *RunQuery {
+	query := (&RunClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(turn.Table, turn.FieldID, id),
+			sqlgraph.To(run.Table, run.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, turn.RunTable, turn.RunColumn),
+		)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // QueryMetadata queries the metadata edge of a Turn.
@@ -859,9 +1207,9 @@ func (c *TurnMetadataClient) mutate(ctx context.Context, m *TurnMetadataMutation
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Block, BlockMetadata, Turn, TurnMetadata []ent.Hook
+		Block, BlockMetadata, Run, RunMetadata, Turn, TurnMetadata []ent.Hook
 	}
 	inters struct {
-		Block, BlockMetadata, Turn, TurnMetadata []ent.Interceptor
+		Block, BlockMetadata, Run, RunMetadata, Turn, TurnMetadata []ent.Interceptor
 	}
 )
