@@ -1,0 +1,12 @@
+bash -lc 'echo '=== SYSTEM LOAD ===' && while true; do echo "$(date): Load: $(up
+time | awk -F'load average:' '{print $2}')" && sleep 5; done'ubuntu@af6ef63a383e
+:~/tmux-dashboard$ bash -lc 'echo '=== SYSTEM LOAD ===' && while true; do echo "
+$(date): Load: $(uptime | awk -F'load average:' '{print $2}')" && sleep 5; done'
+
+
+
+
+
+
+
+

@@ -1,0 +1,24 @@
+build -o tmux-dashboard . && echo 'Build
+ successful!' && echo '' && go test -v .
+/... | head -20'ubuntu@af6ef63a383e:~/tm
+ux-dashboard$ export GO_ENV=developmente
+xport DEBUG=truebash -lc 'cd /home/ubunt
+u/tmux-dashboard && echo '=== BUILD & TE
+ST ===' && go build -o tmux-dashboard .
+&& echo 'Build successful!' && echo '' &
+& go test -v ./... | head -20'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

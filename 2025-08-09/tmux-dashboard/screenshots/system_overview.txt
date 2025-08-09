@@ -1,0 +1,11 @@
+uptime && echo '' && free -h && echo ''
+ && df -h /; sleep 10; done'ubuntu@af6e
+f63a383e:~/tmux-dashboard$ bash -lc 'wh
+ile :; do clear; date "+%F %T"; echo '=
+== SYSTEM OVERVIEW ===' && uptime && ec
+ho '' && free -h && echo '' && df -h /;
+ sleep 10; done'
+
+
+
+

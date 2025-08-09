@@ -1,0 +1,41 @@
+version: 2
+session: "dashboard-demo"
+vars:
+  host: "demo-server"
+  service: "web-app"
+  port: "3000"
+
+tabs:
+  - name: "system"
+    layout: tiled
+    panes:
+      - cmd: "echo '=== SYSTEM OVERVIEW ===' && uptime && echo '' && free -h && echo '' && df -h /"
+        refresh: 10
+      - cmd: "echo '=== TOP PROCESSES ===' && ps aux --sort=-%cpu | head -10"
+        refresh: 5
+      - cmd: "echo '=== NETWORK CONNECTIONS ===' && netstat -tuln | head -10"
+        refresh: 15
+      - cmd: "echo '=== DISK USAGE ===' && du -sh /home/* 2>/dev/null | head -5"
+        refresh: 30
+
+  - name: "monitoring"
+    layout: even-vertical
+    panes:
+      - cmd: "echo '=== CPU & MEMORY MONITOR ===' && while true; do echo \"$(date): CPU: $(top -bn1 | grep 'Cpu(s)' | awk '{print $2}') Memory: $(free | grep Mem | awk '{printf \"%.1f%%\", $3/$2 * 100.0}')\" && sleep 3; done"
+      - cmd: "echo '=== SYSTEM LOAD ===' && while true; do echo \"$(date): Load: $(uptime | awk -F'load average:' '{print $2}')\" && sleep 5; done"
+
+  - name: "logs"
+    layout: main-horizontal
+    panes:
+      - cmd: "echo '=== APPLICATION LOGS ===' && for i in {1..20}; do echo \"$(date) [INFO] Application event $i - Service {{.service}} running on port {{.port}}\"; sleep 2; done && tail -f /dev/null"
+      - cmd: "echo '=== SYSTEM LOGS ===' && journalctl -n 20 --no-pager"
+
+  - name: "development"
+    layout: even-horizontal
+    panes:
+      - cmd: "cd /home/ubuntu/tmux-dashboard && echo '=== PROJECT STATUS ===' && ls -la && echo '' && echo 'Git Status:' && git status --short"
+      - cmd: "cd /home/ubuntu/tmux-dashboard && echo '=== BUILD & TEST ===' && go build -o tmux-dashboard . && echo 'Build successful!' && echo '' && go test -v ./... | head -20"
+        env:
+          GO_ENV: "development"
+          DEBUG: "true"
+

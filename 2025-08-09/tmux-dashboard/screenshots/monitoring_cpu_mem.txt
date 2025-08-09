@@ -1,0 +1,11 @@
+bash -lc 'echo '=== CPU & MEMORY MONITOR ===' && while true; do echo "$(date): C
+PU: $(top -bn1 | grep 'Cpu(s)' | awk '{print $2}') Memory: $(free | grep Mem | a
+wk '{printf "%.1f%%", $3/$2 * 100.0}')" && sleep 3; done'ubuntu@af6ef63a383e:~/t
+mux-dashboard$ bash -lc 'echo '=== CPU & MEMORY MONITOR ===' && while true; do e
+cho "$(date): CPU: $(top -bn1 | grep 'Cpu(s)' | awk '{print $2}') Memory: $(free
+ | grep Mem | awk '{printf "%.1f%%", $3/$2 * 100.0}')" && sleep 3; done'
+
+
+
+
+

@@ -1,0 +1,24 @@
+s -la && echo '' && echo 'Git Status:'
+&& git status --short'ubuntu@af6ef63a38
+3e:~/tmux-dashboard$ bash -lc 'cd /home
+/ubuntu/tmux-dashboard && echo '=== PRO
+JECT STATUS ===' && ls -la && echo '' &
+& echo 'Git Status:' && git status --sh
+ort'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
