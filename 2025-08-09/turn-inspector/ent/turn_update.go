@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"turn-inspector/ent/block"
 	"turn-inspector/ent/predicate"
+	"turn-inspector/ent/run"
 	"turn-inspector/ent/turn"
 	"turn-inspector/ent/turnmetadata"
 
@@ -27,6 +28,17 @@ type TurnUpdate struct {
 func (_u *TurnUpdate) Where(ps ...predicate.Turn) *TurnUpdate {
 	_u.mutation.Where(ps...)
 	return _u
+}
+
+// SetRunID sets the "run" edge to the Run entity by ID.
+func (_u *TurnUpdate) SetRunID(id int) *TurnUpdate {
+	_u.mutation.SetRunID(id)
+	return _u
+}
+
+// SetRun sets the "run" edge to the Run entity.
+func (_u *TurnUpdate) SetRun(v *Run) *TurnUpdate {
+	return _u.SetRunID(v.ID)
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the TurnMetadata entity by IDs.
@@ -62,6 +74,12 @@ func (_u *TurnUpdate) AddBlocks(v ...*Block) *TurnUpdate {
 // Mutation returns the TurnMutation object of the builder.
 func (_u *TurnUpdate) Mutation() *TurnMutation {
 	return _u.mutation
+}
+
+// ClearRun clears the "run" edge to the Run entity.
+func (_u *TurnUpdate) ClearRun() *TurnUpdate {
+	_u.mutation.ClearRun()
+	return _u
 }
 
 // ClearMetadata clears all "metadata" edges to the TurnMetadata entity.
@@ -133,7 +151,18 @@ func (_u *TurnUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *TurnUpdate) check() error {
+	if _u.mutation.RunCleared() && len(_u.mutation.RunIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Turn.run"`)
+	}
+	return nil
+}
+
 func (_u *TurnUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(turn.Table, turn.Columns, sqlgraph.NewFieldSpec(turn.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -141,6 +170,35 @@ func (_u *TurnUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if _u.mutation.RunCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   turn.RunTable,
+			Columns: []string{turn.RunColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RunIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   turn.RunTable,
+			Columns: []string{turn.RunColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -252,6 +310,17 @@ type TurnUpdateOne struct {
 	mutation *TurnMutation
 }
 
+// SetRunID sets the "run" edge to the Run entity by ID.
+func (_u *TurnUpdateOne) SetRunID(id int) *TurnUpdateOne {
+	_u.mutation.SetRunID(id)
+	return _u
+}
+
+// SetRun sets the "run" edge to the Run entity.
+func (_u *TurnUpdateOne) SetRun(v *Run) *TurnUpdateOne {
+	return _u.SetRunID(v.ID)
+}
+
 // AddMetadatumIDs adds the "metadata" edge to the TurnMetadata entity by IDs.
 func (_u *TurnUpdateOne) AddMetadatumIDs(ids ...int) *TurnUpdateOne {
 	_u.mutation.AddMetadatumIDs(ids...)
@@ -285,6 +354,12 @@ func (_u *TurnUpdateOne) AddBlocks(v ...*Block) *TurnUpdateOne {
 // Mutation returns the TurnMutation object of the builder.
 func (_u *TurnUpdateOne) Mutation() *TurnMutation {
 	return _u.mutation
+}
+
+// ClearRun clears the "run" edge to the Run entity.
+func (_u *TurnUpdateOne) ClearRun() *TurnUpdateOne {
+	_u.mutation.ClearRun()
+	return _u
 }
 
 // ClearMetadata clears all "metadata" edges to the TurnMetadata entity.
@@ -369,7 +444,18 @@ func (_u *TurnUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (_u *TurnUpdateOne) check() error {
+	if _u.mutation.RunCleared() && len(_u.mutation.RunIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "Turn.run"`)
+	}
+	return nil
+}
+
 func (_u *TurnUpdateOne) sqlSave(ctx context.Context) (_node *Turn, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(turn.Table, turn.Columns, sqlgraph.NewFieldSpec(turn.FieldID, field.TypeInt))
 	id, ok := _u.mutation.ID()
 	if !ok {
@@ -394,6 +480,35 @@ func (_u *TurnUpdateOne) sqlSave(ctx context.Context) (_node *Turn, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if _u.mutation.RunCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   turn.RunTable,
+			Columns: []string{turn.RunColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RunIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   turn.RunTable,
+			Columns: []string{turn.RunColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if _u.mutation.MetadataCleared() {
 		edge := &sqlgraph.EdgeSpec{

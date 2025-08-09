@@ -32,6 +32,30 @@ func (f BlockMetadataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BlockMetadataMutation", m)
 }
 
+// The RunFunc type is an adapter to allow the use of ordinary
+// function as Run mutator.
+type RunFunc func(context.Context, *ent.RunMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RunFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RunMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RunMutation", m)
+}
+
+// The RunMetadataFunc type is an adapter to allow the use of ordinary
+// function as RunMetadata mutator.
+type RunMetadataFunc func(context.Context, *ent.RunMetadataMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RunMetadataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.RunMetadataMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RunMetadataMutation", m)
+}
+
 // The TurnFunc type is an adapter to allow the use of ordinary
 // function as Turn mutator.
 type TurnFunc func(context.Context, *ent.TurnMutation) (ent.Value, error)

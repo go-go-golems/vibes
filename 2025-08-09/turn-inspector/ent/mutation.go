@@ -10,6 +10,8 @@ import (
 	"turn-inspector/ent/block"
 	"turn-inspector/ent/blockmetadata"
 	"turn-inspector/ent/predicate"
+	"turn-inspector/ent/run"
+	"turn-inspector/ent/runmetadata"
 	"turn-inspector/ent/turn"
 	"turn-inspector/ent/turnmetadata"
 
@@ -28,6 +30,8 @@ const (
 	// Node types.
 	TypeBlock         = "Block"
 	TypeBlockMetadata = "BlockMetadata"
+	TypeRun           = "Run"
+	TypeRunMetadata   = "RunMetadata"
 	TypeTurn          = "Turn"
 	TypeTurnMetadata  = "TurnMetadata"
 )
@@ -1250,6 +1254,1031 @@ func (m *BlockMetadataMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown BlockMetadata edge %s", name)
 }
 
+// RunMutation represents an operation that mutates the Run nodes in the graph.
+type RunMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	name            *string
+	clearedFields   map[string]struct{}
+	turns           map[int]struct{}
+	removedturns    map[int]struct{}
+	clearedturns    bool
+	metadata        map[int]struct{}
+	removedmetadata map[int]struct{}
+	clearedmetadata bool
+	done            bool
+	oldValue        func(context.Context) (*Run, error)
+	predicates      []predicate.Run
+}
+
+var _ ent.Mutation = (*RunMutation)(nil)
+
+// runOption allows management of the mutation configuration using functional options.
+type runOption func(*RunMutation)
+
+// newRunMutation creates new mutation for the Run entity.
+func newRunMutation(c config, op Op, opts ...runOption) *RunMutation {
+	m := &RunMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRun,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRunID sets the ID field of the mutation.
+func withRunID(id int) runOption {
+	return func(m *RunMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Run
+		)
+		m.oldValue = func(ctx context.Context) (*Run, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Run.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRun sets the old Run of the mutation.
+func withRun(node *Run) runOption {
+	return func(m *RunMutation) {
+		m.oldValue = func(context.Context) (*Run, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RunMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RunMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RunMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RunMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Run.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetName sets the "name" field.
+func (m *RunMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *RunMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Run entity.
+// If the Run object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ClearName clears the value of the "name" field.
+func (m *RunMutation) ClearName() {
+	m.name = nil
+	m.clearedFields[run.FieldName] = struct{}{}
+}
+
+// NameCleared returns if the "name" field was cleared in this mutation.
+func (m *RunMutation) NameCleared() bool {
+	_, ok := m.clearedFields[run.FieldName]
+	return ok
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *RunMutation) ResetName() {
+	m.name = nil
+	delete(m.clearedFields, run.FieldName)
+}
+
+// AddTurnIDs adds the "turns" edge to the Turn entity by ids.
+func (m *RunMutation) AddTurnIDs(ids ...int) {
+	if m.turns == nil {
+		m.turns = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.turns[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTurns clears the "turns" edge to the Turn entity.
+func (m *RunMutation) ClearTurns() {
+	m.clearedturns = true
+}
+
+// TurnsCleared reports if the "turns" edge to the Turn entity was cleared.
+func (m *RunMutation) TurnsCleared() bool {
+	return m.clearedturns
+}
+
+// RemoveTurnIDs removes the "turns" edge to the Turn entity by IDs.
+func (m *RunMutation) RemoveTurnIDs(ids ...int) {
+	if m.removedturns == nil {
+		m.removedturns = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.turns, ids[i])
+		m.removedturns[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTurns returns the removed IDs of the "turns" edge to the Turn entity.
+func (m *RunMutation) RemovedTurnsIDs() (ids []int) {
+	for id := range m.removedturns {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TurnsIDs returns the "turns" edge IDs in the mutation.
+func (m *RunMutation) TurnsIDs() (ids []int) {
+	for id := range m.turns {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTurns resets all changes to the "turns" edge.
+func (m *RunMutation) ResetTurns() {
+	m.turns = nil
+	m.clearedturns = false
+	m.removedturns = nil
+}
+
+// AddMetadatumIDs adds the "metadata" edge to the RunMetadata entity by ids.
+func (m *RunMutation) AddMetadatumIDs(ids ...int) {
+	if m.metadata == nil {
+		m.metadata = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.metadata[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMetadata clears the "metadata" edge to the RunMetadata entity.
+func (m *RunMutation) ClearMetadata() {
+	m.clearedmetadata = true
+}
+
+// MetadataCleared reports if the "metadata" edge to the RunMetadata entity was cleared.
+func (m *RunMutation) MetadataCleared() bool {
+	return m.clearedmetadata
+}
+
+// RemoveMetadatumIDs removes the "metadata" edge to the RunMetadata entity by IDs.
+func (m *RunMutation) RemoveMetadatumIDs(ids ...int) {
+	if m.removedmetadata == nil {
+		m.removedmetadata = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.metadata, ids[i])
+		m.removedmetadata[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMetadata returns the removed IDs of the "metadata" edge to the RunMetadata entity.
+func (m *RunMutation) RemovedMetadataIDs() (ids []int) {
+	for id := range m.removedmetadata {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MetadataIDs returns the "metadata" edge IDs in the mutation.
+func (m *RunMutation) MetadataIDs() (ids []int) {
+	for id := range m.metadata {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMetadata resets all changes to the "metadata" edge.
+func (m *RunMutation) ResetMetadata() {
+	m.metadata = nil
+	m.clearedmetadata = false
+	m.removedmetadata = nil
+}
+
+// Where appends a list predicates to the RunMutation builder.
+func (m *RunMutation) Where(ps ...predicate.Run) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the RunMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RunMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Run, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *RunMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RunMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Run).
+func (m *RunMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RunMutation) Fields() []string {
+	fields := make([]string, 0, 1)
+	if m.name != nil {
+		fields = append(fields, run.FieldName)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RunMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case run.FieldName:
+		return m.Name()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RunMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case run.FieldName:
+		return m.OldName(ctx)
+	}
+	return nil, fmt.Errorf("unknown Run field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RunMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case run.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Run field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RunMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RunMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RunMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Run numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RunMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(run.FieldName) {
+		fields = append(fields, run.FieldName)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RunMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RunMutation) ClearField(name string) error {
+	switch name {
+	case run.FieldName:
+		m.ClearName()
+		return nil
+	}
+	return fmt.Errorf("unknown Run nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RunMutation) ResetField(name string) error {
+	switch name {
+	case run.FieldName:
+		m.ResetName()
+		return nil
+	}
+	return fmt.Errorf("unknown Run field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RunMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.turns != nil {
+		edges = append(edges, run.EdgeTurns)
+	}
+	if m.metadata != nil {
+		edges = append(edges, run.EdgeMetadata)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RunMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case run.EdgeTurns:
+		ids := make([]ent.Value, 0, len(m.turns))
+		for id := range m.turns {
+			ids = append(ids, id)
+		}
+		return ids
+	case run.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.metadata))
+		for id := range m.metadata {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RunMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedturns != nil {
+		edges = append(edges, run.EdgeTurns)
+	}
+	if m.removedmetadata != nil {
+		edges = append(edges, run.EdgeMetadata)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RunMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case run.EdgeTurns:
+		ids := make([]ent.Value, 0, len(m.removedturns))
+		for id := range m.removedturns {
+			ids = append(ids, id)
+		}
+		return ids
+	case run.EdgeMetadata:
+		ids := make([]ent.Value, 0, len(m.removedmetadata))
+		for id := range m.removedmetadata {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RunMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedturns {
+		edges = append(edges, run.EdgeTurns)
+	}
+	if m.clearedmetadata {
+		edges = append(edges, run.EdgeMetadata)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RunMutation) EdgeCleared(name string) bool {
+	switch name {
+	case run.EdgeTurns:
+		return m.clearedturns
+	case run.EdgeMetadata:
+		return m.clearedmetadata
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RunMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Run unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RunMutation) ResetEdge(name string) error {
+	switch name {
+	case run.EdgeTurns:
+		m.ResetTurns()
+		return nil
+	case run.EdgeMetadata:
+		m.ResetMetadata()
+		return nil
+	}
+	return fmt.Errorf("unknown Run edge %s", name)
+}
+
+// RunMetadataMutation represents an operation that mutates the RunMetadata nodes in the graph.
+type RunMetadataMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	source        *string
+	key           *string
+	value         *string
+	clearedFields map[string]struct{}
+	run           *int
+	clearedrun    bool
+	done          bool
+	oldValue      func(context.Context) (*RunMetadata, error)
+	predicates    []predicate.RunMetadata
+}
+
+var _ ent.Mutation = (*RunMetadataMutation)(nil)
+
+// runmetadataOption allows management of the mutation configuration using functional options.
+type runmetadataOption func(*RunMetadataMutation)
+
+// newRunMetadataMutation creates new mutation for the RunMetadata entity.
+func newRunMetadataMutation(c config, op Op, opts ...runmetadataOption) *RunMetadataMutation {
+	m := &RunMetadataMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRunMetadata,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRunMetadataID sets the ID field of the mutation.
+func withRunMetadataID(id int) runmetadataOption {
+	return func(m *RunMetadataMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *RunMetadata
+		)
+		m.oldValue = func(ctx context.Context) (*RunMetadata, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().RunMetadata.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRunMetadata sets the old RunMetadata of the mutation.
+func withRunMetadata(node *RunMetadata) runmetadataOption {
+	return func(m *RunMetadataMutation) {
+		m.oldValue = func(context.Context) (*RunMetadata, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RunMetadataMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RunMetadataMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RunMetadataMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RunMetadataMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().RunMetadata.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSource sets the "source" field.
+func (m *RunMetadataMutation) SetSource(s string) {
+	m.source = &s
+}
+
+// Source returns the value of the "source" field in the mutation.
+func (m *RunMetadataMutation) Source() (r string, exists bool) {
+	v := m.source
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSource returns the old "source" field's value of the RunMetadata entity.
+// If the RunMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMetadataMutation) OldSource(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSource is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSource requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSource: %w", err)
+	}
+	return oldValue.Source, nil
+}
+
+// ResetSource resets all changes to the "source" field.
+func (m *RunMetadataMutation) ResetSource() {
+	m.source = nil
+}
+
+// SetKey sets the "key" field.
+func (m *RunMetadataMutation) SetKey(s string) {
+	m.key = &s
+}
+
+// Key returns the value of the "key" field in the mutation.
+func (m *RunMetadataMutation) Key() (r string, exists bool) {
+	v := m.key
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKey returns the old "key" field's value of the RunMetadata entity.
+// If the RunMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMetadataMutation) OldKey(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKey: %w", err)
+	}
+	return oldValue.Key, nil
+}
+
+// ResetKey resets all changes to the "key" field.
+func (m *RunMetadataMutation) ResetKey() {
+	m.key = nil
+}
+
+// SetValue sets the "value" field.
+func (m *RunMetadataMutation) SetValue(s string) {
+	m.value = &s
+}
+
+// Value returns the value of the "value" field in the mutation.
+func (m *RunMetadataMutation) Value() (r string, exists bool) {
+	v := m.value
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValue returns the old "value" field's value of the RunMetadata entity.
+// If the RunMetadata object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMetadataMutation) OldValue(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValue is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValue requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValue: %w", err)
+	}
+	return oldValue.Value, nil
+}
+
+// ResetValue resets all changes to the "value" field.
+func (m *RunMetadataMutation) ResetValue() {
+	m.value = nil
+}
+
+// SetRunID sets the "run" edge to the Run entity by id.
+func (m *RunMetadataMutation) SetRunID(id int) {
+	m.run = &id
+}
+
+// ClearRun clears the "run" edge to the Run entity.
+func (m *RunMetadataMutation) ClearRun() {
+	m.clearedrun = true
+}
+
+// RunCleared reports if the "run" edge to the Run entity was cleared.
+func (m *RunMetadataMutation) RunCleared() bool {
+	return m.clearedrun
+}
+
+// RunID returns the "run" edge ID in the mutation.
+func (m *RunMetadataMutation) RunID() (id int, exists bool) {
+	if m.run != nil {
+		return *m.run, true
+	}
+	return
+}
+
+// RunIDs returns the "run" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RunID instead. It exists only for internal usage by the builders.
+func (m *RunMetadataMutation) RunIDs() (ids []int) {
+	if id := m.run; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRun resets all changes to the "run" edge.
+func (m *RunMetadataMutation) ResetRun() {
+	m.run = nil
+	m.clearedrun = false
+}
+
+// Where appends a list predicates to the RunMetadataMutation builder.
+func (m *RunMetadataMutation) Where(ps ...predicate.RunMetadata) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the RunMetadataMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RunMetadataMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.RunMetadata, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *RunMetadataMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RunMetadataMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (RunMetadata).
+func (m *RunMetadataMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RunMetadataMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.source != nil {
+		fields = append(fields, runmetadata.FieldSource)
+	}
+	if m.key != nil {
+		fields = append(fields, runmetadata.FieldKey)
+	}
+	if m.value != nil {
+		fields = append(fields, runmetadata.FieldValue)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RunMetadataMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case runmetadata.FieldSource:
+		return m.Source()
+	case runmetadata.FieldKey:
+		return m.Key()
+	case runmetadata.FieldValue:
+		return m.Value()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RunMetadataMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case runmetadata.FieldSource:
+		return m.OldSource(ctx)
+	case runmetadata.FieldKey:
+		return m.OldKey(ctx)
+	case runmetadata.FieldValue:
+		return m.OldValue(ctx)
+	}
+	return nil, fmt.Errorf("unknown RunMetadata field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RunMetadataMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case runmetadata.FieldSource:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSource(v)
+		return nil
+	case runmetadata.FieldKey:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKey(v)
+		return nil
+	case runmetadata.FieldValue:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValue(v)
+		return nil
+	}
+	return fmt.Errorf("unknown RunMetadata field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RunMetadataMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RunMetadataMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RunMetadataMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown RunMetadata numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RunMetadataMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RunMetadataMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RunMetadataMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown RunMetadata nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RunMetadataMutation) ResetField(name string) error {
+	switch name {
+	case runmetadata.FieldSource:
+		m.ResetSource()
+		return nil
+	case runmetadata.FieldKey:
+		m.ResetKey()
+		return nil
+	case runmetadata.FieldValue:
+		m.ResetValue()
+		return nil
+	}
+	return fmt.Errorf("unknown RunMetadata field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RunMetadataMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.run != nil {
+		edges = append(edges, runmetadata.EdgeRun)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RunMetadataMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case runmetadata.EdgeRun:
+		if id := m.run; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RunMetadataMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RunMetadataMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RunMetadataMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedrun {
+		edges = append(edges, runmetadata.EdgeRun)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RunMetadataMutation) EdgeCleared(name string) bool {
+	switch name {
+	case runmetadata.EdgeRun:
+		return m.clearedrun
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RunMetadataMutation) ClearEdge(name string) error {
+	switch name {
+	case runmetadata.EdgeRun:
+		m.ClearRun()
+		return nil
+	}
+	return fmt.Errorf("unknown RunMetadata unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RunMetadataMutation) ResetEdge(name string) error {
+	switch name {
+	case runmetadata.EdgeRun:
+		m.ResetRun()
+		return nil
+	}
+	return fmt.Errorf("unknown RunMetadata edge %s", name)
+}
+
 // TurnMutation represents an operation that mutates the Turn nodes in the graph.
 type TurnMutation struct {
 	config
@@ -1257,6 +2286,8 @@ type TurnMutation struct {
 	typ             string
 	id              *int
 	clearedFields   map[string]struct{}
+	run             *int
+	clearedrun      bool
 	metadata        map[int]struct{}
 	removedmetadata map[int]struct{}
 	clearedmetadata bool
@@ -1364,6 +2395,45 @@ func (m *TurnMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetRunID sets the "run" edge to the Run entity by id.
+func (m *TurnMutation) SetRunID(id int) {
+	m.run = &id
+}
+
+// ClearRun clears the "run" edge to the Run entity.
+func (m *TurnMutation) ClearRun() {
+	m.clearedrun = true
+}
+
+// RunCleared reports if the "run" edge to the Run entity was cleared.
+func (m *TurnMutation) RunCleared() bool {
+	return m.clearedrun
+}
+
+// RunID returns the "run" edge ID in the mutation.
+func (m *TurnMutation) RunID() (id int, exists bool) {
+	if m.run != nil {
+		return *m.run, true
+	}
+	return
+}
+
+// RunIDs returns the "run" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RunID instead. It exists only for internal usage by the builders.
+func (m *TurnMutation) RunIDs() (ids []int) {
+	if id := m.run; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRun resets all changes to the "run" edge.
+func (m *TurnMutation) ResetRun() {
+	m.run = nil
+	m.clearedrun = false
 }
 
 // AddMetadatumIDs adds the "metadata" edge to the TurnMetadata entity by ids.
@@ -1582,7 +2652,10 @@ func (m *TurnMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TurnMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
+	if m.run != nil {
+		edges = append(edges, turn.EdgeRun)
+	}
 	if m.metadata != nil {
 		edges = append(edges, turn.EdgeMetadata)
 	}
@@ -1596,6 +2669,10 @@ func (m *TurnMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *TurnMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case turn.EdgeRun:
+		if id := m.run; id != nil {
+			return []ent.Value{*id}
+		}
 	case turn.EdgeMetadata:
 		ids := make([]ent.Value, 0, len(m.metadata))
 		for id := range m.metadata {
@@ -1614,7 +2691,7 @@ func (m *TurnMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TurnMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedmetadata != nil {
 		edges = append(edges, turn.EdgeMetadata)
 	}
@@ -1646,7 +2723,10 @@ func (m *TurnMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TurnMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
+	if m.clearedrun {
+		edges = append(edges, turn.EdgeRun)
+	}
 	if m.clearedmetadata {
 		edges = append(edges, turn.EdgeMetadata)
 	}
@@ -1660,6 +2740,8 @@ func (m *TurnMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *TurnMutation) EdgeCleared(name string) bool {
 	switch name {
+	case turn.EdgeRun:
+		return m.clearedrun
 	case turn.EdgeMetadata:
 		return m.clearedmetadata
 	case turn.EdgeBlocks:
@@ -1672,6 +2754,9 @@ func (m *TurnMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *TurnMutation) ClearEdge(name string) error {
 	switch name {
+	case turn.EdgeRun:
+		m.ClearRun()
+		return nil
 	}
 	return fmt.Errorf("unknown Turn unique edge %s", name)
 }
@@ -1680,6 +2765,9 @@ func (m *TurnMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TurnMutation) ResetEdge(name string) error {
 	switch name {
+	case turn.EdgeRun:
+		m.ResetRun()
+		return nil
 	case turn.EdgeMetadata:
 		m.ResetMetadata()
 		return nil

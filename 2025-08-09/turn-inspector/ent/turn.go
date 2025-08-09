@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"turn-inspector/ent/run"
 	"turn-inspector/ent/turn"
 
 	"entgo.io/ent"
@@ -19,24 +20,38 @@ type Turn struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TurnQuery when eager-loading is set.
 	Edges        TurnEdges `json:"edges"`
+	run_turns    *int
 	selectValues sql.SelectValues
 }
 
 // TurnEdges holds the relations/edges for other nodes in the graph.
 type TurnEdges struct {
+	// Run holds the value of the run edge.
+	Run *Run `json:"run,omitempty"`
 	// Metadata holds the value of the metadata edge.
 	Metadata []*TurnMetadata `json:"metadata,omitempty"`
 	// Blocks holds the value of the blocks edge.
 	Blocks []*Block `json:"blocks,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
+}
+
+// RunOrErr returns the Run value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TurnEdges) RunOrErr() (*Run, error) {
+	if e.Run != nil {
+		return e.Run, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: run.Label}
+	}
+	return nil, &NotLoadedError{edge: "run"}
 }
 
 // MetadataOrErr returns the Metadata value or an error if the edge
 // was not loaded in eager-loading.
 func (e TurnEdges) MetadataOrErr() ([]*TurnMetadata, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[1] {
 		return e.Metadata, nil
 	}
 	return nil, &NotLoadedError{edge: "metadata"}
@@ -45,7 +60,7 @@ func (e TurnEdges) MetadataOrErr() ([]*TurnMetadata, error) {
 // BlocksOrErr returns the Blocks value or an error if the edge
 // was not loaded in eager-loading.
 func (e TurnEdges) BlocksOrErr() ([]*Block, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Blocks, nil
 	}
 	return nil, &NotLoadedError{edge: "blocks"}
@@ -57,6 +72,8 @@ func (*Turn) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case turn.FieldID:
+			values[i] = new(sql.NullInt64)
+		case turn.ForeignKeys[0]: // run_turns
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -79,6 +96,13 @@ func (_m *Turn) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			_m.ID = int(value.Int64)
+		case turn.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field run_turns", value)
+			} else if value.Valid {
+				_m.run_turns = new(int)
+				*_m.run_turns = int(value.Int64)
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -90,6 +114,11 @@ func (_m *Turn) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (_m *Turn) Value(name string) (ent.Value, error) {
 	return _m.selectValues.Get(name)
+}
+
+// QueryRun queries the "run" edge of the Turn entity.
+func (_m *Turn) QueryRun() *RunQuery {
+	return NewTurnClient(_m.config).QueryRun(_m)
 }
 
 // QueryMetadata queries the "metadata" edge of the Turn entity.

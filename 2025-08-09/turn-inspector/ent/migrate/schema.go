@@ -72,15 +72,69 @@ var (
 			},
 		},
 	}
+	// RunsColumns holds the columns for the "runs" table.
+	RunsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString, Nullable: true},
+	}
+	// RunsTable holds the schema information for the "runs" table.
+	RunsTable = &schema.Table{
+		Name:       "runs",
+		Columns:    RunsColumns,
+		PrimaryKey: []*schema.Column{RunsColumns[0]},
+	}
+	// RunMetadataColumns holds the columns for the "run_metadata" table.
+	RunMetadataColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "source", Type: field.TypeString},
+		{Name: "key", Type: field.TypeString},
+		{Name: "value", Type: field.TypeString},
+		{Name: "run_metadata", Type: field.TypeInt},
+	}
+	// RunMetadataTable holds the schema information for the "run_metadata" table.
+	RunMetadataTable = &schema.Table{
+		Name:       "run_metadata",
+		Columns:    RunMetadataColumns,
+		PrimaryKey: []*schema.Column{RunMetadataColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "run_metadata_runs_metadata",
+				Columns:    []*schema.Column{RunMetadataColumns[4]},
+				RefColumns: []*schema.Column{RunsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "runmetadata_source_key",
+				Unique:  false,
+				Columns: []*schema.Column{RunMetadataColumns[1], RunMetadataColumns[2]},
+			},
+			{
+				Name:    "runmetadata_source_key_run_metadata",
+				Unique:  true,
+				Columns: []*schema.Column{RunMetadataColumns[1], RunMetadataColumns[2], RunMetadataColumns[4]},
+			},
+		},
+	}
 	// TurnsColumns holds the columns for the "turns" table.
 	TurnsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "run_turns", Type: field.TypeInt},
 	}
 	// TurnsTable holds the schema information for the "turns" table.
 	TurnsTable = &schema.Table{
 		Name:       "turns",
 		Columns:    TurnsColumns,
 		PrimaryKey: []*schema.Column{TurnsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "turns_runs_turns",
+				Columns:    []*schema.Column{TurnsColumns[1]},
+				RefColumns: []*schema.Column{RunsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// TurnMetadataColumns holds the columns for the "turn_metadata" table.
 	TurnMetadataColumns = []*schema.Column{
@@ -120,6 +174,8 @@ var (
 	Tables = []*schema.Table{
 		BlocksTable,
 		BlockMetadataTable,
+		RunsTable,
+		RunMetadataTable,
 		TurnsTable,
 		TurnMetadataTable,
 	}
@@ -128,5 +184,7 @@ var (
 func init() {
 	BlocksTable.ForeignKeys[0].RefTable = TurnsTable
 	BlockMetadataTable.ForeignKeys[0].RefTable = BlocksTable
+	RunMetadataTable.ForeignKeys[0].RefTable = RunsTable
+	TurnsTable.ForeignKeys[0].RefTable = RunsTable
 	TurnMetadataTable.ForeignKeys[0].RefTable = TurnsTable
 }

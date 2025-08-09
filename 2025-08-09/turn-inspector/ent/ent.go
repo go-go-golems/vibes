@@ -10,6 +10,8 @@ import (
 	"sync"
 	"turn-inspector/ent/block"
 	"turn-inspector/ent/blockmetadata"
+	"turn-inspector/ent/run"
+	"turn-inspector/ent/runmetadata"
 	"turn-inspector/ent/turn"
 	"turn-inspector/ent/turnmetadata"
 
@@ -78,6 +80,8 @@ func checkColumn(t, c string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			block.Table:         block.ValidColumn,
 			blockmetadata.Table: blockmetadata.ValidColumn,
+			run.Table:           run.ValidColumn,
+			runmetadata.Table:   runmetadata.ValidColumn,
 			turn.Table:          turn.ValidColumn,
 			turnmetadata.Table:  turnmetadata.ValidColumn,
 		})

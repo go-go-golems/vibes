@@ -16,6 +16,10 @@ type Tx struct {
 	Block *BlockClient
 	// BlockMetadata is the client for interacting with the BlockMetadata builders.
 	BlockMetadata *BlockMetadataClient
+	// Run is the client for interacting with the Run builders.
+	Run *RunClient
+	// RunMetadata is the client for interacting with the RunMetadata builders.
+	RunMetadata *RunMetadataClient
 	// Turn is the client for interacting with the Turn builders.
 	Turn *TurnClient
 	// TurnMetadata is the client for interacting with the TurnMetadata builders.
@@ -153,6 +157,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Block = NewBlockClient(tx.config)
 	tx.BlockMetadata = NewBlockMetadataClient(tx.config)
+	tx.Run = NewRunClient(tx.config)
+	tx.RunMetadata = NewRunMetadataClient(tx.config)
 	tx.Turn = NewTurnClient(tx.config)
 	tx.TurnMetadata = NewTurnMetadataClient(tx.config)
 }

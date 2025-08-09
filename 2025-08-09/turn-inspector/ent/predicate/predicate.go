@@ -12,6 +12,12 @@ type Block func(*sql.Selector)
 // BlockMetadata is the predicate function for blockmetadata builders.
 type BlockMetadata func(*sql.Selector)
 
+// Run is the predicate function for run builders.
+type Run func(*sql.Selector)
+
+// RunMetadata is the predicate function for runmetadata builders.
+type RunMetadata func(*sql.Selector)
+
 // Turn is the predicate function for turn builders.
 type Turn func(*sql.Selector)
 

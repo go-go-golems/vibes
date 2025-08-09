@@ -18,7 +18,14 @@ func (Turn) Fields() []ent.Field {
 // Edges of the Turn.
 func (Turn) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("metadata", TurnMetadata.Type), // turn -> metadata
-		edge.To("blocks", Block.Type),          // turn -> blocks (ordered by Block.order in queries)
+		// Belongs to a run
+		edge.From("run", Run.Type).
+			Ref("turns").
+			Required().
+			Unique(),
+		// Per-turn metadata
+		edge.To("metadata", TurnMetadata.Type),
+		// Blocks (ordered by Block.order in queries)
+		edge.To("blocks", Block.Type),
 	}
 }
