@@ -4,8 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
-	"text/tabwriter"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/types"
+	"github.com/go-go-golems/glazed/pkg/settings"
 
 	"github.com/spf13/cobra"
 
@@ -16,186 +22,150 @@ import (
 
 var showCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show detailed information about turns",
-	Long:  `Show detailed information about conversation turns, blocks, and metadata.`,
+	Short: "Show detailed information",
 }
 
-var showTurnCmd = &cobra.Command{
-	Use:   "turn",
-	Short: "Show detailed turn information",
-	Long: `Show detailed information about a specific conversation turn.
-		
-This command displays complete information about a turn including:
-- Turn metadata
-- All blocks in order with their content and metadata
-- Timestamps and relationships
+// ShowTurnCommand emits a structured object via multi-table rows
+// section: turn | turn_metadata | block
+// turn row: id, run_id
+// metadata rows: section=turn_metadata, source, key, value
+// blocks rows: section=block, id, order, kind, role, text or payload (as string)
 
-Examples:
-  # Show turn with ID 1
-  turn-inspector show turn --id 1`,
-	RunE: runShowTurn,
+type ShowTurnCommand struct { *cmds.CommandDescription }
+
+func NewShowTurnCommand() (*ShowTurnCommand, error) {
+	glazedParameterLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil { return nil, err }
+	glazedLayers := layers.NewParameterLayers()
+	glazedLayers.Set(settings.GlazedSlug, glazedParameterLayer)
+
+	d := cmds.NewCommandDescription(
+		"turn",
+		cmds.WithShort("Show detailed turn information"),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("id", parameters.ParameterTypeInteger, parameters.WithHelp("Turn ID to show")),
+		),
+		cmds.WithLayers(glazedLayers),
+	)
+	return &ShowTurnCommand{d}, nil
 }
 
-var showBlocksCmd = &cobra.Command{
-	Use:   "blocks",
-	Short: "Show blocks for a turn",
-	Long: `Show all blocks for a specific conversation turn in order.
-		
-This command displays all blocks belonging to a turn with their content,
-metadata, and ordering information.
-
-Examples:
-  # Show blocks for turn 1
-  turn-inspector show blocks --turn-id 1`,
-	RunE: runShowBlocks,
+func (c *ShowTurnCommand) RunIntoGlazeProcessor(ctx context.Context, parsedLayers *layers.ParsedLayers, gp middlewares.Processor) error {
+	client := GetClient()
+	if client == nil { return fmt.Errorf("database client not initialized") }
+	si := struct { ID int `glazed.parameter:"id"` }{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, &si); err != nil { return err }
+	id := si.ID
+	if id == 0 { return fmt.Errorf("--id is required") }
+	t, err := client.Turn.Query().
+		Where(turn.IDEQ(id)).
+		WithRun().
+		WithMetadata().
+		WithBlocks(func(bq *ent.BlockQuery) { bq.Order(ent.Asc(block.FieldOrder)).WithMetadata() }).
+		Only(ctx)
+	if err != nil { return fmt.Errorf("failed to query turn: %w", err) }
+	runID := 0
+	if t.Edges.Run != nil { runID = t.Edges.Run.ID }
+	if err := gp.AddRow(ctx, types.NewRow(
+		types.MRP("section", "turn"),
+		types.MRP("id", t.ID),
+		types.MRP("run_id", runID),
+	)); err != nil { return err }
+	for _, m := range t.Edges.Metadata {
+		if err := gp.AddRow(ctx, types.NewRow(
+			types.MRP("section", "turn_metadata"),
+			types.MRP("source", m.Source),
+			types.MRP("key", m.Key),
+			types.MRP("value", m.Value),
+		)); err != nil { return err }
+	}
+	for _, b := range t.Edges.Blocks {
+		var text string
+		var payload map[string]any
+		if b.Payload != nil {
+			if tt, ok := b.Payload["text"].(string); ok {
+				text = tt
+			} else {
+				payload = b.Payload
+			}
+		}
+		row := types.NewRow(
+			types.MRP("section", "block"),
+			types.MRP("id", b.ID),
+			types.MRP("order", b.Order),
+			types.MRP("kind", string(b.Kind)),
+			types.MRP("role", b.Role),
+		)
+		if text != "" {
+			row.Set("text", text)
+		} else if payload != nil {
+			bs, _ := json.Marshal(payload)
+			row.Set("payload", string(bs))
+		}
+		if err := gp.AddRow(ctx, row); err != nil { return err }
+	}
+	return nil
 }
 
-var (
-	turnIDFlag      int
-	showTurnIDFlag  int
-	jsonOutputFlag  bool
-)
+// ShowBlocksCommand: rows per block: id, order, kind, role, text/payload
+
+type ShowBlocksCommand struct { *cmds.CommandDescription }
+
+func NewShowBlocksCommand() (*ShowBlocksCommand, error) {
+	glazedParameterLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil { return nil, err }
+	glazedLayers := layers.NewParameterLayers()
+	glazedLayers.Set(settings.GlazedSlug, glazedParameterLayer)
+	d := cmds.NewCommandDescription(
+		"blocks",
+		cmds.WithShort("Show blocks for a turn"),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("turn-id", parameters.ParameterTypeInteger, parameters.WithHelp("Turn ID to show blocks for")),
+		),
+		cmds.WithLayers(glazedLayers),
+	)
+	return &ShowBlocksCommand{d}, nil
+}
+
+func (c *ShowBlocksCommand) RunIntoGlazeProcessor(ctx context.Context, parsedLayers *layers.ParsedLayers, gp middlewares.Processor) error {
+	client := GetClient()
+	if client == nil { return fmt.Errorf("database client not initialized") }
+	si := struct { TurnID int `glazed.parameter:"turn-id"` }{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, &si); err != nil { return err }
+	turnID := si.TurnID
+	if turnID == 0 { return fmt.Errorf("--turn-id is required") }
+	blocks, err := client.Block.Query().
+		Where(block.HasTurnWith(turn.IDEQ(turnID))).
+		Order(ent.Asc(block.FieldOrder)).
+		All(ctx)
+	if err != nil { return fmt.Errorf("failed to query blocks: %w", err) }
+	for _, b := range blocks {
+		row := types.NewRow(
+			types.MRP("id", b.ID),
+			types.MRP("order", b.Order),
+			types.MRP("kind", string(b.Kind)),
+			types.MRP("role", b.Role),
+			types.MRP("turn_id", turnID),
+		)
+		if b.Payload != nil {
+			if txt, ok := b.Payload["text"].(string); ok {
+				row.Set("text", txt)
+			} else {
+				bs, _ := json.Marshal(b.Payload)
+				row.Set("payload", string(bs))
+			}
+		}
+		if err := gp.AddRow(ctx, row); err != nil { return err }
+	}
+	return nil
+}
 
 func init() {
 	rootCmd.AddCommand(showCmd)
-	showCmd.AddCommand(showTurnCmd)
-	showCmd.AddCommand(showBlocksCmd)
-
-	showTurnCmd.Flags().IntVar(&showTurnIDFlag, "id", 0, "Turn ID to show")
-	showTurnCmd.Flags().BoolVar(&jsonOutputFlag, "json", false, "Output in JSON format")
-	showTurnCmd.MarkFlagRequired("id")
-
-	showBlocksCmd.Flags().IntVar(&turnIDFlag, "turn-id", 0, "Turn ID to show blocks for")
-	showBlocksCmd.MarkFlagRequired("turn-id")
+	st, _ := NewShowTurnCommand()
+	stCmd, _ := cli.BuildCobraCommand(st)
+	showCmd.AddCommand(stCmd)
+	sb, _ := NewShowBlocksCommand()
+	sbCmd, _ := cli.BuildCobraCommand(sb)
+	showCmd.AddCommand(sbCmd)
 }
-
-func runShowTurn(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
-	client := GetClient()
-	if client == nil {
-		return fmt.Errorf("database client not initialized")
-	}
-
-	// Query turn with all related data
-	t, err := client.Turn.Query().
-		Where(turn.IDEQ(showTurnIDFlag)).
-		WithRun().
-		WithMetadata().
-		WithBlocks(func(bq *ent.BlockQuery) {
-			bq.Order(ent.Asc(block.FieldOrder)).WithMetadata()
-		}).
-		Only(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to query turn: %w", err)
-	}
-
-	if jsonOutputFlag {
-		// JSON output
-		output := map[string]interface{}{
-			"id":         t.ID,
-			"run":        t.Edges.Run,
-			"metadata":   t.Edges.Metadata,
-			"blocks":     t.Edges.Blocks,
-		}
-		jsonData, err := json.MarshalIndent(output, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to marshal JSON: %w", err)
-		}
-		fmt.Println(string(jsonData))
-	} else {
-		// Table output
-		fmt.Printf("Turn ID: %d\n", t.ID)
-		if t.Edges.Run != nil {
-			fmt.Printf("Run ID: %d\n", t.Edges.Run.ID)
-		}
-		fmt.Println()
-
-		// Turn metadata
-		if t.Edges.Metadata != nil && len(t.Edges.Metadata) > 0 {
-			fmt.Println("Turn Metadata:")
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "Source\tKey\tValue")
-			fmt.Fprintln(w, "------\t---\t-----")
-			for _, meta := range t.Edges.Metadata {
-				fmt.Fprintf(w, "%s\t%s\t%s\n", meta.Source, meta.Key, meta.Value)
-			}
-			w.Flush()
-			fmt.Println()
-		}
-
-		// Blocks
-		if t.Edges.Blocks != nil && len(t.Edges.Blocks) > 0 {
-			fmt.Println("Blocks:")
-			for _, b := range t.Edges.Blocks {
-				fmt.Printf("  Block %d (Order: %d, Kind: %s, Role: %s)\n", 
-					b.ID, b.Order, b.Kind, b.Role)
-				
-				if b.Payload != nil {
-					if text, ok := b.Payload["text"].(string); ok {
-						fmt.Printf("    Text: %s\n", text)
-					} else {
-						payloadJSON, _ := json.MarshalIndent(b.Payload, "    ", "  ")
-						fmt.Printf("    Payload: %s\n", string(payloadJSON))
-					}
-				}
-
-				if b.Edges.Metadata != nil && len(b.Edges.Metadata) > 0 {
-					fmt.Println("    Metadata:")
-					for _, meta := range b.Edges.Metadata {
-						fmt.Printf("      %s:%s = %s\n", meta.Source, meta.Key, meta.Value)
-					}
-				}
-				fmt.Println()
-			}
-		}
-	}
-
-	return nil
-}
-
-func runShowBlocks(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
-	client := GetClient()
-	if client == nil {
-		return fmt.Errorf("database client not initialized")
-	}
-
-	// Query blocks for the turn
-	blocks, err := client.Block.Query().
-		Where(block.HasTurnWith(turn.IDEQ(turnIDFlag))).
-		WithMetadata().
-		Order(ent.Asc(block.FieldOrder)).
-		All(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to query blocks: %w", err)
-	}
-
-	// Output results
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tOrder\tKind\tRole\tPayload")
-	fmt.Fprintln(w, "--\t-----\t----\t----\t-------")
-
-	for _, b := range blocks {
-		payloadStr := ""
-		if b.Payload != nil {
-			if text, ok := b.Payload["text"].(string); ok {
-				payloadStr = text
-				if len(payloadStr) > 50 {
-					payloadStr = payloadStr[:47] + "..."
-				}
-			} else {
-				payloadStr = fmt.Sprintf("%v", b.Payload)
-				if len(payloadStr) > 50 {
-					payloadStr = payloadStr[:47] + "..."
-				}
-			}
-		}
-
-		fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%s\n", 
-			b.ID, b.Order, b.Kind, b.Role, payloadStr)
-	}
-
-	w.Flush()
-	return nil
-}
-

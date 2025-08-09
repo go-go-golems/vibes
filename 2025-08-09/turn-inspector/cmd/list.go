@@ -3,103 +3,113 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
-	"text/tabwriter"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/types"
 
 	"github.com/spf13/cobra"
 
+	"github.com/go-go-golems/glazed/pkg/settings"
 	"turn-inspector/ent"
-	"turn-inspector/ent/turn"
 	"turn-inspector/ent/run"
+	"turn-inspector/ent/turn"
 )
 
+// Keep the parent "list" command as a grouping Cobra command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List conversation turns",
-	Long:  `List conversation turns with optional filtering and pagination.`,
+	Short: "List conversation data",
 }
 
-var listTurnsCmd = &cobra.Command{
-	Use:   "turns",
-	Short: "List conversation turns",
-	Long: `List conversation turns with optional filtering and pagination.
-		
-This command displays all conversation turns in the database with summary information
-including turn ID, creation time, number of blocks, and metadata count.
-
-Examples:
-  # List all turns
-  turn-inspector list turns
-  
-  # List turns with limit
-  turn-inspector list turns --limit 10
-
-  # List turns for a specific run
-  turn-inspector list turns --run-id 1`,
-	RunE: runListTurns,
+// ListTurnsCommand implements glazed to emit rows: id, run_id, metadata_count, blocks_count
+type ListTurnsCommand struct {
+	*cmds.CommandDescription
 }
 
-var (
-	limitFlag  int
-	offsetFlag int
-	listRunID  int
-)
+func NewListTurnsCommand() (*ListTurnsCommand, error) {
+	glazedParameterLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+	glazedLayers := layers.NewParameterLayers()
+	glazedLayers.Set(settings.GlazedSlug, glazedParameterLayer)
 
-func init() {
-	rootCmd.AddCommand(listCmd)
-	listCmd.AddCommand(listTurnsCmd)
-
-	listTurnsCmd.Flags().IntVar(&limitFlag, "limit", 100, "Maximum number of turns to return")
-	listTurnsCmd.Flags().IntVar(&offsetFlag, "offset", 0, "Number of turns to skip")
-	listTurnsCmd.Flags().IntVar(&listRunID, "run-id", 0, "Filter turns by run ID")
+	d := cmds.NewCommandDescription(
+		"turns",
+		cmds.WithShort("List conversation turns"),
+		cmds.WithLong("List conversation turns with optional filtering and pagination."),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("limit", parameters.ParameterTypeInteger, parameters.WithDefault(100), parameters.WithHelp("Maximum number of turns to return")),
+			parameters.NewParameterDefinition("offset", parameters.ParameterTypeInteger, parameters.WithDefault(0), parameters.WithHelp("Number of turns to skip")),
+			parameters.NewParameterDefinition("run-id", parameters.ParameterTypeInteger, parameters.WithDefault(0), parameters.WithHelp("Filter turns by run ID")),
+		),
+		cmds.WithLayers(glazedLayers),
+	)
+	return &ListTurnsCommand{CommandDescription: d}, nil
 }
 
-func runListTurns(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
+func (c *ListTurnsCommand) RunIntoGlazeProcessor(ctx context.Context, parsedLayers *layers.ParsedLayers, gp middlewares.Processor) error {
 	client := GetClient()
 	if client == nil {
 		return fmt.Errorf("database client not initialized")
 	}
+	// Read parameters
+	s := struct {
+		Limit  int `glazed.parameter:"limit"`
+		Offset int `glazed.parameter:"offset"`
+		RunID  int `glazed.parameter:"run-id"`
+	}{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, &s); err != nil { return err }
+	limit := s.Limit
+	offset := s.Offset
+	runID := s.RunID
 
-	// Query turns with metadata and blocks
 	q := client.Turn.Query().
 		WithMetadata().
 		WithBlocks().
-		Limit(limitFlag).
-		Offset(offsetFlag).
+		Limit(limit).
+		Offset(offset).
 		Order(ent.Desc(turn.FieldID))
-	if listRunID != 0 {
-		q = q.Where(turn.HasRunWith(run.IDEQ(listRunID)))
+	if runID != 0 {
+		q = q.Where(turn.HasRunWith(run.IDEQ(runID)))
 	}
 	turns, err := q.All(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to query turns: %w", err)
 	}
-
-	// Output results in table format
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tRun ID\tMetadata Count\tBlocks Count")
-	fmt.Fprintln(w, "--\t------\t--------------\t------------")
-
 	for _, t := range turns {
-		runID := 0
+		rid := 0
 		if t.Edges.Run != nil {
-			runID = t.Edges.Run.ID
+			rid = t.Edges.Run.ID
 		}
 		metadataCount := 0
 		if t.Edges.Metadata != nil {
 			metadataCount = len(t.Edges.Metadata)
 		}
-
 		blocksCount := 0
 		if t.Edges.Blocks != nil {
 			blocksCount = len(t.Edges.Blocks)
 		}
-
-		fmt.Fprintf(w, "%d\t%d\t%d\t%d\n", t.ID, runID, metadataCount, blocksCount)
+		row := types.NewRow(
+			types.MRP("id", t.ID),
+			types.MRP("run_id", rid),
+			types.MRP("metadata_count", metadataCount),
+			types.MRP("blocks_count", blocksCount),
+		)
+		if err := gp.AddRow(ctx, row); err != nil {
+			return err
+		}
 	}
-
-	w.Flush()
 	return nil
 }
 
+func init() {
+	rootCmd.AddCommand(listCmd)
+	lc, _ := NewListTurnsCommand()
+	cobraCmd, _ := cli.BuildCobraCommand(lc)
+	listCmd.AddCommand(cobraCmd)
+}

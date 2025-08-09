@@ -5,210 +5,169 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/types"
+	"github.com/go-go-golems/glazed/pkg/settings"
+
 	"github.com/spf13/cobra"
 
 	"turn-inspector/ent/block"
 )
 
-var createCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create resources",
-	Long:  `Create runs and conversation turns with blocks and metadata.`,
+var createCmd = &cobra.Command{Use: "create", Short: "Create resources"}
+
+// CreateRunCommand -> outputs created run: id, name
+
+type CreateRunCommand struct { *cmds.CommandDescription }
+
+func NewCreateRunCommand() (*CreateRunCommand, error) {
+	glazedParameterLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil { return nil, err }
+	glazedLayers := layers.NewParameterLayers()
+	glazedLayers.Set(settings.GlazedSlug, glazedParameterLayer)
+
+	d := cmds.NewCommandDescription(
+		"run",
+		cmds.WithShort("Create a new run"),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("name", parameters.ParameterTypeString, parameters.WithHelp("Optional name for the run")),
+			parameters.NewParameterDefinition("metadata", parameters.ParameterTypeStringList, parameters.WithHelp("Run metadata as JSON strings")),
+		),
+		cmds.WithLayers(glazedLayers),
+	)
+	return &CreateRunCommand{d}, nil
 }
 
-var createRunCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Create a new run",
-	Long: `Create a new run with optional name and metadata.
-		
-Examples:
-  # Create a run with a name
-  turn-inspector create run --name "Experiment A"
-
-  # Create a run with metadata
-  turn-inspector create run --name "Session 1" \
-    --metadata '{"source":"session","key":"id","value":"abc123"}'`,
-	RunE: runCreateRun,
-}
-
-var createTurnCmd = &cobra.Command{
-	Use:   "turn",
-	Short: "Create a new conversation turn",
-	Long: `Create a new conversation turn within a run, with blocks and metadata.
-		
-This command allows you to create a complete conversation turn including:
-- Turn-level metadata (source, key, value pairs)
-- Ordered blocks representing the conversation flow
-- Block-level metadata for each block
-
-Examples:
-  # Create a simple user-assistant turn
-  turn-inspector create turn --run-id 1 --blocks '[{"order":0,"kind":"user","role":"user","payload":{"text":"Hello"}},{"order":1,"kind":"llm_text","role":"assistant","payload":{"text":"Hi there!"}}]'
-  
-  # Create a turn with metadata
-  turn-inspector create turn --run-id 1 --metadata '[{"source":"session","key":"id","value":"abc123"}]' --blocks '[{"order":0,"kind":"user","role":"user","payload":{"text":"What is the weather?"}}]'`,
-	RunE: runCreateTurn,
-}
-
-var (
-	metadataFlag []string
-	blocksFlag   string
-	runIDFlag    int
-	runNameFlag  string
-)
-
-func init() {
-	rootCmd.AddCommand(createCmd)
-	createCmd.AddCommand(createRunCmd)
-	createCmd.AddCommand(createTurnCmd)
-
-	createRunCmd.Flags().StringVar(&runNameFlag, "name", "", "Optional name for the run")
-	createRunCmd.Flags().StringArrayVar(&metadataFlag, "metadata", []string{}, "Run metadata as JSON strings")
-
-	createTurnCmd.Flags().IntVar(&runIDFlag, "run-id", 0, "Run ID the turn belongs to")
-	createTurnCmd.MarkFlagRequired("run-id")
-	createTurnCmd.Flags().StringArrayVar(&metadataFlag, "metadata", []string{}, "Turn metadata as JSON strings")
-	createTurnCmd.Flags().StringVar(&blocksFlag, "blocks", "", "Blocks as JSON array")
-	createTurnCmd.MarkFlagRequired("blocks")
-}
-
-func runCreateRun(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
+func (c *CreateRunCommand) RunIntoGlazeProcessor(ctx context.Context, parsedLayers *layers.ParsedLayers, gp middlewares.Processor) error {
 	client := GetClient()
-	if client == nil {
-		return fmt.Errorf("database client not initialized")
-	}
-
-	// Create run
-	runCreate := client.Run.Create()
-	if runNameFlag != "" {
-		runCreate = runCreate.SetName(runNameFlag)
-	}
-	r, err := runCreate.Save(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create run: %w", err)
-	}
-
-	// Parse metadata
-	var md []map[string]string
-	for _, metaStr := range metadataFlag {
+	if client == nil { return fmt.Errorf("database client not initialized") }
+	s := struct {
+		Name string   `glazed.parameter:"name"`
+		Mds  []string `glazed.parameter:"metadata"`
+	}{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, &s); err != nil { return err }
+	name := s.Name
+	mds := s.Mds
+	rc := client.Run.Create()
+	if name != "" { rc = rc.SetName(name) }
+	r, err := rc.Save(ctx)
+	if err != nil { return fmt.Errorf("failed to create run: %w", err) }
+	// Parse and attach metadata
+	for _, metaStr := range mds {
 		var meta map[string]string
-		if err := json.Unmarshal([]byte(metaStr), &meta); err != nil {
-			return fmt.Errorf("failed to parse metadata: %w", err)
-		}
-		md = append(md, meta)
-	}
-	for _, meta := range md {
-		_, err := client.RunMetadata.Create().
+		if err := json.Unmarshal([]byte(metaStr), &meta); err != nil { return fmt.Errorf("failed to parse metadata: %w", err) }
+		if _, err := client.RunMetadata.Create().
 			SetRun(r).
 			SetSource(meta["source"]).
 			SetKey(meta["key"]).
 			SetValue(meta["value"]).
-			Save(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to create run metadata: %w", err)
-		}
+			Save(ctx); err != nil { return fmt.Errorf("failed to create run metadata: %w", err) }
 	}
-
-	fmt.Printf("Created run %d\n", r.ID)
-	return nil
+	return gp.AddRow(ctx, types.NewRow(
+		types.MRP("id", r.ID),
+		types.MRP("name", r.Name),
+		types.MRP("metadata_count", len(mds)),
+	))
 }
 
-func runCreateTurn(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
+// CreateTurnCommand -> outputs created turn: id, run_id, metadata_count, blocks_count
+
+type CreateTurnCommand struct { *cmds.CommandDescription }
+
+func NewCreateTurnCommand() (*CreateTurnCommand, error) {
+	glazedParameterLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil { return nil, err }
+	glazedLayers := layers.NewParameterLayers()
+	glazedLayers.Set(settings.GlazedSlug, glazedParameterLayer)
+	
+	d := cmds.NewCommandDescription(
+		"turn",
+		cmds.WithShort("Create a new conversation turn"),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("run-id", parameters.ParameterTypeInteger, parameters.WithHelp("Run ID the turn belongs to")),
+			parameters.NewParameterDefinition("metadata", parameters.ParameterTypeStringList, parameters.WithHelp("Turn metadata as JSON strings")),
+			parameters.NewParameterDefinition("blocks", parameters.ParameterTypeString, parameters.WithHelp("Blocks as JSON array")),
+		),
+		cmds.WithLayers(glazedLayers),
+	)
+	return &CreateTurnCommand{d}, nil
+}
+
+func (c *CreateTurnCommand) RunIntoGlazeProcessor(ctx context.Context, parsedLayers *layers.ParsedLayers, gp middlewares.Processor) error {
 	client := GetClient()
-	if client == nil {
-		return fmt.Errorf("database client not initialized")
+	if client == nil { return fmt.Errorf("database client not initialized") }
+	si := struct {
+		RunID     int      `glazed.parameter:"run-id"`
+		Metadata []string `glazed.parameter:"metadata"`
+		Blocks   string   `glazed.parameter:"blocks"`
+	}{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, &si); err != nil { return err }
+	runID := si.RunID
+	if runID == 0 { return fmt.Errorf("--run-id is required") }
+	mds := si.Metadata
+	blocksJSON := si.Blocks
+	if blocksJSON == "" { return fmt.Errorf("--blocks is required") }
+	// parse metadata
+	metadata := make([]map[string]string, 0, len(mds))
+	for _, s := range mds {
+		var m map[string]string
+		if err := json.Unmarshal([]byte(s), &m); err != nil { return fmt.Errorf("failed to parse metadata: %w", err) }
+		metadata = append(metadata, m)
 	}
-
-	// Parse metadata
-	var metadata []map[string]string
-	for _, metaStr := range metadataFlag {
-		var meta map[string]string
-		if err := json.Unmarshal([]byte(metaStr), &meta); err != nil {
-			return fmt.Errorf("failed to parse metadata: %w", err)
-		}
-		metadata = append(metadata, meta)
-	}
-
-	// Parse blocks
-	var blocks []map[string]interface{}
-	if err := json.Unmarshal([]byte(blocksFlag), &blocks); err != nil {
-		return fmt.Errorf("failed to parse blocks: %w", err)
-	}
-
-	// Create turn in run
-	turnCreate := client.Turn.Create().
-		SetRunID(runIDFlag)
-	turn, err := turnCreate.Save(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to create turn: %w", err)
-	}
-
-	// Add metadata
-	for _, meta := range metadata {
-		_, err := client.TurnMetadata.Create().
-			SetTurn(turn).
-			SetSource(meta["source"]).
-			SetKey(meta["key"]).
-			SetValue(meta["value"]).
-			Save(ctx)
-		if err != nil {
+	// parse blocks
+	var blocksArr []map[string]any
+	if err := json.Unmarshal([]byte(blocksJSON), &blocksArr); err != nil { return fmt.Errorf("failed to parse blocks: %w", err) }
+	// create turn
+	t, err := client.Turn.Create().SetRunID(runID).Save(ctx)
+	if err != nil { return fmt.Errorf("failed to create turn: %w", err) }
+	createdMeta := 0
+	for _, m := range metadata {
+		if _, err := client.TurnMetadata.Create().SetTurn(t).SetSource(m["source"]).SetKey(m["key"]).SetValue(m["value"]).Save(ctx); err != nil {
 			return fmt.Errorf("failed to create turn metadata: %w", err)
 		}
+		createdMeta++
 	}
-
-	// Add blocks
-	for _, blockData := range blocks {
-		order, _ := blockData["order"].(float64)
-		kind, _ := blockData["kind"].(string)
-		role, _ := blockData["role"].(string)
-		payload, _ := blockData["payload"].(map[string]interface{})
-
-		blockCreate := client.Block.Create().
-			SetTurn(turn).
-			SetOrder(int(order)).
-			SetKind(block.Kind(kind))
-
-		if role != "" {
-			blockCreate = blockCreate.SetRole(role)
-		}
-
-		if payload != nil {
-			blockCreate = blockCreate.SetPayload(payload)
-		}
-
-		createdBlock, err := blockCreate.Save(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to create block: %w", err)
-		}
-
-		// Add block metadata if present
-		if blockMeta, ok := blockData["metadata"].([]interface{}); ok {
-			for _, metaItem := range blockMeta {
-				if meta, ok := metaItem.(map[string]interface{}); ok {
-					source, _ := meta["source"].(string)
-					key, _ := meta["key"].(string)
-					value, _ := meta["value"].(string)
-
-					_, err := client.BlockMetadata.Create().
-						SetBlock(createdBlock).
-						SetSource(source).
-						SetKey(key).
-						SetValue(value).
-						Save(ctx)
-					if err != nil {
+	for _, bd := range blocksArr {
+		order, _ := bd["order"].(float64)
+		kind, _ := bd["kind"].(string)
+		role, _ := bd["role"].(string)
+		payload, _ := bd["payload"].(map[string]any)
+		bc := client.Block.Create().SetTurn(t).SetOrder(int(order)).SetKind(block.Kind(kind))
+		if role != "" { bc = bc.SetRole(role) }
+		if payload != nil { bc = bc.SetPayload(payload) }
+		created, err := bc.Save(ctx)
+		if err != nil { return fmt.Errorf("failed to create block: %w", err) }
+		if bm, ok := bd["metadata"].([]any); ok {
+			for _, mi := range bm {
+				if mm, ok := mi.(map[string]any); ok {
+					src, _ := mm["source"].(string)
+					key, _ := mm["key"].(string)
+					val, _ := mm["value"].(string)
+					if _, err := client.BlockMetadata.Create().SetBlock(created).SetSource(src).SetKey(key).SetValue(val).Save(ctx); err != nil {
 						return fmt.Errorf("failed to create block metadata: %w", err)
 					}
 				}
 			}
 		}
 	}
-
-	// Output result
-	fmt.Printf("Created turn %d in run %d with %d metadata entries and %d blocks\n",
-		turn.ID, runIDFlag, len(metadata), len(blocks))
-
-	return nil
+	return gp.AddRow(ctx, types.NewRow(
+		types.MRP("id", t.ID),
+		types.MRP("run_id", runID),
+		types.MRP("metadata_count", createdMeta),
+		types.MRP("blocks_count", len(blocksArr)),
+	))
 }
 
+func init() {
+	rootCmd.AddCommand(createCmd)
+	cr, _ := NewCreateRunCommand()
+	crCmd, _ := cli.BuildCobraCommand(cr)
+	createCmd.AddCommand(crCmd)
+	ct, _ := NewCreateTurnCommand()
+	ctCmd, _ := cli.BuildCobraCommand(ct)
+	createCmd.AddCommand(ctCmd)
+}
