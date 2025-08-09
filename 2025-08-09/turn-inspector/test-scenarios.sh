@@ -5,19 +5,27 @@
 
 set -e
 
+# Use an isolated temporary database for deterministic IDs
+export TURN_INSPECTOR_DB="$(mktemp -u).db"
+
 CLI="./turn-inspector"
 
 echo "=== Turn Inspector Test Scenarios ==="
 echo
 
 # Clean up any existing data
-echo "1. Cleaning up existing data..."
-$CLI delete all --confirm 2>/dev/null || true
+echo "1. Initializing fresh database at $TURN_INSPECTOR_DB"
+echo
+
+echo "1b. Creating a run for scenarios..."
+$CLI create run --name "Test Scenarios" >/dev/null
+RUN_ID=1
+echo "Using RUN_ID=$RUN_ID"
 echo
 
 # Scenario 1: Simple user-assistant conversation
 echo "2. Creating simple user-assistant conversation..."
-$CLI create turn --blocks '[
+$CLI create turn --run-id $RUN_ID --blocks '[
   {
     "order": 0,
     "kind": "user",
@@ -30,12 +38,12 @@ $CLI create turn --blocks '[
     "role": "assistant",
     "payload": {"text": "Hello! I am doing well, thank you for asking. How can I help you today?"}
   }
-]' --metadata '{"source":"session","key":"id","value":"simple-001"}' --metadata '{"source":"user","key":"name","value":"Alice"}'
+]'
 echo
 
 # Scenario 2: Tool-calling conversation
 echo "3. Creating tool-calling conversation..."
-$CLI create turn --blocks '[
+$CLI create turn --run-id $RUN_ID --blocks '[
   {
     "order": 0,
     "kind": "user",
@@ -69,12 +77,12 @@ $CLI create turn --blocks '[
     "role": "assistant",
     "payload": {"text": "The current weather in New York is 72°F and partly cloudy with light winds. It is a pleasant day!"}
   }
-]' --metadata '{"source":"session","key":"id","value":"weather-001"}' --metadata '{"source":"user","key":"location","value":"NYC"}'
+]'
 echo
 
 # Scenario 3: Multi-tool complex conversation
 echo "4. Creating complex multi-tool conversation..."
-$CLI create turn --blocks '[
+$CLI create turn --run-id $RUN_ID --blocks '[
   {
     "order": 0,
     "kind": "user",
@@ -121,12 +129,12 @@ $CLI create turn --blocks '[
     "role": "assistant",
     "payload": {"text": "I found several flight options for you from San Francisco to Tokyo on March 15th. The best value is ANA 106 at $1,150. The weather in Tokyo will be 18°C and overcast with occasional rain, so pack accordingly!"}
   }
-]' --metadata '{"source":"session","key":"id","value":"travel-001"}' --metadata '{"source":"user","key":"preference","value":"economy"}' --metadata '{"source":"booking","key":"agent_id","value":"agent-42"}'
+]'
 echo
 
 # Scenario 4: Error handling conversation
 echo "5. Creating error handling conversation..."
-$CLI create turn --blocks '[
+$CLI create turn --run-id $RUN_ID --blocks '[
   {
     "order": 0,
     "kind": "user",
@@ -161,12 +169,12 @@ $CLI create turn --blocks '[
     "role": "assistant",
     "payload": {"text": "I cannot calculate the square root of -1 using real numbers. However, in complex numbers, the square root of -1 is represented as i (the imaginary unit)."}
   }
-]' --metadata '{"source":"session","key":"id","value":"math-error-001"}' --metadata '{"source":"debug","key":"error_handled","value":"true"}'
+]'
 echo
 
 # Scenario 5: Long conversation with system messages
 echo "6. Creating long conversation with system messages..."
-$CLI create turn --blocks '[
+$CLI create turn --run-id $RUN_ID --blocks '[
   {
     "order": 0,
     "kind": "system",
@@ -220,12 +228,12 @@ $CLI create turn --blocks '[
     "role": "system",
     "payload": {"text": "Escalating to technical support team due to feature access issue."}
   }
-]' --metadata '{"source":"session","key":"id","value":"support-001"}' --metadata '{"source":"user","key":"tier","value":"premium"}' --metadata '{"source":"support","key":"category","value":"technical"}' --metadata '{"source":"support","key":"priority","value":"high"}'
+]'
 echo
 
 # Scenario 6: Code assistance conversation
 echo "7. Creating code assistance conversation..."
-$CLI create turn --blocks '[
+$CLI create turn --run-id $RUN_ID --blocks '[
   {
     "order": 0,
     "kind": "user",
@@ -256,7 +264,7 @@ $CLI create turn --blocks '[
       "code": "def reverse_string_loop(s):\n    reversed_str = \"\"\n    for char in s:\n        reversed_str = char + reversed_str\n    return reversed_str"
     }
   }
-]' --metadata '{"source":"session","key":"id","value":"code-001"}' --metadata '{"source":"user","key":"skill_level","value":"beginner"}' --metadata '{"source":"topic","key":"language","value":"python"}'
+]'
 echo
 
 echo "=== Test data creation completed! ==="
