@@ -1,0 +1,4 @@
+
+task_id  agent_type      current_state  time
+-------  --------------  -------------  --------
+1        research-agent  investigate    23:06:09

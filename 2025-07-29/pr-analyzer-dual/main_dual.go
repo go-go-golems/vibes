@@ -76,6 +76,26 @@ and glazed for structured output. Supports both human-readable reports and struc
 	}
 	getCmd.AddCommand(contextCobraCmd)
 
+	diffCmd, err := get.NewDiffDualCommand()
+	if err != nil {
+		panic(err)
+	}
+	diffCobraCmd, err := cli.BuildCobraCommandDualMode(diffCmd)
+	if err != nil {
+		panic(err)
+	}
+	getCmd.AddCommand(diffCobraCmd)
+
+	fileHistoryCmd, err := get.NewFileHistoryDualCommand()
+	if err != nil {
+		panic(err)
+	}
+	fileHistoryCobraCmd, err := cli.BuildCobraCommandDualMode(fileHistoryCmd)
+	if err != nil {
+		panic(err)
+	}
+	getCmd.AddCommand(fileHistoryCobraCmd)
+
 	// Add analyze subcommands
 	functionsCmd, err := analyze.NewFunctionsDualCommand()
 	if err != nil {
