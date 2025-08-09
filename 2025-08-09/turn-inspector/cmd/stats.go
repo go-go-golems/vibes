@@ -3,136 +3,89 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
-	"text/tabwriter"
 
-	"github.com/spf13/cobra"
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/types"
+	"github.com/go-go-golems/glazed/pkg/settings"
 
+	
 	"turn-inspector/ent/block"
 )
 
-var statsCmd = &cobra.Command{
-	Use:   "stats",
-	Short: "Show database statistics",
-	Long: `Show comprehensive statistics about the conversation turns database.
-		
-This command displays:
-- Total number of turns
-- Total number of blocks
-- Block type distribution
-- Metadata statistics
-- Database size information
+// Stats: Glazed command emitting key/value rows for metrics (metric, value)
 
-Examples:
-  # Show basic statistics
-  turn-inspector stats
-  
-  # Show detailed statistics
-  turn-inspector stats --detailed`,
-	RunE: runStats,
+type StatsCommand struct { *cmds.CommandDescription }
+
+func NewStatsCommand() (*StatsCommand, error) {
+	glazedParameterLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil { return nil, err }
+	glazedLayers := layers.NewParameterLayers()
+	glazedLayers.Set(settings.GlazedSlug, glazedParameterLayer)
+	d := cmds.NewCommandDescription("stats", cmds.WithShort("Show database statistics"),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("detailed", parameters.ParameterTypeBool, parameters.WithHelp("Show detailed statistics"), parameters.WithDefault(false)),
+		),
+		cmds.WithLayers(glazedLayers),
+	)
+	return &StatsCommand{d}, nil
 }
 
-var detailedFlag bool
-
-func init() {
-	rootCmd.AddCommand(statsCmd)
-	statsCmd.Flags().BoolVar(&detailedFlag, "detailed", false, "Show detailed statistics")
-}
-
-func runStats(cmd *cobra.Command, args []string) error {
-	ctx := context.Background()
+func (c *StatsCommand) RunIntoGlazeProcessor(ctx context.Context, parsedLayers *layers.ParsedLayers, gp middlewares.Processor) error {
 	client := GetClient()
-	if client == nil {
-		return fmt.Errorf("database client not initialized")
-	}
+	if client == nil { return fmt.Errorf("database client not initialized") }
+	s := struct { Detailed bool `glazed.parameter:"detailed"` }{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, &s); err != nil { return err }
+	detailed := s.Detailed
 
-	// Basic counts
 	turnCount, err := client.Turn.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to count turns: %w", err)
-	}
-
+	if err != nil { return fmt.Errorf("failed to count turns: %w", err) }
 	blockCount, err := client.Block.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to count blocks: %w", err)
-	}
-
+	if err != nil { return fmt.Errorf("failed to count blocks: %w", err) }
 	turnMetadataCount, err := client.TurnMetadata.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to count turn metadata: %w", err)
-	}
-
+	if err != nil { return fmt.Errorf("failed to count turn metadata: %w", err) }
 	blockMetadataCount, err := client.BlockMetadata.Query().Count(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to count block metadata: %w", err)
+	if err != nil { return fmt.Errorf("failed to count block metadata: %w", err) }
+
+	emit := func(metric string, value any) error {
+		return gp.AddRow(ctx, types.NewRow(types.MRP("metric", metric), types.MRP("value", value)))
 	}
-
-	// Display basic statistics
-	fmt.Println("Database Statistics")
-	fmt.Println("==================")
-	fmt.Printf("Total Turns: %d\n", turnCount)
-	fmt.Printf("Total Blocks: %d\n", blockCount)
-	fmt.Printf("Turn Metadata Entries: %d\n", turnMetadataCount)
-	fmt.Printf("Block Metadata Entries: %d\n", blockMetadataCount)
-
+	if err := emit("total_turns", turnCount); err != nil { return err }
+	if err := emit("total_blocks", blockCount); err != nil { return err }
+	if err := emit("turn_metadata_entries", turnMetadataCount); err != nil { return err }
+	if err := emit("block_metadata_entries", blockMetadataCount); err != nil { return err }
 	if turnCount > 0 {
-		avgBlocksPerTurn := float64(blockCount) / float64(turnCount)
-		fmt.Printf("Average Blocks per Turn: %.2f\n", avgBlocksPerTurn)
+		avg := float64(blockCount) / float64(turnCount)
+		if err := emit("avg_blocks_per_turn", avg); err != nil { return err }
 	}
-
-	if !detailedFlag {
-		return nil
+	if !detailed { return nil }
+	// Detailed: block kind distribution
+	kinds := []block.Kind{block.KindLlmText, block.KindToolCall, block.KindToolUse, block.KindSystem, block.KindUser, block.KindOther}
+	for _, k := range kinds {
+		cnt, err := client.Block.Query().Where(block.KindEQ(k)).Count(ctx)
+		if err != nil { continue }
+		pct := 0.0
+		if blockCount > 0 { pct = float64(cnt) / float64(blockCount) * 100 }
+		// emit with kind field for breakdowns
+		if err := gp.AddRow(ctx, types.NewRow(
+			types.MRP("metric", "block_kind_count"),
+			types.MRP("kind", string(k)),
+			types.MRP("value", cnt),
+		)); err != nil { return err }
+		if err := gp.AddRow(ctx, types.NewRow(
+			types.MRP("metric", "block_kind_pct"),
+			types.MRP("kind", string(k)),
+			types.MRP("value", fmt.Sprintf("%.1f%%", pct)),
+		)); err != nil { return err }
 	}
-
-	fmt.Println("\nDetailed Statistics")
-	fmt.Println("==================")
-
-	// Block kind distribution
-	blockKinds := []block.Kind{
-		block.KindLlmText,
-		block.KindToolCall,
-		block.KindToolUse,
-		block.KindSystem,
-		block.KindUser,
-		block.KindOther,
-	}
-
-	fmt.Println("\nBlock Type Distribution:")
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "Kind\tCount\tPercentage")
-	fmt.Fprintln(w, "----\t-----\t----------")
-
-	for _, kind := range blockKinds {
-		count, err := client.Block.Query().Where(block.KindEQ(kind)).Count(ctx)
-		if err != nil {
-			continue
-		}
-		
-		percentage := 0.0
-		if blockCount > 0 {
-			percentage = float64(count) / float64(blockCount) * 100
-		}
-		
-		fmt.Fprintf(w, "%s\t%d\t%.1f%%\n", kind, count, percentage)
-	}
-	w.Flush()
-
-	// Metadata source distribution
-	fmt.Println("\nTurn Metadata Sources:")
-	sources, err := client.TurnMetadata.Query().
-		Select("source").
-		GroupBy("source").
-		Strings(ctx)
-	if err == nil && len(sources) > 0 {
-		w2 := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w2, "Source\tPresent")
-		fmt.Fprintln(w2, "------\t-------")
-		for _, source := range sources {
-			fmt.Fprintf(w2, "%s\tYes\n", source)
-		}
-		w2.Flush()
-	}
-
 	return nil
 }
 
+func init() {
+	sc, _ := NewStatsCommand()
+	cobraCmd, _ := cli.BuildCobraCommand(sc)
+	rootCmd.AddCommand(cobraCmd)
+}
