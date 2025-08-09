@@ -9,7 +9,7 @@ ShowPerDefault: true
 
 # Programmatic Usage with Ent
 
-This guide shows how to work with the Turn Inspector data model directly from Go using Ent: creating runs, turns, and blocks; attaching metadata; and running common queries. It assumes basic familiarity with Go and Ent.
+This guide shows how to work with the Turn Inspector data model from Go. It first introduces high-level convenience APIs that wrap Ent for common tasks (create/update/delete with metadata), and then shows direct Ent usage and query recipes. It assumes basic familiarity with Go and Ent.
 
 ## Data model overview
 
@@ -52,7 +52,62 @@ func newClient() *ent.Client {
 
 Tip: The CLI honors `TURN_INSPECTOR_DB`; you can adopt the same env var to share a database.
 
-## Creating data
+## Creating data (high-level APIs)
+
+The `pkg/ti` package provides convenience functions for common operations with transaction safety and metadata upserts.
+
+```go
+import (
+  "context"
+  "turn-inspector/ent"
+  entblock "turn-inspector/ent/block"
+  "turn-inspector/pkg/ti"
+)
+
+ctx := context.Background()
+client := newClient()
+
+// Create a run with metadata
+run, err := ti.CreateRun(ctx, client, "Demo Run", []ti.MetadataKV{
+  {Source: "session", Key: "id", Value: "abc123"},
+})
+_ = run; _ = err
+
+// Create a turn with two blocks and metadata
+assistant := "assistant"
+user := "user"
+turn, blocks, err := ti.CreateTurnWithBlocks(ctx, client, ti.TurnInput{
+  RunID: run.ID,
+  Metadata: []ti.MetadataKV{{Source: "user", Key: "tier", Value: "premium"}},
+  Blocks: []ti.BlockInput{
+    {Order: 0, Kind: entblock.KindUser, Role: &user, Payload: map[string]any{"text": "Hello"}},
+    {Order: 1, Kind: entblock.KindLlmText, Role: &assistant, Payload: map[string]any{"text": "Hi there!"}},
+  },
+})
+_ = turn; _ = blocks; _ = err
+
+// Upsert metadata
+_, _ = ti.UpsertRunMetadata(ctx, client, run.ID, ti.MetadataKV{Source: "session", Key: "id", Value: "abc124"})
+```
+
+### Updating and deleting (high-level APIs)
+
+```go
+// Update a block
+newPayload := map[string]any{"text": "Revised"}
+_, _ = ti.UpdateBlock(ctx, client, blocks[1].ID, &assistant, newPayload)
+
+// Swap orders within a turn
+_ = ti.SwapBlockOrders(ctx, client, turn.ID, 0, 1)
+
+// Delete a turn and all its children
+_ = ti.DeleteTurnCascade(ctx, client, turn.ID)
+
+// Delete a run and everything under it
+_ = ti.DeleteRunCascade(ctx, client, run.ID)
+```
+
+## Creating data (raw Ent)
 
 ### Create a run with metadata
 
