@@ -1,0 +1,12 @@
+version: 2
+session: "simple-sysdash"
+tabs:
+  - name: "status"
+    layout: even-vertical
+    panes:
+      - cmd: "echo '=== CURRENT TIME ===' && date"
+        refresh: 1
+      - cmd: "echo '=== SYSTEM LOAD ===' && uptime"
+        refresh: 5
+      - cmd: "echo '=== SYSTEMD SERVICES ===' && ./scripts/services.sh"
+        refresh: 10

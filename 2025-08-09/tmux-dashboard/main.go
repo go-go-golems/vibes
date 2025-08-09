@@ -1,11 +1,14 @@
 package main
 
 import (
+    "embed"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
+    "github.com/go-go-golems/glazed/pkg/help"
+    help_cmd "github.com/go-go-golems/glazed/pkg/help/cmd"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +20,11 @@ var (
 	dryRun        bool
 )
 
+//go:embed docs/*.md
+var docsFS embed.FS
+
 func main() {
+    setupHelpSystem()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
@@ -83,6 +90,15 @@ func init() {
 
 	// Add dry-run flag only to apply command
 	applyCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Print tmux commands without executing")
+}
+
+func setupHelpSystem() {
+    hs := help.NewHelpSystem()
+    // Load embedded documentation pages; ignore error if none found
+    if err := hs.LoadSectionsFromFS(docsFS, "docs"); err != nil {
+        // Best-effort: continue without embedded docs
+    }
+    help_cmd.SetupCobraRootCommand(hs, rootCmd)
 }
 
 func applyConfig(configFile string) error {
