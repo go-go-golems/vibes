@@ -1,0 +1,31 @@
+version: 2
+session: "devdash"
+include:
+  - network.yml
+
+vars:
+  project_dir: "/home/ubuntu/tmux-dashboard"
+  service: "tmux-dashboard"
+  port: "8080"
+
+tabs:
+  - name: "editor"
+    layout: main-horizontal
+    panes:
+      - cmd: "cd {{.project_dir}} && ls -la"
+      - cmd: "cd {{.project_dir}} && git status"
+
+  - name: "build"
+    layout: even-vertical
+    panes:
+      - cmd: "cd {{.project_dir}} && go build -o {{.service}} ."
+      - cmd: "cd {{.project_dir}} && go test -v ./..."
+        refresh: 30
+
+  - name: "server"
+    panes:
+      - cmd: "cd {{.project_dir}} && echo 'Server would run on port {{.port}}'"
+        env:
+          PORT: "{{.port}}"
+          ENV: "development"
+

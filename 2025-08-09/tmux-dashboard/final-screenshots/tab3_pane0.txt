@@ -1,0 +1,24 @@
+  9 10:09 go.mod
+-rw-rw-r--  1 ubuntu ubuntu    2220 Aug
+  9 10:09 go.sum
+-rw-r--r--  1 ubuntu ubuntu    5254 Aug
+  9 10:11 includes_test.go
+-rw-r--r--  1 ubuntu ubuntu    6906 Aug
+  9 10:16 main.go
+drwxrwxr-x  2 ubuntu ubuntu    4096 Aug
+  9 10:19 screenshots
+-rwxrwxr-x  1 ubuntu ubuntu    1310 Aug
+  9 10:19 take_screenshots.sh
+-rw-rw-r--  1 ubuntu ubuntu     240 Aug
+  9 10:25 test-simple.yml
+-rwxrwxr-x  1 ubuntu ubuntu 6607056 Aug
+  9 10:28 tmux-dashboard
+-rw-r--r--  1 ubuntu ubuntu    7670 Aug
+  9 10:28 tmux.go
+-rw-r--r--  1 ubuntu ubuntu    2909 Aug
+  9 10:14 tmux_test.go
+
+Git Status:
+fatal: not a git repository (or any of
+the parent directories): .git
+ubuntu@af6ef63a383e:~/tmux-dashboard$

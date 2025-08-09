@@ -1,0 +1,45 @@
+version: 2
+session: "sysdash"
+vars:
+  host: "localhost"
+  service: "nginx"
+  refresh_fast: "5"
+  refresh_slow: "10"
+
+tabs:
+  - name: "overview"
+    layout: tiled
+    panes:
+      - cmd: "uptime"
+        refresh: 5
+      - cmd: "df -h"
+        refresh: 10
+      - cmd: "free -m"
+        refresh: 5
+      - cmd: "ps aux | head -20"
+        refresh: 10
+
+  - name: "network"
+    layout: even-vertical
+    panes:
+      - cmd: "netstat -tuln | head -20"
+        refresh: 5
+      - cmd: "ss -tuln | head -20"
+        refresh: 5
+
+  - name: "logs"
+    layout: even-horizontal
+    panes:
+      - cmd: "journalctl -u {{.service}} -n 50 -f"
+      - cmd: "tail -f /var/log/syslog | head -20"
+
+  - name: "monitoring"
+    layout: main-vertical
+    panes:
+      - cmd: "top -b -n1 | head -20"
+        refresh: 3
+      - cmd: "iostat 1 1"
+        refresh: 5
+      - cmd: "vmstat 1 1"
+        refresh: 5
+

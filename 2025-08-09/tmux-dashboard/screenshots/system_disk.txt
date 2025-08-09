@@ -1,0 +1,12 @@
+ -sh /home/* 2>/dev/null | head -5; slee
+p 30; done'ubuntu@af6ef63a383e:~/tmux-da
+shboard$ bash -lc 'while :; do clear; da
+te "+%F %T"; echo '=== TOP PROCESSES ===
+' && ps aux --sort=-%cpu | head -10; sle
+ep 5; done'bash -lc 'while :; do clear;
+date "+%F %T"; echo '=== NETWORK CONNECT
+IONS ===' && netstat -tuln | head -10; s
+leep 15; done'bash -lc 'while :; do clea
+r; date "+%F %T"; echo '=== DISK USAGE =
+==' && du -sh /home/* 2>/dev/null | head
+ -5; sleep 30; done'

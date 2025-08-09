@@ -1,0 +1,9 @@
+{
+  "host": "production-server",
+  "service": "web-app",
+  "port": "3000",
+  "env": "production",
+  "refresh_fast": "2",
+  "refresh_slow": "15"
+}
+

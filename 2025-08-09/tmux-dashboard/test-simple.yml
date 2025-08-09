@@ -1,0 +1,9 @@
+version: 2
+session: "test-simple"
+tabs:
+  - name: "basic"
+    layout: tiled
+    panes:
+      - cmd: "echo 'Hello from pane 1' && date && echo 'Current directory:' && pwd"
+      - cmd: "echo 'Hello from pane 2' && uptime"
+        refresh: 5

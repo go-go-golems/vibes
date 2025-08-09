@@ -1,0 +1,18 @@
+version: 2
+session: "network-monitoring"
+
+tabs:
+  - name: "interfaces"
+    layout: tiled
+    panes:
+      - cmd: "ip addr show"
+        refresh: 10
+      - cmd: "ip route show"
+        refresh: 30
+
+  - name: "traffic"
+    layout: even-vertical
+    panes:
+      - cmd: "iftop -t -s 5"
+      - cmd: "nethogs -d 5"
+

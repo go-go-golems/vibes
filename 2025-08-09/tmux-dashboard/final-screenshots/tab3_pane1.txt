@@ -1,0 +1,24 @@
+ayout
+=== RUN   TestConfigValidation/duplicate
+_tab_names
+--- PASS: TestConfigValidation (0.00s)
+    --- PASS: TestConfigValidation/valid
+_config (0.00s)
+    --- PASS: TestConfigValidation/inval
+id_version (0.00s)
+    --- PASS: TestConfigValidation/missi
+ng_session (0.00s)
+    --- PASS: TestConfigValidation/inval
+id_layout (0.00s)
+    --- PASS: TestConfigValidation/dupli
+cate_tab_names (0.00s)
+=== RUN   TestSubstituteVars
+--- PASS: TestSubstituteVars (0.00s)
+=== RUN   TestLoadConfigWithIncludes
+--- PASS: TestLoadConfigWithIncludes (0.
+00s)
+=== RUN   TestLoadConfigWithIncludesDupl
+icateTabNames
+--- PASS: TestLoadConfigWithIncludesDupl
+icateTabNames (0.00s)
+ubuntu@af6ef63a383e:~/tmux-dashboard$
