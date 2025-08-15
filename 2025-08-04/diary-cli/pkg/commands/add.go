@@ -106,8 +106,14 @@ func runInteractiveAdd(storage *storage.MarkdownStorage, forceEditor bool) error
 	if err := storage.AddEntry(entry); err != nil {
 		return fmt.Errorf("failed to add entry: %w", err)
 	}
-
-	fmt.Printf("✓ Added %s entry: %s\n", entry.Type, getTitleOrContent(entry))
+	
+	// Print rendered entry and path
+	rendered := storage.RenderEntry(entry)
+	filePath := storage.FilePathForEntry(entry)
+	fmt.Println("Rendered entry:")
+	fmt.Println(rendered)
+	fmt.Printf("Written to: %s\n", filePath)
+	
 	return nil
 }
 
@@ -151,8 +157,14 @@ func runDirectAdd(storage *storage.MarkdownStorage, entryType, content, format, 
 	if err := storage.AddEntry(entry); err != nil {
 		return fmt.Errorf("failed to add entry: %w", err)
 	}
-
-	fmt.Printf("✓ Added %s entry: %s\n", entry.Type, getTitleOrContent(entry))
+	
+	// Print rendered entry and path
+	rendered := storage.RenderEntry(entry)
+	filePath := storage.FilePathForEntry(entry)
+	fmt.Println("Rendered entry:")
+	fmt.Println(rendered)
+	fmt.Printf("Written to: %s\n", filePath)
+	
 	return nil
 }
 

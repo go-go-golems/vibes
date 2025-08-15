@@ -13,22 +13,31 @@ import (
 	"github.com/yuin/goldmark/ast"
 	
 	"diary-cli/pkg/config"
+	"diary-cli/pkg/rendering"
 	"diary-cli/pkg/types"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/text"
 )
 
 // MarkdownStorage handles reading and writing diary entries to markdown files
 type MarkdownStorage struct {
-	config *config.Config
+	config   *config.Config
+	renderer *rendering.Renderer
 }
 
 // NewMarkdownStorage creates a new markdown storage instance
 func NewMarkdownStorage(cfg *config.Config) *MarkdownStorage {
-	return &MarkdownStorage{config: cfg}
+	renderer, err := rendering.NewRenderer(cfg)
+	if err != nil {
+		// If renderer creation fails, we'll handle it gracefully
+		renderer = nil
+	}
+	return &MarkdownStorage{config: cfg, renderer: renderer}
 }
 
 // AddEntry adds a new entry to the appropriate markdown file
 func (ms *MarkdownStorage) AddEntry(entry *types.DiaryEntry) error {
-	filePath := ms.config.GetDateFile(entry.Date.Format(ms.config.DateFormat))
+	filePath := ms.config.GetDateFile(entry.Date)
 	
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
@@ -53,49 +62,73 @@ func (ms *MarkdownStorage) AddEntry(entry *types.DiaryEntry) error {
 func (ms *MarkdownStorage) GetEntries(since time.Time, entryType types.EntryType) ([]*types.DiaryEntry, error) {
 	var entries []*types.DiaryEntry
 	
-	logsDir := ms.config.GetLogsDir()
-	if _, err := os.Stat(logsDir); os.IsNotExist(err) {
-		return entries, nil // No logs directory yet
+	// Search in both the computed logs directory (with template expansion) 
+	// and the base logs directory (for files that don't follow template structure)
+	searchDirs := []string{
+		ms.config.GetLogsDir(),                                               // Template-expanded path
+		filepath.Join(ms.config.VaultPath, "Logs"),                         // Base logs directory
+	}
+	
+	// Track processed files to avoid duplicates
+	processedFiles := make(map[string]bool)
+	
+	for _, baseLogsDir := range searchDirs {
+		
+		// Check if logs directory exists
+		if _, err := os.Stat(baseLogsDir); os.IsNotExist(err) {
+			continue // No logs directory yet, try next
+		}
+
+		// Walk through log files in directory and any subdirectories
+		err := filepath.Walk(baseLogsDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !strings.HasSuffix(path, ".md") {
+				return nil
+			}
+
+			// Skip if we've already processed this file
+			absPath, _ := filepath.Abs(path)
+			if processedFiles[absPath] {
+				return nil
+			}
+			processedFiles[absPath] = true
+
+			// Parse date from filename
+			filename := strings.TrimSuffix(filepath.Base(path), ".md")
+			fileDate, err := time.Parse(ms.config.DateFormat, filename)
+			if err != nil {
+				return nil // Skip files that don't match date format
+			}
+
+			if fileDate.Before(since) {
+				return nil
+			}
+
+			// Parse entries from file
+			fileEntries, err := ms.parseEntriesFromFile(path, fileDate)
+			if err != nil {
+				return err
+			}
+
+			// Filter by type if specified
+			for _, entry := range fileEntries {
+				if entryType == "" || entry.Type == entryType {
+					entries = append(entries, entry)
+				}
+			}
+
+			return nil
+		})
+		
+		if err != nil {
+			return entries, err
+		}
 	}
 
-	// Walk through log files
-	err := filepath.Walk(logsDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !strings.HasSuffix(path, ".md") {
-			return nil
-		}
-
-		// Parse date from filename
-		filename := strings.TrimSuffix(filepath.Base(path), ".md")
-		fileDate, err := time.Parse(ms.config.DateFormat, filename)
-		if err != nil {
-			return nil // Skip files that don't match date format
-		}
-
-		if fileDate.Before(since) {
-			return nil
-		}
-
-		// Parse entries from file
-		fileEntries, err := ms.parseEntriesFromFile(path, fileDate)
-		if err != nil {
-			return err
-		}
-
-		// Filter by type if specified
-		for _, entry := range fileEntries {
-			if entryType == "" || entry.Type == entryType {
-				entries = append(entries, entry)
-			}
-		}
-
-		return nil
-	})
-
-	return entries, err
+	return entries, nil
 }
 
 // createDailyFile creates a new daily markdown file with template
@@ -109,22 +142,37 @@ func (ms *MarkdownStorage) createDailyFile(filePath string, date time.Time) erro
 	return os.WriteFile(filePath, []byte(template), 0644)
 }
 
-// formatEntry formats a diary entry according to its format type
+// formatEntry formats a diary entry using templates
 func (ms *MarkdownStorage) formatEntry(entry *types.DiaryEntry) string {
-	timestamp := entry.Date.Format("2006-01-02 15:04")
+	if ms.renderer == nil {
+		// Fallback to simple formatting if renderer is not available
+		return ms.formatSimpleEntry(entry)
+	}
 	
+	// Determine template name based on format
+	var templateName string
 	switch entry.Format {
 	case types.FormatTask:
-		return ms.formatTaskEntry(entry, timestamp)
+		templateName = "task.md.tmpl"
 	case types.FormatMarkdown:
-		return ms.formatMarkdownEntry(entry, timestamp)
+		templateName = "markdown.md.tmpl"
 	default: // FormatDefault
-		return ms.formatDefaultEntry(entry, timestamp)
+		templateName = "default.md.tmpl"
 	}
+	
+	// Render using template
+	output, err := ms.renderer.Render(templateName, entry)
+	if err != nil {
+		// Fallback to simple formatting if template rendering fails
+		fmt.Printf("Template rendering failed for %s: %v\n", templateName, err)
+		return ms.formatSimpleEntry(entry)
+	}
+	
+	return output
 }
 
-// formatDefaultEntry formats entry in simple markdown format
-func (ms *MarkdownStorage) formatDefaultEntry(entry *types.DiaryEntry, timestamp string) string {
+// formatSimpleEntry provides a simple fallback formatting when templates are not available
+func (ms *MarkdownStorage) formatSimpleEntry(entry *types.DiaryEntry) string {
 	var sb strings.Builder
 	
 	// Title
@@ -138,132 +186,17 @@ func (ms *MarkdownStorage) formatDefaultEntry(entry *types.DiaryEntry, timestamp
 	
 	sb.WriteString(fmt.Sprintf("## %s: %s\n", strings.Title(string(entry.Type)), title))
 	
-	// Subtitle if present
-	if entry.SubtitleSlug != "" {
-		sb.WriteString(fmt.Sprintf("### %s\n", entry.SubtitleSlug))
-	}
-	
 	// Content (if different from title)
 	if entry.Title != "" {
 		sb.WriteString(entry.Content + "\n")
 	}
 	
-	// URL for links
-	if entry.Type == types.EntryTypeLink && entry.URL != "" {
-		sb.WriteString(fmt.Sprintf("\nURL: %s\n", entry.URL))
-	}
-	
-	sb.WriteString(fmt.Sprintf("\n*Added: %s*\n\n", timestamp))
+	sb.WriteString(fmt.Sprintf("\n*Added: %s*\n\n", entry.Date.Format("2006-01-02 15:04")))
 	
 	return sb.String()
 }
 
-// formatMarkdownEntry formats entry in enhanced markdown format
-func (ms *MarkdownStorage) formatMarkdownEntry(entry *types.DiaryEntry, timestamp string) string {
-	var sb strings.Builder
-	
-	// Title with metadata
-	title := entry.Title
-	if title == "" {
-		title = entry.Content
-		if len(title) > 50 {
-			title = title[:50] + "..."
-		}
-	}
-	
-	sb.WriteString(fmt.Sprintf("## %s: %s\n", strings.Title(string(entry.Type)), title))
-	
-	// Metadata
-	sb.WriteString(fmt.Sprintf("**Type:** %s  \n", entry.Type))
-	sb.WriteString(fmt.Sprintf("**Date:** %s  \n", timestamp))
-	if len(entry.Tags) > 0 {
-		sb.WriteString(fmt.Sprintf("**Tags:** %s  \n", strings.Join(entry.Tags, ", ")))
-	}
-	sb.WriteString("\n")
-	
-	// Subtitle if present
-	if entry.SubtitleSlug != "" {
-		sb.WriteString(fmt.Sprintf("### %s\n", entry.SubtitleSlug))
-	}
-	
-	// Content
-	if entry.Title != "" {
-		sb.WriteString(entry.Content + "\n")
-	}
-	
-	// URL for links
-	if entry.Type == types.EntryTypeLink && entry.URL != "" {
-		sb.WriteString(fmt.Sprintf("\n**URL:** [%s](%s)\n", entry.URL, entry.URL))
-	}
-	
-	sb.WriteString("\n---\n\n")
-	
-	return sb.String()
-}
 
-// formatTaskEntry formats entry in Obsidian Tasks format
-func (ms *MarkdownStorage) formatTaskEntry(entry *types.DiaryEntry, timestamp string) string {
-	var sb strings.Builder
-	
-	// Task checkbox
-	checkbox := "- [ ]"
-	if entry.Completed {
-		checkbox = "- [x]"
-	}
-	
-	// Main task line
-	if entry.Type == types.EntryTypeTodo {
-		sb.WriteString(fmt.Sprintf("%s %s", checkbox, entry.Content))
-		
-		// Due date for todos
-		if entry.DueDate != nil {
-			sb.WriteString(fmt.Sprintf(" 📅 %s", entry.DueDate.Format(ms.config.DateFormat)))
-		}
-		
-		// Tags
-		tags := []string{"#todo", "#toProcess"}
-		if len(entry.Tags) > 0 {
-			tags = append(tags, entry.Tags...)
-		}
-		sb.WriteString(fmt.Sprintf(" %s\n", strings.Join(tags, " ")))
-		
-		// Priority and metadata
-		if entry.Priority != "" {
-			sb.WriteString(fmt.Sprintf("  - Priority: %s\n", entry.Priority))
-		}
-		if entry.TaskID != "" {
-			sb.WriteString(fmt.Sprintf("  - ID: %s\n", entry.TaskID))
-		}
-		
-	} else {
-		// Regular entry in task format
-		title := entry.Title
-		if title == "" {
-			title = entry.Content
-			if len(title) > 50 {
-				title = title[:50] + "..."
-			}
-		}
-		
-		sb.WriteString(fmt.Sprintf("%s **%s**: %s #toProcess #%s\n", 
-			checkbox, strings.ToUpper(string(entry.Type)), title, entry.Type))
-		
-		// Content as sub-item if different from title
-		if entry.Title != "" {
-			sb.WriteString(fmt.Sprintf("  - %s\n", entry.Content))
-		}
-		
-		// Subtitle as sub-item
-		if entry.SubtitleSlug != "" {
-			sb.WriteString(fmt.Sprintf("  - **%s**: %s\n", entry.SubtitleSlug, entry.Content))
-		}
-	}
-	
-	sb.WriteString(fmt.Sprintf("  - Added: %s\n", timestamp))
-	sb.WriteString("\n")
-	
-	return sb.String()
-}
 
 // appendToFile appends content to a file, inserting in the "To Process" section
 func (ms *MarkdownStorage) appendToFile(filePath, content string) error {
@@ -316,41 +249,41 @@ func (ms *MarkdownStorage) appendToFile(filePath, content string) error {
 	return os.WriteFile(filePath, []byte(strings.Join(lines, "\n")), 0644)
 }
 
-// parseEntriesFromFile parses diary entries from a markdown file
+// parseEntriesFromFile parses entries from a markdown file using Goldmark AST
 func (ms *MarkdownStorage) parseEntriesFromFile(filePath string, fileDate time.Time) ([]*types.DiaryEntry, error) {
-	var entries []*types.DiaryEntry
-	
-	file, err := os.Open(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file: %w", err)
+		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	lineNum := 0
-	
-	for scanner.Scan() {
-		lineNum++
-		line := strings.TrimSpace(scanner.Text())
-		
-		// Parse task format entries
-		if strings.HasPrefix(line, "- [ ]") || strings.HasPrefix(line, "- [x]") {
-			entry := ms.parseTaskLine(line, filePath, lineNum, fileDate)
+	// Parse Markdown into AST
+	md := goldmark.New()
+	doc := md.Parser().Parse(text.NewReader(data))
+
+	var entries []*types.DiaryEntry
+	// Walk AST nodes
+	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		// Headings (level 2) as entries
+		if heading, ok := node.(*ast.Heading); ok && heading.Level == 2 {
+			entry := ms.parseEntryFromHeading(heading, data, filePath, fileDate)
 			if entry != nil {
 				entries = append(entries, entry)
 			}
 		}
-		
-		// Parse markdown format entries (headers)
-		if strings.HasPrefix(line, "## ") && !strings.Contains(line, "To Process") {
-			entry := ms.parseMarkdownHeader(line, filePath, lineNum, fileDate)
+		// Task list items
+		if listItem, ok := node.(*ast.ListItem); ok && ms.isTaskItem(listItem, data) {
+			entry := ms.parseTaskEntry(listItem, data, filePath, fileDate)
 			if entry != nil {
 				entries = append(entries, entry)
 			}
 		}
-	}
+		return ast.WalkContinue, nil
+	})
 
-	return entries, scanner.Err()
+	return entries, nil
 }
 
 // parseTaskLine parses a task format line into a diary entry
@@ -553,11 +486,12 @@ func (ms *MarkdownStorage) getNodeText(node ast.Node, content []byte) string {
 // parseHeadingContent parses entry type and title from heading text
 func (ms *MarkdownStorage) parseHeadingContent(headingText string) (string, string) {
 	// Match patterns like "TIL: Title", "Thought: Title", "Link: Title", etc.
+	// Use case-insensitive patterns with (?i) flag
 	patterns := map[string]string{
-		`^TIL:\s*(.*)`:     "til",
-		`^Thought:\s*(.*)`: "thought", 
-		`^Did:\s*(.*)`:     "did",
-		`^Link:\s*(.*)`:    "link",
+		`(?i)^TIL:\s*(.*)`:     "til",
+		`(?i)^Thought:\s*(.*)`: "thought", 
+		`(?i)^Did:\s*(.*)`:     "did",
+		`(?i)^Link:\s*(.*)`:    "link",
 	}
 
 	for pattern, entryType := range patterns {
@@ -829,5 +763,16 @@ func (ms *MarkdownStorage) SearchEntries(query string, since time.Time, entryTyp
 	}
 	
 	return results, nil
+}
+
+// FilePathForEntry returns the file path for the given entry
+func (ms *MarkdownStorage) FilePathForEntry(entry *types.DiaryEntry) string {
+	return ms.config.GetDateFile(entry.Date)
+}
+
+
+// RenderEntry returns the rendered entry text as a string
+func (ms *MarkdownStorage) RenderEntry(entry *types.DiaryEntry) string {
+	return ms.formatEntry(entry)
 }
 
