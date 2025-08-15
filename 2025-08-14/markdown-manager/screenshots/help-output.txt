@@ -1,0 +1,21 @@
+A CLI tool for managing markdown files with YAML metadata frontmatter.
+	
+Provides commands to list, search, edit, query, and update markdown documents
+with rich metadata support for project management and documentation workflows.
+
+Usage:
+  mdm [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  info        Show detailed information about a markdown file
+  list        List markdown files with metadata
+  query       Query and analyze markdown file metadata
+  search      Search markdown files by metadata and content
+  update      Update metadata of a markdown file
+
+Flags:
+  -h, --help   help for mdm
+
+Use "mdm [command] --help" for more information about a command.
