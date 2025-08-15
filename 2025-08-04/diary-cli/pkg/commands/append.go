@@ -102,7 +102,14 @@ func runInteractiveAppend(storage *storage.MarkdownStorage, forceEditor bool) er
 	}
 
 	// Perform append operation
-	return storage.AppendToEntry(selectedEntry, form.SubtitleSlug, content)
+	if err := storage.AppendToEntry(selectedEntry, form.SubtitleSlug, content); err != nil {
+		return fmt.Errorf("failed to append entry: %w", err)
+	}
+	// Print appended content and path
+	fmt.Println("Appended content:")
+	fmt.Println(content)
+	fmt.Printf("Appended to: %s\n", selectedEntry.File)
+	return nil
 }
 
 // runDirectAppend handles direct append mode
@@ -119,7 +126,14 @@ func runDirectAppend(storage *storage.MarkdownStorage, targetSlug, content, newS
 	}
 
 	// Perform append operation
-	return storage.AppendToEntry(entry, newSubtitle, content)
+	if err := storage.AppendToEntry(entry, newSubtitle, content); err != nil {
+		return fmt.Errorf("failed to append entry: %w", err)
+	}
+	// Print appended content and path
+	fmt.Println("Appended content:")
+	fmt.Println(content)
+	fmt.Printf("Appended to: %s\n", entry.File)
+	return nil
 }
 
 // getTodaysEntries gets today's entries for selection

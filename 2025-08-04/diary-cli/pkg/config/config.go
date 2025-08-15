@@ -4,18 +4,25 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
+// RenderingConfig represents template rendering configuration
+type RenderingConfig struct {
+	Templates map[string]string `yaml:"templates,omitempty"`
+}
+
 // Config represents the application configuration
 type Config struct {
-	VaultPath    string `yaml:"vault_path"`
-	LogsPath     string `yaml:"logs_path"`
-	DateFormat   string `yaml:"date_format"`
-	DefaultLimit int    `yaml:"default_limit"`
-	Editor       string `yaml:"editor,omitempty"`
+	VaultPath    string           `yaml:"vault_path"`
+	LogsPath     string           `yaml:"logs_path"`
+	DateFormat   string           `yaml:"date_format"`
+	DefaultLimit int              `yaml:"default_limit"`
+	Editor       string           `yaml:"editor,omitempty"`
+	Rendering    *RenderingConfig `yaml:"rendering,omitempty"`
 }
 
 // DefaultConfig returns a configuration with default values
@@ -79,22 +86,62 @@ func (c *Config) Save() error {
 	return nil
 }
 
-// GetLogsDir returns the full path to the logs directory
+// ProcessPathTemplate replaces YYYY-MM-DD placeholders in a path with the actual date
+func (c *Config) ProcessPathTemplate(path string, date time.Time) string {
+	// Replace YYYY-MM-DD with the actual date
+	dateStr := date.Format("2006-01-02")
+	result := strings.ReplaceAll(path, "YYYY-MM-DD", dateStr)
+	
+	// Replace YYYY with year
+	yearStr := date.Format("2006")
+	result = strings.ReplaceAll(result, "YYYY", yearStr)
+	
+	// Replace MM with month
+	monthStr := date.Format("01")
+	result = strings.ReplaceAll(result, "MM", monthStr)
+	
+	// Replace DD with day
+	dayStr := date.Format("02")
+	result = strings.ReplaceAll(result, "DD", dayStr)
+	
+	return result
+}
+
+// GetLogsDir returns the full path to the logs directory with template processing for today
 func (c *Config) GetLogsDir() string {
-	return filepath.Join(c.VaultPath, c.LogsPath)
+	today := getCurrentDate()
+	return c.GetLogsDirForDate(today)
+}
+
+// GetLogsDirForDate returns the logs directory path with template processing for a specific date
+func (c *Config) GetLogsDirForDate(date time.Time) string {
+	processedVaultPath := c.ProcessPathTemplate(c.VaultPath, date)
+	processedLogsPath := c.ProcessPathTemplate(c.LogsPath, date)
+	return filepath.Join(processedVaultPath, processedLogsPath)
 }
 
 // GetTodayFile returns the path to today's diary file
 func (c *Config) GetTodayFile() string {
-	today := getCurrentDateString(c.DateFormat)
+	today := getCurrentDate()
 	return c.GetDateFile(today)
 }
 
 // GetDateFile returns the path to a specific date's diary file
-func (c *Config) GetDateFile(dateStr string) string {
-	// For now, assume flat structure in logs directory
-	// Could be enhanced to support year/month subdirectories
-	return filepath.Join(c.GetLogsDir(), dateStr+".md")
+func (c *Config) GetDateFile(date time.Time) string {
+	// Use template processing for the logs directory
+	logsDir := c.GetLogsDirForDate(date)
+	dateStr := date.Format(c.DateFormat)
+	return filepath.Join(logsDir, dateStr+".md")
+}
+
+// GetDateFileFromString returns the path to a specific date's diary file from a date string
+func (c *Config) GetDateFileFromString(dateStr string) (string, error) {
+	// Parse the date string using the configured format
+	date, err := time.Parse(c.DateFormat, dateStr)
+	if err != nil {
+		return "", fmt.Errorf("invalid date format: %w", err)
+	}
+	return c.GetDateFile(date), nil
 }
 
 // GetEditor returns the editor to use, checking environment variables
@@ -117,7 +164,12 @@ func (c *Config) GetEditor() string {
 // getConfigPath returns the path to the configuration file
 func getConfigPath() string {
 	homeDir, _ := os.UserHomeDir()
-	return filepath.Join(homeDir, ".diary-config.yaml")
+	return filepath.Join(homeDir, ".config", "diary-cli", "config.yaml")
+}
+
+// GetConfigPath returns the path to the configuration file
+func GetConfigPath() string {
+	return getConfigPath()
 }
 
 // getCurrentDateString returns the current date as a string
