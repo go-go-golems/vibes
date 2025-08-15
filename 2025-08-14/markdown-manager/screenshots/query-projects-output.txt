@@ -1,0 +1,7 @@
+PROJECT                 FILES  TOTAL_SIZE  AVG_SIZE
+product-roadmap         1      11450       11450
+ai-research             1      7706        7706
+web-dev                 1      11130       11130
+user-management-system  1      3194        3194
+system-operations       1      16961       16961
+team-coordination       1      13101       13101

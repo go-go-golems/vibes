@@ -1,0 +1,24 @@
+File: examples/projects/ai-research/transformer-architecture.md
+Title: Transformer Architecture Deep Dive
+Description: Detailed analysis of the Transformer neural network architecture and its applications
+Tags: ai, machine-learning, transformers, attention, nlp
+Category: research
+Project: ai-research
+Repository: https://github.com/research-team/transformer-analysis
+Branch: feature/attention-mechanisms
+Status: draft
+Priority: critical
+Version: 0.3
+Author: Dr. Sarah Chen
+Contributors: Prof. Michael Rodriguez, Alex Kim
+Language: markdown
+Format: research-paper
+Template: academic
+Created: 2024-07-20 14:00:00
+Modified: 2024-08-12 11:45:00
+Last Used: 2024-08-14 09:15:00
+File Size: 7706 bytes
+Content Length: 6705 characters
+Related Files: attention-mechanisms.md, bert-analysis.md, gpt-evolution.md
+Dependencies: pytorch-implementation.py, attention-visualization.ipynb
+References: https://arxiv.org/abs/1706.03762, https://arxiv.org/abs/1810.04805

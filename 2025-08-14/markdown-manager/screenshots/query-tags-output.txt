@@ -1,0 +1,10 @@
+TAG               COUNT
+v2.1              1
+machine-learning  1
+nlp               1
+product           1
+strategy          1
+standup           1
+support           1
+team-sync         1
+typescript        1
