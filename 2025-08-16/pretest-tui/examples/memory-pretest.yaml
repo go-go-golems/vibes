@@ -1,0 +1,23 @@
+pretest:
+  title: "Memory Section Pretest"
+  questions:
+    - id: q1
+      type: mcq
+      prompt: "Which practice schedule usually improves long-term retention?"
+      options:
+        - id: A
+          text: "Massed practice (cramming)"
+          rationale: "Feels fluent but fades quickly."
+        - id: B
+          text: "Spaced practice"
+          rationale: "Spacing strengthens memory consolidation and retrieval cues."
+        - id: C
+          text: "Copying notes"
+          rationale: "Shallow processing, little retrieval effort."
+      answer: B
+      hints:
+        - "Think about how time gaps influence memory strength."
+      references:
+        - "Bjork, R. A. (1994). Memory and metamemory considerations."
+        - "Cepeda, N. J., et al. (2006). Distributed practice review."
+

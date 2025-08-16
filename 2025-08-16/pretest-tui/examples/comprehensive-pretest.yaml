@@ -1,0 +1,93 @@
+pretest:
+  title: "Comprehensive Learning Psychology Pretest"
+  questions:
+    - id: q1
+      type: mcq
+      prompt: "According to Bjork's theory of desirable difficulties, which of the following makes learning more effective in the long term?"
+      options:
+        - id: A
+          text: "Making learning as easy and fluent as possible"
+          rationale: "Easy learning often leads to poor retention and transfer."
+        - id: B
+          text: "Introducing challenges that slow down initial learning"
+          rationale: "Correct! Desirable difficulties improve long-term retention and transfer."
+        - id: C
+          text: "Avoiding any confusion during the learning process"
+          rationale: "Some confusion can actually be beneficial for deeper learning."
+        - id: D
+          text: "Focusing only on repetition and drill"
+          rationale: "Pure repetition without variation is less effective than varied practice."
+      answer: B
+      hints:
+        - "Think about the difference between performance during learning and long-term retention."
+        - "Consider what 'desirable' means in this context - not all difficulties are helpful."
+      references:
+        - "Bjork, R. A. (1994). Memory and metamemory considerations in the training of human beings."
+        - "Bjork, E. L., & Bjork, R. A. (2011). Making things hard on yourself, but in a good way."
+
+    - id: q2
+      type: short
+      prompt: "Explain the testing effect and why it might be more effective than simply re-reading material."
+      hints:
+        - "Think about what happens in your brain when you try to retrieve information versus when you passively read it."
+        - "Consider the difference between recognition and recall."
+      references:
+        - "Roediger, H. L., & Karpicke, J. D. (2006). Test-enhanced learning."
+        - "Karpicke, J. D., & Roediger, H. L. (2008). The critical importance of retrieval for learning."
+
+    - id: q3
+      type: mcq
+      prompt: "In the context of spaced repetition, what is the 'spacing effect'?"
+      options:
+        - id: A
+          text: "Learning is better when study sessions are spread out over time"
+          rationale: "Correct! The spacing effect shows that distributed practice is superior to massed practice."
+        - id: B
+          text: "Students need physical space to learn effectively"
+          rationale: "This refers to environmental factors, not the spacing effect in memory research."
+        - id: C
+          text: "Information should be spaced evenly on a page"
+          rationale: "This is about visual design, not the psychological spacing effect."
+      answer: A
+      hints:
+        - "This effect was first discovered by Ebbinghaus in his memory experiments."
+        - "Compare cramming all at once versus studying the same amount over several days."
+      references:
+        - "Ebbinghaus, H. (1885). Memory: A contribution to experimental psychology."
+        - "Cepeda, N. J., et al. (2006). Distributed practice in verbal recall tasks."
+
+    - id: q4
+      type: short
+      prompt: "Describe a real-world scenario where you could apply interleaving to improve learning outcomes."
+      hints:
+        - "Think about subjects that have multiple related concepts or problem types."
+        - "Consider how mixing different types of problems might help with discrimination and transfer."
+      references:
+        - "Rohrer, D., & Taylor, K. (2007). The shuffling of mathematics problems improves learning."
+        - "Birnbaum, M. S., et al. (2013). Why interleaving enhances inductive learning."
+
+    - id: q5
+      type: mcq
+      prompt: "What is metacognition and why is it important for learning?"
+      options:
+        - id: A
+          text: "The ability to think very quickly about complex problems"
+          rationale: "This describes cognitive speed, not metacognition."
+        - id: B
+          text: "Thinking about your own thinking and learning processes"
+          rationale: "Correct! Metacognition involves awareness and understanding of one's own thought processes."
+        - id: C
+          text: "The capacity to memorize large amounts of information"
+          rationale: "This describes memory capacity, not metacognitive awareness."
+        - id: D
+          text: "Using multiple cognitive strategies simultaneously"
+          rationale: "While metacognition can involve strategy selection, it's primarily about awareness of thinking."
+      answer: B
+      hints:
+        - "The prefix 'meta-' means 'about' or 'beyond'."
+        - "Think about being aware of what you know and don't know."
+        - "Consider how good learners monitor their own understanding."
+      references:
+        - "Flavell, J. H. (1976). Metacognitive aspects of problem solving."
+        - "Dunlosky, J., & Metcalfe, J. (2009). Metacognition: A textbook for cognitive, educational, life span and applied psychology."
+

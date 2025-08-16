@@ -1,0 +1,34 @@
+pretest:
+  title: "Critical Thinking and Reflection Pretest"
+  questions:
+    - id: q1
+      type: short
+      prompt: "Describe a time when you realized that something you thought you understood well was actually more complex than you initially believed. What did you learn from this experience?"
+      hints:
+        - "Think about the Dunning-Kruger effect - when we don't know what we don't know."
+        - "Consider how this relates to metacognitive awareness."
+      references:
+        - "Kruger, J., & Dunning, D. (1999). Unskilled and unaware of it."
+        - "Dunlosky, J., & Rawson, K. A. (2012). Overconfidence produces underachievement."
+
+    - id: q2
+      type: short
+      prompt: "Explain how you would design a study schedule for learning a new skill that incorporates principles of effective learning."
+      hints:
+        - "Consider spacing, interleaving, testing, and feedback."
+        - "Think about how to balance challenge and support."
+        - "Remember that initial performance doesn't always predict long-term retention."
+      references:
+        - "Brown, P. C., Roediger, H. L., & McDaniel, M. A. (2014). Make it stick: The science of successful learning."
+        - "Ericsson, A., & Pool, R. (2016). Peak: Secrets from the new science of expertise."
+
+    - id: q3
+      type: short
+      prompt: "What strategies do you currently use to monitor your own understanding while learning? How effective do you think they are?"
+      hints:
+        - "Think about self-testing, explaining to others, or checking your predictions."
+        - "Consider the difference between feeling like you know something and actually knowing it."
+      references:
+        - "Koriat, A. (2007). Metacognition and consciousness."
+        - "Dunlosky, J., et al. (2013). Improving students' learning with effective learning techniques."
+
