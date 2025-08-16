@@ -1,0 +1,30 @@
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/func.go:563 +0x183
+github.com/dop251/goja.call.exec(0x8?, 0xc0000da480)
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/vm.go:3642 +0x66
+github.com/dop251/goja.(*vm).run(0xc0000da480)
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/vm.go:635 +0x5b
+github.com/dop251/goja.(*vm).runTryInner(0x11d1ba0?)
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/vm.go:887 +0x52
+github.com/dop251/goja.(*vm).runTry(0xc0000da480)
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/vm.go:873 +0x1d8
+github.com/dop251/goja.(*Runtime).RunProgram(0xc000005008, 0xc0000bf0e0)
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/runtime.go:1472 +0x43c
+github.com/dop251/goja.(*Runtime).RunScript(0xc000005008, {0x0?, 0xa12?}, {0xc00
+01f4a80?, 0xc0001e7858?})
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/runtime.go:1408 +0x50
+github.com/dop251/goja.(*Runtime).RunString(...)
+        /home/ubuntu/go/pkg/mod/github.com/dop251/goja@v0.0.0-20250309171923-bcd
+7cc6bf64c/runtime.go:1397
+js-uhoh-repl/pkg/evaluator.(*JSUhohEvaluator).ExecuteFile(0xc000034a30, {0xc0000
+56040?, 0xb1962c?}, {0x7fff6b08f281, 0x19})
+        /home/ubuntu/js-uhoh-repl/pkg/evaluator/js_uhoh_evaluator.go:95 +0x565
+main.main()
+        /home/ubuntu/js-uhoh-repl/cmd/main.go:26 +0x11d
+ubuntu@af6ef63a383e:~/js-uhoh-repl$
