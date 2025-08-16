@@ -1,0 +1,24 @@
+    B) Spaced practice
+    C) Copying notes
+
+╭─────────────────────────────────────────────────────────────╮
+│                                                             │
+│  💡 Hints:                                                  │
+│    1. Think about how time gaps influence memory strength.  │
+│                                                             │
+│                                                             │
+╰─────────────────────────────────────────────────────────────╯
+
+
+╭───────────────────────────────────────────────────────────────────╮
+│                                                                   │
+│  📚 References:                                                   │
+│    1. Bjork, R. A. (1994). Memory and metamemory considerations.  │
+│    2. Cepeda, N. J., et al. (2006). Distributed practice review.  │
+│                                                                   │
+│                                                                   │
+╰───────────────────────────────────────────────────────────────────╯
+
+
+
+    ↑/↓ navigate • Enter select • h show hint • r toggle references • q quit

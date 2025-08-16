@@ -1,0 +1,22 @@
+pretest:
+  title: "Learning Strategies Pretest"
+  questions:
+    - id: q3
+      type: mcq
+      prompt: "What does 'interleaving' mean in study practice?"
+      options:
+        - id: A
+          text: "Mixing different problem types"
+          rationale: "Varies context and improves discrimination."
+        - id: B
+          text: "Repeating the same task many times"
+          rationale: "That's massing, not interleaving."
+        - id: C
+          text: "Spacing sessions far apart"
+          rationale: "That's spacing, not interleaving."
+      answer: A
+      hints:
+        - "Think: variety within a single session."
+      references:
+        - "Rohrer & Taylor (2007). Shuffling math problems improves learning."
+

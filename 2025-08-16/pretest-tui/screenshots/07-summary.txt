@@ -1,0 +1,24 @@
+                               Pretest Complete!
+
+
+
+ ╭────────────────────────────────────────────────────────────────────────────╮
+ │                                                                            │
+ │                                                                            │
+ │    Pretest Completed: Memory Section Pretest                               │
+ │    Total Questions: 1                                                      │
+ │    MCQ Score: 1/1 (100.0%)                                                 │
+ │    Total Time: 52s                                                         │
+ │    Average Time per Question: 52s                                          │
+ │                                                                            │
+ │    Detailed Results:                                                       │
+ │      1. q1 (✓ Correct, 38.601s)                                            │
+ │                                                                            │
+ │                                                                            │
+ │                                                                            │
+ ╰────────────────────────────────────────────────────────────────────────────╯
+
+
+
+
+                             Press any key to exit
