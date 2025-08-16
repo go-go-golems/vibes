@@ -1,0 +1,12 @@
+pretest:
+  title: "Retrieval Practice Pretest"
+  questions:
+    - id: q2
+      type: short
+      prompt: "Why can effortful retrieval be beneficial for learning?"
+      hints:
+        - "Compare rereading a page with recalling from memory."
+      references:
+        - "Karpicke & Roediger (2008). The importance of retrieval."
+        - "Bjork & Bjork (2011). Making things hard on yourself."
+
