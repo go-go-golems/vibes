@@ -1,0 +1,89 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    JavaScript + Uhoh REPL - Form Gallery                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─ 1. REPL Interface ──────────────────────────────────────────────────────────┐
+│                                                                              │
+│ ╭──────────────────────────── Output Area ─────────────────────────────────╮ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │ undefined                                                                │ │
+│ │                                                                          │ │
+│ ╰──────────────────────────────────────────────────────────────────────────╯ │
+│ ╭──────────────────────────── Input Area ──────────────────────────────────╮ │
+│ │ js-uhoh>   1 Enter JavaScript code or /load <file> to load a file...     │ │
+│ │ js-uhoh>                                                                 │ │
+│ ╰──────────────────────────────────────────────────────────────────────────╯ │
+│ Hello from JavaScript REPL!↑/↓ for history • /load <file> to load JS files │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ 2. Simple Input Form ───────────────────────────────────────────────────────┐
+│                                                                              │
+│ ┃ Your Name                                                                  │
+│ ┃ > Test User                                                                │
+│                                                                              │
+│ enter submit                                                                 │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ 3. Select Dropdown Form ────────────────────────────────────────────────────┐
+│                                                                              │
+│ ┃ Select a Product                                                           │
+│ ┃ > Basic Widget                                                             │
+│ ┃   Premium Widget                                                           │
+│ ┃   Deluxe Widget                                                            │
+│                                                                              │
+│   Subscribe to newsletter?                                                   │
+│                                                                              │
+│         Yes     No                                                           │
+│                                                                              │
+│ ↑ up • ↓ down • / filter • enter select                                     │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ 4. Multi-Field Form Example ────────────────────────────────────────────────┐
+│                                                                              │
+│ ┃ Contact Information                                                        │
+│ ┃                                                                            │
+│ ┃ Name:     [John Doe                    ]                                   │
+│ ┃ Email:    [john@example.com            ]                                   │
+│ ┃ Message:  [Hello, this is a test       ]                                   │
+│ ┃           [message with multiple lines ]                                   │
+│ ┃                                                                            │
+│   ☐ Subscribe to newsletter                                                  │
+│   ☑ I agree to terms and conditions                                         │
+│                                                                              │
+│ [Submit] [Cancel]                                                            │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─ 5. File Picker Form ────────────────────────────────────────────────────────┐
+│                                                                              │
+│ ┃ Select a file to upload                                                    │
+│ ┃                                                                            │
+│ ┃ 📁 /home/ubuntu/                                                           │
+│ ┃ 📄 document.pdf                                                            │
+│ ┃ 📄 readme.txt                                                              │
+│ ┃ 📄 script.js                                                               │
+│ ┃ 📁 examples/                                                               │
+│ ┃                                                                            │
+│   File Visibility: [Private ▼]                                              │
+│   ☑ Send notification when upload completes                                 │
+│                                                                              │
+│ [Select File] [Cancel]                                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                              Key Features                                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║ ✓ Real-time JavaScript execution                                            ║
+║ ✓ Interactive form generation from JSON                                     ║
+║ ✓ Multiple field types (input, select, confirm, file picker)                ║
+║ ✓ Keyboard navigation and shortcuts                                         ║
+║ ✓ Professional terminal UI with Unicode box drawing                         ║
+║ ✓ Theme support (Default, Charm, Dracula, Catppuccin, Base16)               ║
+║ ✓ File loading and REPL command support                                     ║
+║ ✓ Comprehensive logging and error handling                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+

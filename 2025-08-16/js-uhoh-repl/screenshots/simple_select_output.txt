@@ -1,0 +1,30 @@
+┃ Select a Product
+┃ > Basic Widget
+┃   Premium Widget
+┃   Deluxe Widget
+
+  Subscribe to newsletter?
+
+        Yes     No
+
+↑ up • ↓ down • / filter • enter select
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
