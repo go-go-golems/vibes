@@ -44,8 +44,8 @@ func main() {
 	// Create the REPL model
 	model := NewREPLModel(eval)
 
-	// Run the program
-	p := tea.NewProgram(model, tea.WithAltScreen())
+	// Run the program (no alt screen to help debugging)
+	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dop251/goja"
 	ggjengine "github.com/go-go-golems/go-go-goja/engine"
 	uhoh "github.com/go-go-golems/uhoh/pkg"
@@ -19,8 +18,11 @@ import (
 
 // JSUhohEvaluator implements JavaScript evaluation with uhoh UI generation
 type JSUhohEvaluator struct {
-	runtime *goja.Runtime
-	logger  *log.Logger
+	runtime    *goja.Runtime
+	logger     *log.Logger
+	outputHook func(string)
+	listeners  map[string][]goja.Value
+	nextReqID  int64
 }
 
 // NewJSUhohEvaluator creates a new JavaScript evaluator with uhoh integration
@@ -40,8 +42,9 @@ func NewJSUhohEvaluator() (*JSUhohEvaluator, error) {
 	logger.Println("Goja runtime created successfully")
 
 	evaluator := &JSUhohEvaluator{
-		runtime: vm,
-		logger:  logger,
+		runtime:   vm,
+		logger:    logger,
+		listeners: make(map[string][]goja.Value),
 	}
 
 	// Set up console.log
@@ -52,7 +55,10 @@ func NewJSUhohEvaluator() (*JSUhohEvaluator, error) {
 		for _, arg := range call.Arguments {
 			args = append(args, arg.Export())
 		}
-		fmt.Println(args...)
+		line := fmt.Sprint(args...)
+		if evaluator.outputHook != nil {
+			evaluator.outputHook(line)
+		}
 		logger.Printf("console.log called with: %v", args)
 		return goja.Undefined()
 	})
@@ -63,11 +69,14 @@ func NewJSUhohEvaluator() (*JSUhohEvaluator, error) {
 	logger.Println("Setting up uhoh integration functions...")
 	_ = vm.Set("createUI", evaluator.createUIFunction())
 	_ = vm.Set("loadFile", evaluator.loadFileFunction())
+	_ = vm.Set("on", evaluator.onFunction())
 	logger.Println("Uhoh integration functions set up successfully")
 
 	logger.Println("JSUhohEvaluator initialization complete")
 	return evaluator, nil
 }
+
+// (UI channels removed; the REPL will detect UI signals from JS results)
 
 // ExecuteFile executes a JavaScript file directly
 func (e *JSUhohEvaluator) ExecuteFile(ctx context.Context, filePath string) (string, error) {
@@ -111,6 +120,34 @@ func (e *JSUhohEvaluator) ExecuteFile(ctx context.Context, filePath string) (str
 	return "undefined", nil
 }
 
+// SetOutputHook allows the host REPL to receive console output lines
+func (e *JSUhohEvaluator) SetOutputHook(hook func(string)) { e.outputHook = hook }
+
+// Emit allows the host to emit events into the JS context
+func (e *JSUhohEvaluator) Emit(event string, payload interface{}) {
+	if fns, ok := e.listeners[event]; ok {
+		for _, fn := range fns {
+			defer func() { _ = recover() }()
+			if callee, ok := goja.AssertFunction(fn); ok {
+				_, _ = callee(goja.Undefined(), e.runtime.ToValue(payload))
+			}
+		}
+	}
+}
+
+// onFunction registers JS listeners: on(event, fn)
+func (e *JSUhohEvaluator) onFunction() func(call goja.FunctionCall) goja.Value {
+	return func(call goja.FunctionCall) goja.Value {
+		if len(call.Arguments) < 2 {
+			panic(e.runtime.NewTypeError("on(event, fn) requires 2 arguments"))
+		}
+		evt := call.Arguments[0].String()
+		fn := call.Arguments[1]
+		e.listeners[evt] = append(e.listeners[evt], fn)
+		return goja.Undefined()
+	}
+}
+
 // createUIFunction returns a JavaScript function that creates uhoh UIs
 func (e *JSUhohEvaluator) createUIFunction() func(call goja.FunctionCall) goja.Value {
 	return func(call goja.FunctionCall) goja.Value {
@@ -145,36 +182,15 @@ func (e *JSUhohEvaluator) createUIFunction() func(call goja.FunctionCall) goja.V
 		e.logger.Printf("Form built successfully, type: %T", form)
 		e.logger.Printf("Initial values: %+v", vals)
 
-		// Run the form in a BubbleTea program
-		e.logger.Println("Starting BubbleTea program...")
-		p := tea.NewProgram(form, tea.WithAltScreen())
-		finalModel, err := p.Run()
-		if err != nil {
-			e.logger.Printf("BubbleTea program error: %v", err)
-			panic(e.runtime.NewGoError(fmt.Errorf("Failed to run form: %v", err)))
+		// Return a UI signal object that the REPL can detect to mount the child model itself
+		e.nextReqID++
+		signal := map[string]interface{}{
+			"__uhoh_ui__": true,
+			"form_yaml":   string(yamlBytes),
+			"request_id":  e.nextReqID,
 		}
-		
-		e.logger.Println("BubbleTea program completed")
-
-		// Extract final values
-		finalValues, err := uhoh.ExtractFinalValues(vals)
-		if err != nil {
-			e.logger.Printf("Failed to extract final values: %v", err)
-			finalValues = vals // fallback to initial values
-		}
-		
-		e.logger.Printf("Final values: %+v", finalValues)
-
-		// Return the result
-		result := map[string]interface{}{
-			"success":     true,
-			"message":     "UI completed successfully",
-			"form_type":   fmt.Sprintf("%T", finalModel),
-			"values":      finalValues,
-		}
-		
-		e.logger.Printf("Returning result: %+v", result)
-		return e.runtime.ToValue(result)
+		e.logger.Printf("Returning UI signal: %+v", signal)
+		return e.runtime.ToValue(signal)
 	}
 }
 
@@ -293,19 +309,8 @@ func (e *JSUhohEvaluator) loadFile(filePath string) (string, error) {
 	return fmt.Sprintf("File %s loaded successfully", filePath), nil
 }
 
-func (e *JSUhohEvaluator) GetPrompt() string {
-	return "js-uhoh> "
-}
-
-func (e *JSUhohEvaluator) GetName() string {
-	return "JavaScript + Uhoh"
-}
-
-func (e *JSUhohEvaluator) SupportsMultiline() bool {
-	return true
-}
-
-func (e *JSUhohEvaluator) GetFileExtension() string {
-	return ".js"
-}
+func (e *JSUhohEvaluator) GetPrompt() string { return "js-uhoh> " }
+func (e *JSUhohEvaluator) GetName() string   { return "JavaScript + Uhoh" }
+func (e *JSUhohEvaluator) SupportsMultiline() bool { return true }
+func (e *JSUhohEvaluator) GetFileExtension() string { return ".js" }
 
