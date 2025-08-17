@@ -1,0 +1,152 @@
+package cmd
+
+import (
+	"context"
+	"fmt"
+
+	"keyring/pkg/keyring"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
+)
+
+type InvalidateCommand struct {
+	*cmds.CommandDescription
+	ring *keyring.Ring
+}
+
+type InvalidateSettings struct {
+	Path           string `glazed.parameter:"path"`
+	Reason         string `glazed.parameter:"reason"`
+	DeleteAtSource bool   `glazed.parameter:"delete-at-source"`
+	Profile        string `glazed.parameter:"profile"`
+}
+
+func NewInvalidateCommand(ring *keyring.Ring) (*InvalidateCommand, error) {
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	commandSettingsLayer, err := cli.NewCommandSettingsLayer()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdDesc := cmds.NewCommandDescription(
+		"invalidate",
+		cmds.WithShort("Mark a secret as invalidated"),
+		cmds.WithLong(`
+Mark a secret as invalidated in the keyring state management system.
+
+Invalidated secrets cannot be accessed and will return errors when retrieved.
+This is useful for security incidents where a secret has been compromised.
+
+Optionally, the secret can be deleted from the writer backend as well,
+though the invalidation policy will prevent access even if remnants exist
+in read-only backends.
+
+Examples:
+  keyring invalidate --path openai/api_key --reason "Credential leak incident #123"
+  keyring invalidate --path aws/compromised_key --delete-at-source
+  keyring invalidate --path leaked/token --reason "Security breach" --profile work
+		`),
+
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"path",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Hierarchical path to the secret (e.g., openai/api_key)"),
+				parameters.WithShortFlag("p"),
+				parameters.WithRequired(true),
+			),
+			parameters.NewParameterDefinition(
+				"reason",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Reason for invalidation (e.g., security incident)"),
+				parameters.WithShortFlag("r"),
+			),
+			parameters.NewParameterDefinition(
+				"delete-at-source",
+				parameters.ParameterTypeBool,
+				parameters.WithDefault(false),
+				parameters.WithHelp("Also attempt to delete the secret from the writer backend"),
+				parameters.WithShortFlag("d"),
+			),
+			parameters.NewParameterDefinition(
+				"profile",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Profile to invalidate under (defaults to first configured profile)"),
+			),
+		),
+
+		cmds.WithLayersList(glazedLayer, commandSettingsLayer),
+	)
+
+	return &InvalidateCommand{
+		CommandDescription: cmdDesc,
+		ring:               ring,
+	}, nil
+}
+
+func (c *InvalidateCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	settings := &InvalidateSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return err
+	}
+
+	path := keyring.P(settings.Path)
+
+	opts := keyring.InvalidateOpts{
+		Reason:         settings.Reason,
+		DeleteAtSource: settings.DeleteAtSource,
+	}
+
+	// If specific profile requested, temporarily override ring profiles
+	originalRing := c.ring
+	if settings.Profile != "" {
+		c.ring = keyring.New(
+			keyring.WithProfiles(settings.Profile),
+			keyring.WithReaders(originalRing.GetReaders()...),
+			keyring.WithWriter(originalRing.GetWriter()),
+			keyring.WithStateStore(originalRing.GetStateStore()),
+			keyring.WithAuditSink(originalRing.GetAuditSink()),
+			keyring.WithActor(originalRing.GetActor()),
+		)
+	}
+
+	if err := c.ring.Invalidate(ctx, path, opts); err != nil {
+		return fmt.Errorf("failed to invalidate secret: %w", err)
+	}
+
+	// Create output row
+	row := types.NewRow(
+		types.MRP("path", settings.Path),
+		types.MRP("status", "invalidated"),
+		types.MRP("profile", func() string {
+			if settings.Profile != "" {
+				return settings.Profile
+			}
+			return c.ring.GetProfiles()[0]
+		}()),
+		types.MRP("delete_at_source", settings.DeleteAtSource),
+	)
+
+	if settings.Reason != "" {
+		row, _ = row.Set("reason", settings.Reason)
+	}
+
+	return gp.AddRow(ctx, row)
+}
+
