@@ -158,11 +158,14 @@ var (
 	titleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#9BE1FF"))
 
 	boxStyle = lipgloss.NewStyle().
-			Width(2).Height(1).MarginRight(1)
+			Width(2).Height(1).MarginRight(1).
+			Border(lipgloss.Border{Bottom: " "}).
+			BorderForeground(lipgloss.Color("#000000"))
 
 	selectedBoxStyle = lipgloss.NewStyle().
 				Width(2).Height(1).MarginRight(1).
-				Underline(true)
+				Border(lipgloss.Border{Bottom: "‾"}).
+				BorderForeground(lipgloss.Color("#9BE1FF"))
 
 	legendName = lipgloss.NewStyle().Foreground(lipgloss.Color("#B3B3B3"))
 	legendSep  = lipgloss.NewStyle().Foreground(lipgloss.Color("#666666")).Render(" - ")
@@ -207,30 +210,56 @@ func (m model) renderBoxes() string {
 	if m.width <= 0 {
 		m.width = 80
 	}
-	var (
-		curW  int
-		lines []string
-		row   []string
-	)
+
+	var boxes []string
 	for i, bl := range m.blocks {
-		var it string
+		var box string
 		if i == m.selected {
-			it = selectedBoxStyle.Background(colorFor(bl.Kind)).Render("  ")
+			// High-top dash underline close to text with margin gap
+			stack := lipgloss.JoinVertical(lipgloss.Top,
+				lipgloss.NewStyle().Width(2).Background(colorFor(bl.Kind)).Render("  "),
+				lipgloss.NewStyle().Width(2).Foreground(lipgloss.Color("#9BE1FF")).Render("──"),
+			)
+			box = lipgloss.NewStyle().MarginRight(1).Render(stack)
 		} else {
-			it = boxStyle.Background(colorFor(bl.Kind)).Render("  ")
+			stack := lipgloss.JoinVertical(lipgloss.Top,
+				lipgloss.NewStyle().Width(2).Background(colorFor(bl.Kind)).Render("  "),
+				lipgloss.NewStyle().Width(2).Render("  "),
+			)
+			box = lipgloss.NewStyle().MarginRight(1).Render(stack)
 		}
-		w := lipgloss.Width(it)
-		if curW+w > m.width && len(row) > 0 {
-			lines = append(lines, strings.Join(row, ""))
-			row = row[:0]
-			curW = 0
+		boxes = append(boxes, box)
+	}
+
+	// Use lipgloss.JoinHorizontal to maintain proper layout
+	joined := lipgloss.JoinHorizontal(lipgloss.Top, boxes...)
+
+	// Handle wrapping if needed
+	if lipgloss.Width(joined) <= m.width {
+		return joined
+	}
+
+	// Manual wrapping for long content
+	var lines []string
+	var currentLine []string
+	currentWidth := 0
+
+	for _, box := range boxes {
+		boxWidth := lipgloss.Width(box)
+		if currentWidth+boxWidth > m.width && len(currentLine) > 0 {
+			lines = append(lines, lipgloss.JoinHorizontal(lipgloss.Top, currentLine...))
+			currentLine = []string{box}
+			currentWidth = boxWidth
+		} else {
+			currentLine = append(currentLine, box)
+			currentWidth += boxWidth
 		}
-		row = append(row, it)
-		curW += w
 	}
-	if len(row) > 0 {
-		lines = append(lines, strings.Join(row, ""))
+
+	if len(currentLine) > 0 {
+		lines = append(lines, lipgloss.JoinHorizontal(lipgloss.Top, currentLine...))
 	}
+
 	return strings.Join(lines, "\n")
 }
 
