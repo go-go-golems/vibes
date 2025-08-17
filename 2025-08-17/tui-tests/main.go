@@ -162,9 +162,7 @@ var (
 
 	selectedBoxStyle = lipgloss.NewStyle().
 				Width(2).Height(1).MarginRight(1).
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color("#9BE1FF")).
-				Padding(0)
+				Underline(true)
 
 	legendName = lipgloss.NewStyle().Foreground(lipgloss.Color("#B3B3B3"))
 	legendSep  = lipgloss.NewStyle().Foreground(lipgloss.Color("#666666")).Render(" - ")
