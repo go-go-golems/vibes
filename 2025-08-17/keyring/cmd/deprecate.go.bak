@@ -1,0 +1,160 @@
+package cmd
+
+import (
+	"context"
+	"fmt"
+
+	"keyring/pkg/keyring"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
+)
+
+type DeprecateCommand struct {
+	*cmds.CommandDescription
+	ring *keyring.Ring
+}
+
+type DeprecateSettings struct {
+	Path        string `glazed.parameter:"path"`
+	Message     string `glazed.parameter:"message"`
+	ReplaceWith string `glazed.parameter:"replace-with"`
+	Profile     string `glazed.parameter:"profile"`
+}
+
+func NewDeprecateCommand(ring *keyring.Ring) (*DeprecateCommand, error) {
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	commandSettingsLayer, err := cli.NewCommandSettingsLayer()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdDesc := cmds.NewCommandDescription(
+		"deprecate",
+		cmds.WithShort("Mark a secret as deprecated"),
+		cmds.WithLong(`
+Mark a secret as deprecated in the keyring state management system.
+
+Deprecated secrets will still be accessible but will generate warnings
+when retrieved. This is useful for gradual migration to new secrets.
+
+The secret remains functional but users are warned to migrate to the
+replacement path if specified.
+
+Examples:
+  keyring deprecate --path openai/api_key --message "Use azure_openai instead"
+  keyring deprecate --path aws/old_key --replace-with aws/new_key
+  keyring deprecate --path legacy/token --message "Migrating to v2 API" --profile work
+		`),
+
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"path",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Hierarchical path to the secret (e.g., openai/api_key)"),
+				parameters.WithShortFlag("p"),
+				parameters.WithRequired(true),
+			),
+			parameters.NewParameterDefinition(
+				"message",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Deprecation message explaining why it's deprecated"),
+				parameters.WithShortFlag("m"),
+			),
+			parameters.NewParameterDefinition(
+				"replace-with",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Path to the replacement secret"),
+				parameters.WithShortFlag("r"),
+			),
+			parameters.NewParameterDefinition(
+				"profile",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Profile to deprecate under (defaults to first configured profile)"),
+			),
+		),
+
+		cmds.WithLayersList(glazedLayer, commandSettingsLayer),
+	)
+
+	return &DeprecateCommand{
+		CommandDescription: cmdDesc,
+		ring:               ring,
+	}, nil
+}
+
+func (c *DeprecateCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	settings := &DeprecateSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return err
+	}
+
+	path := keyring.P(settings.Path)
+
+	var replaceWith *keyring.Path
+	if settings.ReplaceWith != "" {
+		p := keyring.P(settings.ReplaceWith)
+		replaceWith = &p
+	}
+
+	opts := keyring.DeprecateOpts{
+		Message:     settings.Message,
+		ReplaceWith: replaceWith,
+	}
+
+	// If specific profile requested, temporarily override ring profiles
+	originalRing := c.ring
+	if settings.Profile != "" {
+		c.ring = keyring.New(
+			keyring.WithProfiles(settings.Profile),
+			keyring.WithReaders(originalRing.GetReaders()...),
+			keyring.WithWriter(originalRing.GetWriter()),
+			keyring.WithStateStore(originalRing.GetStateStore()),
+			keyring.WithAuditSink(originalRing.GetAuditSink()),
+			keyring.WithActor(originalRing.GetActor()),
+		)
+	}
+
+	if err := c.ring.Deprecate(ctx, path, opts); err != nil {
+		return fmt.Errorf("failed to deprecate secret: %w", err)
+	}
+
+	// Create output row
+	row := types.NewRow(
+		types.MRP("path", settings.Path),
+		types.MRP("status", "deprecated"),
+		types.MRP("profile", func() string {
+			if settings.Profile != "" {
+				return settings.Profile
+			}
+			return c.ring.GetProfiles()[0]
+		}()),
+	)
+
+	if settings.Message != "" {
+		row, _ = row.Set("message", settings.Message)
+	}
+
+	if settings.ReplaceWith != "" {
+		row, _ = row.Set("replace_with", settings.ReplaceWith)
+	}
+
+	return gp.AddRow(ctx, row)
+}
+

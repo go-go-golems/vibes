@@ -1,0 +1,184 @@
+package cmd
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"keyring/pkg/keyring"
+	"keyring/pkg/stores/sqlite"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
+)
+
+type AuditCommand struct {
+	*cmds.CommandDescription
+	store *sqlite.Store
+}
+
+type AuditSettings struct {
+	Path      string `glazed.parameter:"path"`
+	Profile   string `glazed.parameter:"profile"`
+	EventType string `glazed.parameter:"event-type"`
+	Since     string `glazed.parameter:"since"`
+	Until     string `glazed.parameter:"until"`
+	Limit     int    `glazed.parameter:"limit"`
+}
+
+func NewAuditCommand(store *sqlite.Store) (*AuditCommand, error) {
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	commandSettingsLayer, err := cli.NewCommandSettingsLayer()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdDesc := cmds.NewCommandDescription(
+		"audit",
+		cmds.WithShort("View audit logs"),
+		cmds.WithLong(`
+View audit logs from the keyring system.
+
+The audit log contains records of all keyring operations including
+acquisitions, puts, deletions, deprecations, invalidations, and reinstates.
+
+Filter by path, profile, event type, or time range to find specific events.
+
+Examples:
+  keyring audit                                    # Show recent audit events
+  keyring audit --path openai/api_key             # Show events for specific path
+  keyring audit --event-type acquire              # Show only acquire events
+  keyring audit --profile work --limit 50         # Show work profile events
+  keyring audit --since 2024-01-01T00:00:00Z      # Show events since date
+  keyring audit --until 2024-12-31T23:59:59Z      # Show events until date
+		`),
+
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"path",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Filter by hierarchical path (e.g., openai/api_key)"),
+				parameters.WithShortFlag("p"),
+			),
+			parameters.NewParameterDefinition(
+				"profile",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Filter by profile"),
+			),
+			parameters.NewParameterDefinition(
+				"event-type",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Filter by event type (acquire, put, delete_source, etc.)"),
+				parameters.WithShortFlag("t"),
+			),
+			parameters.NewParameterDefinition(
+				"since",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Show events since this time (RFC3339 format)"),
+				parameters.WithShortFlag("s"),
+			),
+			parameters.NewParameterDefinition(
+				"until",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Show events until this time (RFC3339 format)"),
+				parameters.WithShortFlag("u"),
+			),
+			parameters.NewParameterDefinition(
+				"limit",
+				parameters.ParameterTypeInteger,
+				parameters.WithDefault(100),
+				parameters.WithHelp("Maximum number of events to show"),
+				parameters.WithShortFlag("l"),
+			),
+		),
+
+		cmds.WithLayersList(glazedLayer, commandSettingsLayer),
+	)
+
+	return &AuditCommand{
+		CommandDescription: cmdDesc,
+		store:              store,
+	}, nil
+}
+
+func (c *AuditCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	settings := &AuditSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return err
+	}
+
+	var since, until time.Time
+	var err error
+
+	if settings.Since != "" {
+		since, err = time.Parse(time.RFC3339, settings.Since)
+		if err != nil {
+			return fmt.Errorf("invalid since time format (use RFC3339): %w", err)
+		}
+	}
+
+	if settings.Until != "" {
+		until, err = time.Parse(time.RFC3339, settings.Until)
+		if err != nil {
+			return fmt.Errorf("invalid until time format (use RFC3339): %w", err)
+		}
+	}
+
+	var eventType keyring.EventType
+	if settings.EventType != "" {
+		eventType = keyring.EventType(settings.EventType)
+	}
+
+	events, err := c.store.GetAuditEvents(ctx, settings.Profile, settings.Path, eventType, since, until, settings.Limit)
+	if err != nil {
+		return fmt.Errorf("failed to retrieve audit events: %w", err)
+	}
+
+	for _, event := range events {
+		row := types.NewRow(
+			types.MRP("timestamp", event.At.Format("2006-01-02T15:04:05Z07:00")),
+			types.MRP("type", string(event.Type)),
+			types.MRP("path", event.Path),
+			types.MRP("profile", event.Profile),
+			types.MRP("backend", event.Backend),
+			types.MRP("actor", event.Actor),
+			types.MRP("success", event.Success),
+		)
+
+		if event.Err != "" {
+			row, _ = row.Set("error", event.Err)
+		}
+
+		// Add metadata if present
+		if event.Meta != nil {
+			for k, v := range event.Meta {
+				row, _ = row.Set(fmt.Sprintf("meta_%s", k), v)
+			}
+		}
+
+		if err := gp.AddRow(ctx, row); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
