@@ -162,8 +162,6 @@ var (
 
 	selectedBoxStyle = lipgloss.NewStyle().
 				Width(2).Height(1).MarginRight(1).
-				Border(lipgloss.RoundedBorder()).
-				BorderForeground(lipgloss.Color("#9BE1FF")).
 				Padding(0)
 
 	legendName = lipgloss.NewStyle().Foreground(lipgloss.Color("#B3B3B3"))
@@ -216,10 +214,21 @@ func (m model) renderBoxes() string {
 	)
 	for i, bl := range m.blocks {
 		var it string
+		box := boxStyle.Background(colorFor(bl.Kind)).Render("  ")
 		if i == m.selected {
-			it = selectedBoxStyle.Background(colorFor(bl.Kind)).Render("  ")
+			// Add an underline for the selected box
+			underline := lipgloss.NewStyle().
+				Width(2).
+				BorderStyle(lipgloss.NormalBorder()).
+				BorderBottom(true).
+				BorderForeground(lipgloss.Color("#9BE1FF")).
+				Height(1).
+				Render(" ")
+			it = lipgloss.JoinVertical(lipgloss.Left, box, underline)
 		} else {
-			it = boxStyle.Background(colorFor(bl.Kind)).Render("  ")
+			// Add empty space to maintain consistent height
+			spacer := lipgloss.NewStyle().Width(2).Height(1).Render(" ")
+			it = lipgloss.JoinVertical(lipgloss.Left, box, spacer)
 		}
 		w := lipgloss.Width(it)
 		if curW+w > m.width && len(row) > 0 {
