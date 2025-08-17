@@ -1,0 +1,125 @@
+package cmd
+
+import (
+	"context"
+	"fmt"
+
+	"keyring/pkg/keyring"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
+)
+
+type ReinstateCommand struct {
+	*cmds.CommandDescription
+	ring *keyring.Ring
+}
+
+type ReinstateSettings struct {
+	Path    string `glazed.parameter:"path"`
+	Profile string `glazed.parameter:"profile"`
+}
+
+func NewReinstateCommand(ring *keyring.Ring) (*ReinstateCommand, error) {
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	commandSettingsLayer, err := cli.NewCommandSettingsLayer()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdDesc := cmds.NewCommandDescription(
+		"reinstate",
+		cmds.WithShort("Restore a secret to active state"),
+		cmds.WithLong(`
+Restore a deprecated or invalidated secret to active state.
+
+This removes the key state record, effectively returning the secret to
+normal operation without warnings or access restrictions.
+
+Use this command when a previously deprecated or invalidated secret
+should be made available again without restrictions.
+
+Examples:
+  keyring reinstate --path openai/api_key
+  keyring reinstate --path aws/restored_key --profile work
+  keyring reinstate --path temp/token
+		`),
+
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"path",
+				parameters.ParameterTypeString,
+				parameters.WithHelp("Hierarchical path to the secret (e.g., openai/api_key)"),
+				parameters.WithShortFlag("p"),
+				parameters.WithRequired(true),
+			),
+			parameters.NewParameterDefinition(
+				"profile",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Profile to reinstate under (defaults to first configured profile)"),
+			),
+		),
+
+		cmds.WithLayersList(glazedLayer, commandSettingsLayer),
+	)
+
+	return &ReinstateCommand{
+		CommandDescription: cmdDesc,
+		ring:               ring,
+	}, nil
+}
+
+func (c *ReinstateCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	settings := &ReinstateSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return err
+	}
+
+	path := keyring.P(settings.Path)
+
+	// If specific profile requested, temporarily override ring profiles
+	originalRing := c.ring
+	if settings.Profile != "" {
+		c.ring = keyring.New(
+			keyring.WithProfiles(settings.Profile),
+			keyring.WithReaders(originalRing.GetReaders()...),
+			keyring.WithWriter(originalRing.GetWriter()),
+			keyring.WithStateStore(originalRing.GetStateStore()),
+			keyring.WithAuditSink(originalRing.GetAuditSink()),
+			keyring.WithActor(originalRing.GetActor()),
+		)
+	}
+
+	if err := c.ring.Reinstate(ctx, path); err != nil {
+		return fmt.Errorf("failed to reinstate secret: %w", err)
+	}
+
+	// Create output row
+	row := types.NewRow(
+		types.MRP("path", settings.Path),
+		types.MRP("status", "reinstated"),
+		types.MRP("profile", func() string {
+			if settings.Profile != "" {
+				return settings.Profile
+			}
+			return c.ring.GetProfiles()[0]
+		}()),
+	)
+
+	return gp.AddRow(ctx, row)
+}
+

@@ -1,0 +1,211 @@
+package cmd
+
+import (
+	"context"
+	"fmt"
+
+	"keyring/pkg/keyring"
+
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/settings"
+	"github.com/go-go-golems/glazed/pkg/types"
+)
+
+type ListCommand struct {
+	*cmds.CommandDescription
+	ring *keyring.Ring
+}
+
+type ListSettings struct {
+	Prefix     string `glazed.parameter:"prefix"`
+	Profile    string `glazed.parameter:"profile"`
+	ShowValues bool   `glazed.parameter:"show-values"`
+	Recursive  bool   `glazed.parameter:"recursive"`
+}
+
+func NewListCommand(ring *keyring.Ring) (*ListCommand, error) {
+	glazedLayer, err := settings.NewGlazedParameterLayers()
+	if err != nil {
+		return nil, err
+	}
+
+	commandSettingsLayer, err := cli.NewCommandSettingsLayer()
+	if err != nil {
+		return nil, err
+	}
+
+	cmdDesc := cmds.NewCommandDescription(
+		"list",
+		cmds.WithShort("List secrets and paths in the keyring"),
+		cmds.WithLong(`
+List secrets and paths in the keyring under the specified prefix.
+
+The command will show immediate children of the prefix by default.
+Use --recursive to show all descendants. Use --show-values to include
+secret values in the output (use with caution).
+
+Examples:
+  keyring list                           # List top-level paths
+  keyring list --prefix openai/          # List under openai/ prefix
+  keyring list --prefix aws/ --recursive # List all under aws/ recursively
+  keyring list --show-values --output json # Show values in JSON format
+  keyring list --profile work            # List using specific profile
+		`),
+
+		cmds.WithFlags(
+			parameters.NewParameterDefinition(
+				"prefix",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Path prefix to list under (e.g., openai/)"),
+				parameters.WithShortFlag("p"),
+			),
+			parameters.NewParameterDefinition(
+				"profile",
+				parameters.ParameterTypeString,
+				parameters.WithDefault(""),
+				parameters.WithHelp("Profile to use (defaults to configured profile order)"),
+			),
+			parameters.NewParameterDefinition(
+				"show-values",
+				parameters.ParameterTypeBool,
+				parameters.WithDefault(false),
+				parameters.WithHelp("Include secret values in output (use with caution)"),
+				parameters.WithShortFlag("v"),
+			),
+			parameters.NewParameterDefinition(
+				"recursive",
+				parameters.ParameterTypeBool,
+				parameters.WithDefault(false),
+				parameters.WithHelp("List all descendants recursively"),
+				parameters.WithShortFlag("r"),
+			),
+		),
+
+		cmds.WithLayersList(glazedLayer, commandSettingsLayer),
+	)
+
+	return &ListCommand{
+		CommandDescription: cmdDesc,
+		ring:               ring,
+	}, nil
+}
+
+func (c *ListCommand) RunIntoGlazeProcessor(
+	ctx context.Context,
+	parsedLayers *layers.ParsedLayers,
+	gp middlewares.Processor,
+) error {
+	settings := &ListSettings{}
+	if err := parsedLayers.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return err
+	}
+
+	prefix := keyring.P(settings.Prefix)
+
+	// If specific profile requested, temporarily override ring profiles
+	originalRing := c.ring
+	if settings.Profile != "" {
+		c.ring = keyring.New(
+			keyring.WithProfiles(settings.Profile),
+			keyring.WithReaders(originalRing.GetReaders()...),
+			keyring.WithWriter(originalRing.GetWriter()),
+			keyring.WithStateStore(originalRing.GetStateStore()),
+			keyring.WithAuditSink(originalRing.GetAuditSink()),
+			keyring.WithActor(originalRing.GetActor()),
+		)
+	}
+
+	if settings.Recursive {
+		return c.listRecursive(ctx, gp, prefix, settings)
+	}
+
+	paths, err := c.ring.List(ctx, prefix)
+	if err != nil {
+		if keyring.IsNotFound(err) {
+			return fmt.Errorf("no paths found under prefix: %s", settings.Prefix)
+		}
+		return fmt.Errorf("failed to list paths: %w", err)
+	}
+
+	for _, path := range paths {
+		fullPath := prefix.Child(path.String())
+		row := types.NewRow(
+			types.MRP("path", fullPath.String()),
+			types.MRP("type", "path"),
+		)
+
+		if settings.ShowValues {
+			secret, err := c.ring.Get(ctx, fullPath)
+			if err == nil {
+				row, _ = row.Set("value", secret.Value)
+				row, _ = row.Set("type", "secret")
+				if !secret.ExpiresAt.IsZero() {
+					row, _ = row.Set("expires_at", secret.ExpiresAt.Format("2006-01-02T15:04:05Z07:00"))
+				}
+			}
+		}
+
+		if err := gp.AddRow(ctx, row); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *ListCommand) listRecursive(ctx context.Context, gp middlewares.Processor, prefix keyring.Path, settings *ListSettings) error {
+	// For recursive listing, we need to traverse the tree
+	visited := make(map[string]bool)
+	return c.listRecursiveHelper(ctx, gp, prefix, settings, visited)
+}
+
+func (c *ListCommand) listRecursiveHelper(ctx context.Context, gp middlewares.Processor, currentPath keyring.Path, settings *ListSettings, visited map[string]bool) error {
+	pathStr := currentPath.String()
+	if visited[pathStr] {
+		return nil
+	}
+	visited[pathStr] = true
+
+	// Try to get the secret at this path
+	secret, err := c.ring.Get(ctx, currentPath)
+	if err == nil {
+		// This is a leaf node (secret)
+		row := types.NewRow(
+			types.MRP("path", pathStr),
+			types.MRP("type", "secret"),
+		)
+
+		if settings.ShowValues {
+			row, _ = row.Set("value", secret.Value)
+		}
+
+		if !secret.ExpiresAt.IsZero() {
+			row, _ = row.Set("expires_at", secret.ExpiresAt.Format("2006-01-02T15:04:05Z07:00"))
+		}
+
+		if err := gp.AddRow(ctx, row); err != nil {
+			return err
+		}
+	}
+
+	// Try to list children
+	children, err := c.ring.List(ctx, currentPath)
+	if err != nil && !keyring.IsNotFound(err) {
+		return err
+	}
+
+	for _, child := range children {
+		childPath := currentPath.Child(child.String())
+		if err := c.listRecursiveHelper(ctx, gp, childPath, settings, visited); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
