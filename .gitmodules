@@ -1,0 +1,3 @@
+[submodule "2025-08-15/document-management-system/source/cayley-setup"]
+	path = 2025-08-15/document-management-system/source/cayley-setup
+	url = ssh://git@github.com/cayleygraph/cayley.git
