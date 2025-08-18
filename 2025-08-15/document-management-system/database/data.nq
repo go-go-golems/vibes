@@ -1,0 +1,66 @@
+person:github:alice <ex:type> "Person" .
+person:github:bob <ex:type> "Person" .
+person:github:charlie <ex:type> "Person" .
+doc:workspace:plans/api-redesign.md <ex:type> "Document" .
+doc:workspace:howtos/deployment.md <ex:type> "Document" .
+doc:workspace:reports/q3-performance.md <ex:type> "Document" .
+doc:workspace:reference/coding-standards.md <ex:type> "Document" .
+doc:workspace:analysis/security-audit.md <ex:type> "Document" .
+doc:workspace:playbooks/incident-response.md <ex:type> "Document" .
+person:github:alice <ex:title> "Alice Johnson" .
+person:github:bob <ex:title> "Bob Smith" .
+person:github:charlie <ex:title> "Charlie Brown" .
+doc:workspace:plans/api-redesign.md <ex:title> "API Redesign Plan" .
+doc:workspace:howtos/deployment.md <ex:title> "Deployment Guide" .
+doc:workspace:reports/q3-performance.md <ex:title> "Q3 Performance Report" .
+doc:workspace:reference/coding-standards.md <ex:title> "Coding Standards" .
+doc:workspace:analysis/security-audit.md <ex:title> "Security Audit Analysis" .
+doc:workspace:playbooks/incident-response.md <ex:title> "Incident Response Playbook" .
+doc:workspace:plans/api-redesign.md <ex:hasKind> "plan" .
+doc:workspace:howtos/deployment.md <ex:hasKind> "howto" .
+doc:workspace:reports/q3-performance.md <ex:hasKind> "report" .
+doc:workspace:reference/coding-standards.md <ex:hasKind> "reference" .
+doc:workspace:analysis/security-audit.md <ex:hasKind> "analysis" .
+doc:workspace:playbooks/incident-response.md <ex:hasKind> "playbook" .
+doc:workspace:plans/api-redesign.md <ex:hasStatus> "draft" .
+doc:workspace:howtos/deployment.md <ex:hasStatus> "accepted" .
+doc:workspace:reports/q3-performance.md <ex:hasStatus> "provisional" .
+doc:workspace:reference/coding-standards.md <ex:hasStatus> "accepted" .
+doc:workspace:analysis/security-audit.md <ex:hasStatus> "draft" .
+doc:workspace:playbooks/incident-response.md <ex:hasStatus> "accepted" .
+doc:workspace:plans/api-redesign.md <ex:isLongLived> "false" .
+doc:workspace:howtos/deployment.md <ex:isLongLived> "true" .
+doc:workspace:reports/q3-performance.md <ex:isLongLived> "false" .
+doc:workspace:reference/coding-standards.md <ex:isLongLived> "true" .
+doc:workspace:analysis/security-audit.md <ex:isLongLived> "false" .
+doc:workspace:playbooks/incident-response.md <ex:isLongLived> "true" .
+doc:workspace:plans/api-redesign.md <ex:reviewIntervalDays> "" .
+doc:workspace:howtos/deployment.md <ex:reviewIntervalDays> "90" .
+doc:workspace:reports/q3-performance.md <ex:reviewIntervalDays> "" .
+doc:workspace:reference/coding-standards.md <ex:reviewIntervalDays> "180" .
+doc:workspace:analysis/security-audit.md <ex:reviewIntervalDays> "" .
+doc:workspace:playbooks/incident-response.md <ex:reviewIntervalDays> "60" .
+doc:workspace:plans/api-redesign.md <ex:path> "plans/api-redesign.md" .
+doc:workspace:howtos/deployment.md <ex:path> "howtos/deployment.md" .
+doc:workspace:reports/q3-performance.md <ex:path> "reports/q3-performance.md" .
+doc:workspace:reference/coding-standards.md <ex:path> "reference/coding-standards.md" .
+doc:workspace:analysis/security-audit.md <ex:path> "analysis/security-audit.md" .
+doc:workspace:playbooks/incident-response.md <ex:path> "playbooks/incident-response.md" .
+
+
+
+
+
+
+person:github:alice <ex:handle> "alice" .
+person:github:bob <ex:handle> "bob" .
+person:github:charlie <ex:handle> "charlie" .
+person:github:alice <ex:displayName> "Alice Johnson" .
+person:github:bob <ex:displayName> "Bob Smith" .
+person:github:charlie <ex:displayName> "Charlie Brown" .
+doc:workspace:plans/api-redesign.md <ex:ownedBy> "person:github:alice" .
+doc:workspace:howtos/deployment.md <ex:ownedBy> "person:github:bob" .
+doc:workspace:reports/q3-performance.md <ex:ownedBy> "person:github:charlie" .
+doc:workspace:reference/coding-standards.md <ex:ownedBy> "person:github:alice" .
+doc:workspace:analysis/security-audit.md <ex:ownedBy> "person:github:bob" .
+doc:workspace:playbooks/incident-response.md <ex:ownedBy> "person:github:charlie" .
