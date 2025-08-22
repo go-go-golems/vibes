@@ -100,6 +100,7 @@ func (a *Analyzer) analyzeCommits(commits []*object.Commit, baseBranch, prBranch
 
 			// Categorize file
 			categories := a.categoryMatcher.CategorizeFile(fileDiff.Path)
+			log.Trace().Str("file", fileDiff.Path).Strs("categories", categories).Msg("categorized file")
 			for _, category := range categories {
 				commitInfo.Categories[category]++
 			}
