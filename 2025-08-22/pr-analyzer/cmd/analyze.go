@@ -3,12 +3,14 @@ package cmd
 import (
 	"fmt"
 	"strings"
+	"context"
 
 	"github.com/spf13/cobra"
 	"github.com/rs/zerolog/log"
 	"pr-analyzer/internal/analysis"
 	"pr-analyzer/internal/git"
 	"pr-analyzer/internal/output"
+	"pr-analyzer/internal/db"
 )
 
 var (
@@ -18,6 +20,8 @@ var (
 	categories   string
 	excludes     string
 	useDefaults  bool
+	saveToDB     bool
+	dbPath       string
 )
 
 var analyzeCmd = &cobra.Command{
@@ -55,6 +59,8 @@ func init() {
 	analyzeCmd.Flags().StringVar(&categories, "categories", "", "Custom categories in format 'name1:pattern1,pattern2;name2:pattern3'")
 	analyzeCmd.Flags().StringVar(&excludes, "excludes", "", "Comma-separated exclude patterns")
 	analyzeCmd.Flags().BoolVar(&useDefaults, "use-defaults", false, "Use default category patterns")
+	analyzeCmd.Flags().BoolVar(&saveToDB, "save-to-db", false, "Save analysis to sqlite database (use --db-path)")
+	analyzeCmd.Flags().StringVar(&dbPath, "db-path", "pr-analyzer.sqlite", "Path to sqlite database file")
 }
 
 func runAnalyze(cmd *cobra.Command, args []string) error {
@@ -118,6 +124,20 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Debug().Int("commits", result.PRInfo.TotalCommits).Int("files", result.PRInfo.TotalFiles).Int("lines", result.PRInfo.TotalLines).Msg("analysis complete")
+
+	// Optionally save to sqlite
+	if saveToDB {
+		ctx := context.Background()
+		store, err := db.Open(ctx, dbPath)
+		if err != nil {
+			return fmt.Errorf("open db: %w", err)
+		}
+		defer store.Close()
+		if _, err := store.InsertAnalysis(ctx, result); err != nil {
+			return fmt.Errorf("insert analysis: %w", err)
+		}
+		log.Info().Str("db", dbPath).Msg("analysis saved to database")
+	}
 
 	// Output results
 	switch strings.ToLower(outputFormat) {
