@@ -5,6 +5,7 @@ import (
 	"sort"
 	"pr-analyzer/internal/git"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/rs/zerolog/log"
 )
 
 // Analyzer performs PR analysis
@@ -29,6 +30,7 @@ func (a *Analyzer) SetCategories(categories map[string][]string) {
 	for name, patterns := range categories {
 		a.categoryMatcher.AddCategory(name, patterns)
 	}
+	log.Debug().Int("categories", len(categories)).Msg("set categories")
 }
 
 // AddExcludePatterns adds patterns to exclude from analysis
@@ -36,6 +38,7 @@ func (a *Analyzer) AddExcludePatterns(patterns []string) {
 	for _, pattern := range patterns {
 		a.categoryMatcher.AddExcludePattern(pattern)
 	}
+	log.Debug().Int("excludes", len(patterns)).Msg("added exclude patterns")
 }
 
 // AnalyzePR performs complete PR analysis
@@ -45,6 +48,7 @@ func (a *Analyzer) AnalyzePR(baseBranch, prBranch string) (*PRAnalysisResult, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits: %w", err)
 	}
+	log.Debug().Str("base", baseBranch).Str("head", prBranch).Int("commits", len(commits)).Msg("analyzing PR")
 
 	return a.analyzeCommits(commits, baseBranch, prBranch, "")
 }
@@ -55,6 +59,7 @@ func (a *Analyzer) AnalyzeMergeCommit(mergeCommitHash string) (*PRAnalysisResult
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits from merge: %w", err)
 	}
+	log.Debug().Str("merge", mergeCommitHash).Int("commits", len(commits)).Msg("analyzing merge commit")
 
 	return a.analyzeCommits(commits, "", "", mergeCommitHash)
 }
@@ -128,6 +133,7 @@ func (a *Analyzer) analyzeCommits(commits []*object.Commit, baseBranch, prBranch
 		Categories:       a.categoryMatcher.GetCategories(),
 	}
 
+	log.Debug().Int("commits", len(commits)).Int("files", result.PRInfo.TotalFiles).Int("lines", result.PRInfo.TotalLines).Msg("completed analysis")
 	return result, nil
 }
 
@@ -171,6 +177,7 @@ func (a *Analyzer) calculateLanguageStats(diffs []*git.CommitDiff) []LanguageSta
 		return result[i].Percentage > result[j].Percentage
 	})
 
+	log.Debug().Int("languages", len(result)).Int("total_lines", totalLines).Msg("calculated language stats")
 	return result
 }
 
@@ -240,7 +247,7 @@ func (a *Analyzer) calculateCrossSystemStats(commits []CommitInfo) CrossSystemSt
 		crossSystemRate = float64(multiSystemCommits) / float64(totalCommits) * 100
 	}
 
-	return CrossSystemStats{
+	stats := CrossSystemStats{
 		TotalCommits:        totalCommits,
 		SingleSystemCommits: singleSystemCommits,
 		MultiSystemCommits:  multiSystemCommits,
@@ -248,5 +255,7 @@ func (a *Analyzer) calculateCrossSystemStats(commits []CommitInfo) CrossSystemSt
 		SystemTouchMatrix:   systemTouchMatrix,
 		MostTouchedSystems:  mostTouched,
 	}
+	log.Debug().Int("total_commits", totalCommits).Float64("cross_rate", crossSystemRate).Msg("calculated cross-system stats")
+	return stats
 }
 

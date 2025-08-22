@@ -5,6 +5,7 @@ go 1.23.4
 require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/olekukonko/tablewriter v1.0.9
+	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.9.1
 	gopkg.in/yaml.v3 v3.0.1
 )
