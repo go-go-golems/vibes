@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/rs/zerolog/log"
 	"pr-analyzer/internal/analysis"
 	"pr-analyzer/internal/git"
 	"pr-analyzer/internal/output"
@@ -66,6 +67,8 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("cannot specify both --pr-branch and --merge-commit")
 	}
 
+	log.Debug().Str("repo", repoPath).Str("base", baseBranch).Str("pr", prBranch).Str("merge", mergeCommit).Str("output", outputFormat).Msg("starting analysis")
+
 	// Open repository
 	repo, err := git.OpenRepository(repoPath)
 	if err != nil {
@@ -87,11 +90,13 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 			excludePatterns[i] = strings.TrimSpace(pattern)
 		}
 		analyzer.AddExcludePatterns(excludePatterns)
+		log.Debug().Int("exclude_count", len(excludePatterns)).Msg("applied exclude patterns")
 	}
 
 	// Perform analysis
 	var result *analysis.PRAnalysisResult
 	if mergeCommit != "" {
+		log.Debug().Str("merge", mergeCommit).Msg("mode=merge-commit")
 		result, err = analyzer.AnalyzeMergeCommit(mergeCommit)
 		if err != nil {
 			return fmt.Errorf("failed to analyze merge commit: %w", err)
@@ -105,19 +110,25 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("PR branch '%s' does not exist", prBranch)
 		}
 
+		log.Debug().Str("base", baseBranch).Str("pr", prBranch).Msg("mode=branch-range")
 		result, err = analyzer.AnalyzePR(baseBranch, prBranch)
 		if err != nil {
 			return fmt.Errorf("failed to analyze PR: %w", err)
 		}
 	}
 
+	log.Debug().Int("commits", result.PRInfo.TotalCommits).Int("files", result.PRInfo.TotalFiles).Int("lines", result.PRInfo.TotalLines).Msg("analysis complete")
+
 	// Output results
 	switch strings.ToLower(outputFormat) {
 	case "json":
+		log.Debug().Msg("output=json")
 		return output.PrintJSON(result)
 	case "yaml", "yml":
+		log.Debug().Msg("output=yaml")
 		return output.PrintYAML(result)
 	case "table":
+		log.Debug().Msg("output=table")
 		return output.PrintTable(result)
 	default:
 		return fmt.Errorf("unsupported output format: %s (supported: table, json, yaml)", outputFormat)
@@ -130,12 +141,14 @@ func configureCategories(analyzer *analysis.Analyzer) error {
 	if useDefaults {
 		// Use default categories
 		categoryMap = analysis.GetDefaultCategories()
+		log.Debug().Int("category_count", len(categoryMap)).Msg("using default categories")
 	} else if categories != "" {
 		// Parse custom categories
 		categoryMap = analysis.ParseCategoriesString(categories)
 		if len(categoryMap) == 0 {
 			return fmt.Errorf("failed to parse categories string: %s", categories)
 		}
+		log.Debug().Int("category_count", len(categoryMap)).Msg("using custom categories")
 	}
 
 	if len(categoryMap) > 0 {
