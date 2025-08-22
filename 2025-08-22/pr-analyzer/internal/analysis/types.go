@@ -54,6 +54,7 @@ type PRAnalysisResult struct {
 type PRInfo struct {
 	BaseBranch   string `json:"base_branch" yaml:"base_branch"`
 	PRBranch     string `json:"pr_branch" yaml:"pr_branch"`
+	Commit       string `json:"commit,omitempty" yaml:"commit,omitempty"`
 	MergeCommit  string `json:"merge_commit,omitempty" yaml:"merge_commit,omitempty"`
 	TotalFiles   int    `json:"total_files" yaml:"total_files"`
 	TotalLines   int    `json:"total_lines" yaml:"total_lines"`
