@@ -1,0 +1,74 @@
+categories:
+    backend:
+        - backend/**
+        - server/**
+        - api/**
+        - services/**
+        - '*.go'
+        - '*.py'
+        - '*.java'
+        - '*.rb'
+        - '*.php'
+        - '*.rs'
+    build:
+        - build/**
+        - scripts/**
+        - Makefile
+        - '*.mk'
+        - Dockerfile*
+        - docker-compose*
+        - '*.sh'
+        - '*.bat'
+        - '*.ps1'
+    config:
+        - config/**
+        - configs/**
+        - '*.yaml'
+        - '*.yml'
+        - '*.json'
+        - '*.toml'
+        - '*.ini'
+        - '*.conf'
+        - '*.cfg'
+    database:
+        - database/**
+        - db/**
+        - migrations/**
+        - '*.sql'
+        - '*.db'
+    docs:
+        - docs/**
+        - documentation/**
+        - '*.md'
+        - '*.rst'
+        - '*.txt'
+        - README*
+    frontend:
+        - frontend/**
+        - web/**
+        - ui/**
+        - client/**
+        - '*.html'
+        - '*.css'
+        - '*.js'
+        - '*.jsx'
+        - '*.ts'
+        - '*.tsx'
+        - '*.vue'
+        - '*.svelte'
+    tests:
+        - test/**
+        - tests/**
+        - '*_test.*'
+        - '*Test.*'
+        - '*.test.*'
+excludes:
+    - '*.md'
+    - '*.txt'
+    - docs/**
+    - '*.lock'
+    - node_modules/**
+    - vendor/**
+defaults:
+    output_format: table
+    use_defaults: true
