@@ -3,6 +3,7 @@ module pr-analyzer
 go 1.23.4
 
 require (
+	github.com/bmatcuk/doublestar/v4 v4.7.1
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/rs/zerolog v1.33.0

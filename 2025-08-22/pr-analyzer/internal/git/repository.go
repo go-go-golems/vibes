@@ -18,6 +18,21 @@ type Repository struct {
 	path string
 }
 
+// Path returns the filesystem path of the repository root
+func (r *Repository) Path() string {
+	return r.path
+}
+
+// GetCommitByHash returns the commit object for the given hash string
+func (r *Repository) GetCommitByHash(hash string) (*object.Commit, error) {
+	h := plumbing.NewHash(hash)
+	c, err := r.repo.CommitObject(h)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit %s: %w", hash, err)
+	}
+	return c, nil
+}
+
 // OpenRepository opens a git repository at the given path
 func OpenRepository(path string) (*Repository, error) {
 	absPath, err := filepath.Abs(path)

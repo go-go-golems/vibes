@@ -22,9 +22,26 @@ func PrintTable(result *analysis.PRAnalysisResult) error {
 	if result.PRInfo.MergeCommit != "" {
 		fmt.Printf("Merge Commit: %s\n", result.PRInfo.MergeCommit)
 	}
+	if result.PRInfo.RepoPath != "" {
+		fmt.Printf("Repository: %s\n", result.PRInfo.RepoPath)
+	}
 	fmt.Printf("Total Files: %d\n", result.PRInfo.TotalFiles)
 	fmt.Printf("Total Lines Changed: %d\n", result.PRInfo.TotalLines)
 	fmt.Printf("Total Commits: %d\n\n", result.PRInfo.TotalCommits)
+
+	// Merge commit metadata
+	if result.PRInfo.MergeCommit != "" {
+		fmt.Printf("Merge Commit Metadata\n")
+		fmt.Printf("=====================\n")
+		fmt.Printf("Author:    %s <%s>\n", result.PRInfo.MergeAuthorName, result.PRInfo.MergeAuthorEmail)
+		fmt.Printf("Authored:  %s\n", result.PRInfo.MergeAuthorDate.Format("2006-01-02 15:04:05"))
+		fmt.Printf("Committer: %s <%s>\n", result.PRInfo.MergeCommitterName, result.PRInfo.MergeCommitterEmail)
+		fmt.Printf("Committed: %s\n", result.PRInfo.MergeCommitterDate.Format("2006-01-02 15:04:05"))
+		if result.PRInfo.MergeSummary != "" {
+			fmt.Printf("Summary:   %s\n", result.PRInfo.MergeSummary)
+		}
+		fmt.Println()
+	}
 
 	// Language Statistics Table
 	fmt.Printf("Language Statistics\n")

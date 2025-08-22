@@ -110,7 +110,7 @@ func (r *Repository) GetCommitDiff(commit *object.Commit) (*CommitDiff, error) {
 		chunks := filePatch.Chunks()
 		for _, chunk := range chunks {
 			lines := strings.Split(chunk.Content(), "\n")
-			log.Trace().Str("file", fileDiff.Path).Int("lines", len(lines)).Msg("processing chunk")
+			// log.Trace().Str("file", fileDiff.Path).Int("lines", len(lines)).Msg("processing chunk")
 			for _, line := range lines {
 				if len(line) == 0 {
 					continue

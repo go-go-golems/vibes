@@ -100,7 +100,6 @@ func (a *Analyzer) analyzeCommits(commits []*object.Commit, baseBranch, prBranch
 
 			// Categorize file
 			categories := a.categoryMatcher.CategorizeFile(fileDiff.Path)
-			log.Trace().Str("file", fileDiff.Path).Strs("categories", categories).Msg("categorized file")
 			for _, category := range categories {
 				commitInfo.Categories[category]++
 			}
@@ -127,11 +126,35 @@ func (a *Analyzer) analyzeCommits(commits []*object.Commit, baseBranch, prBranch
 			TotalFiles:   len(fileChanges),
 			TotalLines:   totalAdded + totalDeleted,
 			TotalCommits: len(commits),
+			RepoPath:     a.repo.Path(),
 		},
 		LanguageStats:    languageStats,
 		CrossSystemStats: crossSystemStats,
 		Commits:          commitInfos,
 		Categories:       a.categoryMatcher.GetCategories(),
+	}
+
+	// Populate merge commit metadata when provided
+	if mergeCommit != "" {
+		if mc, err := a.repo.GetCommitByHash(mergeCommit); err == nil {
+			result.PRInfo.MergeAuthorName = mc.Author.Name
+			result.PRInfo.MergeAuthorEmail = mc.Author.Email
+			result.PRInfo.MergeAuthorDate = mc.Author.When
+			result.PRInfo.MergeCommitterName = mc.Committer.Name
+			result.PRInfo.MergeCommitterEmail = mc.Committer.Email
+			result.PRInfo.MergeCommitterDate = mc.Committer.When
+			if mc.Message != "" {
+				// First line summary
+				msg := mc.Message
+				for i := 0; i < len(msg); i++ {
+					if msg[i] == '\n' || msg[i] == '\r' {
+						msg = msg[:i]
+						break
+					}
+				}
+				result.PRInfo.MergeSummary = msg
+			}
+		}
 	}
 
 	log.Debug().Int("commits", len(commits)).Int("files", result.PRInfo.TotalFiles).Int("lines", result.PRInfo.TotalLines).Msg("completed analysis")
@@ -191,12 +214,10 @@ func (a *Analyzer) calculateCrossSystemStats(commits []CommitInfo) CrossSystemSt
 	systemTouchCount := make(map[string]int)
 
 	for _, commit := range commits {
-		// Get unique systems touched by this commit
+		// Get unique systems touched by this commit (including uncategorized)
 		systemsInCommit := make(map[string]bool)
 		for system := range commit.Categories {
-			if system != "uncategorized" {
-				systemsInCommit[system] = true
-			}
+			systemsInCommit[system] = true
 		}
 
 		// Count systems touched
