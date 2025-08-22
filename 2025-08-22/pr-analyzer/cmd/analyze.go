@@ -22,6 +22,7 @@ var (
 	useDefaults  bool
 	saveToDB     bool
 	dbPath       string
+	withoutOverwrite bool
 )
 
 var analyzeCmd = &cobra.Command{
@@ -61,6 +62,7 @@ func init() {
 	analyzeCmd.Flags().BoolVar(&useDefaults, "use-defaults", false, "Use default category patterns")
 	analyzeCmd.Flags().BoolVar(&saveToDB, "save-to-db", false, "Save analysis to sqlite database (use --db-path)")
 	analyzeCmd.Flags().StringVar(&dbPath, "db-path", "pr-analyzer.sqlite", "Path to sqlite database file")
+	analyzeCmd.Flags().BoolVar(&withoutOverwrite, "without-overwrite", false, "Do not overwrite existing analysis for the same commit")
 }
 
 func runAnalyze(cmd *cobra.Command, args []string) error {
@@ -133,7 +135,7 @@ func runAnalyze(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("open db: %w", err)
 		}
 		defer store.Close()
-		if _, err := store.InsertAnalysis(ctx, result); err != nil {
+		if _, err := store.InsertAnalysis(ctx, result, !withoutOverwrite); err != nil {
 			return fmt.Errorf("insert analysis: %w", err)
 		}
 		log.Info().Str("db", dbPath).Msg("analysis saved to database")
