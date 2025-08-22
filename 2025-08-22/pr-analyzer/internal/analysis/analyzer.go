@@ -53,6 +53,48 @@ func (a *Analyzer) AnalyzePR(baseBranch, prBranch string) (*PRAnalysisResult, er
 	return a.analyzeCommits(commits, baseBranch, prBranch, "")
 }
 
+// AnalyzeCommit analyzes a specific commit hash. If it's a merge commit, it analyzes commits from the feature branch; otherwise it analyzes the single commit itself.
+func (a *Analyzer) AnalyzeCommit(commitHash string) (*PRAnalysisResult, error) {
+	c, err := a.repo.GetCommitByHash(commitHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit %s: %w", commitHash, err)
+	}
+	if c.NumParents() >= 2 {
+		log.Debug().Str("commit", commitHash).Msg("analyzing commit as merge commit")
+		res, err := a.AnalyzeMergeCommit(commitHash)
+		if err != nil {
+			return nil, err
+		}
+		res.PRInfo.Commit = commitHash
+		return res, nil
+	}
+	log.Debug().Str("commit", commitHash).Msg("analyzing single commit")
+	commits := []*object.Commit{c}
+	res, err := a.analyzeCommits(commits, "", "", "")
+	if err != nil {
+		return nil, err
+	}
+	res.PRInfo.Commit = commitHash
+	// Populate author/committer metadata for non-merge commit
+	res.PRInfo.MergeAuthorName = c.Author.Name
+	res.PRInfo.MergeAuthorEmail = c.Author.Email
+	res.PRInfo.MergeAuthorDate = c.Author.When
+	res.PRInfo.MergeCommitterName = c.Committer.Name
+	res.PRInfo.MergeCommitterEmail = c.Committer.Email
+	res.PRInfo.MergeCommitterDate = c.Committer.When
+	if c.Message != "" {
+		msg := c.Message
+		for i := 0; i < len(msg); i++ {
+			if msg[i] == '\n' || msg[i] == '\r' {
+				msg = msg[:i]
+				break
+			}
+		}
+		res.PRInfo.MergeSummary = msg
+	}
+	return res, nil
+}
+
 // AnalyzeMergeCommit analyzes a specific merge commit
 func (a *Analyzer) AnalyzeMergeCommit(mergeCommitHash string) (*PRAnalysisResult, error) {
 	commits, err := a.repo.GetCommitsFromMerge(mergeCommitHash)

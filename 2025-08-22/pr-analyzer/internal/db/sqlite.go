@@ -42,6 +42,7 @@ func (s *Store) ensureSchema(ctx context.Context) error {
 			repo_path TEXT NOT NULL,
 			base_branch TEXT,
 			pr_branch TEXT,
+			commit_hash TEXT,
 			merge_commit TEXT,
 			total_files INTEGER NOT NULL,
 			total_lines INTEGER NOT NULL,
@@ -56,6 +57,7 @@ func (s *Store) ensureSchema(ctx context.Context) error {
 			merge_summary TEXT
 		);`,
 		`CREATE UNIQUE INDEX IF NOT EXISTS idx_prs_unique_merge ON prs(repo_path, merge_commit) WHERE merge_commit IS NOT NULL;`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS idx_prs_unique_commit ON prs(repo_path, commit_hash) WHERE commit_hash IS NOT NULL;`,
 		`CREATE TABLE IF NOT EXISTS languages (
 			pr_id INTEGER NOT NULL,
 			language TEXT NOT NULL,
@@ -106,15 +108,16 @@ func (s *Store) InsertAnalysis(ctx context.Context, result *analysis.PRAnalysisR
 	// Insert PR row
 	res, err := tx.ExecContext(ctx, `
 		INSERT INTO prs (
-			repo_path, base_branch, pr_branch, merge_commit,
+			repo_path, base_branch, pr_branch, commit_hash, merge_commit,
 			total_files, total_lines, total_commits, analyzed_at,
 			merge_author_name, merge_author_email, merge_author_date,
 			merge_committer_name, merge_committer_email, merge_committer_date,
 			merge_summary
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		result.PRInfo.RepoPath,
 		result.PRInfo.BaseBranch,
 		result.PRInfo.PRBranch,
+		nullableString(result.PRInfo.Commit),
 		nullableString(result.PRInfo.MergeCommit),
 		result.PRInfo.TotalFiles,
 		result.PRInfo.TotalLines,
@@ -227,6 +230,52 @@ func (s *Store) AggregateSystems(ctx context.Context) ([]struct{
 		out = append(out, r)
 	}
 	return out, rows.Err()
+}
+
+// ListPRs returns stored PR rows with filters
+func (s *Store) ListPRs(ctx context.Context, since time.Time, authorOrEmail string) (*sql.Rows, error) {
+	q := `SELECT id, repo_path, base_branch, pr_branch, commit_hash, merge_commit, total_files, total_lines, total_commits, analyzed_at,
+		merge_author_name, merge_author_email, merge_author_date,
+		merge_committer_name, merge_committer_email, merge_committer_date,
+		merge_summary
+		FROM prs WHERE 1=1`
+	var args []any
+	if !since.IsZero() {
+		q += " AND analyzed_at >= ?"
+		args = append(args, since)
+	}
+	if authorOrEmail != "" {
+		q += " AND (lower(merge_author_name) LIKE ? OR lower(merge_author_email) LIKE ? OR lower(merge_committer_name) LIKE ? OR lower(merge_committer_email) LIKE ?)"
+		like := "%" + authorOrEmail + "%"
+		args = append(args, like, like, like, like)
+	}
+	q += " ORDER BY analyzed_at DESC"
+	return s.db.QueryContext(ctx, q, args...)
+}
+
+// Summary aggregates across PRs with optional filters
+func (s *Store) Summary(ctx context.Context, since time.Time, authorOrEmail string) (struct{
+	PRs int
+	Files int
+	Lines int
+}, error) {
+	q := `SELECT COUNT(*) AS prs, COALESCE(SUM(total_files),0) AS files, COALESCE(SUM(total_lines),0) AS lines FROM prs WHERE 1=1`
+	var args []any
+	if !since.IsZero() {
+		q += " AND analyzed_at >= ?"
+		args = append(args, since)
+	}
+	if authorOrEmail != "" {
+		q += " AND (lower(merge_author_name) LIKE ? OR lower(merge_author_email) LIKE ? OR lower(merge_committer_name) LIKE ? OR lower(merge_committer_email) LIKE ?)"
+		like := "%" + authorOrEmail + "%"
+		args = append(args, like, like, like, like)
+	}
+	row := s.db.QueryRowContext(ctx, q, args...)
+	var r struct{ PRs, Files, Lines int }
+	if err := row.Scan(&r.PRs, &r.Files, &r.Lines); err != nil {
+		return r, err
+	}
+	return r, nil
 }
 
 func nullableString(s string) any {

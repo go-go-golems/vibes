@@ -8,8 +8,7 @@ A Go CLI utility that analyzes GitHub pull requests to compute percentage of lan
 - **Cross-Subsystem Analysis**: Identifies commits that touch multiple subsystems (now includes `uncategorized`)
 - **Custom Categorization**: Uses glob patterns (doublestar) to define semantic groups/subsystems
 - **Multiple Output Formats**: Table, JSON, and YAML output
-- **Merge Commit Analysis**: Analyzes specific merge commits to understand PR impact
-- **Branch Comparison**: Compares branches to analyze differences
+- **Commit/PR Analysis**: Analyze any commit (merge or non-merge) or a branch range
 - **Exclude Patterns**: Filter out files using glob patterns
 - **Configurable Logging**: `--log-level trace|debug|info|warn|error`
 
@@ -34,26 +33,26 @@ go build -o pr-analyzer .
 ### Basic Commands
 
 ```bash
-# Analyze a merge commit
-pr-analyzer analyze --merge-commit abc123def456
+# Analyze a specific commit (works for merge and non-merge commits)
+pr-analyzer analyze --commit abc123def456
 
 # Analyze branch differences
 pr-analyzer analyze --pr-branch feature/new-api --base-branch main
 
 # Use default category patterns
-pr-analyzer analyze --merge-commit abc123def456 --use-defaults
+pr-analyzer analyze --commit abc123def456 --use-defaults
 
 # Custom categories
-a pr-analyzer analyze --merge-commit abc123def456 --categories "frontend:frontend/**,*.css,*.js;backend:backend/**,*.go"
+pr-analyzer analyze --commit abc123def456 --categories "frontend:frontend/**,*.css,*.js;backend:backend/**,*.go"
 
 # Exclude files
-pr-analyzer analyze --merge-commit abc123def456 --excludes "*.md,docs/**"
+pr-analyzer analyze --commit abc123def456 --excludes "*.md,docs/**"
 
 # JSON output
-pr-analyzer analyze --merge-commit abc123def456 --output json
+pr-analyzer analyze --commit abc123def456 --output json
 
 # Increase verbosity
-pr-analyzer analyze --merge-commit abc123def456 --log-level debug
+pr-analyzer analyze --commit abc123def456 --log-level debug
 ```
 
 ### Command Line Options
@@ -63,14 +62,34 @@ pr-analyzer analyze --merge-commit abc123def456 --log-level debug
 - `--output string`: Output format: table, json, yaml (default "table")
 - `--config string`: Path to config file
 - `--log-level string`: Log level: trace, debug, info, warn, error (default "info")
+- `--db-path string`: Path to sqlite database file (default `pr-analyzer.sqlite`)
 
 #### Analyze Command Flags
-- `--pr-branch string`: Branch to analyze as PR (required unless using --merge-commit)
+- `--pr-branch string`: Branch to analyze as PR (required unless using --commit)
 - `--base-branch string`: Base branch to compare against (default "main")
-- `--merge-commit string`: Specific merge commit to analyze
+- `--commit string`: Specific commit to analyze (merge or non-merge)
 - `--categories string`: Custom categories in format 'name1:pattern1,pattern2;name2:pattern3'
 - `--excludes string`: Comma-separated exclude patterns
 - `--use-defaults`: Use default category patterns
+- `--save-to-db`: Save analysis result to sqlite database (uses `--db-path`)
+
+### SQLite Mode
+
+Initialize the database, save analyses, and query aggregates across many commits/PRs.
+
+```bash
+# Initialize schema (creates file if needed)
+pr-analyzer db init --db-path ./pr-stats.sqlite
+
+# Analyze and save a commit
+pr-analyzer analyze --commit abc123 --use-defaults --save-to-db --db-path ./pr-stats.sqlite
+
+# Aggregate languages across all saved analyses
+pr-analyzer db languages --db-path ./pr-stats.sqlite
+
+# Aggregate systems across all saved analyses
+pr-analyzer db systems --db-path ./pr-stats.sqlite
+```
 
 ### Category Patterns
 
@@ -115,7 +134,8 @@ Structured JSON output suitable for programmatic processing:
     "repo_path": "/abs/path/to/repo",
     "base_branch": "main",
     "pr_branch": "feature/x",
-    "merge_commit": "abc123...",
+    "commit": "abc123...",
+    "merge_commit": "deadbeef...",
     "merge_author_name": "Alice",
     "merge_author_email": "alice@example.com",
     "merge_author_date": "2025-08-22T10:00:00Z",
@@ -160,7 +180,14 @@ Run tests:
 go test ./...
 ```
 
-A fake repo in `testdata/` can be used for manual validation.
+Manual validation with a fake repo:
+```bash
+# Example: analyze specific commit and save
+pr-analyzer analyze --commit <commit-hash> --use-defaults --save-to-db --db-path ./pr-stats.sqlite
+# Query aggregates
+pr-analyzer db languages --db-path ./pr-stats.sqlite
+pr-analyzer db systems --db-path ./pr-stats.sqlite
+```
 
 ## Contributing
 
