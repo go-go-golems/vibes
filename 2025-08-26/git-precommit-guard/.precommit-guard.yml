@@ -1,0 +1,94 @@
+# Pre-commit configuration for Go-based binary detection tool
+version: "1.0"
+
+# Global settings
+settings:
+  fail_fast: true
+  timeout: "10s"
+
+# Global file excludes - never check these patterns
+global_excludes:
+  - ".git/*"
+  - "node_modules/*"
+  - "vendor/*"
+  - "*.md"
+  - "*.txt"
+  - "*.yml"
+  - "*.yaml"
+  - "*.json"
+
+# Rules configuration
+rules:
+  # ELF binary detection
+  elf_detection:
+    enabled: true
+    description: "Detect and reject ELF executable binaries and shared objects"
+    severity: "error"
+    config:
+      # ELF file signatures to detect
+      elf_magic: "7f454c46"  # ELF magic number
+      # File command patterns to match
+      file_patterns:
+        - "ELF.*executable"
+        - "ELF.*shared object"
+        - "ELF.*relocatable"
+      # MIME types to check
+      mime_types:
+        - "application/x-executable"
+        - "application/x-sharedlib"
+      message: "ELF binary detected: {{.File}}. Use Git LFS or add to excludes"
+      # Directory-specific overrides
+      directory_overrides:
+        "bin/*":
+          enabled: false  # Allow ELF files in bin/ directory
+        "build/*":
+          enabled: false  # Allow ELF files in build/ directory
+
+  # File size limits
+  file_size:
+    enabled: true
+    description: "Prevent committing files that exceed size limits"
+    severity: "error"
+    config:
+      max_size_mb: 10      # 10MB hard limit
+      warn_size_mb: 5      # 5MB warning threshold
+      message: "File {{.File}} ({{.SizeMB}}MB) exceeds size limit ({{.MaxSizeMB}}MB)"
+      # Directory-specific overrides
+      directory_overrides:
+        "assets/*":
+          max_size_mb: 50   # Allow larger files in assets/
+
+  # MIME type detection
+  mime_detection:
+    enabled: true
+    description: "Detect and control various file types by MIME"
+    severity: "warning"
+    config:
+      # Blocked MIME types
+      blocked_types:
+        - "application/octet-stream"
+        - "application/x-binary" 
+        - "application/x-msdownload"  # Windows executables
+        - "application/x-mach-binary" # macOS binaries
+        - "application/java-archive"  # JAR files
+        - "application/x-java-archive"
+      # Allowed MIME types (these override blocked_types)
+      allowed_types:
+        - "text/*"
+        - "application/json"
+        - "application/xml"
+        - "application/yaml"
+        - "image/svg+xml"
+      message: "Binary file type detected: {{.File}} ({{.MimeType}})"
+      # Directory-specific overrides  
+      directory_overrides:
+        "vendor/*":
+          enabled: false    # Skip vendor dependencies
+
+# Reporting configuration
+reporting:
+  format: "console"  # "console" or "json"
+  show_passed: false
+  colors: true
+  summary: true
+
