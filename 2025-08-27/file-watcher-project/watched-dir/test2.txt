@@ -1,0 +1,6 @@
+Initial content for test2.txt
+Additional line 1
+Additional line 2
+Line added by cat append
+Another line for testing
+Final line of test2.txt
