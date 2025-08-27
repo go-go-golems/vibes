@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -108,5 +109,24 @@ func HasStagedChanges() (bool, error) {
 	}
 	
 	return false, nil // No differences
+}
+
+// GetGitDir returns the absolute path to the repository's git directory.
+// This supports standard repos and worktrees (where .git is a file pointing to the gitdir).
+func GetGitDir() (string, error) {
+	cmd := exec.Command("git", "rev-parse", "--git-dir")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get git dir: %w", err)
+	}
+	gitDir := strings.TrimSpace(string(output))
+	if filepath.IsAbs(gitDir) {
+		return gitDir, nil
+	}
+	root, err := GetRepositoryRoot()
+	if err != nil {
+		return gitDir, nil // return as-is if we can't resolve; likely fine
+	}
+	return filepath.Join(root, gitDir), nil
 }
 

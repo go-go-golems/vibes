@@ -1,48 +1,80 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/spf13/cobra"
-	"github.com/user/git-precommit-guard/pkg/config"
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/cmds"
+	"github.com/go-go-golems/glazed/pkg/cmds/layers"
+	"github.com/go-go-golems/glazed/pkg/cmds/parameters"
+	"github.com/go-go-golems/glazed/pkg/middlewares"
+	"github.com/go-go-golems/glazed/pkg/types"
+	"github.com/pkg/errors"
+
+	cfgpkg "github.com/user/git-precommit-guard/pkg/config"
 )
 
-// validateConfigCmd represents the validate-config command
-var validateConfigCmd = &cobra.Command{
-	Use:   "validate-config",
-	Short: "Validate configuration file",
-	Long: `Validate the configuration file for syntax and logical errors.
-
-This command loads and validates the configuration file, reporting any
-issues found in the YAML syntax or configuration values.`,
-	Run: runValidateConfig,
+// ValidateCommand implements the dual-mode validate-config command
+ type ValidateCommand struct {
+	*cmds.CommandDescription
 }
 
-func runValidateConfig(cmd *cobra.Command, args []string) {
-	configPath := getConfigFile()
-	
-	fmt.Printf("Validating configuration file: %s\n", configPath)
-	
-	// Load and validate configuration
-	cfg, err := config.LoadConfig(configPath)
+// ValidateSettings holds parsed parameters
+ type ValidateSettings struct {
+	Config string `glazed.parameter:"config"`
+}
+
+// NewValidateCommand constructs the Glazed command description
+ func NewValidateCommand() (*ValidateCommand, error) {
+	commandSettingsLayer, err := cli.NewCommandSettingsLayer()
 	if err != nil {
-		exitWithError("Configuration validation failed: %v", err)
+		return nil, errors.Wrap(err, "create command settings layer")
 	}
 
-	// Print configuration summary
+	cd := cmds.NewCommandDescription(
+		"validate-config",
+		cmds.WithShort("Validate configuration file"),
+		cmds.WithLong(`Validate the configuration file for syntax and logical errors.
+
+This command loads and validates the configuration file, reporting any
+issues found in the YAML syntax or configuration values.`),
+		cmds.WithFlags(
+			parameters.NewParameterDefinition("config", parameters.ParameterTypeString,
+				parameters.WithDefault(""), parameters.WithHelp("config file (default is .precommit-guard.yml)"), parameters.WithShortFlag("c")),
+		),
+		cmds.WithLayersList(commandSettingsLayer),
+	)
+
+	return &ValidateCommand{CommandDescription: cd}, nil
+}
+
+// Run outputs human-readable validation summary
+ func (c *ValidateCommand) Run(ctx context.Context, pl *layers.ParsedLayers) error {
+	settings := &ValidateSettings{}
+	if err := pl.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return errors.Wrap(err, "parse settings")
+	}
+
+	configPath := settings.Config
+	fmt.Printf("Validating configuration file: %s\n", configPath)
+
+	cfg, err := cfgpkg.LoadConfig(configPath)
+	if err != nil {
+		return errors.Wrap(err, "configuration validation failed")
+	}
+
 	fmt.Println("\n✓ Configuration is valid!")
 	fmt.Printf("  Version: %s\n", cfg.Version)
 	fmt.Printf("  Timeout: %v\n", cfg.Settings.Timeout)
 	fmt.Printf("  Fail Fast: %t\n", cfg.Settings.FailFast)
-	
+
 	fmt.Printf("\nGlobal Excludes (%d patterns):\n", len(cfg.Excludes))
 	for _, exclude := range cfg.Excludes {
 		fmt.Printf("  - %s\n", exclude)
 	}
 
 	fmt.Printf("\nRules:\n")
-	
-	// ELF Detection
 	fmt.Printf("  ELF Detection: ")
 	if cfg.Rules.ElfDetection.Enabled {
 		fmt.Printf("✓ Enabled (%s)\n", cfg.Rules.ElfDetection.Severity)
@@ -54,7 +86,6 @@ func runValidateConfig(cmd *cobra.Command, args []string) {
 		fmt.Printf("✗ Disabled\n")
 	}
 
-	// File Size
 	fmt.Printf("  File Size: ")
 	if cfg.Rules.FileSize.Enabled {
 		fmt.Printf("✓ Enabled (%s)\n", cfg.Rules.FileSize.Severity)
@@ -65,7 +96,6 @@ func runValidateConfig(cmd *cobra.Command, args []string) {
 		fmt.Printf("✗ Disabled\n")
 	}
 
-	// MIME Detection
 	fmt.Printf("  MIME Detection: ")
 	if cfg.Rules.MimeDetection.Enabled {
 		fmt.Printf("✓ Enabled (%s)\n", cfg.Rules.MimeDetection.Severity)
@@ -81,5 +111,34 @@ func runValidateConfig(cmd *cobra.Command, args []string) {
 	fmt.Printf("  Colors: %t\n", cfg.Reporting.Colors)
 	fmt.Printf("  Show Passed: %t\n", cfg.Reporting.ShowPassed)
 	fmt.Printf("  Summary: %t\n", cfg.Reporting.Summary)
+
+	return nil
 }
+
+// RunIntoGlazeProcessor outputs structured validation summary
+ func (c *ValidateCommand) RunIntoGlazeProcessor(ctx context.Context, pl *layers.ParsedLayers, gp middlewares.Processor) error {
+	settings := &ValidateSettings{}
+	if err := pl.InitializeStruct(layers.DefaultSlug, settings); err != nil {
+		return errors.Wrap(err, "parse settings")
+	}
+	cfg, err := cfgpkg.LoadConfig(settings.Config)
+	if err != nil {
+		return errors.Wrap(err, "configuration validation failed")
+	}
+
+	row := types.NewRow(
+		types.MRP("version", cfg.Version),
+		types.MRP("timeout", cfg.Settings.Timeout.String()),
+		types.MRP("fail_fast", cfg.Settings.FailFast),
+		types.MRP("excludes_count", len(cfg.Excludes)),
+		types.MRP("elf_enabled", cfg.Rules.ElfDetection.Enabled),
+		types.MRP("filesize_enabled", cfg.Rules.FileSize.Enabled),
+		types.MRP("mime_enabled", cfg.Rules.MimeDetection.Enabled),
+		types.MRP("report_format", cfg.Reporting.Format),
+	)
+	return gp.AddRow(ctx, row)
+}
+
+var _ cmds.BareCommand = &ValidateCommand{}
+var _ cmds.GlazeCommand = &ValidateCommand{}
 
