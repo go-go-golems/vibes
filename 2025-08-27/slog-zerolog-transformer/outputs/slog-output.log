@@ -1,0 +1,12 @@
+time=2025-08-27T12:58:09.833-04:00 level=INFO msg="Application starting" version=1.0.0 build_time=2025-08-27T12:58:09-04:00
+time=2025-08-27T12:58:09.833-04:00 level=DEBUG msg="Debug message for troubleshooting" component=main debug_info=startup_sequence
+time=2025-08-27T12:58:09.833-04:00 level=INFO msg="Information message" user_id=12345 action=login
+time=2025-08-27T12:58:09.834-04:00 level=WARN msg="Warning message" memory_usage=85% threshold=80%
+time=2025-08-27T12:58:09.834-04:00 level=ERROR msg="Error occurred" error="connection timeout" retry_count=3
+time=2025-08-27T12:58:09.834-04:00 level=INFO msg="User activity" user_id=67890 username=john_doe email=john@example.com last_login=2025-08-26T12:58:09.834-04:00 is_premium=true login_count=42
+time=2025-08-27T12:58:09.834-04:00 level=INFO msg="Processing request" endpoint=/api/users method=GET duration_ms=150
+time=2025-08-27T12:58:09.834-04:00 level=INFO msg="Database operation" database.host=localhost database.port=5432 database.name=myapp query.table=users query.operation=SELECT query.rows_affected=25
+time=2025-08-27T12:58:09.834-04:00 level=INFO msg="Service configuration" service=user-service port=8080 tls_enabled=true
+time=2025-08-27T12:58:09.934-04:00 level=INFO msg="Operation completed" operation=data_processing duration=100.365224ms records_processed=1000 success_rate=0.98
+time=2025-08-27T12:58:09.934-04:00 level=ERROR msg="Failed to process data" error="Invalid data format" component=data_processor retry_after=30s
+time=2025-08-27T12:58:09.934-04:00 level=INFO msg="Application shutting down" uptime=5m0.000000105s
