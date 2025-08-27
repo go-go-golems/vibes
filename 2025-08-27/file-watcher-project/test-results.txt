@@ -1,0 +1,35 @@
+=== Final Git Log ===
+d2675ab Created file: config.conf
+dae50de Created file: test1.txt
+0c3d96f Deleted file: to_delete.txt
+3e199ef Created file: to_delete.txt
+c2e2bae Created file: temp.log
+9286790 Modified file: temp.log
+4375ee1 Created file: temp.log
+81f4e8f Modified file: test2.txt
+6b21dfa Created file: config.conf
+5137734 Created file: config.conf
+eb50c9e Created file: test1.txt
+cb00c45 Created file: test1.txt
+8277657 Created file: config.conf
+94c55bd Created file: test2.txt
+4b37ff8 Created file: test1.txt
+e0f565b Initial commit: File watcher test repository
+
+=== Files in Repository ===
+total 28
+drwxrwxr-x 3 ubuntu ubuntu 4096 Aug 27 16:15 .
+drwxrwxr-x 5 ubuntu ubuntu 4096 Aug 27 16:16 ..
+drwxrwxr-x 8 ubuntu ubuntu 4096 Aug 27 16:15 .git
+-rw-rw-r-- 1 ubuntu ubuntu   71 Aug 27 16:15 config.conf
+-rw-rw-r-- 1 ubuntu ubuntu   33 Aug 27 16:15 temp.log
+-rw-rw-r-- 1 ubuntu ubuntu  156 Aug 27 16:15 test1.txt
+-rw-rw-r-- 1 ubuntu ubuntu  140 Aug 27 16:15 test2.txt
+
+=== Sample File Content ===
+test1.txt:
+This is the initial content of test1.txt
+Line 2: Hello Universe
+Line 3: Testing file watcher
+Line 4: Added by sed command
+Final modification timestamp: Wed

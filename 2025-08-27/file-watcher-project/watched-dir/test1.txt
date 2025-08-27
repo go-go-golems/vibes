@@ -1,0 +1,5 @@
+This is the initial content of test1.txt
+Line 2: Hello Universe
+Line 3: Testing file watcher
+Line 4: Added by sed command
+Final modification timestamp: Wed
