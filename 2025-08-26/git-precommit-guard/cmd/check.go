@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
     "time"
+    "os/exec"
+    "strings"
 
 	"github.com/go-go-golems/glazed/pkg/cli"
 	"github.com/go-go-golems/glazed/pkg/cmds"
@@ -38,6 +40,7 @@ import (
 	Config   string   `glazed.parameter:"config"`
 	Verbose  bool     `glazed.parameter:"verbose"`
 	JSON     bool     `glazed.parameter:"json"`
+    Fix      bool     `glazed.parameter:"fix"`
 	Files    []string `glazed.parameter:"files"`
 }
 
@@ -72,6 +75,8 @@ run manually to check files.`),
 				parameters.WithDefault(false), parameters.WithHelp("verbose output"), parameters.WithShortFlag("v")),
 			parameters.NewParameterDefinition("json", parameters.ParameterTypeBool,
 				parameters.WithDefault(false), parameters.WithHelp("output results in JSON format"), parameters.WithShortFlag("j")),
+            parameters.NewParameterDefinition("fix", parameters.ParameterTypeBool,
+                parameters.WithDefault(false), parameters.WithHelp("unstage failing files")),
 		),
 		cmds.WithArguments(
 			parameters.NewParameterDefinition(
@@ -249,7 +254,46 @@ run manually to check files.`),
 	if err := rep.Report(allResults); err != nil {
 		return errors.Wrap(err, "generate report")
 	}
+	log.Debug().Bool("has_failures", hasFailures).Bool("fix", settings.Fix).Msg("check results")
 	if hasFailures {
+        if settings.Fix {
+            log.Debug().Msg("fixing failing files")
+            // Unstage failing files
+            toUnstage := make(map[string]struct{})
+            for _, r := range allResults {
+                if !r.Passed && r.Severity == "error" {
+                    toUnstage[r.FilePath] = struct{}{}
+                }
+            }
+            if len(toUnstage) > 0 {
+                repoRoot, err := gitpkg.GetRepositoryRoot()
+                if err == nil {
+                    var rels []string
+                    for p := range toUnstage {
+                        // Convert to relative path for git reset
+                        rel := p
+                        if strings.HasPrefix(p, repoRoot+string(os.PathSeparator)) {
+                            rel = p[len(repoRoot)+1:]
+                        }
+                        cmd := exec.Command("git", "reset", "-q", "HEAD", "--", rel)
+                        cmd.Dir = repoRoot
+                        if runErr := cmd.Run(); runErr == nil {
+                            rels = append(rels, rel)
+                        } else {
+                            log.Debug().Str("path", rel).Err(runErr).Msg("git reset failed")
+                        }
+                    }
+                    if len(rels) > 0 {
+                        if settings.Verbose {
+                            fmt.Println("Unstaged failing files (--fix):")
+                            for _, r := range rels { fmt.Printf("  %s\n", r) }
+                        } else {
+                            fmt.Printf("Unstaged %d failing file(s) (--fix)\n", len(rels))
+                        }
+                    }
+                }
+            }
+        }
 		return errors.New("check failed")
 	}
 	return nil
@@ -310,6 +354,7 @@ run manually to check files.`),
 	defer cancel()
 
 	var hasFailures bool
+    toUnstage := make(map[string]struct{})
 
 	for _, filePath := range filesToCheck {
 		select {
@@ -346,6 +391,11 @@ run manually to check files.`),
 			for k, v := range r.Details {
 				row.Set(k, v)
 			}
+            if settings.Fix && !r.Passed && r.Severity == "error" {
+                row.Set("fix_action", "unstaged")
+                row.Set("fixed", true)
+                toUnstage[r.FilePath] = struct{}{}
+            }
 			if err := gp.AddRow(ctx, row); err != nil {
 				return errors.Wrap(err, "add row")
 			}
@@ -358,6 +408,21 @@ run manually to check files.`),
 			break
 		}
 	}
+
+    if settings.Fix && len(toUnstage) > 0 {
+        repoRoot, err := gitpkg.GetRepositoryRoot()
+        if err == nil {
+            for p := range toUnstage {
+                rel := p
+                if strings.HasPrefix(p, repoRoot+string(os.PathSeparator)) {
+                    rel = p[len(repoRoot)+1:]
+                }
+                cmd := exec.Command("git", "reset", "-q", "HEAD", "--", rel)
+                cmd.Dir = repoRoot
+                _ = cmd.Run()
+            }
+        }
+    }
 
 	if hasFailures {
 		return errors.New("check failed")
