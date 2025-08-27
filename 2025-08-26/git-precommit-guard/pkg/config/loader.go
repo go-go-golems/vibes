@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	gitpkg "github.com/user/git-precommit-guard/pkg/git"
 	"gopkg.in/yaml.v3"
 )
 
@@ -41,20 +42,47 @@ func LoadConfig(configPath string) (*Config, error) {
 
 // findDefaultConfig looks for configuration files in common locations
 func findDefaultConfig() string {
-	candidates := []string{
+	// 1) Check common locations relative to CWD
+	cwdCandidates := []string{
 		".precommit-guard.yml",
 		".precommit-guard.yaml",
-		".git/precommit-guard.yml",
-		".git/precommit-guard.yaml",
+		filepath.Join(".git", "precommit-guard.yml"),
+		filepath.Join(".git", "precommit-guard.yaml"),
 	}
-
-	for _, candidate := range candidates {
-		if _, err := os.Stat(candidate); err == nil {
+	for _, candidate := range cwdCandidates {
+		if fi, err := os.Stat(candidate); err == nil && !fi.IsDir() {
 			return candidate
 		}
 	}
 
-	return ".precommit-guard.yml" // Default fallback
+	// 2) If inside a git repo, check repo toplevel directory
+	if root, err := gitpkg.GetRepositoryRoot(); err == nil && root != "" {
+		rootCandidates := []string{
+			filepath.Join(root, ".precommit-guard.yml"),
+			filepath.Join(root, ".precommit-guard.yaml"),
+		}
+		for _, candidate := range rootCandidates {
+			if fi, err := os.Stat(candidate); err == nil && !fi.IsDir() {
+				return candidate
+			}
+		}
+	}
+
+	// 3) Check the gitDir (supports worktrees and non-standard git dirs)
+	if gitDir, err := gitpkg.GetGitDir(); err == nil && gitDir != "" {
+		gitDirCandidates := []string{
+			filepath.Join(gitDir, "precommit-guard.yml"),
+			filepath.Join(gitDir, "precommit-guard.yaml"),
+		}
+		for _, candidate := range gitDirCandidates {
+			if fi, err := os.Stat(candidate); err == nil && !fi.IsDir() {
+				return candidate
+			}
+		}
+	}
+
+	// 4) Fallback: default filename in CWD (will error later if missing)
+	return ".precommit-guard.yml"
 }
 
 // applyDefaults sets default values for missing configuration

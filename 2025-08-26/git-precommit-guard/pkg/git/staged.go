@@ -3,9 +3,11 @@ package git
 import (
 	"bufio"
 	"fmt"
-	"os/exec"
+	"os"
 	"path/filepath"
 	"strings"
+
+	gogit "github.com/go-git/go-git/v5"
 )
 
 // StagedFile represents a file staged for commit
@@ -16,44 +18,34 @@ type StagedFile struct {
 
 // GetStagedFiles returns a list of files staged for commit
 func GetStagedFiles() ([]StagedFile, error) {
-	cmd := exec.Command("git", "diff", "--cached", "--name-status")
-	output, err := cmd.Output()
+	root, err := GetRepositoryRoot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get staged files: %w", err)
+		return nil, fmt.Errorf("failed to find repository root: %w", err)
+	}
+
+	repo, err := gogit.PlainOpenWithOptions(root, &gogit.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		return nil, fmt.Errorf("failed to open git repo: %w", err)
+	}
+	wt, err := repo.Worktree()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get worktree: %w", err)
+	}
+	status, err := wt.Status()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get status: %w", err)
 	}
 
 	var stagedFiles []StagedFile
-	scanner := bufio.NewScanner(strings.NewReader(string(output)))
-	
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" {
+	for path, s := range status {
+		if s.Staging == gogit.Unmodified || s.Staging == gogit.Untracked {
 			continue
 		}
-
-		parts := strings.Fields(line)
-		if len(parts) < 2 {
-			continue
-		}
-
-		status := parts[0]
-		path := parts[1]
-
-		// Handle renamed files (R100 oldname newname)
-		if strings.HasPrefix(status, "R") && len(parts) >= 3 {
-			path = parts[2] // Use the new name for renamed files
-		}
-
 		stagedFiles = append(stagedFiles, StagedFile{
 			Path:   path,
-			Status: status,
+			Status: statusCodeToLetter(s.Staging),
 		})
 	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error reading git output: %w", err)
-	}
-
 	return stagedFiles, nil
 }
 
@@ -77,56 +69,120 @@ func GetStagedFilePaths() ([]string, error) {
 
 // IsGitRepository checks if the current directory is a git repository
 func IsGitRepository() bool {
-	cmd := exec.Command("git", "rev-parse", "--git-dir")
-	err := cmd.Run()
+	_, _, err := findGitDirAndRoot("")
 	return err == nil
 }
 
 // GetRepositoryRoot returns the root directory of the git repository
 func GetRepositoryRoot() (string, error) {
-	cmd := exec.Command("git", "rev-parse", "--show-toplevel")
-	output, err := cmd.Output()
+	_, root, err := findGitDirAndRoot("")
 	if err != nil {
-		return "", fmt.Errorf("failed to get repository root: %w", err)
+		return "", err
 	}
-
-	return strings.TrimSpace(string(output)), nil
+	return root, nil
 }
 
 // HasStagedChanges checks if there are any staged changes
 func HasStagedChanges() (bool, error) {
-	cmd := exec.Command("git", "diff", "--cached", "--quiet")
-	err := cmd.Run()
-	
-	// git diff --quiet returns 0 if no differences, 1 if differences exist
+	root, err := GetRepositoryRoot()
 	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			if exitError.ExitCode() == 1 {
-				return true, nil // Differences exist
-			}
-		}
-		return false, fmt.Errorf("failed to check staged changes: %w", err)
+		return false, fmt.Errorf("failed to find repository root: %w", err)
 	}
-	
-	return false, nil // No differences
+	repo, err := gogit.PlainOpenWithOptions(root, &gogit.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		return false, fmt.Errorf("failed to open git repo: %w", err)
+	}
+	wt, err := repo.Worktree()
+	if err != nil {
+		return false, fmt.Errorf("failed to get worktree: %w", err)
+	}
+	status, err := wt.Status()
+	if err != nil {
+		return false, fmt.Errorf("failed to get status: %w", err)
+	}
+	for _, s := range status {
+		if s.Staging != gogit.Unmodified && s.Staging != gogit.Untracked {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // GetGitDir returns the absolute path to the repository's git directory.
 // This supports standard repos and worktrees (where .git is a file pointing to the gitdir).
 func GetGitDir() (string, error) {
-	cmd := exec.Command("git", "rev-parse", "--git-dir")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to get git dir: %w", err)
+	gitDir, _, err := findGitDirAndRoot("")
+	return gitDir, err
+}
+
+// findGitDirAndRoot locates the .git directory or file and returns (gitDir, repoRoot).
+// If .git is a file, it parses the 'gitdir: <path>' pointer.
+func findGitDirAndRoot(start string) (string, string, error) {
+	startDir := start
+	if startDir == "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return "", "", fmt.Errorf("failed to get working directory: %w", err)
+		}
+		startDir = cwd
 	}
-	gitDir := strings.TrimSpace(string(output))
-	if filepath.IsAbs(gitDir) {
-		return gitDir, nil
+
+	d := startDir
+	for {
+		candidate := filepath.Join(d, ".git")
+		fi, err := os.Stat(candidate)
+		if err == nil {
+			if fi.IsDir() {
+				return candidate, d, nil
+			}
+			// .git is a file containing 'gitdir: <path>'
+			data, err := os.ReadFile(candidate)
+			if err != nil {
+				return "", "", fmt.Errorf("failed to read .git file: %w", err)
+			}
+			line := strings.TrimSpace(string(data))
+			// handle possible multiple lines, pick the one starting with gitdir:
+			scanner := bufio.NewScanner(strings.NewReader(line))
+			for scanner.Scan() {
+				l := strings.TrimSpace(scanner.Text())
+				if strings.HasPrefix(strings.ToLower(l), "gitdir:") {
+					p := strings.TrimSpace(strings.TrimPrefix(l, "gitdir:"))
+					if !filepath.IsAbs(p) {
+						p = filepath.Clean(filepath.Join(d, p))
+					}
+					return p, d, nil
+				}
+			}
+			if err := scanner.Err(); err != nil {
+				return "", "", fmt.Errorf("failed to parse .git file: %w", err)
+			}
+		}
+
+		parent := filepath.Dir(d)
+		if parent == d {
+			break
+		}
+		d = parent
 	}
-	root, err := GetRepositoryRoot()
-	if err != nil {
-		return gitDir, nil // return as-is if we can't resolve; likely fine
+	return "", "", fmt.Errorf("not a git repository (or any of the parent directories): .git")
+}
+
+func statusCodeToLetter(code gogit.StatusCode) string {
+	switch code {
+	case gogit.Added:
+		return "A"
+	case gogit.Modified:
+		return "M"
+	case gogit.Deleted:
+		return "D"
+	case gogit.Renamed:
+		return "R"
+	case gogit.Untracked:
+		return "?"
+	case gogit.UpdatedButUnmerged:
+		return "U"
+	default:
+		return "?"
 	}
-	return filepath.Join(root, gitDir), nil
 }
 
