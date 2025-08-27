@@ -115,11 +115,11 @@ The server provides intelligent mock responses based on message content:
 
 ## Configuration
 
-The server runs on port `8080` by default. To change the port, modify the `port` variable in `main.go`:
+The server is configurable via YAML. By default it loads `config/bot.yaml`. Override with `MOCK_SERVER_CONFIG=/path/to/bot.yaml`.
 
-```go
-port := "8080"  // Change this to your desired port
-```
+- Customize models, streaming delay, and rule-based responses for both Chat and the Responses API.
+- See `docs/CONFIGURATION.md` for the full schema and examples.
+- New to the project? See `docs/GETTING_STARTED.md` for a fast setup and the built-in default configuration used when no YAML is provided.
 
 ## Error Handling
 
@@ -196,4 +196,3 @@ Feel free to extend this mock server with additional features:
 - Additional OpenAI endpoints (embeddings, images, etc.)
 - Configuration file support
 - Logging and metrics
-

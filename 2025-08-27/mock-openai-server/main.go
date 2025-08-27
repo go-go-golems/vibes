@@ -71,7 +71,9 @@ type ModelsResponse struct {
 // CORS middleware
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := "*"
+		if botConfig != nil && botConfig.Server.CORS != "" { origin = botConfig.Server.CORS }
+		w.Header().Set("Access-Control-Allow-Origin", origin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
@@ -134,8 +136,19 @@ func handleChatCompletions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generate response
-	responseText := generateChatResponse(req.Messages)
+    // Generate response (config-aware)
+    responseText, errOut, _ := resolveChatResponse(&req)
+    if errOut != nil {
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(errOut.Status)
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "error": map[string]interface{}{
+                "message": errOut.Message,
+                "code":    errOut.Code,
+            },
+        })
+        return
+    }
 	
 	response := ChatCompletionResponse{
 		ID:      fmt.Sprintf("chatcmpl-%d", time.Now().Unix()),
@@ -168,7 +181,9 @@ func handleStreamingChat(w http.ResponseWriter, r *http.Request, req *ChatComple
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	origin := "*"
+	if botConfig != nil && botConfig.Server.CORS != "" { origin = botConfig.Server.CORS }
+	w.Header().Set("Access-Control-Allow-Origin", origin)
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -176,7 +191,7 @@ func handleStreamingChat(w http.ResponseWriter, r *http.Request, req *ChatComple
 		return
 	}
 
-	responseText := generateChatResponse(req.Messages)
+	responseText, _, delay := resolveChatResponse(req)
 	words := strings.Fields(responseText)
 	chatID := fmt.Sprintf("chatcmpl-%d", time.Now().Unix())
 
@@ -221,8 +236,8 @@ func handleStreamingChat(w http.ResponseWriter, r *http.Request, req *ChatComple
 		fmt.Fprintf(w, "data: %s\n\n", chunkData)
 		flusher.Flush()
 
-		// Add delay for realistic streaming
-		time.Sleep(150 * time.Millisecond)
+		// Add delay for realistic streaming (configurable)
+		time.Sleep(delay)
 	}
 
 	// Send final chunk
@@ -257,29 +272,19 @@ func countTokens(messages []Message) int {
 
 // Handle models endpoint
 func handleModels(w http.ResponseWriter, r *http.Request) {
-	models := ModelsResponse{
-		Object: "list",
-		Data: []Model{
-			{
-				ID:      "gpt-4o",
-				Object:  "model",
-				Created: 1677610602,
-				OwnedBy: "openai",
-			},
-			{
-				ID:      "gpt-4o-mini",
-				Object:  "model",
-				Created: 1677610602,
-				OwnedBy: "openai",
-			},
-			{
-				ID:      "gpt-3.5-turbo",
-				Object:  "model",
-				Created: 1677610602,
-				OwnedBy: "openai",
-			},
-		},
+	var data []Model
+	if botConfig != nil && len(botConfig.Models) > 0 {
+		for _, m := range botConfig.Models {
+			data = append(data, Model{ID: m.ID, Object: "model", Created: 1677610602, OwnedBy: m.OwnedBy})
+		}
+	} else {
+		data = []Model{
+			{ID: "gpt-4o", Object: "model", Created: 1677610602, OwnedBy: "openai"},
+			{ID: "gpt-4o-mini", Object: "model", Created: 1677610602, OwnedBy: "openai"},
+			{ID: "gpt-3.5-turbo", Object: "model", Created: 1677610602, OwnedBy: "openai"},
+		}
 	}
+	models := ModelsResponse{Object: "list", Data: data}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(models)
@@ -304,6 +309,9 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
+	// Load YAML configuration if present
+	LoadConfigFromEnv()
+
 	router := mux.NewRouter()
 	router.Use(corsMiddleware)
 
@@ -315,7 +323,9 @@ func main() {
 	// Setup Responses API routes
 	setupResponsesRoutes(router)
 
-	log.Println("🚀 Mock OpenAI Server with Responses API starting on :8080")
+	port := "8080"
+	if botConfig != nil && botConfig.Server.Port != "" { port = botConfig.Server.Port }
+	log.Printf("🚀 Mock OpenAI Server with Responses API starting on :%s", port)
 	log.Println("")
 	log.Println("Available APIs:")
 	log.Println("📝 Chat Completions API:")
@@ -335,6 +345,69 @@ func main() {
 	log.Println("✅ Conversation forking")
 	log.Println("✅ CORS enabled")
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
+// Resolve chat response using configuration rules; falls back to built-in generator.
+func resolveChatResponse(req *ChatCompletionRequest) (string, *ErrorOut, time.Duration) {
+    // Build input context
+    lastUser := ""
+    full := ""
+    lastRole := ""
+    for _, m := range req.Messages {
+        if m.Role == "user" { lastUser = m.Content }
+        lastRole = m.Role
+        if m.Content != "" { full += m.Content + "\n" }
+    }
+    delayMs := 150
+    if botConfig != nil && botConfig.Streaming.ChunkDelayMs != nil {
+        delayMs = *botConfig.Streaming.ChunkDelayMs
+    }
+    delay := time.Duration(delayMs) * time.Millisecond
+
+    mr := evaluateRules("chat", req.Model, lastRole, lastUser, full)
+    if mr != nil {
+        delay = mr.Delay
+        // error path
+        if mr.Rule.Respond.Error != nil {
+            return "", mr.Rule.Respond.Error, delay
+        }
+        // text path with optional tools aggregation
+        ctx := buildTemplateContext(req.Model, lastUser, full)
+
+        // Aggregate tool output texts if any are requested via use_tools
+        agg := ""
+        for _, name := range mr.Rule.Respond.UseTools {
+            if !isToolEnabled(name) { continue }
+            if def, ok := getToolDef(name); ok && def.Message != nil {
+                t := renderTemplate(def.Message.Text, ctx)
+                if t != "" {
+                    if agg != "" { agg += "\n" }
+                    agg += t
+                }
+            }
+        }
+
+        txt := pickText(mr.Rule.Respond)
+        if txt != "" {
+            rendered := renderTemplate(txt, ctx)
+            if agg != "" { rendered = agg + "\n" + rendered }
+            return rendered, nil, delay
+        }
+        if agg != "" {
+            return agg, nil, delay
+        }
+    }
+
+    // fallback to configured fallback text
+    if botConfig != nil && (botConfig.Fallback.Text != "" || botConfig.Fallback.Message.Text != "") {
+        ctx := buildTemplateContext(req.Model, lastUser, full)
+        txt := pickText(botConfig.Fallback)
+        if txt != "" {
+            return renderTemplate(txt, ctx), nil, delay
+        }
+    }
+
+    // built-in logic
+    return generateChatResponse(req.Messages), nil, delay
+}

@@ -1,16 +1,16 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"math/rand"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
+    "encoding/json"
+    "fmt"
+    "log"
+    "math/rand"
+    "net/http"
+    "strconv"
+    "strings"
+    "time"
 
-	"github.com/gorilla/mux"
+    "github.com/gorilla/mux"
 )
 
 // Responses API structures
@@ -217,20 +217,34 @@ func generateFileSearchResults() []OutputObject {
 
 // Handle responses creation
 func handleResponsesCreate(w http.ResponseWriter, r *http.Request) {
-	var req ResponsesCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
-	}
+    var req ResponsesCreateRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid JSON", http.StatusBadRequest)
+        return
+    }
 
-	// Check if streaming is requested
-	if req.Stream != nil && *req.Stream {
-		handleStreamingResponse(w, r, &req)
-		return
-	}
+    // Check if streaming is requested
+    if req.Stream != nil && *req.Stream {
+        handleStreamingResponse(w, r, &req)
+        return
+    }
 
-	// Generate response ID
-	responseID := generateResponseID()
+    // Resolve via configuration first
+    resolved, errOut := resolveResponsesContent(&req)
+    if errOut != nil {
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(errOut.Status)
+        json.NewEncoder(w).Encode(map[string]interface{}{
+            "error": map[string]interface{}{
+                "message": errOut.Message,
+                "code":    errOut.Code,
+            },
+        })
+        return
+    }
+
+    // Generate response ID
+    responseID := generateResponseID()
 	
 	// Build conversation history
 	var fullContext string
@@ -258,43 +272,45 @@ func handleResponsesCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	fullContext += inputStr
 
-	// Generate output based on tools
-	var output []OutputObject
+    // Generate output (config-aware or legacy)
+    var output []OutputObject
 	
 	// Check for tools
-	hasWebSearch := false
-	hasFileSearch := false
-	for _, tool := range req.Tools {
-		if tool.Type == "web_search" || tool.Type == "web_search_preview" {
-			hasWebSearch = true
-		}
-		if tool.Type == "file_search" {
-			hasFileSearch = true
-		}
-	}
-	
-	if hasWebSearch {
-		output = generateWebSearchResults()
-	} else if hasFileSearch {
-		output = generateFileSearchResults()
-	} else {
-		// Regular text response
-		responseText := generateMockResponse(&req)
-		messageID := generateMessageID()
-		
-		output = []OutputObject{
-			{
-				ID:   messageID,
-				Type: "message",
-				Content: []ContentObject{
-					{
-						Type: "text",
-						Text: responseText,
-					},
-				},
-			},
-		}
-	}
+    if resolved != nil {
+        // Use resolved tools + message
+        output = append(output, resolved.PrefixTools...)
+        messageID := generateMessageID()
+        msg := OutputObject{ID: messageID, Type: "message", Content: []ContentObject{{Type: "text", Text: resolved.Text}}}
+        if len(resolved.Annotations) > 0 {
+            msg.Content[0].Annotations = resolved.Annotations
+        }
+        output = append(output, msg)
+    } else {
+        // Legacy path based on requested tools
+        hasWebSearch := false
+        hasFileSearch := false
+        for _, tool := range req.Tools {
+            if tool.Type == "web_search" || tool.Type == "web_search_preview" {
+                hasWebSearch = true
+            }
+            if tool.Type == "file_search" {
+                hasFileSearch = true
+            }
+        }
+        if hasWebSearch {
+            output = generateWebSearchResults()
+        } else if hasFileSearch {
+            output = generateFileSearchResults()
+        } else {
+            responseText := generateMockResponse(&req)
+            messageID := generateMessageID()
+            output = []OutputObject{{
+                ID:   messageID,
+                Type: "message",
+                Content: []ContentObject{{Type: "text", Text: responseText}},
+            }}
+        }
+    }
 
 	// Create response
 	response := &ResponsesResponse{
@@ -314,16 +330,18 @@ func handleResponsesCreate(w http.ResponseWriter, r *http.Request) {
 	responseStore[responseID] = response
 	conversationHistory[responseID] = append(conversationHistory[req.PreviousResponseID], inputStr, response.Output[len(response.Output)-1].Content[0].Text)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
 }
 
 // Handle streaming responses
 func handleStreamingResponse(w http.ResponseWriter, r *http.Request, req *ResponsesCreateRequest) {
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Content-Type", "text/event-stream")
+    w.Header().Set("Cache-Control", "no-cache")
+    w.Header().Set("Connection", "keep-alive")
+    origin := "*"
+    if botConfig != nil && botConfig.Server.CORS != "" { origin = botConfig.Server.CORS }
+    w.Header().Set("Access-Control-Allow-Origin", origin)
 
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -331,16 +349,27 @@ func handleStreamingResponse(w http.ResponseWriter, r *http.Request, req *Respon
 		return
 	}
 
-	// Generate response text
-	responseText := generateMockResponse(req)
-	words := strings.Fields(responseText)
+    // Resolve via configuration (fallback to legacy)
+    resolved, _ := resolveResponsesContent(req)
+    responseText := ""
+    if resolved != nil && resolved.Text != "" {
+        responseText = resolved.Text
+    } else {
+        responseText = generateMockResponse(req)
+    }
+    words := strings.Fields(responseText)
 
 	// Stream response word by word
-	for i, word := range words {
-		event := StreamEvent{
-			Type:  "response.output_text.delta",
-			Delta: word,
-		}
+    // Determine delay
+    delayMs := 200
+    if botConfig != nil && botConfig.Streaming.ChunkDelayMs != nil {
+        delayMs = *botConfig.Streaming.ChunkDelayMs
+    }
+    for i, word := range words {
+        event := StreamEvent{
+            Type:  "response.output_text.delta",
+            Delta: word,
+        }
 		
 		if i < len(words)-1 {
 			event.Delta += " "
@@ -350,9 +379,9 @@ func handleStreamingResponse(w http.ResponseWriter, r *http.Request, req *Respon
 		fmt.Fprintf(w, "data: %s\n\n", eventData)
 		flusher.Flush()
 
-		// Add delay for demonstration
-		time.Sleep(200 * time.Millisecond)
-	}
+        // Add delay for demonstration (configurable)
+        time.Sleep(time.Duration(delayMs) * time.Millisecond)
+    }
 
 	// Send completion event
 	completionEvent := StreamEvent{
@@ -422,3 +451,101 @@ func setupResponsesRoutes(router *mux.Router) {
 	log.Println("  GET /v1/responses/{response_id} - Retrieve response")
 }
 
+// Configuration-driven resolver for Responses API
+type ResolvedResponse struct {
+    Text        string
+    PrefixTools []OutputObject
+    Annotations []Annotation
+}
+
+func resolveResponsesContent(req *ResponsesCreateRequest) (*ResolvedResponse, *ErrorOut) {
+    if botConfig == nil {
+        return nil, nil
+    }
+    // Build context strings
+    inputStr := ""
+    switch v := req.Input.(type) {
+    case string:
+        inputStr = v
+    case []interface{}:
+        for _, msg := range v {
+            if msgMap, ok := msg.(map[string]interface{}); ok {
+                if content, exists := msgMap["content"]; exists {
+                    switch c := content.(type) {
+                    case string:
+                        inputStr += c + " "
+                    case []interface{}:
+                        // ignore non-text for matching
+                        _ = c
+                    }
+                }
+            }
+        }
+    }
+    lastUser := strings.TrimSpace(inputStr)
+    full := lastUser
+
+    mr := evaluateRules("responses", req.Model, "", lastUser, full)
+    if mr == nil {
+        // Fallback
+        if botConfig.Fallback.Text != "" || botConfig.Fallback.Message.Text != "" {
+            txt := pickText(botConfig.Fallback)
+            ctx := buildTemplateContext(req.Model, lastUser, full)
+            return &ResolvedResponse{Text: renderTemplate(txt, ctx)}, nil
+        }
+        return nil, nil
+    }
+    // error injection
+    if mr.Rule.Respond.Error != nil {
+        return nil, mr.Rule.Respond.Error
+    }
+    // Build response
+    res := &ResolvedResponse{}
+    ctx := buildTemplateContext(req.Model, lastUser, full)
+
+    // Build tools from registry
+    accumulatedText := ""
+    var accumulatedAnn []Annotation
+    for _, name := range mr.Rule.Respond.UseTools {
+        if !isToolEnabled(name) { continue }
+        if def, ok := getToolDef(name); ok {
+            // tool call
+            res.PrefixTools = append(res.PrefixTools, OutputObject{ID: generateToolCallID(), Type: def.CallType, Status: def.Status})
+            // default message from tool
+            if def.Message != nil {
+                txt := renderTemplate(def.Message.Text, ctx)
+                if txt != "" {
+                    if accumulatedText != "" { accumulatedText += "\n" }
+                    accumulatedText += txt
+                }
+                for _, a := range def.Message.Annotations {
+                    accumulatedAnn = append(accumulatedAnn, Annotation{Index: nil, Title: a.Title, Type: a.Type, URL: a.URL})
+                }
+            }
+        }
+    }
+
+    // Explicit tool calls still supported
+    for _, t := range mr.Rule.Respond.Tools {
+        res.PrefixTools = append(res.PrefixTools, OutputObject{ID: generateToolCallID(), Type: t.Type, Status: t.Status})
+    }
+
+    // Message text precedence: rule.message.text > rule.text/choose > accumulated tool text
+    ruleChosen := pickText(mr.Rule.Respond)
+    if mr.Rule.Respond.Message.Text != "" {
+        res.Text = renderTemplate(mr.Rule.Respond.Message.Text, ctx)
+    } else if ruleChosen != "" {
+        res.Text = renderTemplate(ruleChosen, ctx)
+    } else {
+        res.Text = accumulatedText
+    }
+
+    // Annotations combine tool defaults + rule.message.annotations
+    res.Annotations = append(res.Annotations, accumulatedAnn...)
+    if len(mr.Rule.Respond.Message.Annotations) > 0 {
+        for _, a := range mr.Rule.Respond.Message.Annotations {
+            res.Annotations = append(res.Annotations, Annotation{Index: nil, Title: a.Title, Type: a.Type, URL: a.URL})
+        }
+    }
+    return res, nil
+}

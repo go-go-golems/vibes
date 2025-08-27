@@ -119,6 +119,52 @@ def test_mock_server():
         
     except Exception as e:
         print(f"✅ Expected error caught: {e}")
+
+    # Test 7: Chat tools (web_search) non-streaming
+    print("\n🧰 Test 7: Chat Tools (non-streaming)")
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": "Please search the latest AI news."}
+            ]
+        )
+
+        content = response.choices[0].message.content
+        has_tool_summary = "Based on my web search" in content
+        has_rule_text = "Summary above" in content
+        if has_tool_summary and has_rule_text:
+            print("✅ Success! Tool output included in completion text")
+        else:
+            print("❌ Tool output missing in completion text")
+            print(f"Got: {content}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
+
+    # Test 8: Chat tools (web_search) streaming
+    print("\n🧰 Test 8: Chat Tools (streaming)")
+    try:
+        stream = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": "Could you search the latest trends?"}
+            ],
+            stream=True
+        )
+
+        full = ""
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                full += chunk.choices[0].delta.content
+        has_tool_summary = "Based on my web search" in full
+        has_rule_text = "Summary above" in full
+        if has_tool_summary and has_rule_text:
+            print("✅ Success! Tool output included in streaming completion text")
+        else:
+            print("❌ Tool output missing in streaming completion text")
+            print(f"Got: {full}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
     
     print("\n" + "=" * 50)
     print("🎉 All tests completed!")
@@ -177,4 +223,3 @@ if __name__ == "__main__":
     print("- All major endpoints are working correctly")
     print("- Error handling is implemented properly")
     print("- CORS is enabled for web applications")
-
