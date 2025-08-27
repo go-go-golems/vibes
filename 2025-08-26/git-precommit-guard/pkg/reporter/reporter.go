@@ -80,11 +80,25 @@ func (r *Reporter) reportConsole(results []*detector.DetectionResult) error {
 	// Group results by file
 	fileResults := r.groupResultsByFile(results)
 
-	for filePath, fileResults := range fileResults {
-		fmt.Printf("\n📁 %s\n", infoColor.Sprint(filePath))
-		
-		for _, result := range fileResults {
-			r.printResult(result, errorColor, warningColor, successColor, infoColor, dimColor)
+	for filePath, fr := range fileResults {
+		// In normal mode, only keep problematic results (not passed)
+		toPrint := fr
+		if !r.verbose {
+			tmp := make([]*detector.DetectionResult, 0, len(fr))
+			for _, res := range fr {
+				if !res.Passed {
+					tmp = append(tmp, res)
+				}
+			}
+			toPrint = tmp
+		}
+
+		// Print this file only if verbose, or if it has problematic results
+		if r.verbose || len(toPrint) > 0 {
+			fmt.Printf("\n%s\n", infoColor.Sprint(filePath))
+			for _, result := range toPrint {
+				r.printResult(result, errorColor, warningColor, successColor, infoColor, dimColor)
+			}
 		}
 	}
 
@@ -94,21 +108,21 @@ func (r *Reporter) reportConsole(results []*detector.DetectionResult) error {
 		fmt.Println("Summary:")
 		
 		if summary.ErrorCount > 0 {
-			errorColor.Printf("  ❌ Errors: %d\n", summary.ErrorCount)
+			errorColor.Printf("  Errors: %d\n", summary.ErrorCount)
 		}
 		if summary.WarningCount > 0 {
-			warningColor.Printf("  ⚠️  Warnings: %d\n", summary.WarningCount)
+			warningColor.Printf("  Warnings: %d\n", summary.WarningCount)
 		}
 		if summary.PassedCount > 0 {
-			successColor.Printf("  ✅ Passed: %d\n", summary.PassedCount)
+			successColor.Printf("  Passed: %d\n", summary.PassedCount)
 		}
-		
-		fmt.Printf("  📊 Total files checked: %d\n", summary.FilesChecked)
-		
+
+		fmt.Printf("  Total files checked: %d\n", summary.FilesChecked)
+
 		if summary.ErrorCount > 0 {
-			errorColor.Println("\n❌ Pre-commit check FAILED")
+			errorColor.Println("\nPre-commit check FAILED")
 		} else {
-			successColor.Println("\n✅ Pre-commit check PASSED")
+			successColor.Println("\nPre-commit check PASSED")
 		}
 	}
 
@@ -117,36 +131,31 @@ func (r *Reporter) reportConsole(results []*detector.DetectionResult) error {
 
 // printResult prints a single detection result
 func (r *Reporter) printResult(result *detector.DetectionResult, errorColor, warningColor, successColor, infoColor, dimColor *color.Color) {
-	var icon, statusText string
+	var statusText string
 	var colorFunc *color.Color
 
 	if result.Passed {
 		if !r.config.ShowPassed && !r.verbose {
 			return // Skip passed results unless configured to show them
 		}
-		icon = "✅"
 		statusText = "PASS"
 		colorFunc = successColor
 	} else {
 		switch result.Severity {
 		case "error":
-			icon = "❌"
 			statusText = "FAIL"
 			colorFunc = errorColor
 		case "warning":
-			icon = "⚠️"
 			statusText = "WARN"
 			colorFunc = warningColor
 		default:
-			icon = "ℹ️"
 			statusText = "INFO"
 			colorFunc = infoColor
 		}
 	}
 
 	// Print main result line
-	fmt.Printf("  %s %s [%s] %s\n", 
-		icon, 
+	fmt.Printf("  %s [%s] %s\n",
 		colorFunc.Sprint(statusText),
 		result.RuleName,
 		result.Message)
