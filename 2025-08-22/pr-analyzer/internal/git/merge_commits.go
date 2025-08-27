@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5"
+	"github.com/rs/zerolog/log"
 )
 
 // MergeCommitInfo represents information about a merge commit
@@ -39,6 +40,7 @@ func (r *Repository) GetMergeCommits(limit int, since, author string) ([]*MergeC
 			return nil, fmt.Errorf("failed to parse since parameter: %w", err)
 		}
 	}
+	log.Debug().Int("limit", limit).Str("since", since).Str("author", author).Msg("listing merge commits")
 
 	// Iterate through commits
 	err = commitIter.ForEach(func(commit *object.Commit) error {
@@ -96,6 +98,7 @@ func (r *Repository) GetMergeCommits(limit int, since, author string) ([]*MergeC
 		return nil, fmt.Errorf("failed to iterate commits: %w", err)
 	}
 
+	log.Debug().Int("merge_commits", len(mergeCommits)).Msg("listed merge commits")
 	return mergeCommits, nil
 }
 
