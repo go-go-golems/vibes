@@ -1,0 +1,70 @@
+@startuml
+!theme plain
+title File Operations and Git Commits Flow
+
+start
+
+:Start File Watcher Server;
+:Initialize fsnotify watcher;
+:Add watched directory to watcher;
+
+fork
+  :File Watcher Running;
+  repeat
+    :Wait for file system events;
+    :Receive event (CREATE/WRITE/REMOVE);
+    
+    if (Event type?) then (CREATE)
+      :Execute: git add <file>;
+      :Execute: git commit -m "Created file: <file>";
+    elseif (Event type?) then (WRITE)
+      :Execute: git add <file>;
+      :Execute: git commit -m "Modified file: <file>";
+    elseif (Event type?) then (REMOVE)
+      :Execute: git rm --cached <file>;
+      :Execute: git commit -m "Deleted file: <file>";
+    endif
+    
+    :Log commit creation;
+  repeat while (Server running?)
+fork again
+  :Test Script Execution;
+  
+  :Create test1.txt using cat;
+  note right: Triggers CREATE event
+  
+  :Create test2.txt using cat;
+  note right: Triggers CREATE event
+  
+  :Create config.conf using cat;
+  note right: Triggers CREATE event
+  
+  :Modify test1.txt using sed;
+  note right: Triggers WRITE event
+  
+  :Append to test2.txt using cat;
+  note right: Triggers WRITE event
+  
+  :Create temp.log;
+  note right: Triggers CREATE event
+  
+  :Modify temp.log using sed;
+  note right: Triggers WRITE event
+  
+  :Create to_delete.txt;
+  note right: Triggers CREATE event
+  
+  :Delete to_delete.txt using rm;
+  note right: Triggers REMOVE event
+  
+  :Final modifications using sed;
+  note right: Triggers WRITE events
+  
+  :Display git log results;
+end fork
+
+:Stop File Watcher Server;
+stop
+
+@enduml
+

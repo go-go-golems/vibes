@@ -1,0 +1,59 @@
+@startuml
+!theme plain
+title File Watcher Git Integration System Architecture
+
+actor User
+participant "Test Script\n(Bash)" as TestScript
+participant "File System" as FS
+participant "File Watcher\n(Go Server)" as Watcher
+participant "fsnotify\nLibrary" as FSNotify
+participant "Git Repository" as Git
+
+User -> TestScript : Execute test-file-operations.sh
+activate TestScript
+
+TestScript -> FS : Create files using cat
+TestScript -> FS : Modify files using sed
+TestScript -> FS : Delete files using rm
+
+FS -> FSNotify : File system events\n(CREATE, WRITE, REMOVE)
+activate FSNotify
+
+FSNotify -> Watcher : Event notification
+activate Watcher
+
+Watcher -> Watcher : Process event\n(determine operation type)
+
+alt File Created or Modified
+    Watcher -> Git : git add <filename>
+    Watcher -> Git : git commit -m "Created/Modified file: <filename>"
+else File Deleted
+    Watcher -> Git : git rm --cached <filename>
+    Watcher -> Git : git commit -m "Deleted file: <filename>"
+end
+
+Git -> Git : Create commit with\ntimestamp and message
+
+Watcher -> Watcher : Log commit creation
+deactivate Watcher
+deactivate FSNotify
+
+TestScript -> Git : git log --oneline\n(verify commits)
+TestScript -> User : Display results
+deactivate TestScript
+
+note right of Watcher
+  The Go server continuously monitors
+  the watched directory using fsnotify
+  and automatically creates git commits
+  for all file operations
+end note
+
+note right of Git
+  Each file operation results in
+  a separate git commit with
+  descriptive commit messages
+end note
+
+@enduml
+
