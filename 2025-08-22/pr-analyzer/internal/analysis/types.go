@@ -54,9 +54,19 @@ type PRAnalysisResult struct {
 type PRInfo struct {
 	BaseBranch   string `json:"base_branch" yaml:"base_branch"`
 	PRBranch     string `json:"pr_branch" yaml:"pr_branch"`
+	Commit       string `json:"commit,omitempty" yaml:"commit,omitempty"`
 	MergeCommit  string `json:"merge_commit,omitempty" yaml:"merge_commit,omitempty"`
 	TotalFiles   int    `json:"total_files" yaml:"total_files"`
 	TotalLines   int    `json:"total_lines" yaml:"total_lines"`
 	TotalCommits int    `json:"total_commits" yaml:"total_commits"`
+	RepoPath     string `json:"repo_path" yaml:"repo_path"`
+	// Merge commit metadata (when applicable)
+	MergeAuthorName  string    `json:"merge_author_name,omitempty" yaml:"merge_author_name,omitempty"`
+	MergeAuthorEmail string    `json:"merge_author_email,omitempty" yaml:"merge_author_email,omitempty"`
+	MergeAuthorDate  time.Time `json:"merge_author_date,omitempty" yaml:"merge_author_date,omitempty"`
+	MergeCommitterName  string    `json:"merge_committer_name,omitempty" yaml:"merge_committer_name,omitempty"`
+	MergeCommitterEmail string    `json:"merge_committer_email,omitempty" yaml:"merge_committer_email,omitempty"`
+	MergeCommitterDate  time.Time `json:"merge_committer_date,omitempty" yaml:"merge_committer_date,omitempty"`
+	MergeSummary        string    `json:"merge_summary,omitempty" yaml:"merge_summary,omitempty"`
 }
 

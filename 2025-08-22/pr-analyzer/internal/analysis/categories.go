@@ -3,6 +3,8 @@ package analysis
 import (
 	"path/filepath"
 	"strings"
+
+	"github.com/bmatcuk/doublestar/v4"
 )
 
 // CategoryMatcher handles file categorization using glob patterns
@@ -31,12 +33,11 @@ func (cm *CategoryMatcher) AddExcludePattern(pattern string) {
 
 // CategorizeFile determines which categories a file belongs to
 func (cm *CategoryMatcher) CategorizeFile(filename string) []string {
+	// Normalize to forward slashes for matching
+	filename = filepath.ToSlash(filename)
+
 	// Check if file should be excluded
 	for _, exclude := range cm.excludes {
-		if matched, _ := filepath.Match(exclude, filename); matched {
-			return []string{}
-		}
-		// Also check if any parent directory matches the exclude pattern
 		if cm.matchesPath(filename, exclude) {
 			return []string{}
 		}
@@ -60,37 +61,22 @@ func (cm *CategoryMatcher) CategorizeFile(filename string) []string {
 	return categories
 }
 
-// matchesPath checks if a file path matches a glob pattern
-// Supports both simple filename matching and directory path matching
+// matchesPath checks if a file path matches a glob pattern using doublestar
+// Supports patterns with **, *, ?, character classes, and alternations.
 func (cm *CategoryMatcher) matchesPath(filename, pattern string) bool {
-	// Direct match
-	if matched, _ := filepath.Match(pattern, filename); matched {
+	pattern = filepath.ToSlash(strings.TrimSpace(pattern))
+	matched, err := doublestar.PathMatch(pattern, filename)
+	if err == nil && matched {
 		return true
 	}
-	
-	// Check if pattern contains directory separators
-	if strings.Contains(pattern, "/") {
-		// For patterns like "frontend/**", "backend/api/**"
-		if strings.HasSuffix(pattern, "/**") {
-			prefix := strings.TrimSuffix(pattern, "/**")
-			return strings.HasPrefix(filename, prefix+"/") || filename == prefix
-		}
-		
-		// For patterns like "frontend/*.js"
-		if matched, _ := filepath.Match(pattern, filename); matched {
+	// Fallback: if pattern has no slash, try matching basename only
+	if !strings.Contains(pattern, "/") {
+		base := filepath.ToSlash(filepath.Base(filename))
+		matched, _ = doublestar.PathMatch(pattern, base)
+		if matched {
 			return true
 		}
-		
-		// Check each component of the path
-		dir := filepath.Dir(filename)
-		for dir != "." && dir != "/" {
-			if matched, _ := filepath.Match(pattern, filepath.Join(dir, filepath.Base(filename))); matched {
-				return true
-			}
-			dir = filepath.Dir(dir)
-		}
 	}
-	
 	return false
 }
 

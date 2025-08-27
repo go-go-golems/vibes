@@ -5,12 +5,12 @@ A Go CLI utility that analyzes GitHub pull requests to compute percentage of lan
 ## Features
 
 - **Language Analysis**: Computes percentage of changes by programming language
-- **Cross-Subsystem Analysis**: Identifies commits that touch multiple subsystems
-- **Custom Categorization**: Uses glob patterns to define semantic groups/subsystems
+- **Cross-Subsystem Analysis**: Identifies commits that touch multiple subsystems (now includes `uncategorized`)
+- **Custom Categorization**: Uses glob patterns (doublestar) to define semantic groups/subsystems
 - **Multiple Output Formats**: Table, JSON, and YAML output
-- **Merge Commit Analysis**: Analyzes specific merge commits to understand PR impact
-- **Branch Comparison**: Compares branches to analyze differences
+- **Commit/PR Analysis**: Analyze any commit (merge or non-merge) or a branch range
 - **Exclude Patterns**: Filter out files using glob patterns
+- **Configurable Logging**: `--log-level trace|debug|info|warn|error`
 
 ## Installation
 
@@ -33,46 +33,75 @@ go build -o pr-analyzer .
 ### Basic Commands
 
 ```bash
-# Analyze a merge commit
-pr-analyzer analyze --merge-commit abc123def456
+# Analyze a specific commit (works for merge and non-merge commits)
+pr-analyzer analyze --commit abc123def456
 
 # Analyze branch differences
 pr-analyzer analyze --pr-branch feature/new-api --base-branch main
 
 # Use default category patterns
-pr-analyzer analyze --merge-commit abc123def456 --use-defaults
+pr-analyzer analyze --commit abc123def456 --use-defaults
 
 # Custom categories
-pr-analyzer analyze --merge-commit abc123def456 --categories "frontend:frontend/**,*.css,*.js;backend:backend/**,*.go"
+pr-analyzer analyze --commit abc123def456 --categories "frontend:frontend/**,*.css,*.js;backend:backend/**,*.go"
 
 # Exclude files
-pr-analyzer analyze --merge-commit abc123def456 --excludes "*.md,docs/**"
+pr-analyzer analyze --commit abc123def456 --excludes "*.md,docs/**"
 
 # JSON output
-pr-analyzer analyze --merge-commit abc123def456 --output json
+pr-analyzer analyze --commit abc123def456 --output json
+
+# Increase verbosity
+pr-analyzer analyze --commit abc123def456 --log-level debug
 ```
 
 ### Command Line Options
 
 #### Global Flags
-- `--repo-path string`: Path to git repository (default ".")
+- `--repo-path string` / `--repo`: Path to git repository (default ".")
 - `--output string`: Output format: table, json, yaml (default "table")
 - `--config string`: Path to config file
+- `--log-level string`: Log level: trace, debug, info, warn, error (default "info")
+- `--db-path string`: Path to sqlite database file (default `pr-analyzer.sqlite`)
 
 #### Analyze Command Flags
-- `--pr-branch string`: Branch to analyze as PR (required unless using --merge-commit)
+- `--pr-branch string`: Branch to analyze as PR (required unless using --commit)
 - `--base-branch string`: Base branch to compare against (default "main")
-- `--merge-commit string`: Specific merge commit to analyze
+- `--commit string`: Specific commit to analyze (merge or non-merge)
 - `--categories string`: Custom categories in format 'name1:pattern1,pattern2;name2:pattern3'
 - `--excludes string`: Comma-separated exclude patterns
 - `--use-defaults`: Use default category patterns
+- `--save-to-db`: Save analysis result to sqlite database (uses `--db-path`)
+
+### SQLite Mode
+
+Initialize the database, save analyses, and query aggregates across many commits/PRs.
+
+```bash
+# Initialize schema (creates file if needed)
+pr-analyzer db init --db-path ./pr-stats.sqlite
+
+# Analyze and save a commit
+pr-analyzer analyze --commit abc123 --use-defaults --save-to-db --db-path ./pr-stats.sqlite
+
+# Aggregate languages across all saved analyses
+pr-analyzer db languages --db-path ./pr-stats.sqlite
+
+# Aggregate systems across all saved analyses
+pr-analyzer db systems --db-path ./pr-stats.sqlite
+```
 
 ### Category Patterns
 
-Categories are defined using glob patterns. The format is:
+Categories are defined using glob patterns (via `github.com/bmatcuk/doublestar/v4`) supporting `**`, `*`, `?`, character classes and alternations.
+Format:
 ```
 "category1:pattern1,pattern2;category2:pattern3,pattern4"
 ```
+Examples:
+- `frontend:frontend/**,*.css,*.js`
+- `backend:{api,services}/**,*.go`
+- `tests:**/*_test.*`
 
 #### Default Categories
 
@@ -90,9 +119,9 @@ When using `--use-defaults`, the following categories are applied:
 
 #### Table Format (Default)
 Human-readable tables showing:
-- PR information summary
+- PR information summary (includes repository path and merge commit metadata when applicable)
 - Language statistics with percentages
-- Cross-system analysis metrics
+- Cross-system analysis metrics (includes `uncategorized`)
 - Most touched systems
 - System co-occurrence matrix
 - Categories configuration
@@ -102,7 +131,18 @@ Structured JSON output suitable for programmatic processing:
 ```json
 {
   "pr_info": {
-    "merge_commit": "abc123...",
+    "repo_path": "/abs/path/to/repo",
+    "base_branch": "main",
+    "pr_branch": "feature/x",
+    "commit": "abc123...",
+    "merge_commit": "deadbeef...",
+    "merge_author_name": "Alice",
+    "merge_author_email": "alice@example.com",
+    "merge_author_date": "2025-08-22T10:00:00Z",
+    "merge_committer_name": "Bob",
+    "merge_committer_email": "bob@example.com",
+    "merge_committer_date": "2025-08-22T10:05:00Z",
+    "merge_summary": "Merge branch 'feature/x'",
     "total_files": 10,
     "total_lines": 250,
     "total_commits": 3
@@ -116,35 +156,6 @@ Structured JSON output suitable for programmatic processing:
 
 #### YAML Format
 YAML output for configuration-friendly processing.
-
-## Examples
-
-### Example 1: Analyze Frontend Changes
-```bash
-pr-analyzer analyze --merge-commit abc123 --categories "ui:frontend/**,*.css,*.js;api:backend/**,*.go"
-```
-
-Output shows:
-- 85% of changes in JavaScript/CSS (UI)
-- 15% of changes in Go (API)
-- Cross-system rate: 100% (touches both UI and API)
-
-### Example 2: Backend-Only Changes
-```bash
-pr-analyzer analyze --merge-commit def456 --use-defaults
-```
-
-Output shows:
-- 70% Go, 30% SQL
-- Single-system commits: 2, Multi-system commits: 0
-- Cross-system rate: 0%
-
-### Example 3: Full-Stack Integration
-```bash
-pr-analyzer analyze --merge-commit ghi789 --use-defaults --excludes "*.md"
-```
-
-Output shows multiple systems touched with co-occurrence matrix.
 
 ## Architecture
 
@@ -164,27 +175,19 @@ The tool is built with a modular architecture:
 
 ## Testing
 
-The repository includes a comprehensive test suite with a fake repository containing:
-
-- Multiple feature branches
-- Merge commits simulating pull requests
-- Various file types and languages
-- Cross-system changes
-
 Run tests:
 ```bash
-cd testdata/fake-repo
-# Test various merge commits
-../../pr-analyzer analyze --merge-commit <commit-hash> --use-defaults
+go test ./...
 ```
 
-## Validation Results
-
-The tool has been validated with the test repository showing:
-
-1. **Frontend-only PR**: 0% cross-system rate, CSS/JS language detection
-2. **Backend-only PR**: 0% cross-system rate, Go/SQL language detection  
-3. **Full-stack PR**: 100% cross-system rate, multiple languages and systems
+Manual validation with a fake repo:
+```bash
+# Example: analyze specific commit and save
+pr-analyzer analyze --commit <commit-hash> --use-defaults --save-to-db --db-path ./pr-stats.sqlite
+# Query aggregates
+pr-analyzer db languages --db-path ./pr-stats.sqlite
+pr-analyzer db systems --db-path ./pr-stats.sqlite
+```
 
 ## Contributing
 

@@ -2,18 +2,35 @@ package git
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/rs/zerolog/log"
 )
 
 // Repository wraps go-git repository with additional functionality
 type Repository struct {
 	repo *git.Repository
 	path string
+}
+
+// Path returns the filesystem path of the repository root
+func (r *Repository) Path() string {
+	return r.path
+}
+
+// GetCommitByHash returns the commit object for the given hash string
+func (r *Repository) GetCommitByHash(hash string) (*object.Commit, error) {
+	h := plumbing.NewHash(hash)
+	c, err := r.repo.CommitObject(h)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit %s: %w", hash, err)
+	}
+	return c, nil
 }
 
 // OpenRepository opens a git repository at the given path
@@ -24,18 +41,50 @@ func OpenRepository(path string) (*Repository, error) {
 	}
 
 	repo, err := git.PlainOpen(absPath)
-	if err != nil {
+	if err == nil {
+		log.Debug().Str("path", absPath).Msg("opened git repository")
+		return &Repository{repo: repo, path: absPath}, nil
+	}
+
+	// If not found, walk up to find .git directory or bare repo
+	rootPath, findErr := findGitRoot(absPath)
+	if findErr != nil {
 		return nil, fmt.Errorf("failed to open git repository at %s: %w", absPath, err)
 	}
 
-	return &Repository{
-		repo: repo,
-		path: absPath,
-	}, nil
+	repo, err = git.PlainOpen(rootPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open git repository at %s: %w", rootPath, err)
+	}
+	log.Debug().Str("requested", absPath).Str("root", rootPath).Msg("resolved repository root")
+	return &Repository{repo: repo, path: rootPath}, nil
+}
+
+// findGitRoot walks parent directories to locate a git repository root
+func findGitRoot(start string) (string, error) {
+	current := start
+	for {
+		// Try opening as a (possibly bare) repo
+		if _, err := git.PlainOpen(current); err == nil {
+			return current, nil
+		}
+		// Check for .git directory
+		gitDir := filepath.Join(current, ".git")
+		if info, err := os.Stat(gitDir); err == nil && info.IsDir() {
+			return current, nil
+		}
+		parent := filepath.Dir(current)
+		if parent == current {
+			break
+		}
+		current = parent
+	}
+	return "", fmt.Errorf(".git directory not found from %s upwards", start)
 }
 
 // GetCommitsBetween returns commits between two branches/commits
 func (r *Repository) GetCommitsBetween(base, head string) ([]*object.Commit, error) {
+	log.Debug().Str("base", base).Str("head", head).Msg("resolving revisions for range analysis")
 	baseRef, err := r.repo.ResolveRevision(plumbing.Revision(base))
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve base revision %s: %w", base, err)
@@ -45,6 +94,7 @@ func (r *Repository) GetCommitsBetween(base, head string) ([]*object.Commit, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve head revision %s: %w", head, err)
 	}
+	log.Trace().Str("base_hash", baseRef.String()).Str("head_hash", headRef.String()).Msg("resolved revisions")
 
 	// Get commit objects
 	baseCommit, err := r.repo.CommitObject(*baseRef)
@@ -62,6 +112,7 @@ func (r *Repository) GetCommitsBetween(base, head string) ([]*object.Commit, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits between branches: %w", err)
 	}
+	log.Debug().Int("commits", len(commits)).Msg("computed head-minus-base commit set")
 
 	return commits, nil
 }
@@ -91,12 +142,14 @@ func (r *Repository) GetCommitsFromMerge(mergeCommitHash string) ([]*object.Comm
 	if err != nil {
 		return nil, fmt.Errorf("failed to get second parent: %w", err)
 	}
+	log.Debug().Str("merge", mergeCommitHash).Str("p1", firstParent.Hash.String()).Str("p2", secondParent.Hash.String()).Msg("extracting feature commits from merge")
 
 	// Get commits from the feature branch
 	commits, err := r.getCommitsNotInBase(secondParent, firstParent)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits from merge: %w", err)
 	}
+	log.Debug().Int("commits", len(commits)).Msg("computed feature-only commit set from merge")
 
 	return commits, nil
 }
@@ -111,13 +164,16 @@ func (r *Repository) getCommitsNotInBase(head, base *object.Commit) ([]*object.C
 	}
 	defer baseIter.Close()
 
+	baseCount := 0
 	err = baseIter.ForEach(func(c *object.Commit) error {
 		baseCommits[c.Hash] = true
+		baseCount++
 		return nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to iterate base commits: %w", err)
 	}
+	log.Trace().Int("base_reachable", baseCount).Msg("collected base-reachable commits")
 
 	// Get commits reachable from head that are not in base
 	var commits []*object.Commit
@@ -127,7 +183,9 @@ func (r *Repository) getCommitsNotInBase(head, base *object.Commit) ([]*object.C
 	}
 	defer headIter.Close()
 
+	headVisited := 0
 	err = headIter.ForEach(func(c *object.Commit) error {
+		headVisited++
 		if !baseCommits[c.Hash] {
 			// Filter out merge commits from main branch
 			if !r.isMergeFromMain(c) {
@@ -145,6 +203,7 @@ func (r *Repository) getCommitsNotInBase(head, base *object.Commit) ([]*object.C
 		commits[i], commits[j] = commits[j], commits[i]
 	}
 
+	log.Trace().Int("head_visited", headVisited).Int("selected", len(commits)).Msg("filtered head commits not in base")
 	return commits, nil
 }
 

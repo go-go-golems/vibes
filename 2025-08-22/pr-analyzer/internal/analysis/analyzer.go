@@ -5,6 +5,7 @@ import (
 	"sort"
 	"pr-analyzer/internal/git"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/rs/zerolog/log"
 )
 
 // Analyzer performs PR analysis
@@ -29,6 +30,7 @@ func (a *Analyzer) SetCategories(categories map[string][]string) {
 	for name, patterns := range categories {
 		a.categoryMatcher.AddCategory(name, patterns)
 	}
+	log.Debug().Int("categories", len(categories)).Msg("set categories")
 }
 
 // AddExcludePatterns adds patterns to exclude from analysis
@@ -36,6 +38,7 @@ func (a *Analyzer) AddExcludePatterns(patterns []string) {
 	for _, pattern := range patterns {
 		a.categoryMatcher.AddExcludePattern(pattern)
 	}
+	log.Debug().Int("excludes", len(patterns)).Msg("added exclude patterns")
 }
 
 // AnalyzePR performs complete PR analysis
@@ -45,8 +48,51 @@ func (a *Analyzer) AnalyzePR(baseBranch, prBranch string) (*PRAnalysisResult, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits: %w", err)
 	}
+	log.Debug().Str("base", baseBranch).Str("head", prBranch).Int("commits", len(commits)).Msg("analyzing PR")
 
 	return a.analyzeCommits(commits, baseBranch, prBranch, "")
+}
+
+// AnalyzeCommit analyzes a specific commit hash. If it's a merge commit, it analyzes commits from the feature branch; otherwise it analyzes the single commit itself.
+func (a *Analyzer) AnalyzeCommit(commitHash string) (*PRAnalysisResult, error) {
+	c, err := a.repo.GetCommitByHash(commitHash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get commit %s: %w", commitHash, err)
+	}
+	if c.NumParents() >= 2 {
+		log.Debug().Str("commit", commitHash).Msg("analyzing commit as merge commit")
+		res, err := a.AnalyzeMergeCommit(commitHash)
+		if err != nil {
+			return nil, err
+		}
+		res.PRInfo.Commit = commitHash
+		return res, nil
+	}
+	log.Debug().Str("commit", commitHash).Msg("analyzing single commit")
+	commits := []*object.Commit{c}
+	res, err := a.analyzeCommits(commits, "", "", "")
+	if err != nil {
+		return nil, err
+	}
+	res.PRInfo.Commit = commitHash
+	// Populate author/committer metadata for non-merge commit
+	res.PRInfo.MergeAuthorName = c.Author.Name
+	res.PRInfo.MergeAuthorEmail = c.Author.Email
+	res.PRInfo.MergeAuthorDate = c.Author.When
+	res.PRInfo.MergeCommitterName = c.Committer.Name
+	res.PRInfo.MergeCommitterEmail = c.Committer.Email
+	res.PRInfo.MergeCommitterDate = c.Committer.When
+	if c.Message != "" {
+		msg := c.Message
+		for i := 0; i < len(msg); i++ {
+			if msg[i] == '\n' || msg[i] == '\r' {
+				msg = msg[:i]
+				break
+			}
+		}
+		res.PRInfo.MergeSummary = msg
+	}
+	return res, nil
 }
 
 // AnalyzeMergeCommit analyzes a specific merge commit
@@ -55,6 +101,7 @@ func (a *Analyzer) AnalyzeMergeCommit(mergeCommitHash string) (*PRAnalysisResult
 	if err != nil {
 		return nil, fmt.Errorf("failed to get commits from merge: %w", err)
 	}
+	log.Debug().Str("merge", mergeCommitHash).Int("commits", len(commits)).Msg("analyzing merge commit")
 
 	return a.analyzeCommits(commits, "", "", mergeCommitHash)
 }
@@ -121,6 +168,7 @@ func (a *Analyzer) analyzeCommits(commits []*object.Commit, baseBranch, prBranch
 			TotalFiles:   len(fileChanges),
 			TotalLines:   totalAdded + totalDeleted,
 			TotalCommits: len(commits),
+			RepoPath:     a.repo.Path(),
 		},
 		LanguageStats:    languageStats,
 		CrossSystemStats: crossSystemStats,
@@ -128,6 +176,30 @@ func (a *Analyzer) analyzeCommits(commits []*object.Commit, baseBranch, prBranch
 		Categories:       a.categoryMatcher.GetCategories(),
 	}
 
+	// Populate merge commit metadata when provided
+	if mergeCommit != "" {
+		if mc, err := a.repo.GetCommitByHash(mergeCommit); err == nil {
+			result.PRInfo.MergeAuthorName = mc.Author.Name
+			result.PRInfo.MergeAuthorEmail = mc.Author.Email
+			result.PRInfo.MergeAuthorDate = mc.Author.When
+			result.PRInfo.MergeCommitterName = mc.Committer.Name
+			result.PRInfo.MergeCommitterEmail = mc.Committer.Email
+			result.PRInfo.MergeCommitterDate = mc.Committer.When
+			if mc.Message != "" {
+				// First line summary
+				msg := mc.Message
+				for i := 0; i < len(msg); i++ {
+					if msg[i] == '\n' || msg[i] == '\r' {
+						msg = msg[:i]
+						break
+					}
+				}
+				result.PRInfo.MergeSummary = msg
+			}
+		}
+	}
+
+	log.Debug().Int("commits", len(commits)).Int("files", result.PRInfo.TotalFiles).Int("lines", result.PRInfo.TotalLines).Msg("completed analysis")
 	return result, nil
 }
 
@@ -171,6 +243,7 @@ func (a *Analyzer) calculateLanguageStats(diffs []*git.CommitDiff) []LanguageSta
 		return result[i].Percentage > result[j].Percentage
 	})
 
+	log.Debug().Int("languages", len(result)).Int("total_lines", totalLines).Msg("calculated language stats")
 	return result
 }
 
@@ -183,12 +256,10 @@ func (a *Analyzer) calculateCrossSystemStats(commits []CommitInfo) CrossSystemSt
 	systemTouchCount := make(map[string]int)
 
 	for _, commit := range commits {
-		// Get unique systems touched by this commit
+		// Get unique systems touched by this commit (including uncategorized)
 		systemsInCommit := make(map[string]bool)
 		for system := range commit.Categories {
-			if system != "uncategorized" {
-				systemsInCommit[system] = true
-			}
+			systemsInCommit[system] = true
 		}
 
 		// Count systems touched
@@ -240,7 +311,7 @@ func (a *Analyzer) calculateCrossSystemStats(commits []CommitInfo) CrossSystemSt
 		crossSystemRate = float64(multiSystemCommits) / float64(totalCommits) * 100
 	}
 
-	return CrossSystemStats{
+	stats := CrossSystemStats{
 		TotalCommits:        totalCommits,
 		SingleSystemCommits: singleSystemCommits,
 		MultiSystemCommits:  multiSystemCommits,
@@ -248,5 +319,7 @@ func (a *Analyzer) calculateCrossSystemStats(commits []CommitInfo) CrossSystemSt
 		SystemTouchMatrix:   systemTouchMatrix,
 		MostTouchedSystems:  mostTouched,
 	}
+	log.Debug().Int("total_commits", totalCommits).Float64("cross_rate", crossSystemRate).Msg("calculated cross-system stats")
+	return stats
 }
 
