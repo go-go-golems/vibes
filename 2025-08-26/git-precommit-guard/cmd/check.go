@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+    "time"
 
 	"github.com/go-go-golems/glazed/pkg/cli"
 	"github.com/go-go-golems/glazed/pkg/cmds"
@@ -15,6 +16,8 @@ import (
 	"github.com/go-go-golems/glazed/pkg/types"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+    "github.com/charmbracelet/lipgloss"
+    "golang.org/x/term"
 
 	utilspkg "github.com/user/git-precommit-guard/internal/utils"
 	cfgpkg "github.com/user/git-precommit-guard/pkg/config"
@@ -142,17 +145,60 @@ run manually to check files.`),
 	dm := detectorpkg.NewDetectorManager(cfg)
 	rep := reporterpkg.NewReporter(cfg.Reporting, settings.Verbose)
 
+	// Setup spinner if running in a dynamic TTY and console output
+	showSpinner := term.IsTerminal(int(os.Stdout.Fd())) && cfg.Reporting.Format == "console" && !settings.Verbose
+	type progressUpdate struct {
+		index int
+		path  string
+	}
+	var (
+		progressCh chan progressUpdate
+		doneCh     chan struct{}
+	)
+	if showSpinner && len(filesToCheck) > 0 {
+		progressCh = make(chan progressUpdate, 1)
+		doneCh = make(chan struct{})
+		go func(total int) {
+			frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+			style := lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Bold(true)
+			ticker := time.NewTicker(80 * time.Millisecond)
+			defer ticker.Stop()
+			frameIdx := 0
+			var last progressUpdate
+			for {
+				select {
+				case u := <-progressCh:
+					last = u
+				case <-ticker.C:
+					line := fmt.Sprintf("%s %d/%d %s", frames[frameIdx%len(frames)], last.index, total, last.path)
+					frameIdx++
+					fmt.Printf("\r\x1b[2K%s", style.Render(line))
+				case <-doneCh:
+					fmt.Print("\r\x1b[2K")
+					return
+				}
+			}
+		}(len(filesToCheck))
+	}
+
 	ctxTimeout, cancel := context.WithTimeout(ctx, cfg.Settings.Timeout)
 	defer cancel()
 
 	var allResults []*detectorpkg.DetectionResult
 	var hasFailures bool
 
-	for _, filePath := range filesToCheck {
+	for i, filePath := range filesToCheck {
 		select {
 		case <-ctxTimeout.Done():
 			return errors.Errorf("operation timed out after %v", cfg.Settings.Timeout)
 		default:
+		}
+
+		if showSpinner {
+			select {
+			case progressCh <- progressUpdate{index: i + 1, path: filePath}:
+			default:
+			}
 		}
 
 		info, err := os.Stat(filePath)
@@ -197,6 +243,9 @@ run manually to check files.`),
 		}
 	}
 
+	if showSpinner {
+		close(doneCh)
+	}
 	if err := rep.Report(allResults); err != nil {
 		return errors.Wrap(err, "generate report")
 	}

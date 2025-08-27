@@ -65,6 +65,16 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error creating uninstall command: %v\n", err)
 		os.Exit(1)
 	}
+	debugRootCmd, err := cmdpkg.NewDebugRootCommand()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating debug root command: %v\n", err)
+		os.Exit(1)
+	}
+	debugGitCmd, err := cmdpkg.NewDebugGitCommand()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating debug-git command: %v\n", err)
+		os.Exit(1)
+	}
 
 	cobraCheckCmd, err := cli.BuildCobraCommand(checkCmd,
 		cli.WithDualMode(true),
@@ -113,8 +123,28 @@ func main() {
 			MiddlewaresFunc: cli.CobraCommandDefaultMiddlewares,
 		}),
 	)
+	cobraDebugRootCmd, err := cli.BuildCobraCommand(debugRootCmd,
+		cli.WithDualMode(true),
+		cli.WithGlazeToggleFlag("with-glaze-output"),
+		cli.WithParserConfig(cli.CobraParserConfig{
+			ShortHelpLayers: []string{layers.DefaultSlug},
+			MiddlewaresFunc: cli.CobraCommandDefaultMiddlewares,
+		}),
+	)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error building uninstall command: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error building debug root command: %v\n", err)
+		os.Exit(1)
+	}
+	cobraDebugGitCmd, err := cli.BuildCobraCommand(debugGitCmd,
+		cli.WithDualMode(true),
+		cli.WithGlazeToggleFlag("with-glaze-output"),
+		cli.WithParserConfig(cli.CobraParserConfig{
+			ShortHelpLayers: []string{layers.DefaultSlug},
+			MiddlewaresFunc: cli.CobraCommandDefaultMiddlewares,
+		}),
+	)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error building debug-git command: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -122,6 +152,8 @@ func main() {
 	rootCmd.AddCommand(cobraValidateCmd)
 	rootCmd.AddCommand(cobraInstallCmd)
 	rootCmd.AddCommand(cobraUninstallCmd)
+	rootCmd.AddCommand(cobraDebugRootCmd)
+	cobraDebugRootCmd.AddCommand(cobraDebugGitCmd)
 
 	helpSystem := help.NewHelpSystem()
 	help_cmd.SetupCobraRootCommand(helpSystem, rootCmd)
