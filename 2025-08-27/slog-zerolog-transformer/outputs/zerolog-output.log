@@ -1,0 +1,12 @@
+[90m1:01PM[0m [32mINF[0m [1mApplication starting[0m [36mbuild_time=[0m2025-08-27T13:01:17-04:00 [36mversion=[0m1.0.0
+[90m1:01PM[0m DBG Debug message for troubleshooting [36mcomponent=[0mmain [36mdebug_info=[0mstartup_sequence
+[90m1:01PM[0m [32mINF[0m [1mInformation message[0m [36maction=[0mlogin [36muser_id=[0m12345
+[90m1:01PM[0m [33mWRN[0m [1mWarning message[0m [36mmemory_usage=[0m85% [36mthreshold=[0m80%
+[90m1:01PM[0m [31mERR[0m [1mError occurred[0m [36merror=[0m[31m[1m"connection timeout"[0m[0m [36mretry_count=[0m3
+[90m1:01PM[0m [32mINF[0m [1mUser activity[0m [36memail=[0mjohn@example.com [36mis_premium=[0mtrue [36mlast_login=[0m2025-08-26T13:01:17-04:00 [36mlogin_count=[0m42 [36muser_id=[0m67890 [36musername=[0mjohn_doe
+[90m1:01PM[0m [32mINF[0m [1mProcessing request[0m [36mduration_ms=[0m150 [36mendpoint=[0m/api/users [36mmethod=[0mGET
+[90m1:01PM[0m [32mINF[0m [1mDatabase operation[0m [36mdatabase.host=[0mlocalhost [36mdatabase.name=[0mmyapp [36mdatabase.port=[0m5432 [36mquery.operation=[0mSELECT [36mquery.rows_affected=[0m25 [36mquery.table=[0musers
+[90m1:01PM[0m [32mINF[0m [1mService configuration[0m [36mport=[0m8080 [36mservice=[0muser-service [36mtls_enabled=[0mtrue
+[90m1:01PM[0m [32mINF[0m [1mOperation completed[0m [36mduration=[0m100.416947 [36moperation=[0mdata_processing [36mrecords_processed=[0m1000 [36msuccess_rate=[0m0.98
+[90m1:01PM[0m [31mERR[0m [1mFailed to process data[0m [36merror=[0m[31m[1m"Invalid data format"[0m[0m [36mcomponent=[0mdata_processor [36mretry_after=[0m30s
+[90m1:01PM[0m [32mINF[0m [1mApplication shutting down[0m [36muptime=[0m300000.000171
