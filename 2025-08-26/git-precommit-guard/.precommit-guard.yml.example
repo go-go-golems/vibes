@@ -1,0 +1,109 @@
+# Git Pre-commit Guard Configuration Example
+# Copy this file to .precommit-guard.yml and customize as needed
+
+version: "1.0"
+
+# Global settings
+settings:
+  fail_fast: true      # Stop on first failure
+  timeout: "10s"       # Maximum time for all checks
+
+# Global file excludes - never check these patterns
+global_excludes:
+  - ".git/*"
+  - "node_modules/*"
+  - "vendor/*"
+  - "*.md"
+  - "*.txt"
+  - "*.yml"
+  - "*.yaml"
+  - "*.json"
+  - "*.log"
+
+# Detection rules
+rules:
+  # ELF binary detection
+  elf_detection:
+    enabled: true
+    description: "Detect and reject ELF executable binaries and shared objects"
+    severity: "error"
+    config:
+      elf_magic: "7f454c46"  # ELF magic number (hex)
+      file_patterns:
+        - "ELF.*executable"
+        - "ELF.*shared object"
+        - "ELF.*relocatable"
+      mime_types:
+        - "application/x-executable"
+        - "application/x-sharedlib"
+        - "application/x-pie-executable"
+      message: "ELF binary detected: {{.File}}. Use Git LFS or add to excludes"
+      directory_overrides:
+        "bin/*":
+          enabled: false        # Allow ELF files in bin/ directory
+        "build/*":
+          enabled: false        # Allow ELF files in build/ directory
+        "dist/*":
+          enabled: false        # Allow ELF files in dist/ directory
+        "target/debug/*":
+          enabled: false        # Rust debug builds
+        "target/release/*":
+          enabled: false        # Rust release builds
+
+  # File size limits
+  file_size:
+    enabled: true
+    description: "Prevent committing files that exceed size limits"
+    severity: "error"
+    config:
+      max_size_mb: 10          # 10MB hard limit
+      warn_size_mb: 5          # 5MB warning threshold
+      message: "File {{.File}} ({{.SizeMB}}MB) exceeds size limit ({{.MaxSizeMB}}MB)"
+      directory_overrides:
+        "assets/*":
+          max_size_mb: 50       # Allow larger files in assets/
+        "docs/*":
+          max_size_mb: 20       # Allow larger docs
+        "test/fixtures/*":
+          enabled: false        # No size limits for test fixtures
+        "examples/*":
+          max_size_mb: 15       # Allow larger example files
+
+  # MIME type detection
+  mime_detection:
+    enabled: true
+    description: "Detect and control various file types by MIME"
+    severity: "warning"
+    config:
+      blocked_types:
+        - "application/octet-stream"
+        - "application/x-binary"
+        - "application/x-msdownload"    # Windows executables
+        - "application/x-mach-binary"   # macOS binaries
+        - "application/java-archive"    # JAR files
+        - "application/x-java-archive"
+      allowed_types:
+        - "text/*"
+        - "application/json"
+        - "application/xml"
+        - "application/yaml"
+        - "image/svg+xml"
+        - "application/javascript"
+      message: "Binary file type detected: {{.File}} ({{.MimeType}})"
+      directory_overrides:
+        "vendor/*":
+          enabled: false        # Skip vendor dependencies
+        "third-party/*":
+          blocked_types: []     # Allow all types in third-party/
+        "tools/*":
+          blocked_types:        # Only block executables in tools/
+            - "application/x-executable"
+            - "application/x-msdownload"
+
+# Output configuration
+reporting:
+  format: "console"    # "console" or "json"
+  show_passed: false   # Show successful checks
+  colors: true         # Use colored output
+  summary: true        # Show summary at end
+
