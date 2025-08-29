@@ -63,6 +63,7 @@ type Config struct {
     DownscaleFactor int
     SpeedMS         int
     StepMode        bool
+    TransparentBG   bool
 }
 
 // Model represents the TUI application state
@@ -756,6 +757,69 @@ func renderPixelImage(pixels [][]int, palette []string) string {
 	return result.String()
 }
 
+// computeConnectedBGMask flood-fills from (0,0) and marks only the connected
+// region that matches the top-left color as transparent. Prevents removing
+// interior pixels of the same color that are not connected to the border area.
+func computeConnectedBGMask(pixels [][]int) [][]bool {
+    h := len(pixels)
+    if h == 0 { return nil }
+    w := len(pixels[0])
+    if w == 0 { return nil }
+    target := pixels[0][0]
+    mask := make([][]bool, h)
+    for y := 0; y < h; y++ {
+        mask[y] = make([]bool, w)
+    }
+    // BFS
+    type pt struct{ x, y int }
+    q := make([]pt, 0, h*w/4+1)
+    push := func(p pt) { q = append(q, p) }
+    pop := func() pt { p := q[0]; q = q[1:]; return p }
+    if w > 0 && h > 0 {
+        mask[0][0] = true
+        push(pt{0, 0})
+    }
+    dirs := [][2]int{{1,0},{-1,0},{0,1},{0,-1}}
+    for len(q) > 0 {
+        p := pop()
+        for _, d := range dirs {
+            nx, ny := p.x+d[0], p.y+d[1]
+            if nx < 0 || ny < 0 || nx >= w || ny >= h { continue }
+            if mask[ny][nx] { continue }
+            if pixels[ny][nx] == target {
+                mask[ny][nx] = true
+                push(pt{nx, ny})
+            }
+        }
+    }
+    return mask
+}
+
+// renderPixelImageWithMask renders blocks with a transparency mask.
+func renderPixelImageWithMask(pixels [][]int, palette []string, mask [][]bool) string {
+    if mask == nil { return renderPixelImage(pixels, palette) }
+    var result strings.Builder
+    styles := make([]lipgloss.Style, len(palette))
+    for i, hex := range palette {
+        styles[i] = lipgloss.NewStyle().Background(lipgloss.Color(hex))
+    }
+    for y, row := range pixels {
+        for x, colorIndex := range row {
+            if y < len(mask) && x < len(mask[y]) && mask[y][x] {
+                result.WriteString("  ")
+                continue
+            }
+            if colorIndex < len(styles) {
+                result.WriteString(styles[colorIndex].Render("  "))
+            } else {
+                result.WriteString("  ")
+            }
+        }
+        result.WriteString("\n")
+    }
+    return result.String()
+}
+
 // renderPixelImageHalfBlock renders using '▀' with FG=top color, BG=bottom color, packing 2 rows per cell.
 func renderPixelImageHalfBlock(pixels [][]int, palette []string) string {
     var result strings.Builder
@@ -787,6 +851,46 @@ func renderPixelImageHalfBlock(pixels [][]int, palette []string) string {
             }
             style := lipgloss.NewStyle().Foreground(lipgloss.Color(top)).Background(lipgloss.Color(bottom))
             result.WriteString(style.Render("▀"))
+        }
+        result.WriteString("\n")
+    }
+    return result.String()
+}
+
+// renderPixelImageHalfBlockWithBG renders half-block mode with bgHex treated as transparent.
+func renderPixelImageHalfBlockWithMask(pixels [][]int, palette []string, mask [][]bool) string {
+    if mask == nil { return renderPixelImageHalfBlock(pixels, palette) }
+    var result strings.Builder
+    height := len(pixels)
+    if height == 0 { return "" }
+    width := len(pixels[0])
+    for y := 0; y < height; y += 2 {
+        for x := 0; x < width; x++ {
+            topIdx := 0
+            bottomIdx := 0
+            if x < len(pixels[y]) { topIdx = pixels[y][x] }
+            if y+1 < height && x < len(pixels[y+1]) { bottomIdx = pixels[y+1][x] } else { bottomIdx = topIdx }
+            topTrans := y < len(mask) && x < len(mask[y]) && mask[y][x]
+            botTrans := false
+            if y+1 < len(mask) && x < len(mask[y+1]) { botTrans = mask[y+1][x] }
+            if topTrans && botTrans {
+                result.WriteString(" ")
+                continue
+            }
+            top := "#000000"
+            bottom := "#000000"
+            if topIdx >= 0 && topIdx < len(palette) { top = palette[topIdx] }
+            if bottomIdx >= 0 && bottomIdx < len(palette) { bottom = palette[bottomIdx] }
+            if topTrans && !botTrans {
+                style := lipgloss.NewStyle().Foreground(lipgloss.Color(bottom))
+                result.WriteString(style.Render("▄"))
+            } else if !topTrans && botTrans {
+                style := lipgloss.NewStyle().Foreground(lipgloss.Color(top))
+                result.WriteString(style.Render("▀"))
+            } else {
+                style := lipgloss.NewStyle().Foreground(lipgloss.Color(top)).Background(lipgloss.Color(bottom))
+                result.WriteString(style.Render("▀"))
+            }
         }
         result.WriteString("\n")
     }
@@ -838,11 +942,16 @@ func (m Model) View() string {
         // Render current frame
         if m.currentFrame < len(m.animatedGIF.Frames) {
             frame := m.animatedGIF.Frames[m.currentFrame]
+            // determine transparent background mask if enabled (connected area from top-left)
+            var mask [][]bool
+            if m.config.TransparentBG && len(frame.Pixels) > 0 && len(frame.Pixels[0]) > 0 {
+                mask = computeConnectedBGMask(frame.Pixels)
+            }
             switch m.config.RenderMode {
             case RenderHalf:
-                view.WriteString(renderPixelImageHalfBlock(frame.Pixels, frame.Palette))
+                view.WriteString(renderPixelImageHalfBlockWithMask(frame.Pixels, frame.Palette, mask))
             default:
-                view.WriteString(renderPixelImage(frame.Pixels, frame.Palette))
+                view.WriteString(renderPixelImageWithMask(frame.Pixels, frame.Palette, mask))
             }
 			
 			// Frame palette
@@ -906,11 +1015,15 @@ func (m Model) View() string {
 		view.WriteString("\n")
 		
         // Render the pixel image
+        var mask [][]bool
+        if m.config.TransparentBG && len(img.Pixels) > 0 && len(img.Pixels[0]) > 0 {
+            mask = computeConnectedBGMask(img.Pixels)
+        }
         switch m.config.RenderMode {
         case RenderHalf:
-            view.WriteString(renderPixelImageHalfBlock(img.Pixels, img.Palette))
+            view.WriteString(renderPixelImageHalfBlockWithMask(img.Pixels, img.Palette, mask))
         default:
-            view.WriteString(renderPixelImage(img.Pixels, img.Palette))
+            view.WriteString(renderPixelImageWithMask(img.Pixels, img.Palette, mask))
         }
 		
 		// Color palette
@@ -967,6 +1080,7 @@ func main() {
     flag.IntVar(&config.DownscaleFactor, "downscale", 1, "Downscale original by factor before sizing (>=1)")
     flag.IntVar(&speedMS, "speed", 200, "Animation speed in milliseconds per frame")
     flag.BoolVar(&config.StepMode, "step", false, "Start in animation view paused for manual frame stepping (GIF only)")
+    flag.BoolVar(&config.TransparentBG, "transparent", false, "Treat top-left color as transparent background in TUI")
 	flag.IntVar(&config.ExportScale, "scale", 10, "Export PNG scale factor")
 	flag.BoolVar(&config.Verbose, "verbose", false, "Verbose output")
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose output (shorthand)")
