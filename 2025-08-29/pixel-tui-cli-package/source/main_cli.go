@@ -19,6 +19,7 @@ import (
 
     "github.com/charmbracelet/bubbletea"
     "github.com/charmbracelet/lipgloss"
+    
 )
 
 // ColorSampling defines how colors are processed
@@ -258,37 +259,38 @@ func reducePaletteUniform(pixels [][]int, palette []string, maxColors int) ([][]
 
 // resizeImage resizes an image using nearest neighbor interpolation
 func resizeImage(src image.Image, newWidth, newHeight int) image.Image {
-	srcBounds := src.Bounds()
-	srcWidth := srcBounds.Dx()
-	srcHeight := srcBounds.Dy()
-	
-	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
-	
-	for y := 0; y < newHeight; y++ {
-		for x := 0; x < newWidth; x++ {
-			// Calculate source coordinates using nearest neighbor
-			srcX := (x * srcWidth) / newWidth
-			srcY := (y * srcHeight) / newHeight
-			
-			// Ensure we don't go out of bounds
-			if srcX >= srcWidth {
-				srcX = srcWidth - 1
-			}
-			if srcY >= srcHeight {
-				srcY = srcHeight - 1
-			}
-			
-			srcColor := src.At(srcBounds.Min.X+srcX, srcBounds.Min.Y+srcY)
-			dst.Set(x, y, srcColor)
-		}
-	}
-	
-	return dst
+    srcBounds := src.Bounds()
+    srcWidth := srcBounds.Dx()
+    srcHeight := srcBounds.Dy()
+
+    dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+
+    for y := 0; y < newHeight; y++ {
+        for x := 0; x < newWidth; x++ {
+            // Calculate source coordinates using nearest neighbor
+            srcX := (x * srcWidth) / newWidth
+            srcY := (y * srcHeight) / newHeight
+
+            // Ensure we don't go out of bounds
+            if srcX >= srcWidth {
+                srcX = srcWidth - 1
+            }
+            if srcY >= srcHeight {
+                srcY = srcHeight - 1
+            }
+
+            srcColor := src.At(srcBounds.Min.X+srcX, srcBounds.Min.Y+srcY)
+            dst.Set(x, y, srcColor)
+        }
+    }
+
+    return dst
 }
 
 // downsampleImageBlockMode reduces image size by selecting the dominant color
 // within each source region that maps to a destination pixel. This preserves
 // crisp pixel-art edges compared to naive nearest-neighbor downsampling.
+// downsampleImageBlockMode reduces image size by selecting the dominant color in each region.
 func downsampleImageBlockMode(src image.Image, newWidth, newHeight int) image.Image {
     srcBounds := src.Bounds()
     srcWidth := srcBounds.Dx()
@@ -308,7 +310,6 @@ func downsampleImageBlockMode(src image.Image, newWidth, newHeight int) image.Im
             if sx1 <= sx0 {
                 sx1 = sx0 + 1
             }
-            // Count colors in the block and pick the most frequent
             counts := make(map[uint32]int)
             var bestKey uint32
             var bestCount int
@@ -770,14 +771,20 @@ func computeConnectedBGMask(pixels [][]int) [][]bool {
     for y := 0; y < h; y++ {
         mask[y] = make([]bool, w)
     }
-    // BFS
     type pt struct{ x, y int }
     q := make([]pt, 0, h*w/4+1)
     push := func(p pt) { q = append(q, p) }
     pop := func() pt { p := q[0]; q = q[1:]; return p }
-    if w > 0 && h > 0 {
-        mask[0][0] = true
-        push(pt{0, 0})
+    // Seed BFS from all border pixels that match the target color
+    // Top and bottom rows
+    for x := 0; x < w; x++ {
+        if pixels[0][x] == target && !mask[0][x] { mask[0][x] = true; push(pt{x, 0}) }
+        if pixels[h-1][x] == target && !mask[h-1][x] { mask[h-1][x] = true; push(pt{x, h - 1}) }
+    }
+    // Left and right columns (excluding corners already added)
+    for y := 1; y < h-1; y++ {
+        if pixels[y][0] == target && !mask[y][0] { mask[y][0] = true; push(pt{0, y}) }
+        if pixels[y][w-1] == target && !mask[y][w-1] { mask[y][w-1] = true; push(pt{w - 1, y}) }
     }
     dirs := [][2]int{{1,0},{-1,0},{0,1},{0,-1}}
     for len(q) > 0 {
