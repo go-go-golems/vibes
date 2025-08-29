@@ -1,22 +1,22 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"image"
-	"image/color"
-	"image/gif"
-	"image/png"
-	_ "image/jpeg"
-	"log"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"time"
+    "flag"
+    "fmt"
+    "image"
+    "image/color"
+    "image/gif"
+    "image/png"
+    _ "image/jpeg"
+    "log"
+    "os"
+    "path/filepath"
+    "strconv"
+    "strings"
+    "time"
 
-	"github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+    "github.com/charmbracelet/bubbletea"
+    "github.com/charmbracelet/lipgloss"
 )
 
 // ColorSampling defines how colors are processed
@@ -119,8 +119,13 @@ func processImageWithSampling(img image.Image, width, height int, sampling Color
 			img.Bounds().Dx(), img.Bounds().Dy(), width, height, sampling)
 	}
 
-	// Resize image using nearest neighbor to preserve pixel art
-	resized := resizeImage(img, width, height)
+    // Choose resizing strategy: nearest for upscaling, block-mode for downscaling
+    var resized image.Image
+    if img.Bounds().Dx() > width || img.Bounds().Dy() > height {
+        resized = downsampleImageBlockMode(img, width, height)
+    } else {
+        resized = resizeImage(img, width, height)
+    }
 	
 	pixels := make([][]int, height)
 	colorMap := make(map[string]int)
@@ -205,6 +210,149 @@ func resizeImage(src image.Image, newWidth, newHeight int) image.Image {
 	return dst
 }
 
+// downsampleImageBlockMode reduces image size by selecting the dominant color
+// within each source region that maps to a destination pixel. This preserves
+// crisp pixel-art edges compared to naive nearest-neighbor downsampling.
+func downsampleImageBlockMode(src image.Image, newWidth, newHeight int) image.Image {
+    srcBounds := src.Bounds()
+    srcWidth := srcBounds.Dx()
+    srcHeight := srcBounds.Dy()
+
+    dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+
+    for y := 0; y < newHeight; y++ {
+        sy0 := (y * srcHeight) / newHeight
+        sy1 := ((y + 1) * srcHeight) / newHeight
+        if sy1 <= sy0 {
+            sy1 = sy0 + 1
+        }
+        for x := 0; x < newWidth; x++ {
+            sx0 := (x * srcWidth) / newWidth
+            sx1 := ((x + 1) * srcWidth) / newWidth
+            if sx1 <= sx0 {
+                sx1 = sx0 + 1
+            }
+            // Count colors in the block and pick the most frequent
+            counts := make(map[uint32]int)
+            var bestKey uint32
+            var bestCount int
+            for yy := sy0; yy < sy1; yy++ {
+                for xx := sx0; xx < sx1; xx++ {
+                    r, g, b, _ := src.At(srcBounds.Min.X+xx, srcBounds.Min.Y+yy).RGBA()
+                    r8, g8, b8 := uint8(r>>8), uint8(g>>8), uint8(b>>8)
+                    key := uint32(r8)<<16 | uint32(g8)<<8 | uint32(b8)
+                    counts[key]++
+                    if counts[key] > bestCount {
+                        bestCount = counts[key]
+                        bestKey = key
+                    }
+                }
+            }
+            r8 := uint8((bestKey >> 16) & 0xFF)
+            g8 := uint8((bestKey >> 8) & 0xFF)
+            b8 := uint8(bestKey & 0xFF)
+            dst.Set(x, y, color.RGBA{r8, g8, b8, 255})
+        }
+    }
+    return dst
+}
+
+// mseBetween computes mean squared error between two same-sized images (RGB only)
+func mseBetween(a, b image.Image) float64 {
+    ba := a.Bounds()
+    bb := b.Bounds()
+    if ba.Dx() != bb.Dx() || ba.Dy() != bb.Dy() {
+        return 1e30 // incompatible sizes; treat as very bad
+    }
+    var sum float64
+    var n float64
+    for y := 0; y < ba.Dy(); y++ {
+        for x := 0; x < ba.Dx(); x++ {
+            ar, ag, ab, _ := a.At(ba.Min.X+x, ba.Min.Y+y).RGBA()
+            br, bg, bb2, _ := b.At(bb.Min.X+x, bb.Min.Y+y).RGBA()
+            dr := float64(int(ar>>8) - int(br>>8))
+            dg := float64(int(ag>>8) - int(bg>>8))
+            db := float64(int(ab>>8) - int(bb2>>8))
+            sum += dr*dr + dg*dg + db*db
+            n += 3.0
+        }
+    }
+    if n == 0 {
+        return 0
+    }
+    return sum / n
+}
+
+// chooseDownsampleDims tries integer-like reductions near the requested size
+// using the first frame to minimize reconstruction error after downsample+nearest.
+func chooseDownsampleDims(first image.Image, desiredW, desiredH int, verbose bool) (int, int) {
+    sw := first.Bounds().Dx()
+    sh := first.Bounds().Dy()
+    if desiredW <= 0 || desiredH <= 0 {
+        return desiredW, desiredH
+    }
+    // If not actually downscaling, keep requested
+    if sw <= desiredW && sh <= desiredH {
+        return desiredW, desiredH
+    }
+
+    type cand struct{ w, h int }
+    candidates := make([]cand, 0, 32)
+
+    // Always consider requested target
+    candidates = append(candidates, cand{desiredW, desiredH})
+
+    // Consider integer factors of original size near requested
+    maxF := 64
+    if sw < maxF { maxF = sw }
+    if sh < maxF { if sh < maxF { maxF = sh } }
+    for f := 1; f <= maxF; f++ {
+        w := sw / f
+        h := sh / f
+        if w <= 0 || h <= 0 {
+            break
+        }
+        candidates = append(candidates, cand{w, h})
+    }
+
+    // Also add small neighborhood around desired dims
+    for dw := -2; dw <= 2; dw++ {
+        for dh := -2; dh <= 2; dh++ {
+            w := desiredW + dw
+            h := desiredH + dh
+            if w > 0 && h > 0 {
+                candidates = append(candidates, cand{w, h})
+            }
+        }
+    }
+
+    // Evaluate by downsample -> upsample (nearest) MSE, with distance tie-breaker
+    bestW, bestH := desiredW, desiredH
+    bestScore := 1e30
+    for _, c := range candidates {
+        // Skip if change is extreme (>50% away from desired)
+        if c.w < desiredW/2 || c.h < desiredH/2 || c.w > desiredW*3/2 || c.h > desiredH*3/2 {
+            continue
+        }
+        ds := downsampleImageBlockMode(first, c.w, c.h)
+        up := resizeImage(ds, sw, sh)
+        score := mseBetween(first, up)
+        // Favor closeness to desired size when scores are similar
+        dist := float64(absInt(c.w-desiredW) + absInt(c.h-desiredH))
+        adjusted := score * (1.0 + 0.01*dist)
+        if adjusted < bestScore {
+            bestScore = adjusted
+            bestW, bestH = c.w, c.h
+        }
+    }
+    if verbose {
+        fmt.Printf("Tuned downsample size: requested %dx%d -> chosen %dx%d (first frame)\n", desiredW, desiredH, bestW, bestH)
+    }
+    return bestW, bestH
+}
+
+func absInt(x int) int { if x < 0 { return -x }; return x }
+
 // loadImage loads an image from file
 func loadImage(filename string) (image.Image, error) {
 	file, err := os.Open(filename)
@@ -235,18 +383,24 @@ func loadGIF(filename string, config Config) (*ProcessedGIF, error) {
 			len(gifImg.Image), gifImg.Config.Width, gifImg.Config.Height)
 	}
 	
-	frames := make([]ProcessedImage, len(gifImg.Image))
+    // Tune dimensions using first frame if downscaling
+    tunedW, tunedH := config.OutputWidth, config.OutputHeight
+    if len(gifImg.Image) > 0 {
+        tunedW, tunedH = chooseDownsampleDims(gifImg.Image[0], config.OutputWidth, config.OutputHeight, config.Verbose)
+    }
+
+    frames := make([]ProcessedImage, len(gifImg.Image))
 	
 	for i, frame := range gifImg.Image {
 		if config.Verbose {
 			fmt.Printf("Processing frame %d/%d\n", i+1, len(gifImg.Image))
 		}
 		
-		processed := processImageWithSampling(frame, config.OutputWidth, config.OutputHeight, 
-			config.ColorSampling, config.Verbose)
-		processed.Filename = fmt.Sprintf("%s_frame_%d", filepath.Base(filename), i+1)
-		frames[i] = processed
-	}
+        processed := processImageWithSampling(frame, tunedW, tunedH, 
+            config.ColorSampling, config.Verbose)
+        processed.Filename = fmt.Sprintf("%s_frame_%d", filepath.Base(filename), i+1)
+        frames[i] = processed
+    }
 	
 	return &ProcessedGIF{
 		Filename:       filepath.Base(filename),
@@ -667,4 +821,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
