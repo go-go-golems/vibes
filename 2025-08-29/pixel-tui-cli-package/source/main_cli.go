@@ -9,6 +9,7 @@ import (
     "image/draw"
     "image/png"
     _ "image/jpeg"
+    "math"
     "log"
     "os"
     "path/filepath"
@@ -51,24 +52,30 @@ type ProcessedGIF struct {
 
 // Config holds the application configuration
 type Config struct {
-	InputFile     string
-	OutputWidth   int
-	OutputHeight  int
-	ColorSampling ColorSampling
-	ExportScale   int
-	Verbose       bool
+    InputFile     string
+    OutputWidth   int
+    OutputHeight  int
+    ColorSampling ColorSampling
+    ExportScale   int
+    Verbose       bool
+    RenderMode    RenderMode
+    MaxColors     int
+    DownscaleFactor int
+    SpeedMS         int
+    StepMode        bool
 }
 
 // Model represents the TUI application state
 type Model struct {
-	config        Config
-	staticImage   *ProcessedImage
-	animatedGIF   *ProcessedGIF
-	currentFrame  int
-	animationMode bool
-	animationSpeed time.Duration
-	width         int
-	height        int
+    config        Config
+    staticImage   *ProcessedImage
+    animatedGIF   *ProcessedGIF
+    currentFrame  int
+    animationView bool
+    playing       bool
+    animationSpeed time.Duration
+    width         int
+    height        int
 }
 
 // Animation tick message
@@ -78,6 +85,23 @@ func doTick(d time.Duration) tea.Cmd {
 	return tea.Tick(d, func(t time.Time) tea.Msg {
 		return tickMsg(t)
 	})
+}
+
+// RenderMode selects how pixels are mapped to terminal cells
+type RenderMode int
+
+const (
+    RenderBlock RenderMode = iota // 1 pixel per cell using background color
+    RenderHalf                    // 2 vertical pixels per cell using '▀' (fg/bg)
+)
+
+func parseRenderMode(s string) RenderMode {
+    switch strings.ToLower(s) {
+    case "half", "subpixel":
+        return RenderHalf
+    default:
+        return RenderBlock
+    }
 }
 
 // parseColorSampling converts string to ColorSampling enum
@@ -172,13 +196,63 @@ func processImageWithSampling(img image.Image, width, height int, sampling Color
 		fmt.Printf("Generated palette with %d colors\n", len(palette))
 	}
 	
-	return ProcessedImage{
-		Width:      width,
-		Height:     height,
-		Pixels:     pixels,
-		Palette:    palette,
-		ColorCount: len(palette),
-	}
+    return ProcessedImage{
+        Width:      width,
+        Height:     height,
+        Pixels:     pixels,
+        Palette:    palette,
+        ColorCount: len(palette),
+    }
+}
+
+// reducePaletteUniform re-quantizes pixels to a uniformly reduced palette ceiling at maxColors.
+func reducePaletteUniform(pixels [][]int, palette []string, maxColors int) ([][]int, []string) {
+    if maxColors <= 0 || len(palette) <= maxColors {
+        return pixels, palette
+    }
+    // Choose per-channel step so bucket count <= maxColors (try simple steps)
+    steps := []int{4, 8, 16, 32, 64}
+    chosen := 16
+    for _, s := range steps {
+        buckets := int(math.Ceil(256.0/float64(s)))
+        if buckets*buckets*buckets <= maxColors {
+            chosen = s
+            break
+        }
+    }
+    colorMap := make(map[string]int)
+    newPalette := []string{}
+    h := len(pixels)
+    w := 0
+    if h > 0 {
+        w = len(pixels[0])
+    }
+    newPixels := make([][]int, h)
+    for y := 0; y < h; y++ {
+        newPixels[y] = make([]int, w)
+        for x := 0; x < w; x++ {
+            idx := pixels[y][x]
+            var hex string
+            if idx >= 0 && idx < len(palette) {
+                r, g, b := hexToRGB(palette[idx])
+                rq := (int(r) / chosen) * chosen
+                gq := (int(g) / chosen) * chosen
+                bq := (int(b) / chosen) * chosen
+                if rq > 255 { rq = 255 }
+                if gq > 255 { gq = 255 }
+                if bq > 255 { bq = 255 }
+                hex = rgbToHex(uint8(rq), uint8(gq), uint8(bq))
+            } else {
+                hex = "#000000"
+            }
+            if _, ok := colorMap[hex]; !ok {
+                colorMap[hex] = len(newPalette)
+                newPalette = append(newPalette, hex)
+            }
+            newPixels[y][x] = colorMap[hex]
+        }
+    }
+    return newPixels, newPalette
 }
 
 // resizeImage resizes an image using nearest neighbor interpolation
@@ -354,6 +428,36 @@ func chooseDownsampleDims(first image.Image, desiredW, desiredH int, verbose boo
 
 func absInt(x int) int { if x < 0 { return -x }; return x }
 
+// computeDesiredDims derives target width/height using the original size,
+// an optional downscale factor, and aspect-ratio preservation when one side is unspecified.
+func computeDesiredDims(origW, origH int, cfg Config) (int, int) {
+    if origW <= 0 || origH <= 0 {
+        return maxInt(1, cfg.OutputWidth), maxInt(1, cfg.OutputHeight)
+    }
+    baseW, baseH := origW, origH
+    if cfg.DownscaleFactor > 1 {
+        baseW = maxInt(1, origW/cfg.DownscaleFactor)
+        baseH = maxInt(1, origH/cfg.DownscaleFactor)
+    }
+    w, h := cfg.OutputWidth, cfg.OutputHeight
+    switch {
+    case w > 0 && h > 0:
+        return w, h
+    case w > 0 && h <= 0:
+        // preserve aspect based on base dimensions
+        newH := int(math.Round(float64(w) * float64(baseH) / float64(baseW)))
+        return w, maxInt(1, newH)
+    case h > 0 && w <= 0:
+        newW := int(math.Round(float64(h) * float64(baseW) / float64(baseH)))
+        return maxInt(1, newW), h
+    default:
+        // both unspecified -> use base dimensions
+        return baseW, baseH
+    }
+}
+
+func maxInt(a, b int) int { if a > b { return a }; return b }
+
 // loadImage loads an image from file
 func loadImage(filename string) (image.Image, error) {
 	file, err := os.Open(filename)
@@ -387,10 +491,17 @@ func loadGIF(filename string, config Config) (*ProcessedGIF, error) {
     // Composite frames according to disposal to avoid artifacts
     composited := compositeGIFFrames(gifImg)
 
-    // Tune dimensions using first composited frame if downscaling
-    tunedW, tunedH := config.OutputWidth, config.OutputHeight
+    // Determine desired dimensions using original size, downscale factor, and aspect rules
+    desiredW, desiredH := config.OutputWidth, config.OutputHeight
     if len(composited) > 0 {
-        tunedW, tunedH = chooseDownsampleDims(composited[0], config.OutputWidth, config.OutputHeight, config.Verbose)
+        ow := composited[0].Bounds().Dx()
+        oh := composited[0].Bounds().Dy()
+        desiredW, desiredH = computeDesiredDims(ow, oh, config)
+    }
+    // Tune dimensions using first composited frame if downscaling
+    tunedW, tunedH := desiredW, desiredH
+    if len(composited) > 0 {
+        tunedW, tunedH = chooseDownsampleDims(composited[0], desiredW, desiredH, config.Verbose)
     }
 
     frames := make([]ProcessedImage, len(composited))
@@ -402,6 +513,10 @@ func loadGIF(filename string, config Config) (*ProcessedGIF, error) {
 
         processed := processImageWithSampling(frame, tunedW, tunedH, 
             config.ColorSampling, config.Verbose)
+        if config.MaxColors > 0 {
+            processed.Pixels, processed.Palette = reducePaletteUniform(processed.Pixels, processed.Palette, config.MaxColors)
+            processed.ColorCount = len(processed.Palette)
+        }
         processed.Filename = fmt.Sprintf("%s_frame_%d", filepath.Base(filename), i+1)
         frames[i] = processed
     }
@@ -521,75 +636,99 @@ func exportImageToPNG(pixels [][]int, palette []string, filename string, scale i
 
 // Init initializes the model
 func (m Model) Init() tea.Cmd {
-	if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
-		return doTick(m.animationSpeed)
-	}
-	return nil
+    if m.animatedGIF != nil && m.animatedGIF.IsAnimated && m.animationView && m.playing {
+        return doTick(m.animationSpeed)
+    }
+    return nil
 }
 
 // Update handles messages and updates the model
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "a":
-			// Toggle animation mode
-			if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
-				m.animationMode = !m.animationMode
-				if m.animationMode {
-					return m, doTick(m.animationSpeed)
-				}
-			}
-		case "s":
-			// Save current view as PNG
-			if m.animationMode && m.animatedGIF != nil && m.currentFrame < len(m.animatedGIF.Frames) {
-				frame := m.animatedGIF.Frames[m.currentFrame]
-				filename := fmt.Sprintf("export_%s_frame_%d.png", 
-					strings.TrimSuffix(m.animatedGIF.Filename, filepath.Ext(m.animatedGIF.Filename)), 
-					m.currentFrame+1)
-				err := exportImageToPNG(frame.Pixels, frame.Palette, filename, m.config.ExportScale)
-				if err == nil {
-					fmt.Printf("Exported animation frame to %s\n", filename)
-				}
-			} else if !m.animationMode && m.staticImage != nil {
-				filename := fmt.Sprintf("export_%s.png", 
-					strings.TrimSuffix(m.staticImage.Filename, filepath.Ext(m.staticImage.Filename)))
-				err := exportImageToPNG(m.staticImage.Pixels, m.staticImage.Palette, filename, m.config.ExportScale)
-				if err == nil {
-					fmt.Printf("Exported image to %s\n", filename)
-				}
-			}
-		case "=", "+":
-			// Speed up animation
-			if m.animationSpeed > 50*time.Millisecond {
-				m.animationSpeed -= 50 * time.Millisecond
-			}
-		case "-", "_":
-			// Slow down animation
-			if m.animationSpeed < 2*time.Second {
-				m.animationSpeed += 50 * time.Millisecond
-			}
-		case " ":
-			// Pause/resume animation
-			if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
-				m.animationMode = !m.animationMode
-				if m.animationMode {
-					return m, doTick(m.animationSpeed)
-				}
-			}
-		}
-	case tea.WindowSizeMsg:
-		m.width = msg.Width
-		m.height = msg.Height
-	case tickMsg:
-		if m.animationMode && m.animatedGIF != nil && m.animatedGIF.IsAnimated {
-			m.currentFrame = (m.currentFrame + 1) % m.animatedGIF.FrameCount
-			return m, doTick(m.animationSpeed)
-		}
-	}
-	return m, nil
+    case tea.KeyMsg:
+        switch msg.String() {
+        case "ctrl+c", "q":
+            return m, tea.Quit
+        case "a":
+            // Toggle animation mode
+            if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
+                m.animationView = !m.animationView
+                if m.animationView {
+                    if !m.playing { m.playing = true }
+                    return m, doTick(m.animationSpeed)
+                }
+            }
+        case "s":
+            // Save current view as PNG
+            if m.animationView && m.animatedGIF != nil && m.currentFrame < len(m.animatedGIF.Frames) {
+                frame := m.animatedGIF.Frames[m.currentFrame]
+                filename := fmt.Sprintf("export_%s_frame_%d.png", 
+                    strings.TrimSuffix(m.animatedGIF.Filename, filepath.Ext(m.animatedGIF.Filename)), 
+                    m.currentFrame+1)
+                err := exportImageToPNG(frame.Pixels, frame.Palette, filename, m.config.ExportScale)
+                if err == nil {
+                    fmt.Printf("Exported animation frame to %s\n", filename)
+                }
+            } else if !m.animationView && m.staticImage != nil {
+                filename := fmt.Sprintf("export_%s.png", 
+                    strings.TrimSuffix(m.staticImage.Filename, filepath.Ext(m.staticImage.Filename)))
+                err := exportImageToPNG(m.staticImage.Pixels, m.staticImage.Palette, filename, m.config.ExportScale)
+                if err == nil {
+                    fmt.Printf("Exported image to %s\n", filename)
+                }
+            }
+        case "=", "+":
+            // Speed up animation
+            if m.animationSpeed > 50*time.Millisecond {
+                m.animationSpeed -= 50 * time.Millisecond
+            }
+        case "-", "_":
+            // Slow down animation
+            if m.animationSpeed < 2*time.Second {
+                m.animationSpeed += 50 * time.Millisecond
+            }
+        case " ":
+            // Pause/resume playback (in animation view)
+            if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
+                if !m.animationView {
+                    m.animationView = true
+                }
+                m.playing = !m.playing
+                if m.playing {
+                    return m, doTick(m.animationSpeed)
+                }
+            }
+        case ",", "<", "left", "h":
+            // Previous frame (enter animation view, pause)
+            if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
+                m.animationView = true
+                m.playing = false
+                if m.currentFrame > 0 {
+                    m.currentFrame--
+                } else if m.animatedGIF.FrameCount > 0 {
+                    m.currentFrame = m.animatedGIF.FrameCount - 1
+                }
+            }
+        case ".", ">", "right", "l":
+            // Next frame (enter animation view, pause)
+            if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
+                m.animationView = true
+                m.playing = false
+                if m.animatedGIF.FrameCount > 0 {
+                    m.currentFrame = (m.currentFrame + 1) % m.animatedGIF.FrameCount
+                }
+            }
+        }
+    case tea.WindowSizeMsg:
+        m.width = msg.Width
+        m.height = msg.Height
+    case tickMsg:
+        if m.animationView && m.playing && m.animatedGIF != nil && m.animatedGIF.IsAnimated {
+            m.currentFrame = (m.currentFrame + 1) % m.animatedGIF.FrameCount
+            return m, doTick(m.animationSpeed)
+        }
+    }
+    return m, nil
 }
 
 // renderPixelImage renders a pixel image using lipgloss
@@ -617,6 +756,43 @@ func renderPixelImage(pixels [][]int, palette []string) string {
 	return result.String()
 }
 
+// renderPixelImageHalfBlock renders using '▀' with FG=top color, BG=bottom color, packing 2 rows per cell.
+func renderPixelImageHalfBlock(pixels [][]int, palette []string) string {
+    var result strings.Builder
+    height := len(pixels)
+    if height == 0 {
+        return ""
+    }
+    width := len(pixels[0])
+    for y := 0; y < height; y += 2 {
+        for x := 0; x < width; x++ {
+            topIdx := 0
+            bottomIdx := 0
+            if x < len(pixels[y]) {
+                topIdx = pixels[y][x]
+            }
+            if y+1 < height && x < len(pixels[y+1]) {
+                bottomIdx = pixels[y+1][x]
+            } else {
+                // if no bottom row, fill with top color for full block appearance
+                bottomIdx = topIdx
+            }
+            top := "#000000"
+            bottom := "#000000"
+            if topIdx >= 0 && topIdx < len(palette) {
+                top = palette[topIdx]
+            }
+            if bottomIdx >= 0 && bottomIdx < len(palette) {
+                bottom = palette[bottomIdx]
+            }
+            style := lipgloss.NewStyle().Foreground(lipgloss.Color(top)).Background(lipgloss.Color(bottom))
+            result.WriteString(style.Render("▀"))
+        }
+        result.WriteString("\n")
+    }
+    return result.String()
+}
+
 // View renders the current view
 func (m Model) View() string {
 	// Header style
@@ -640,12 +816,12 @@ func (m Model) View() string {
 	// Build the view
 	var view strings.Builder
 	
-	if m.animationMode && m.animatedGIF != nil {
-		// Animation mode
-		header := fmt.Sprintf("Pixel Art Viewer - Animation Mode - Frame %d/%d", 
-			m.currentFrame+1, m.animatedGIF.FrameCount)
-		view.WriteString(headerStyle.Render(header))
-		view.WriteString("\n")
+    if m.animationView && m.animatedGIF != nil {
+        // Animation mode
+        header := fmt.Sprintf("Pixel Art Viewer - Animation Mode - Frame %d/%d", 
+            m.currentFrame+1, m.animatedGIF.FrameCount)
+        view.WriteString(headerStyle.Render(header))
+        view.WriteString("\n")
 		
 		// Animation info
 		info := fmt.Sprintf("File: %s | Original: %dx%d | Display: %dx%d | Speed: %v | Sampling: %v", 
@@ -659,10 +835,15 @@ func (m Model) View() string {
 		view.WriteString(infoStyle.Render(info))
 		view.WriteString("\n")
 		
-		// Render current frame
-		if m.currentFrame < len(m.animatedGIF.Frames) {
-			frame := m.animatedGIF.Frames[m.currentFrame]
-			view.WriteString(renderPixelImage(frame.Pixels, frame.Palette))
+        // Render current frame
+        if m.currentFrame < len(m.animatedGIF.Frames) {
+            frame := m.animatedGIF.Frames[m.currentFrame]
+            switch m.config.RenderMode {
+            case RenderHalf:
+                view.WriteString(renderPixelImageHalfBlock(frame.Pixels, frame.Palette))
+            default:
+                view.WriteString(renderPixelImage(frame.Pixels, frame.Palette))
+            }
 			
 			// Frame palette
 			view.WriteString(fmt.Sprintf("\nFrame Palette (%d colors):\n", len(frame.Palette)))
@@ -686,15 +867,15 @@ func (m Model) View() string {
 			view.WriteString("\n")
 		}
 		
-		// Animation controls
-		controls := "Controls: SPACE (pause/play) | +/- (speed) | s (save PNG) | a (exit anim) | q (quit)"
-		view.WriteString(controlsStyle.Render(controls))
-		
-	} else {
-		// Static image mode
-		if m.staticImage == nil && m.animatedGIF == nil {
-			return "No image loaded.\n"
-		}
+        // Animation controls
+        controls := "Controls: SPACE (play/pause) | ,/< (prev) | ./> (next) | +/- (speed) | s (save PNG) | a (exit) | q (quit)"
+        view.WriteString(controlsStyle.Render(controls))
+
+    } else {
+        // Static image mode
+        if m.staticImage == nil && m.animatedGIF == nil {
+            return "No image loaded.\n"
+        }
 		
 		var img *ProcessedImage
 		if m.staticImage != nil {
@@ -724,8 +905,13 @@ func (m Model) View() string {
 		view.WriteString(infoStyle.Render(info))
 		view.WriteString("\n")
 		
-		// Render the pixel image
-		view.WriteString(renderPixelImage(img.Pixels, img.Palette))
+        // Render the pixel image
+        switch m.config.RenderMode {
+        case RenderHalf:
+            view.WriteString(renderPixelImageHalfBlock(img.Pixels, img.Palette))
+        default:
+            view.WriteString(renderPixelImage(img.Pixels, img.Palette))
+        }
 		
 		// Color palette
 		view.WriteString(fmt.Sprintf("\nColor Palette (%d colors):\n", len(img.Palette)))
@@ -749,30 +935,38 @@ func (m Model) View() string {
 		view.WriteString("\n")
 		
 		// Controls
-		animText := ""
-		if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
-			animText = " | a (animation)"
-		}
-		controls := fmt.Sprintf("Controls: s (save PNG)%s | q (quit)", animText)
-		view.WriteString(controlsStyle.Render(controls))
-	}
+        animText := ""
+        if m.animatedGIF != nil && m.animatedGIF.IsAnimated {
+            animText = " | a (animation) | ./> (next frame) | ,/< (prev frame)"
+        }
+        controls := fmt.Sprintf("Controls: s (save PNG)%s | q (quit)", animText)
+        view.WriteString(controlsStyle.Render(controls))
+    }
 	
 	return view.String()
 }
 
 func main() {
-	// Parse command line arguments
-	var config Config
-	var colorSamplingStr string
+    // Parse command line arguments
+    var config Config
+    var colorSamplingStr string
+    var renderModeStr string
+    var speedMS int
 	
 	flag.StringVar(&config.InputFile, "input", "", "Input image file (PNG or GIF)")
 	flag.StringVar(&config.InputFile, "i", "", "Input image file (PNG or GIF) (shorthand)")
-	flag.IntVar(&config.OutputWidth, "width", 32, "Output width in pixels")
-	flag.IntVar(&config.OutputWidth, "w", 32, "Output width in pixels (shorthand)")
-	flag.IntVar(&config.OutputHeight, "height", 32, "Output height in pixels")
-	flag.IntVar(&config.OutputHeight, "h", 32, "Output height in pixels (shorthand)")
+    flag.IntVar(&config.OutputWidth, "width", 0, "Output width in pixels (0=auto)")
+    flag.IntVar(&config.OutputWidth, "w", 0, "Output width in pixels (shorthand, 0=auto)")
+    flag.IntVar(&config.OutputHeight, "height", 0, "Output height in pixels (0=auto)")
+    flag.IntVar(&config.OutputHeight, "h", 0, "Output height in pixels (shorthand, 0=auto)")
 	flag.StringVar(&colorSamplingStr, "sampling", "nearest", "Color sampling method: nearest, quantized, interpolated")
-	flag.StringVar(&colorSamplingStr, "s", "nearest", "Color sampling method (shorthand)")
+    flag.StringVar(&colorSamplingStr, "s", "nearest", "Color sampling method (shorthand)")
+    flag.StringVar(&renderModeStr, "render", "block", "Render mode: block, half")
+    flag.StringVar(&renderModeStr, "r", "block", "Render mode (shorthand): block, half")
+    flag.IntVar(&config.MaxColors, "maxcolors", 0, "Reduce to at most this many colors (0=off)")
+    flag.IntVar(&config.DownscaleFactor, "downscale", 1, "Downscale original by factor before sizing (>=1)")
+    flag.IntVar(&speedMS, "speed", 200, "Animation speed in milliseconds per frame")
+    flag.BoolVar(&config.StepMode, "step", false, "Start in animation view paused for manual frame stepping (GIF only)")
 	flag.IntVar(&config.ExportScale, "scale", 10, "Export PNG scale factor")
 	flag.BoolVar(&config.Verbose, "verbose", false, "Verbose output")
 	flag.BoolVar(&config.Verbose, "v", false, "Verbose output (shorthand)")
@@ -786,34 +980,37 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  nearest      - Use exact colors from original image (default)\n")
 		fmt.Fprintf(os.Stderr, "  quantized    - Reduce color variations by quantization\n")
 		fmt.Fprintf(os.Stderr, "  interpolated - Allow intermediate colors for smooth gradients\n")
-		fmt.Fprintf(os.Stderr, "\nExamples:\n")
-		fmt.Fprintf(os.Stderr, "  %s -i image.png -w 64 -h 48 -s nearest\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "  %s --input animation.gif --width 32 --height 32 --sampling quantized\n", os.Args[0])
-	}
+        fmt.Fprintf(os.Stderr, "\nExamples:\n")
+        fmt.Fprintf(os.Stderr, "  %s -i image.png -w 64 -h 48 -s nearest\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "  %s --input animation.gif --width 32 --sampling quantized --render half --maxcolors 64 --speed 120\n", os.Args[0])
+        }
 	
 	flag.Parse()
 	
-	// Validate arguments
-	if config.InputFile == "" {
-		fmt.Fprintf(os.Stderr, "Error: Input file is required\n\n")
-		flag.Usage()
-		os.Exit(1)
-	}
+    // Validate arguments
+    if config.InputFile == "" {
+        fmt.Fprintf(os.Stderr, "Error: Input file is required\n\n")
+        flag.Usage()
+        os.Exit(1)
+    }
+    if config.DownscaleFactor < 1 { config.DownscaleFactor = 1 }
 	
-	if config.OutputWidth <= 0 || config.OutputHeight <= 0 {
-		fmt.Fprintf(os.Stderr, "Error: Width and height must be positive\n")
-		os.Exit(1)
-	}
-	
-	config.ColorSampling = parseColorSampling(colorSamplingStr)
+    config.ColorSampling = parseColorSampling(colorSamplingStr)
+    config.RenderMode = parseRenderMode(renderModeStr)
+    if speedMS <= 0 { speedMS = 200 }
+    config.SpeedMS = speedMS
 	
 	if config.Verbose {
 		fmt.Printf("Configuration:\n")
 		fmt.Printf("  Input: %s\n", config.InputFile)
 		fmt.Printf("  Output size: %dx%d\n", config.OutputWidth, config.OutputHeight)
 		fmt.Printf("  Color sampling: %v\n", config.ColorSampling)
-		fmt.Printf("  Export scale: %dx\n", config.ExportScale)
-	}
+        fmt.Printf("  Export scale: %dx\n", config.ExportScale)
+        fmt.Printf("  Render mode: %v\n", config.RenderMode)
+        if config.MaxColors > 0 { fmt.Printf("  Max colors: %d\n", config.MaxColors) }
+        fmt.Printf("  Downscale factor: %d\n", config.DownscaleFactor)
+        fmt.Printf("  Speed: %dms/frame\n", config.SpeedMS)
+    }
 	
 	// Check if file exists
 	if _, err := os.Stat(config.InputFile); os.IsNotExist(err) {
@@ -823,31 +1020,41 @@ func main() {
 	// Determine file type and process accordingly
 	ext := strings.ToLower(filepath.Ext(config.InputFile))
 	
-	var model Model
-	model.config = config
-	model.animationSpeed = 200 * time.Millisecond
+    var model Model
+    model.config = config
+    model.animationSpeed = time.Duration(config.SpeedMS) * time.Millisecond
+    model.animationView = false
+    model.playing = false
 	
 	switch ext {
-	case ".gif":
+case ".gif":
 		if config.Verbose {
 			fmt.Println("Processing GIF file...")
 		}
 		
-		processedGIF, err := loadGIF(config.InputFile, config)
-		if err != nil {
-			log.Fatalf("Error processing GIF: %v", err)
-		}
-		
-		model.animatedGIF = processedGIF
+        processedGIF, err := loadGIF(config.InputFile, config)
+        if err != nil {
+            log.Fatalf("Error processing GIF: %v", err)
+        }
+
+        model.animatedGIF = processedGIF
+        // Initialize viewing mode for GIFs
+        if config.StepMode {
+            model.animationView = true
+            model.playing = false
+        } else {
+            model.animationView = false
+            model.playing = false
+        }
 		
 		if config.Verbose {
-			fmt.Printf("Loaded GIF: %d frames, %dx%d -> %dx%d\n", 
-				processedGIF.FrameCount, 
-				processedGIF.OriginalWidth, processedGIF.OriginalHeight,
-				config.OutputWidth, config.OutputHeight)
-		}
+            fmt.Printf("Loaded GIF: %d frames, %dx%d -> %dx%d\n", 
+                processedGIF.FrameCount, 
+                processedGIF.OriginalWidth, processedGIF.OriginalHeight,
+                config.OutputWidth, config.OutputHeight)
+        }
 		
-	case ".png", ".jpg", ".jpeg":
+case ".png", ".jpg", ".jpeg":
 		if config.Verbose {
 			fmt.Println("Processing static image...")
 		}
@@ -857,8 +1064,16 @@ func main() {
 			log.Fatalf("Error loading image: %v", err)
 		}
 		
-		processed := processImageWithSampling(img, config.OutputWidth, config.OutputHeight, 
-			config.ColorSampling, config.Verbose)
+        // Determine desired dimensions from original, downscale, and aspect rules
+        ow := img.Bounds().Dx()
+        oh := img.Bounds().Dy()
+        dw, dh := computeDesiredDims(ow, oh, model.config)
+        processed := processImageWithSampling(img, dw, dh, 
+            config.ColorSampling, config.Verbose)
+        if config.MaxColors > 0 {
+            processed.Pixels, processed.Palette = reducePaletteUniform(processed.Pixels, processed.Palette, config.MaxColors)
+            processed.ColorCount = len(processed.Palette)
+        }
 		processed.Filename = filepath.Base(config.InputFile)
 		
 		model.staticImage = &processed
