@@ -6,6 +6,7 @@ import (
     "image"
     "image/color"
     "image/gif"
+    "image/draw"
     "image/png"
     _ "image/jpeg"
     "log"
@@ -378,24 +379,27 @@ func loadGIF(filename string, config Config) (*ProcessedGIF, error) {
 		return nil, err
 	}
 	
-	if config.Verbose {
-		fmt.Printf("Loading GIF: %d frames, %dx%d\n", 
-			len(gifImg.Image), gifImg.Config.Width, gifImg.Config.Height)
-	}
+    if config.Verbose {
+        fmt.Printf("Loading GIF: %d frames, %dx%d\n", 
+            len(gifImg.Image), gifImg.Config.Width, gifImg.Config.Height)
+    }
 	
-    // Tune dimensions using first frame if downscaling
+    // Composite frames according to disposal to avoid artifacts
+    composited := compositeGIFFrames(gifImg)
+
+    // Tune dimensions using first composited frame if downscaling
     tunedW, tunedH := config.OutputWidth, config.OutputHeight
-    if len(gifImg.Image) > 0 {
-        tunedW, tunedH = chooseDownsampleDims(gifImg.Image[0], config.OutputWidth, config.OutputHeight, config.Verbose)
+    if len(composited) > 0 {
+        tunedW, tunedH = chooseDownsampleDims(composited[0], config.OutputWidth, config.OutputHeight, config.Verbose)
     }
 
-    frames := make([]ProcessedImage, len(gifImg.Image))
-	
-	for i, frame := range gifImg.Image {
-		if config.Verbose {
-			fmt.Printf("Processing frame %d/%d\n", i+1, len(gifImg.Image))
-		}
-		
+    frames := make([]ProcessedImage, len(composited))
+
+    for i, frame := range composited {
+        if config.Verbose {
+            fmt.Printf("Processing frame %d/%d\n", i+1, len(gifImg.Image))
+        }
+
         processed := processImageWithSampling(frame, tunedW, tunedH, 
             config.ColorSampling, config.Verbose)
         processed.Filename = fmt.Sprintf("%s_frame_%d", filepath.Base(filename), i+1)
@@ -410,6 +414,65 @@ func loadGIF(filename string, config Config) (*ProcessedGIF, error) {
 		FrameCount:     len(gifImg.Image),
 		Frames:         frames,
 	}, nil
+}
+
+// cloneRGBA makes a deep copy of an RGBA image
+func cloneRGBA(src *image.RGBA) *image.RGBA {
+    dst := image.NewRGBA(src.Bounds())
+    copy(dst.Pix, src.Pix)
+    return dst
+}
+
+// compositeGIFFrames composites paletted frames into full RGBA frames using disposal methods.
+func compositeGIFFrames(g *gif.GIF) []image.Image {
+    w, h := g.Config.Width, g.Config.Height
+    canvas := image.NewRGBA(image.Rect(0, 0, w, h))
+    // Background color from global palette if available
+    var bg color.Color = color.RGBA{0, 0, 0, 0}
+    if pal, ok := g.Config.ColorModel.(color.Palette); ok && int(g.BackgroundIndex) < len(pal) {
+        bg = pal[g.BackgroundIndex]
+    }
+    // Clear canvas
+    draw.Draw(canvas, canvas.Bounds(), &image.Uniform{C: bg}, image.Point{}, draw.Src)
+
+    frames := make([]image.Image, 0, len(g.Image))
+    var prevBounds image.Rectangle
+    var prevBackup *image.RGBA
+    var prevDisposal byte
+
+    // Helper to get disposal for frame i, default 0 (None)
+    getDisposal := func(i int) byte {
+        if g.Disposal != nil && i >= 0 && i < len(g.Disposal) {
+            return g.Disposal[i]
+        }
+        return 0
+    }
+
+    for i, pal := range g.Image {
+        // Apply disposal for previous frame before drawing current
+        if i > 0 {
+            switch prevDisposal {
+            case 2: // DisposalBackground
+                draw.Draw(canvas, prevBounds, &image.Uniform{C: bg}, image.Point{}, draw.Src)
+            case 3: // DisposalPrevious
+                if prevBackup != nil {
+                    draw.Draw(canvas, prevBackup.Bounds(), prevBackup, image.Point{}, draw.Src)
+                }
+            }
+        }
+
+        // Backup before drawing this frame (for DisposalPrevious use in next step)
+        prevBackup = cloneRGBA(canvas)
+        prevBounds = pal.Bounds()
+        prevDisposal = getDisposal(i)
+
+        // Draw current frame onto canvas respecting transparency
+        draw.Draw(canvas, pal.Bounds(), pal, pal.Bounds().Min, draw.Over)
+
+        // Store a copy of the composited frame
+        frames = append(frames, cloneRGBA(canvas))
+    }
+    return frames
 }
 
 // exportImageToPNG exports the current image to a PNG file
