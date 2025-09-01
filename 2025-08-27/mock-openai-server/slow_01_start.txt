@@ -1,0 +1,24 @@
+ubuntu@6cfcd2641768:~$ python3 slow_streaming_demo.py
+=== SLOW Streaming Demo ===
+Each token will appear with 1 second delay
+Perfect for visual demonstration!
+
+Request: 'Tell me a joke!'
+Response: Why don't scientists
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
