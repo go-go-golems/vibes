@@ -19,9 +19,11 @@ def test_streaming_basic():
     print_with_timestamp("🚀 Starting Basic Streaming Test", "92")  # Green
     print("=" * 60)
     
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
     client = openai.OpenAI(
         api_key="mock-api-key",
-        base_url="http://localhost:8080/v1"
+        base_url=f"http://localhost:{port}/v1"
     )
     
     print_with_timestamp("📤 Sending request with stream=True", "94")  # Blue
@@ -63,9 +65,11 @@ def test_streaming_different_prompts():
     print_with_timestamp("🎯 Testing Different Prompt Types", "92")
     print("=" * 60)
     
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
     client = openai.OpenAI(
         api_key="mock-api-key",
-        base_url="http://localhost:8080/v1"
+        base_url=f"http://localhost:{port}/v1"
     )
     
     test_prompts = [
@@ -106,9 +110,11 @@ def test_streaming_vs_non_streaming():
     print_with_timestamp("⚖️  Comparing Streaming vs Non-Streaming", "92")
     print("=" * 60)
     
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
     client = openai.OpenAI(
         api_key="mock-api-key",
-        base_url="http://localhost:8080/v1"
+        base_url=f"http://localhost:{port}/v1"
     )
     
     prompt = "Explain the difference between streaming and non-streaming responses."
@@ -169,9 +175,11 @@ def test_streaming_with_system_message():
     print_with_timestamp("🎭 Testing Streaming with System Message", "92")
     print("=" * 60)
     
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
     client = openai.OpenAI(
         api_key="mock-api-key",
-        base_url="http://localhost:8080/v1"
+        base_url=f"http://localhost:{port}/v1"
     )
     
     try:
@@ -231,4 +239,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

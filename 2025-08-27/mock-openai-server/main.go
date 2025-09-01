@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+    docpkg "mock-openai-server/pkg/doc"
 )
 
 // Chat Completions API structures (existing)
@@ -306,46 +307,33 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(health)
 }
 
-func main() {
-	rand.Seed(time.Now().UnixNano())
+func startHttpServer() error {
+    router := mux.NewRouter()
+    router.Use(corsMiddleware)
 
-	// Load YAML configuration if present
-	LoadConfigFromEnv()
+    // Chat Completions API
+    router.HandleFunc("/v1/chat/completions", handleChatCompletions).Methods("POST")
+    router.HandleFunc("/v1/models", handleModels).Methods("GET")
+    router.HandleFunc("/health", handleHealth).Methods("GET")
 
-	router := mux.NewRouter()
-	router.Use(corsMiddleware)
+    // Help endpoints
+    docpkg.RegisterHelpRoutes(router)
 
-	// Chat Completions API (existing)
-	router.HandleFunc("/v1/chat/completions", handleChatCompletions).Methods("POST")
-	router.HandleFunc("/v1/models", handleModels).Methods("GET")
-	router.HandleFunc("/health", handleHealth).Methods("GET")
+    // Responses API
+    setupResponsesRoutes(router)
 
-	// Setup Responses API routes
-	setupResponsesRoutes(router)
+    port := "3117"
+    if botConfig != nil && botConfig.Server.Port != "" { port = botConfig.Server.Port }
+    log.Printf("🚀 Mock OpenAI Server with Responses API starting on :%s", port)
+    log.Println("")
+    log.Println("Available APIs:")
+    log.Println("📝 Chat Completions API:\n  POST /v1/chat/completions")
+    log.Println("🔄 Responses API:\n  POST /v1/responses\n  GET /v1/responses\n  GET /v1/responses/{response_id}")
+    log.Println("🔧 Utility endpoints:\n  GET /v1/models\n  GET /health\n  GET /help, /help/{slug}")
+    log.Println("")
+    log.Println("Features:\n✅ Streaming support for both APIs\n✅ Built-in tools (web_search, file_search)\n✅ Stateful conversations\n✅ Conversation forking\n✅ CORS enabled")
 
-	port := "8080"
-	if botConfig != nil && botConfig.Server.Port != "" { port = botConfig.Server.Port }
-	log.Printf("🚀 Mock OpenAI Server with Responses API starting on :%s", port)
-	log.Println("")
-	log.Println("Available APIs:")
-	log.Println("📝 Chat Completions API:")
-	log.Println("  POST /v1/chat/completions")
-	log.Println("🔄 Responses API:")
-	log.Println("  POST /v1/responses")
-	log.Println("  GET /v1/responses")
-	log.Println("  GET /v1/responses/{response_id}")
-	log.Println("🔧 Utility endpoints:")
-	log.Println("  GET /v1/models")
-	log.Println("  GET /health")
-	log.Println("")
-	log.Println("Features:")
-	log.Println("✅ Streaming support for both APIs")
-	log.Println("✅ Built-in tools (web_search, file_search)")
-	log.Println("✅ Stateful conversations")
-	log.Println("✅ Conversation forking")
-	log.Println("✅ CORS enabled")
-
-	log.Fatal(http.ListenAndServe(":"+port, router))
+    return http.ListenAndServe(":"+port, router)
 }
 
 // Resolve chat response using configuration rules; falls back to built-in generator.

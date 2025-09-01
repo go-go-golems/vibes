@@ -9,6 +9,7 @@ import (
     "strings"
     yaml "gopkg.in/yaml.v3"
     "github.com/gorilla/mux"
+    glaze_help "github.com/go-go-golems/glazed/pkg/help"
 )
 
 //go:embed help/*.md
@@ -111,3 +112,11 @@ func RegisterHelpRoutes(r *mux.Router) {
 // Utilities for CLI integration
 func ListSections() map[string]*HelpSection { return helpIndex }
 func GetSection(slug string) (*HelpSection, bool) { s, ok := helpIndex[slug]; return s, ok }
+
+// AddDocToHelpSystem wires embedded docs into the Glazed help system.
+// Note: We keep a custom parser for front matter and content, then
+//       add minimal sections to the Glazed system.
+func AddDocToHelpSystem(hs *glaze_help.HelpSystem) error {
+    // Load all embedded markdown files under help/ into the Glazed help system
+    return hs.LoadSectionsFromFS(helpFS, "help")
+}

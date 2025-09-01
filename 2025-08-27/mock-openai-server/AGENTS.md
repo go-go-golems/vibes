@@ -9,8 +9,8 @@
 
 ## Build, Test, and Development Commands
 - Run server (dev): `go run .`
-- Build binary: `go build -o mock-openai-server .` then `./mock-openai-server`
-- Quick health check: `curl http://localhost:8080/health`
+- Build binary: `go build -o mock-openai-server .` then `./mock-openai-server serve`
+- Quick health check: `curl http://localhost:3117/health`
 - Python smoke tests (server running):
   - Basic SDK tests: `python3 test_mock_server.py`
   - Responses API suite: `python3 test_responses_api.py`
@@ -33,7 +33,6 @@
 - Keep diffs focused; update relevant docs (`README.md`, this file) when adding endpoints or flags.
 
 ## Security & Configuration Tips
-- Server runs on `:8080` by default (see `main.go`). Do not expose publicly; CORS is wide‑open for dev convenience and there is no auth.
+- Server runs on `:3117` by default (see `main.go`). Do not expose publicly; CORS is wide‑open for dev convenience and there is no auth.
 - The API is mock; avoid sending sensitive data.
 - When adding endpoints, ensure CORS headers and JSON error shapes match existing handlers.
-

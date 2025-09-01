@@ -64,10 +64,12 @@ import openai
 import time
 import sys
 
-client = openai.OpenAI(
-    api_key="mock-api-key",
-    base_url="http://localhost:8080/v1"
-)
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
+    client = openai.OpenAI(
+        api_key="mock-api-key",
+        base_url=f"http://localhost:{port}/v1"
+    )
 
 print("📤 Sending streaming request...")
 print("🤖 Assistant: ", end="", flush=True)
@@ -141,7 +143,9 @@ def create_streaming_comparison_demo():
 import openai
 import time
 
-client = openai.OpenAI(api_key="mock-api-key", base_url="http://localhost:8080/v1")
+import os
+port = os.environ.get("MOCK_SERVER_PORT", "3117")
+client = openai.OpenAI(api_key="mock-api-key", base_url=f"http://localhost:{port}/v1")
 print("⏳ Requesting...")
 time.sleep(1)
 response = client.chat.completions.create(
@@ -161,7 +165,9 @@ print(response.choices[0].message.content)
 import openai
 import time
 
-client = openai.OpenAI(api_key="mock-api-key", base_url="http://localhost:8080/v1")
+import os
+port = os.environ.get("MOCK_SERVER_PORT", "3117")
+client = openai.OpenAI(api_key="mock-api-key", base_url=f"http://localhost:{port}/v1")
 print("📤 Streaming...")
 stream = client.chat.completions.create(
     model="gpt-3.5-turbo",
@@ -238,7 +244,9 @@ def main():
     time.sleep(2)
     
     # Test server connectivity
-    success, _, _ = run_command("curl -s http://localhost:8080/health > /dev/null")
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
+    success, _, _ = run_command(f"curl -s http://localhost:{port}/health > /dev/null")
     if not success:
         print("❌ Mock server is not running. Please start it first.")
         return
@@ -269,4 +277,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

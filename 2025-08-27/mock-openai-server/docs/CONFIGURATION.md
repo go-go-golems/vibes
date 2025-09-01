@@ -9,7 +9,7 @@ This server can be customized with a single YAML file to control models, streami
 
 ## Schema Overview
 - `version`: Integer config version.
-- `server`: `{ port: 8080, cors: "*" }`
+- `server`: `{ port: 3117, cors: "*" }`
 - `models`: List of `{ id, owned_by }` exposed by `/v1/models`.
 - `streaming`: `{ enabled: true, chunk_delay_ms: 120 }` (affects SSE token pacing).
 - `variables`: Key/values available in templates (e.g., `bot_name`).

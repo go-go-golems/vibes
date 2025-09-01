@@ -12,7 +12,8 @@ import sys
 from typing import Dict, Any, List
 
 # Configuration
-BASE_URL = "http://localhost:8080"
+import os
+BASE_URL = f"http://localhost:{os.environ.get('MOCK_SERVER_PORT','3117')}"
 API_KEY = "mock-api-key"
 
 class ResponsesAPITester:
@@ -494,4 +495,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

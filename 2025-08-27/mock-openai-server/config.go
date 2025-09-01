@@ -224,7 +224,7 @@ func defaultConfig() *BotConfig {
     enabled := true
     cfg := &BotConfig{
         Version: 1,
-        Server:  ServerConfig{Port: "8080", CORS: "*"},
+        Server:  ServerConfig{Port: "3117", CORS: "*"},
         Models: []ModelConfig{
             {ID: "gpt-4o", OwnedBy: "openai"},
             {ID: "gpt-4o-mini", OwnedBy: "openai"},
