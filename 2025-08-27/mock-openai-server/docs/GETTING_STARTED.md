@@ -10,9 +10,9 @@ This guide helps you run the Mock OpenAI Server quickly and customize it when re
 - With Makefile:
   - `make run` — starts the server using `config/bot.yaml` (override with `make run MOCK_SERVER_CONFIG=path.yaml`).
 - Without Makefile:
-  - `go run .` — uses the built‑in default configuration when no YAML file is found.
+  - `go run . serve` — uses the built‑in default configuration when no YAML file is found.
 
-The server listens on `http://localhost:8080` by default.
+The server listens on `http://localhost:3117` by default.
 
 ## Quick tests
 - Chat completions (Python SDK): `python3 test_mock_server.py`
@@ -28,7 +28,7 @@ Use a YAML file to control models, streaming delay, and rule‑based responses f
 ## Default configuration (used when no YAML is provided)
 ```yaml
 version: 1
-server: { port: 8080, cors: "*" }
+server: { port: 3117, cors: "*" }
 models:
   - { id: gpt-4o, owned_by: openai }
   - { id: gpt-4o-mini, owned_by: openai }
@@ -66,4 +66,3 @@ fallback:
 ```
 
 Start with the defaults, then copy `config/bot.yaml` and tailor rules, tools, and models to your needs.
-

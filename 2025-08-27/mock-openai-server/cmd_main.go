@@ -8,6 +8,8 @@ import (
 
     docpkg "mock-openai-server/pkg/doc"
     "github.com/spf13/cobra"
+    glaze_help "github.com/go-go-golems/glazed/pkg/help"
+    help_cmd "github.com/go-go-golems/glazed/pkg/help/cmd"
 )
 
 func main() {
@@ -18,6 +20,11 @@ func main() {
             LoadConfigFromEnv()
         },
     }
+
+    // Wire Glazed help system
+    hs := glaze_help.NewHelpSystem()
+    _ = docpkg.AddDocToHelpSystem(hs)
+    help_cmd.SetupCobraRootCommand(hs, rootCmd)
 
     helpCmd := &cobra.Command{
         Use:   "help",
@@ -67,4 +74,3 @@ func main() {
         log.Fatal(err)
     }
 }
-

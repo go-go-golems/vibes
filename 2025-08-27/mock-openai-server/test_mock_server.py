@@ -11,9 +11,11 @@ def test_mock_server():
     """Test the mock OpenAI server with various scenarios."""
     
     # Configure the OpenAI client to use our local mock server
+    import os
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
     client = openai.OpenAI(
         api_key="mock-api-key",  # Mock API key
-        base_url="http://localhost:8080/v1"  # Our local server
+        base_url=f"http://localhost:{port}/v1"  # Our local server
     )
     
     print("🚀 Testing Mock OpenAI Server")
@@ -173,9 +175,10 @@ def test_models_endpoint():
     """Test the models endpoint."""
     print("\n🔍 Testing Models Endpoint")
     
+    port = os.environ.get("MOCK_SERVER_PORT", "3117")
     client = openai.OpenAI(
         api_key="mock-api-key",
-        base_url="http://localhost:8080/v1"
+        base_url=f"http://localhost:{port}/v1"
     )
     
     try:
@@ -192,10 +195,11 @@ def test_health_endpoint():
     """Test the health endpoint using direct HTTP request."""
     print("\n🏥 Testing Health Endpoint")
     
-    import requests
+    import requests, os
     
     try:
-        response = requests.get("http://localhost:8080/health")
+        port = os.environ.get("MOCK_SERVER_PORT", "3117")
+        response = requests.get(f"http://localhost:{port}/health")
         if response.status_code == 200:
             data = response.json()
             print(f"✅ Health endpoint works!")

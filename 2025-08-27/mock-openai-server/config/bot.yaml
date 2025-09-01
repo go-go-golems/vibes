@@ -1,6 +1,6 @@
 version: 1
 server:
-  port: 8080
+  port: 3117
   cors: "*"
 models:
   - { id: gpt-4o, owned_by: openai }

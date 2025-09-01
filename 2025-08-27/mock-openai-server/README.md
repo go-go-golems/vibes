@@ -26,10 +26,10 @@ A lightweight mock implementation of the OpenAI API written in Go, designed to b
    ```bash
    cd mock-openai-server
    go build -o mock-openai-server .
-   ./mock-openai-server
+   ./mock-openai-server serve
    ```
 
-The server will start on `http://localhost:8080`
+The server will start on `http://localhost:3117`
 
 ### Testing with Python OpenAI SDK
 
@@ -65,6 +65,10 @@ The server will start on `http://localhost:8080`
 - **Endpoint**: `GET /`
 - **Returns**: Server information and available endpoints
 
+### Help
+- **Endpoint**: `GET /help` lists built-in documentation topics
+- **Endpoint**: `GET /help/{slug}` returns a specific help entry (markdown content with metadata)
+
 ## Usage Examples
 
 ### Python with OpenAI SDK
@@ -75,7 +79,7 @@ import openai
 # Configure client to use mock server
 client = openai.OpenAI(
     api_key="mock-api-key",  # Any string works
-    base_url="http://localhost:8080/v1"
+    base_url="http://localhost:3117/v1"
 )
 
 # Make a chat completion request
@@ -92,7 +96,7 @@ print(response.choices[0].message.content)
 ### cURL
 
 ```bash
-curl -X POST http://localhost:8080/v1/chat/completions \
+curl -X POST http://localhost:3117/v1/chat/completions \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer mock-api-key" \
   -d '{
