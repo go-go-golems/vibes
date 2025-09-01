@@ -1,0 +1,59 @@
+version: 1
+server:
+  port: 3117
+  cors: "*"
+models:
+  - { id: gpt-4o, owned_by: openai }
+  - { id: gpt-4o-mini, owned_by: openai }
+  - { id: gpt-3.5-turbo, owned_by: openai }
+streaming:
+  enabled: true
+  chunk_delay_ms: 120
+variables:
+  bot_name: "Mock OpenAI"
+
+tools:
+  enabled: [web_search, file_search]
+  registry:
+    # Override defaults or add custom tools here.
+    # web_search and file_search have sensible defaults baked in.
+    custom_demo:
+      call_type: custom_demo_call
+      status: completed
+      message:
+        text: "Custom tool ran with input: '{{input_text}}'"
+
+rules:
+  - id: greet
+    match: { endpoint: chat, contains: ["hello", "hi"] }
+    respond:
+      text: "Hello! I'm {{bot_name}}. How can I help?"
+
+  - id: jokes
+    match: { endpoint: chat, contains: ["joke"] }
+    respond:
+      choose:
+        - { weight: 1, text: "Why don't scientists trust atoms? They make up everything!" }
+        - { weight: 1, text: "What do you call a fake noodle? An impasta!" }
+
+  - id: chat_with_search
+    match: { endpoint: chat, contains: ["search", "latest"] }
+    respond:
+      use_tools: [web_search]
+      text: "Summary above. Let me know if you want more details."
+
+  - id: responses_web_search
+    match: { endpoint: responses, contains: ["news", "latest", "AI"] }
+    respond:
+      use_tools: [web_search]
+      message:
+        text: "Here are the latest AI headlines with citations."
+
+  - id: responses_custom_tool
+    match: { endpoint: responses, contains: ["custom tool"] }
+    respond:
+      use_tools: [custom_demo]
+
+fallback:
+  respond:
+    text: "This is a mock response to: '{{last_user_message}}'."
