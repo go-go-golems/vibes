@@ -1,57 +1,87 @@
 # Vault .envrc Generator
 
-A comprehensive Go utility for generating .envrc files from HashiCorp Vault secrets with advanced features and audit logging.
+Generate developer-friendly environment files (.envrc, JSON, YAML) from HashiCorp Vault secrets. Supports browsing, batch composition, YAML-driven seeding, and safe token resolution.
 
-## Features
+## Highlights
 
-- 🔐 **Multi-Engine Support**: Works with KV v1 and KV v2 secret engines
-- 🎯 **Multiple Interfaces**: CLI, Interactive, and Batch processing modes
-- 🎨 **Flexible Output**: .envrc, JSON, and YAML formats
-- 🔧 **Customization**: Prefix addition, key transformation, and filtering
-- 📝 **Templates**: Custom Go templates for advanced formatting
-- 📊 **Audit Integration**: Complete audit trail of all operations
-- ⚡ **Performance**: Efficient processing with parallel batch operations
+- 🔐 KV v1/v2 aware: KV v2-first fallback (no mount-list permission required)
+- 🧭 Token sources: env, file (~/.vault-token), or lookup via `vault token lookup`
+- 🧰 Interfaces: `generate`, `interactive`, `batch`, `list`, `seed`, `test`
+- 🧩 Output: `.envrc`, `json`, `yaml`; append or merge across jobs
+- 🧱 Sections-based batch: job-level defaults + per-section overrides, with headers in `.envrc`
+- ✍️ YAML seeding: write secrets into Vault from env, literals, files
+- 🔎 KV v2-aware listing: YAML/text, optional censored values for leaf keys
 
 ## Quick Start
 
 ### Prerequisites
 
-- HashiCorp Vault server running and accessible
-- Valid Vault token with appropriate permissions
+- HashiCorp Vault reachable and you have a token (dev policy at minimum)
 
-### Installation
+### Install
 
-1. Download the binary from the releases or build from source:
 ```bash
 go build -o vault-envrc-generator .
 ```
 
-2. Set environment variables:
+### Configure Vault address and token
+
 ```bash
-export VAULT_ADDR="http://127.0.0.1:8200"
-export VAULT_TOKEN="your-vault-token"
+export VAULT_ADDR="https://vault.example.com:8200"
+export VAULT_TOKEN="$(cat ~/.vault-token)"   # or use env/file/lookup at runtime
 ```
 
-### Basic Usage
+### Common commands
 
 ```bash
-# Test connectivity
-./vault-envrc-generator test
+# Connectivity check
+./vault-envrc-generator test -v
 
-# Generate .envrc from secrets
-./vault-envrc-generator generate --path secret/myapp
-
-# Interactive mode
+# Browse and generate interactively
 ./vault-envrc-generator interactive
 
-# Batch processing
-./vault-envrc-generator batch --config batch-config.yaml
+# Generate one path
+./vault-envrc-generator generate --path secrets/environments/development/shared/database \
+  --output out/.envrc --prefix DB_ --transform-keys
+
+# Batch (sections schema)
+./vault-envrc-generator batch --config go-utility/batch-load-dev.yaml --continue-on-error
+
+# List what you can see (YAML with censored values)
+./vault-envrc-generator list --path secrets/environments/development/shared/ \
+  --format yaml --include-values --censor "***"
+
+# Seed secrets from YAML
+./vault-envrc-generator seed --config go-utility/seed-personal.yaml --dry-run
 ```
+
+## Concepts
+
+A few core concepts help understand how this tool behaves and why:
+
+- KV Engines: Vault stores secrets under mounts. KV v2 wraps real data under `data/` for reads and `metadata/` for listings. This tool automatically attempts v2 and falls back to v1 to minimize required privileges.
+- Token Resolution: Tokens can be taken from `VAULT_TOKEN`, read from `~/.vault-token`, or resolved via `vault token lookup` (current session). The default `auto` mode tries all three in a safe order.
+- Key Transformation and Prefixing: Many developers prefer shell-safe env names. `transform_keys` converts keys to uppercase and replaces `-` with `_`, then `prefix` is prepended (e.g., `DB_`).
+- Output Modes: Batch jobs can overwrite, append, or merge outputs. Append is ideal for `.envrc`. Merge is ideal for JSON/YAML maps.
+- Sections-Based Batch: Define job-level defaults (output, format, etc.) and a list of sections each pointing at a Vault path. Each section can override defaults for precise control. The `.envrc` formatter emits friendly headers per section including the source path and description.
+
+## Token Resolution
+
+Global flags/ENV control how the token is found:
+
+- `--vault-token-source`: `auto` (default), `env`, `file`, `lookup`
+- `--vault-token-file`: path to token file (default: `~/.vault-token`)
+
+Auto order: explicit flag/env → file → `vault token lookup`.
+
+Notes:
+- For `lookup`, this tool shells out to `vault token lookup -format=json` and extracts `.data.id`. Ensure the Vault CLI is installed and authenticated.
+- For `file`, the default path is `~/.vault-token`. You can override with `--vault-token-file`.
 
 ## Commands
 
-### `generate`
-Generate .envrc files from Vault secrets with extensive customization options.
+### generate
+Reads a single path and writes formatted output.
 
 ```bash
 vault-envrc-generator generate [flags]
@@ -59,225 +89,280 @@ vault-envrc-generator generate [flags]
 Flags:
   -p, --path string          Vault secret path (required)
   -o, --output string        Output file path (default ".envrc")
-      --prefix string        Prefix for environment variable names
-      --exclude strings      Keys to exclude (comma-separated)
-      --include strings      Keys to include (comma-separated)
-      --transform-keys       Transform keys to uppercase and replace - with _
-      --template string      Custom template file
-  -f, --format string        Output format: envrc, json, yaml (default "envrc")
-      --dry-run             Show output without writing file
+      --prefix string        Prefix for names
+      --exclude strings      Keys to exclude
+      --include strings      Keys to include
+      --transform-keys       Uppercase + replace '-'→'_' (see Transform Keys)
+      --template string      Custom Go template (envrc)
+  -f, --format string        envrc | json | yaml (default "envrc")
+      --dry-run              Show output only
 ```
 
-**Examples:**
+How it works:
+- Reads the secret from Vault at `--path` (tries KV v2 then v1)
+- Filters keys per `--include/--exclude`
+- Applies `--transform-keys` and `--prefix`
+- Formats into `envrc|json|yaml` (or a custom template)
+
+Common examples:
 ```bash
-# Basic generation
-vault-envrc-generator generate --path secret/myapp
+# Only include username/password and add prefix
+./vault-envrc-generator generate -p secrets/.../database --include username,password \
+  --prefix DB_ --transform-keys --output out/.envrc
 
-# With prefix and transformation
-vault-envrc-generator generate --path secret/myapp --prefix MYAPP_ --transform-keys
-
-# Exclude sensitive keys
-vault-envrc-generator generate --path secret/myapp --exclude password,secret_key
-
-# JSON output
-vault-envrc-generator generate --path secret/myapp --format json
-
-# Dry run
-vault-envrc-generator generate --path secret/myapp --dry-run
+# Emit JSON for programmatic consumption
+./vault-envrc-generator generate -p secrets/.../config --format json > config.json
 ```
 
-### `interactive`
-Interactive mode for guided secret selection and configuration.
+### interactive
+Guided mode to select a path, preview, and write.
 
-```bash
-vault-envrc-generator interactive
-```
+### batch
+Compose multiple outputs from multiple paths. Two schemas are supported.
 
-Features:
-- Browse available Vault paths
-- Select specific secrets to include
-- Configure generation options interactively
-- Preview output before saving
+#### Sections schema (recommended)
 
-### `batch`
-Process multiple Vault paths using a YAML configuration file.
-
-```bash
-vault-envrc-generator batch --config batch-config.yaml [flags]
-
-Flags:
-  -c, --config string       Batch configuration file (required)
-      --parallel            Run jobs in parallel
-      --continue-on-error   Continue processing if a job fails
-```
-
-**Batch Configuration Example:**
 ```yaml
 jobs:
-  - name: "Frontend App"
-    path: "secret/frontend"
-    output: "frontend/.envrc"
-    prefix: "FRONTEND_"
-    transform_keys: true
-    exclude_keys: ["internal_key"]
-    
-  - name: "Backend API"
-    path: "secret/backend"
-    output: "backend/.envrc"
-    format: "json"
+  - name: "Dev envrc"
+    description: "Aggregated development environment variables"
+    output: "out/dev/.envrc"
+    output_mode: append        # overwrite | append | merge
+    format: envrc              # envrc | json | yaml
+    transform_keys: true       # job-level default; sections can override
+    sections:
+      - name: db
+        description: "Shared DB user/password"
+        path: secrets/environments/development/shared/database
+        include_keys: [username, password]
+        prefix: DATABASE_
+        # transform_keys: false  # optional override
+      - name: google-oauth
+        path: secrets/external-apis/development/google-oauth
+        # Option A: include_keys (uses prefix/transform rules)
+        # include_keys: [client_id, client_secret]
+        # prefix: GOOGLE_
+        # Option B: env_map (explicit mapping to env var names; no transform/prefix)
+        env_map:
+          GOOGLE_CLIENT_ID: client_id
+          GOOGLE_CLIENT_SECRET: client_secret
 ```
 
-### `test`
-Test Vault connectivity and authentication.
+Behavior:
+- `.envrc` sections include headers with job/section name, source path, description, and a trailing blank line.
+- `output_mode: append` concatenates `.envrc` chunks; for `json`/`yaml`, `merge` combines maps (last write wins).
+
+Tri-state `transform_keys` precedence:
+- Section-level `transform_keys: true|false` overrides job.
+- Job-level `transform_keys: true|false` is the default for all sections.
+- If omitted at both levels, the default is `false`.
+
+#### Legacy job schema
+
+```yaml
+jobs:
+  - name: frontend
+    path: secrets/app/frontend
+    output: out/frontend.envrc
+    prefix: FRONTEND_
+    transform_keys: true
+```
+
+### list
+KV v2-aware listing.
 
 ```bash
-vault-envrc-generator test [flags]
+vault-envrc-generator list --path <prefix> [--depth N] [--prefix STR] \
+  [--format yaml|text] [--include-values] [--censor "***"]
+```
 
-Flags:
-  -v, --verbose   Enable verbose output
+Examples:
+
+```bash
+# YAML with censored leaf keys
+./vault-envrc-generator list --path secrets/environments/development/shared/ \
+  --depth 1 --format yaml --include-values --censor "***"
+
+# Text view
+./vault-envrc-generator list --path secrets/environments/development/ --depth 2 --format text
+```
+
+### seed
+Write secrets to Vault from a YAML spec (env/literal/file sources). KV v2-first, v1 fallback.
+
+```yaml
+base_path: secrets/environments/personal/102454784610416055110/manuel
+sets:
+  - path: core
+    data:
+      VAULT_ADDR: https://vault.mento.co/
+    env:
+      OP_ACCOUNT: OP_ACCOUNT
+      OP_VAULT: OP_VAULT
+  - path: google
+    env:
+      client_email: GOOGLE_EMAIL
+    files:
+      private_key: ~/.keys/google-sa.pem
+```
+
+Run:
+
+```bash
+./vault-envrc-generator seed --config go-utility/seed-personal.yaml --dry-run
+./vault-envrc-generator seed --config go-utility/seed-personal.yaml
+```
+
+### test
+Connectivity, health, token introspection, and a simple read.
+
+## Transform Keys
+
+- Uppercases keys and replaces hyphens with underscores, prior to prefixing.
+- Applies to all formats because transformation happens before formatting.
+- Example: `prefix=MYAPP_`, `transform_keys=true`, key `client-id` → `MYAPP_CLIENT_ID`.
+
+## Batch Format Details
+
+### Job-level fields
+
+- `name`: Human-friendly identifier for logs and headers.
+- `description` (optional): Included in `.envrc` headers.
+- `output`: File to write.
+- `output_mode`: `overwrite` | `append` | `merge`.
+  - `.envrc`: prefer `append` to build a single file from multiple sections.
+  - `json`/`yaml`: prefer `merge` to accumulate a single map across sections.
+- `format`: `envrc` | `json` | `yaml`.
+- `transform_keys` (optional): Default for all sections (overridden by section-level value).
+- `prefix`, `include_keys`, `exclude_keys`, `template`, `variables`: Defaults for sections.
+
+### Sections
+
+Each `section` accepts the same keys as a legacy job, plus `name` and `description`. Section-level values override job-level defaults. For `.envrc`, the emitted header shows `job: section`, the Vault `path`, and the optional `description`.
+
+Key selection options per section:
+- `include_keys`: choose keys and then apply `transform_keys`/`prefix`.
+- `env_map`: explicit mapping of `ENV_VAR` → `source_key`. When `env_map` is used:
+  - `transform_keys` and `prefix` are ignored (your env var names are used as-is)
+  - `include_keys`/`exclude_keys` are ignored for that section
+
+### Concurrency & Safety
+
+- When running with `--parallel`, each output file is protected by an in-process mutex to prevent races.
+- `--continue-on-error` lets other sections/jobs continue if one fails (e.g., lacking permission on a path).
+
+## Output Formats
+
+### envrc
+
+Emits `export KEY=VALUE` lines with a generated header per section in batch mode.
+
+```bash
+# === Dev envrc: db ===
+# Source path: secrets/environments/development/shared/database
+# Section: Shared DB user/password
+
+export DATABASE_USERNAME=postgres
+export DATABASE_PASSWORD=your_password_here
+
+# === Dev envrc: google-oauth ===
+# Source path: secrets/external-apis/development/google-oauth
+
+export GOOGLE_CLIENT_ID=...
+export GOOGLE_CLIENT_SECRET=...
+```
+
+### json / yaml
+
+Maps of key→value. With `output_mode: merge`, later sections/jobs override keys.
+
+Example merged JSON:
+```json
+{
+  "DATABASE_USERNAME": "postgres",
+  "DATABASE_PASSWORD": "...",
+  "API_KEY": "..."
+}
 ```
 
 ## Configuration
 
-### Environment Variables
-- `VAULT_ADDR`: Vault server address
-- `VAULT_TOKEN`: Vault authentication token
-- `VAULT_ENVRC_*`: Application-specific configuration
+### ENV and config file
 
-### Configuration File
-Create `~/.vault-envrc-generator.yaml`:
+- `VAULT_ADDR`, `VAULT_TOKEN`
+- Or a config file `~/.vault-envrc-generator.yaml`:
+
 ```yaml
 vault:
-  addr: "https://vault.example.com:8200"
-  token: "your-token"
-output: ".envrc"
+  addr: https://vault.example.com:8200
+  token: your-token
+output: .envrc
 verbose: false
 ```
 
-## Templates
+## Security & Troubleshooting
 
-Create custom templates for advanced formatting:
-
-```go
-# Custom .envrc template
-{{range $key, $value := .}}
-export {{$key}}="{{$value}}"
-{{end}}
-
-# Additional configuration
-export GENERATED_AT="$(date)"
-```
-
-Use with:
-```bash
-vault-envrc-generator generate --path secret/app --template custom.tmpl
-```
-
-## Output Formats
-
-### .envrc Format (Default)
-```bash
-export DATABASE_URL=postgresql://localhost:5432/myapp
-export API_KEY=secret-key-123
-export DEBUG_MODE=true
-```
-
-### JSON Format
-```json
-{
-  "DATABASE_URL": "postgresql://localhost:5432/myapp",
-  "API_KEY": "secret-key-123",
-  "DEBUG_MODE": "true"
-}
-```
-
-### YAML Format
-```yaml
-DATABASE_URL: postgresql://localhost:5432/myapp
-API_KEY: secret-key-123
-DEBUG_MODE: "true"
-```
-
-## Security Features
-
-- **Audit Logging**: All Vault operations are logged for compliance
-- **Secure Value Handling**: Proper escaping prevents injection attacks
-- **Token Validation**: Comprehensive authentication checking
-- **Permission Boundaries**: Respects Vault access policies
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Connection Failed**
-   ```bash
-   vault-envrc-generator test --verbose
-   ```
-
-2. **Permission Denied**
-   - Verify token has read access to the secret path
-   - Check Vault policies and permissions
-
-3. **Secret Not Found**
-   - Verify the secret path exists
-   - Check if using correct KV engine version
-
-4. **Template Errors**
-   - Validate template syntax
-   - Ensure template file is accessible
-
-### Debug Mode
-Enable verbose output for detailed information:
-```bash
-vault-envrc-generator generate --path secret/app --verbose
-```
+- 403 on listing mounts is expected for non-admin tokens. The tool avoids requiring `sys/mounts`.
+- 403 on secret paths means your token lacks `list`/`read` there.
+- Use `test -v` and `list` to probe access without reading values.
+- Ensure `VAULT_ADDR` is set; if using `lookup` token source, you must be logged in with the Vault CLI.
+- If a `.envrc` file has duplicate exports, later sections will appear later in the file; standard shell sourcing semantics apply (last one wins).
 
 ## Development
 
-### Building from Source
 ```bash
-git clone <repository>
-cd vault-envrc-generator
-go mod download
 go build -o vault-envrc-generator .
-```
-
-### Running Tests
-```bash
 go test ./...
 ```
 
-### Project Structure
+Project layout:
+
 ```
-vault-envrc-generator/
-├── main.go                 # Application entry point
-├── cmd/                    # CLI commands
-│   ├── root.go            # Root command
-│   ├── generate.go        # Generate command
-│   ├── interactive.go     # Interactive mode
-│   ├── batch.go           # Batch processing
-│   └── test.go            # Test command
-└── pkg/                   # Core packages
-    ├── vault/             # Vault client
-    └── envrc/             # Generation engine
+vibes/.../go-utility/
+├── cmd/            # CLI commands (generate, batch, list, seed, test, interactive)
+├── pkg/
+│   ├── vault/      # KV v2-first client (Get/Put, List metadata)
+│   └── envrc/      # Formatting and key transforms
+└── go.mod
 ```
 
-## License
+## Appendix: Example batch (sections)
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+```yaml
+jobs:
+  - name: dev-envrc
+    description: "Aggregated development environment variables for .envrc"
+    output: out/dev/.envrc
+    output_mode: append
+    format: envrc
+    transform_keys: true
+    sections:
+      - name: db
+        path: secrets/environments/development/shared/database
+        include_keys: [username, password]
+        prefix: DATABASE_
+      - name: google-oauth
+        path: secrets/external-apis/development/google-oauth
+        include_keys: [client_id, client_secret]
+        prefix: GOOGLE_
+```
 
-## Contributing
+## End-to-End Example
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+This example demonstrates seeding a personal namespace, exploring, and generating `.envrc`.
 
-## Support
+```bash
+# 1) Seed personal namespace (dry-run first)
+./vault-envrc-generator seed --config go-utility/seed-personal.yaml --dry-run
+./vault-envrc-generator seed --config go-utility/seed-personal.yaml
 
-For issues and questions:
-- Check the troubleshooting section
-- Review the project documentation
-- Open an issue on the repository
+# 2) Explore accessible development paths (YAML + censored values)
+./vault-envrc-generator list --path secrets/environments/development/ --depth 2 \
+  --format yaml --include-values --censor "***"
 
+# 3) Batch-generate an envrc composed from several sections
+./vault-envrc-generator batch --config go-utility/batch-load-dev.yaml --continue-on-error
+
+# 4) Source it in your shell
+source out/dev/.envrc
+```
