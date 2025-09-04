@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"context"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -49,7 +51,19 @@ func runInteractive(cmd *cobra.Command, args []string) error {
 
 	// Initialize Vault client
 	fmt.Println("Connecting to Vault...")
-	vaultClient, err := vault.NewClient(viper.GetString("vault.addr"), viper.GetString("vault.token"))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	resolvedToken, err := vault.ResolveToken(
+		ctx,
+		viper.GetString("vault.token"),
+		vault.TokenSource(viper.GetString("vault.token_source")),
+		viper.GetString("vault.token_file"),
+		viper.GetBool("verbose"),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to resolve Vault token: %w", err)
+	}
+	vaultClient, err := vault.NewClient(viper.GetString("vault.addr"), resolvedToken)
 	if err != nil {
 		return fmt.Errorf("failed to create Vault client: %w", err)
 	}

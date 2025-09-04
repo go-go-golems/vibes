@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"context"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -77,8 +79,22 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, "Generating .envrc from Vault path: %s\n", secretPath)
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	resolvedToken, err := vault.ResolveToken(
+		ctx,
+		viper.GetString("vault.token"),
+		vault.TokenSource(viper.GetString("vault.token_source")),
+		viper.GetString("vault.token_file"),
+		viper.GetBool("verbose"),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to resolve Vault token: %w", err)
+	}
+
 	// Initialize Vault client
-	vaultClient, err := vault.NewClient(viper.GetString("vault.addr"), viper.GetString("vault.token"))
+	vaultClient, err := vault.NewClient(viper.GetString("vault.addr"), resolvedToken)
 	if err != nil {
 		return fmt.Errorf("failed to create Vault client: %w", err)
 	}
