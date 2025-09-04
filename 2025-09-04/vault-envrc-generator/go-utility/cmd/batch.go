@@ -21,19 +21,37 @@ type BatchConfig struct {
 	Jobs []BatchJob `yaml:"jobs"`
 }
 
+// BatchSection represents one logical section emitted by a job
+type BatchSection struct {
+	Name        string            `yaml:"name,omitempty"`
+	Description string            `yaml:"description,omitempty"`
+	Path        string            `yaml:"path"`
+	Prefix      string            `yaml:"prefix,omitempty"`
+	ExcludeKeys []string          `yaml:"exclude_keys,omitempty"`
+	IncludeKeys []string          `yaml:"include_keys,omitempty"`
+	Transform   *bool             `yaml:"transform_keys,omitempty"`
+	Template    string            `yaml:"template,omitempty"`
+	Variables   map[string]string `yaml:"variables,omitempty"`
+	Format      string            `yaml:"format,omitempty"` // optional override
+	Output      string            `yaml:"output,omitempty"` // optional override
+	EnvMap      map[string]string `yaml:"env_map,omitempty"` // explicit ENV_VAR -> source_key mapping
+}
+
 // BatchJob represents a single job in batch processing
 type BatchJob struct {
 	Name         string            `yaml:"name"`
-	Path         string            `yaml:"path"`
+	Description  string            `yaml:"description,omitempty"`
+	Path         string            `yaml:"path,omitempty"`   // legacy single-path mode
 	Output       string            `yaml:"output"`
 	OutputMode   string            `yaml:"output_mode,omitempty"` // overwrite (default), append, merge
 	Prefix       string            `yaml:"prefix,omitempty"`
 	ExcludeKeys  []string          `yaml:"exclude_keys,omitempty"`
 	IncludeKeys  []string          `yaml:"include_keys,omitempty"`
-	Transform    bool              `yaml:"transform_keys,omitempty"`
+	Transform    *bool             `yaml:"transform_keys,omitempty"`
 	Format       string            `yaml:"format,omitempty"`
 	Template     string            `yaml:"template,omitempty"`
 	Variables    map[string]string `yaml:"variables,omitempty"`
+	Sections     []BatchSection    `yaml:"sections,omitempty"`
 }
 
 var (
@@ -72,35 +90,41 @@ Batch mode allows you to:
 - Run jobs in parallel for faster processing
 - Continue processing even if some jobs fail
 
-The batch configuration file should be in YAML format with the following structure:
+Two schemas are supported:
+
+1) Legacy per-job schema
 
 jobs:
   - name: "Frontend App"
     path: "secret/frontend"
     output: "frontend/.envrc"
     output_mode: overwrite   # overwrite | append | merge (merge for json/yaml)
+    description: "Exports for frontend app"
     prefix: "FRONTEND_"
     transform_keys: true
     exclude_keys: ["internal_key"]
     
-  - name: "Backend API"
-    path: "secret/backend"
-    output: "backend/config.json"
-    format: "json"
-    output_mode: merge       # merges JSON objects across jobs
-    template: "templates/api.tmpl"
-    variables:
-      service_name: "api-server"
+2) Sections schema (recommended)
 
-Examples:
-  # Process batch configuration
-  vault-envrc-generator batch --config batch-jobs.yaml
-
-  # Run jobs in parallel
-  vault-envrc-generator batch --config batch-jobs.yaml --parallel
-
-  # Continue on errors
-  vault-envrc-generator batch --config batch-jobs.yaml --continue-on-error`,
+jobs:
+  - name: "Dev envrc"
+    description: "Development env aggregation"
+    output: "out/dev/.envrc"
+    output_mode: append
+    format: envrc
+    sections:
+      - name: db
+        description: "Shared DB user/password"
+        path: secrets/environments/development/shared/database
+        include_keys: [username, password]
+        prefix: DATABASE_
+        transform_keys: true
+      - name: google-oauth
+        path: secrets/external-apis/development/google-oauth
+        env_map:                 # explicit mapping ENV_VAR -> key
+          GOOGLE_CLIENT_ID: client_id
+          GOOGLE_CLIENT_SECRET: client_secret
+`,
 	RunE: runBatch,
 }
 
@@ -245,6 +269,165 @@ func processBatchParallel(vaultClient *vault.Client, jobs []BatchJob) error {
 }
 
 func processJob(vaultClient *vault.Client, job BatchJob) error {
+	// If sections are provided, iterate sections using job-level defaults
+	if len(job.Sections) > 0 {
+		for _, sec := range job.Sections {
+			sourcePath := sec.Path
+			outPath := job.Output
+			if sec.Output != "" { outPath = sec.Output }
+			format := job.Format
+			if sec.Format != "" { format = sec.Format }
+
+			secrets, err := vaultClient.GetSecrets(sourcePath)
+			if err != nil {
+				return fmt.Errorf("failed to retrieve secrets from path %s: %w", sourcePath, err)
+			}
+
+			// Apply variables: job-level then section-level (section overrides)
+			if len(job.Variables) > 0 {
+				for key, value := range job.Variables { secrets[key] = value }
+			}
+			if len(sec.Variables) > 0 {
+				for key, value := range sec.Variables { secrets[key] = value }
+			}
+
+			// Options: section override or fallback to job
+			prefix := job.Prefix
+			if sec.Prefix != "" { prefix = sec.Prefix }
+			exclude := job.ExcludeKeys
+			if len(sec.ExcludeKeys) > 0 { exclude = sec.ExcludeKeys }
+			include := job.IncludeKeys
+			if len(sec.IncludeKeys) > 0 { include = sec.IncludeKeys }
+			// effective transform: section overrides job; nil means not specified
+			var transform bool
+			if sec.Transform != nil {
+				transform = *sec.Transform
+			} else if job.Transform != nil {
+				transform = *job.Transform
+			} else {
+				transform = false
+			}
+			template := job.Template
+			if sec.Template != "" { template = sec.Template }
+
+			// If env_map is provided, build explicit mapping and disable transform/prefix
+			selected := secrets
+			useEnvMap := len(sec.EnvMap) > 0
+			if useEnvMap {
+				mapped := make(map[string]interface{}, len(sec.EnvMap))
+				for envName, srcKey := range sec.EnvMap {
+					if v, ok := secrets[srcKey]; ok {
+						mapped[envName] = v
+					} else if viper.GetBool("verbose") {
+						fmt.Fprintf(os.Stderr, "[batch] warning: %s missing key '%s'\n", sourcePath, srcKey)
+					}
+				}
+				selected = mapped
+				// env_map uses explicit names; do not transform or prefix
+				transform = false
+				prefix = ""
+				// ignore include/exclude when env_map is used
+				exclude = nil
+				include = nil
+			}
+
+			options := &envrc.Options{
+				Prefix:        prefix,
+				ExcludeKeys:   exclude,
+				IncludeKeys:   include,
+				TransformKeys: transform,
+				Format:        format,
+				TemplateFile:  template,
+				Verbose:       viper.GetBool("verbose"),
+			}
+
+			generator := envrc.NewGenerator(options)
+			content, err := generator.Generate(selected)
+			if err != nil {
+				return fmt.Errorf("failed to generate content: %w", err)
+			}
+
+			// Add envrc header with job+section context and trailing newline
+			if options.Format == "envrc" {
+				header := fmt.Sprintf("# === %s", job.Name)
+				if sec.Name != "" { header += fmt.Sprintf(": %s", sec.Name) }
+				header += " ===\n"
+				header += fmt.Sprintf("# Source path: %s\n", sourcePath)
+				if job.Description != "" { header += fmt.Sprintf("# Job: %s\n", job.Description) }
+				if sec.Description != "" { header += fmt.Sprintf("# Section: %s\n", sec.Description) }
+				header += "\n"
+				content = header + content + "\n"
+			}
+
+			// Ensure output directory exists
+			outputDir := filepath.Dir(outPath)
+			if outputDir != "." {
+				if err := os.MkdirAll(outputDir, 0755); err != nil {
+					return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
+				}
+			}
+
+			unlock := lockForPath(outPath)
+			defer unlock()
+
+			mode := job.OutputMode
+			if mode == "" { mode = "overwrite" }
+
+			switch mode {
+			case "overwrite":
+				if err := os.WriteFile(outPath, []byte(content), 0644); err != nil {
+					return fmt.Errorf("failed to write output file %s: %w", outPath, err)
+				}
+			case "append":
+				f, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+				if err != nil { return fmt.Errorf("failed to open output file %s: %w", outPath, err) }
+				defer f.Close()
+				if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", outPath, err) }
+			case "merge":
+				// Only meaningful for json|yaml; envrc falls back to append
+				switch options.Format {
+				case "json":
+					var existing map[string]interface{}
+					if b, err := os.ReadFile(outPath); err == nil && len(b) > 0 {
+						_ = json.Unmarshal(b, &existing)
+					}
+					if existing == nil { existing = map[string]interface{}{} }
+					var next map[string]interface{}
+					if err := json.Unmarshal([]byte(content), &next); err != nil {
+						return fmt.Errorf("failed to parse generated JSON for merge: %w", err)
+					}
+					for k, v := range next { existing[k] = v }
+					buf, err := json.MarshalIndent(existing, "", "  ")
+					if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
+					if err := os.WriteFile(outPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", outPath, err) }
+				case "yaml":
+					var existing map[string]interface{}
+					if b, err := os.ReadFile(outPath); err == nil && len(b) > 0 {
+						_ = yaml.Unmarshal(b, &existing)
+					}
+					if existing == nil { existing = map[string]interface{}{} }
+					var next map[string]interface{}
+					if err := yaml.Unmarshal([]byte(content), &next); err != nil {
+						return fmt.Errorf("failed to parse generated YAML for merge: %w", err)
+					}
+					for k, v := range next { existing[k] = v }
+					buf, err := yaml.Marshal(existing)
+					if err != nil { return fmt.Errorf("failed to marshal merged YAML: %w", err) }
+					if err := os.WriteFile(outPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", outPath, err) }
+				default:
+					f, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+					if err != nil { return fmt.Errorf("failed to open output file %s: %w", outPath, err) }
+					defer f.Close()
+					if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", outPath, err) }
+				}
+			default:
+				return fmt.Errorf("unknown output_mode: %s", mode)
+			}
+		}
+		return nil
+	}
+
+	// Legacy single-path job processing
 	// Retrieve secrets
 	secrets, err := vaultClient.GetSecrets(job.Path)
 	if err != nil {
@@ -263,7 +446,7 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 		Prefix:        job.Prefix,
 		ExcludeKeys:   job.ExcludeKeys,
 		IncludeKeys:   job.IncludeKeys,
-		TransformKeys: job.Transform,
+		TransformKeys: func() bool { if job.Transform != nil { return *job.Transform }; return false }(),
 		Format:        job.Format,
 		TemplateFile:  job.Template,
 		Verbose:       viper.GetBool("verbose"),
@@ -279,6 +462,14 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 	content, err := generator.Generate(secrets)
 	if err != nil {
 		return fmt.Errorf("failed to generate content: %w", err)
+	}
+
+	// If envrc, add a section header with job metadata and a trailing newline
+	if options.Format == "envrc" {
+		header := fmt.Sprintf("# === %s ===\n# Source path: %s\n", job.Name, job.Path)
+		if job.Description != "" { header += fmt.Sprintf("# Description: %s\n", job.Description) }
+		header += "\n"
+		content = header + content + "\n"
 	}
 
 	// Ensure output directory exists
