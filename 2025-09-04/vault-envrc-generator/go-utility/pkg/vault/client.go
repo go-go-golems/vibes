@@ -35,40 +35,34 @@ func NewClient(address, token string) (*Client, error) {
 
 // GetSecrets retrieves secrets from the given path, handling both KV v1 and v2
 func (c *Client) GetSecrets(path string) (map[string]interface{}, error) {
-	// First, try to determine if this is a KV v2 mount
 	mountPath, secretPath := c.parsePath(path)
-	
-	// Check mount info to determine KV version
-	mounts, err := c.client.Sys().ListMounts()
-	if err != nil {
-		return nil, fmt.Errorf("failed to list mounts: %w", err)
+
+	// Try KV v2 first (common default), then fall back to KV v1 if needed
+	if data, err := c.getKVv2Secrets(mountPath, secretPath); err == nil {
+		return data, nil
 	}
 
-	var isKVv2 bool
-	if mount, exists := mounts[mountPath+"/"]; exists {
-		if mount.Type == "kv" && mount.Options != nil {
-			if version, ok := mount.Options["version"]; ok && version == "2" {
-				isKVv2 = true
-			}
-		}
-	}
-
-	// Try KV v2 first if detected, otherwise try both
-	if isKVv2 {
-		return c.getKVv2Secrets(mountPath, secretPath)
-	}
-
-	// Try KV v1 first, then v2 if that fails
-	secrets, err := c.getKVv1Secrets(path)
-	if err != nil {
-		// If KV v1 fails, try KV v2
-		if secrets, err2 := c.getKVv2Secrets(mountPath, secretPath); err2 == nil {
-			return secrets, nil
-		}
+	// Fallback: KV v1 direct read
+	if data, err := c.getKVv1Secrets(path); err == nil {
+		return data, nil
+	} else {
 		return nil, err
 	}
+}
 
-	return secrets, nil
+// PutSecrets writes secrets to the given path, handling KV v2 and v1
+func (c *Client) PutSecrets(path string, data map[string]interface{}) error {
+	mountPath, secretPath := c.parsePath(path)
+	// Try KV v2 first
+	if err := c.putKVv2Secrets(mountPath, secretPath, data); err == nil {
+		return nil
+	}
+	// Fallback KV v1
+	if err := c.putKVv1Secrets(path, data); err == nil {
+		return nil
+	} else {
+		return err
+	}
 }
 
 // getKVv1Secrets retrieves secrets from KV v1 engine
@@ -107,6 +101,26 @@ func (c *Client) getKVv2Secrets(mountPath, secretPath string) (map[string]interf
 	return nil, fmt.Errorf("invalid KV v2 secret format at path %s", fullPath)
 }
 
+// putKVv1Secrets writes secrets to KV v1 engine
+func (c *Client) putKVv1Secrets(path string, data map[string]interface{}) error {
+	_, err := c.client.Logical().Write(path, data)
+	if err != nil {
+		return fmt.Errorf("failed to write secret to path %s: %w", path, err)
+	}
+	return nil
+}
+
+// putKVv2Secrets writes secrets to KV v2 engine
+func (c *Client) putKVv2Secrets(mountPath, secretPath string, data map[string]interface{}) error {
+	fullPath := fmt.Sprintf("%s/data/%s", mountPath, secretPath)
+	payload := map[string]interface{}{"data": data}
+	_, err := c.client.Logical().Write(fullPath, payload)
+	if err != nil {
+		return fmt.Errorf("failed to write KV v2 secret to %s: %w", fullPath, err)
+	}
+	return nil
+}
+
 // parsePath splits a path into mount path and secret path
 func (c *Client) parsePath(path string) (string, string) {
 	parts := strings.SplitN(path, "/", 2)
@@ -118,17 +132,39 @@ func (c *Client) parsePath(path string) (string, string) {
 
 // ListSecrets lists all secrets at the given path (for interactive mode)
 func (c *Client) ListSecrets(path string) ([]string, error) {
-	// Try to list secrets
+	// First try direct list (works for KV v1 and some KV v2 setups)
 	secret, err := c.client.Logical().List(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to list secrets at path %s: %w", path, err)
+	if err == nil && secret != nil && secret.Data != nil {
+		if keys, ok := secret.Data["keys"].([]interface{}); ok {
+			var result []string
+			for _, key := range keys {
+				if keyStr, ok := key.(string); ok {
+					result = append(result, keyStr)
+				}
+			}
+			return result, nil
+		}
 	}
 
-	if secret == nil || secret.Data == nil {
+	// If that failed or returned nothing, try KV v2 metadata listing
+	mountPath, secretPath := c.parsePath(path)
+	var metaPath string
+	if secretPath == "" {
+		metaPath = fmt.Sprintf("%s/metadata", mountPath)
+	} else {
+		metaPath = fmt.Sprintf("%s/metadata/%s", mountPath, strings.TrimSuffix(secretPath, "/"))
+	}
+
+	metaList, err2 := c.client.Logical().List(metaPath)
+	if err2 != nil || metaList == nil || metaList.Data == nil {
+		// Return original error if we had one; otherwise, a generic not found
+		if err != nil {
+			return nil, fmt.Errorf("failed to list secrets at path %s: %w", path, err)
+		}
 		return []string{}, nil
 	}
 
-	keys, ok := secret.Data["keys"].([]interface{})
+	keys, ok := metaList.Data["keys"].([]interface{})
 	if !ok {
 		return []string{}, nil
 	}

@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"context"
+	"time"
+	"encoding/json"
+	"sync"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -22,6 +26,7 @@ type BatchJob struct {
 	Name         string            `yaml:"name"`
 	Path         string            `yaml:"path"`
 	Output       string            `yaml:"output"`
+	OutputMode   string            `yaml:"output_mode,omitempty"` // overwrite (default), append, merge
 	Prefix       string            `yaml:"prefix,omitempty"`
 	ExcludeKeys  []string          `yaml:"exclude_keys,omitempty"`
 	IncludeKeys  []string          `yaml:"include_keys,omitempty"`
@@ -36,6 +41,23 @@ var (
 	parallel        bool
 	continueOnError bool
 )
+
+var outputLocks = struct {
+	mu    sync.Mutex
+	locks map[string]*sync.Mutex
+}{locks: make(map[string]*sync.Mutex)}
+
+func lockForPath(path string) func() {
+	outputLocks.mu.Lock()
+	m, ok := outputLocks.locks[path]
+	if !ok {
+		m = &sync.Mutex{}
+		outputLocks.locks[path] = m
+	}
+	outputLocks.mu.Unlock()
+	m.Lock()
+	return func() { m.Unlock() }
+}
 
 // batchCmd represents the batch command
 var batchCmd = &cobra.Command{
@@ -56,14 +78,16 @@ jobs:
   - name: "Frontend App"
     path: "secret/frontend"
     output: "frontend/.envrc"
+    output_mode: overwrite   # overwrite | append | merge (merge for json/yaml)
     prefix: "FRONTEND_"
     transform_keys: true
     exclude_keys: ["internal_key"]
     
   - name: "Backend API"
     path: "secret/backend"
-    output: "backend/.envrc"
+    output: "backend/config.json"
     format: "json"
+    output_mode: merge       # merges JSON objects across jobs
     template: "templates/api.tmpl"
     variables:
       service_name: "api-server"
@@ -107,8 +131,22 @@ func runBatch(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("Loaded %d jobs from configuration\n", len(config.Jobs))
 
+	// Resolve token via loader
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	resolvedToken, err := vault.ResolveToken(
+		ctx,
+		viper.GetString("vault.token"),
+		vault.TokenSource(viper.GetString("vault.token_source")),
+		viper.GetString("vault.token_file"),
+		viper.GetBool("verbose"),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to resolve Vault token: %w", err)
+	}
+
 	// Initialize Vault client
-	vaultClient, err := vault.NewClient(viper.GetString("vault.addr"), viper.GetString("vault.token"))
+	vaultClient, err := vault.NewClient(viper.GetString("vault.addr"), resolvedToken)
 	if err != nil {
 		return fmt.Errorf("failed to create Vault client: %w", err)
 	}
@@ -251,11 +289,61 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 		}
 	}
 
-	// Write output file
-	if err := os.WriteFile(job.Output, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write output file %s: %w", job.Output, err)
-	}
+	unlock := lockForPath(job.Output)
+	defer unlock()
 
-	return nil
+	mode := job.OutputMode
+	if mode == "" { mode = "overwrite" }
+
+	switch mode {
+	case "overwrite":
+		return os.WriteFile(job.Output, []byte(content), 0644)
+	case "append":
+		f, err := os.OpenFile(job.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil { return fmt.Errorf("failed to open output file %s: %w", job.Output, err) }
+		defer f.Close()
+		if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", job.Output, err) }
+		return nil
+	case "merge":
+		// Only meaningful for json|yaml; envrc falls back to append
+		switch options.Format {
+		case "json":
+			var existing map[string]interface{}
+			if b, err := os.ReadFile(job.Output); err == nil && len(b) > 0 {
+				_ = json.Unmarshal(b, &existing)
+			}
+			if existing == nil { existing = map[string]interface{}{} }
+			var next map[string]interface{}
+			if err := json.Unmarshal([]byte(content), &next); err != nil {
+				return fmt.Errorf("failed to parse generated JSON for merge: %w", err)
+			}
+			for k, v := range next { existing[k] = v }
+			buf, err := json.MarshalIndent(existing, "", "  ")
+			if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
+			return os.WriteFile(job.Output, buf, 0644)
+		case "yaml":
+			var existing map[string]interface{}
+			if b, err := os.ReadFile(job.Output); err == nil && len(b) > 0 {
+				_ = yaml.Unmarshal(b, &existing)
+			}
+			if existing == nil { existing = map[string]interface{}{} }
+			var next map[string]interface{}
+			if err := yaml.Unmarshal([]byte(content), &next); err != nil {
+				return fmt.Errorf("failed to parse generated YAML for merge: %w", err)
+			}
+			for k, v := range next { existing[k] = v }
+			buf, err := yaml.Marshal(existing)
+			if err != nil { return fmt.Errorf("failed to marshal merged YAML: %w", err) }
+			return os.WriteFile(job.Output, buf, 0644)
+		default:
+			f, err := os.OpenFile(job.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			if err != nil { return fmt.Errorf("failed to open output file %s: %w", job.Output, err) }
+			defer f.Close()
+			if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", job.Output, err) }
+			return nil
+		}
+	default:
+		return fmt.Errorf("unknown output_mode: %s", mode)
+	}
 }
 
