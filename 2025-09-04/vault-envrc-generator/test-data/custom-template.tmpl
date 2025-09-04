@@ -1,0 +1,13 @@
+# Custom .envrc template
+# Generated from Vault secrets
+# Template: custom-template.tmpl
+
+{{range $key, $value := .}}
+# Setting {{$key}}
+export {{$key}}="{{$value}}"
+{{end}}
+
+# Additional custom configuration
+export TEMPLATE_USED="custom-template.tmpl"
+export GENERATED_AT="$(date)"
+
