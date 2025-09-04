@@ -1,0 +1,44 @@
+=== AUDIT LOG SUMMARY ===
+Total entries: 86
+Generated on: Fri Aug 22 12:54:22 EDT 2025
+
+Secret read operations:
+sys/internal/ui/mounts/legacy/old-app - 2025-08-22T16:49:57.788352529Z
+sys/internal/ui/mounts/legacy/old-app - 2025-08-22T16:49:57.788697517Z
+sys/mounts - 2025-08-22T16:50:40.754508223Z
+sys/mounts - 2025-08-22T16:50:45.354743835Z
+secret/data/frontend-app - 2025-08-22T16:50:45.356781226Z
+secret/data/frontend-app - 2025-08-22T16:50:45.357038163Z
+sys/mounts - 2025-08-22T16:50:54.146240115Z
+secret/data/backend-api - 2025-08-22T16:50:54.148194952Z
+secret/data/backend-api - 2025-08-22T16:50:54.148579401Z
+sys/mounts - 2025-08-22T16:51:03.802045715Z
+secret/data/shared-config - 2025-08-22T16:51:03.803945219Z
+secret/data/shared-config - 2025-08-22T16:51:03.804324366Z
+sys/mounts - 2025-08-22T16:51:14.611597767Z
+legacy/old-app - 2025-08-22T16:51:14.613782043Z
+legacy/old-app - 2025-08-22T16:51:14.613973204Z
+sys/mounts - 2025-08-22T16:51:21.432694057Z
+secret/data/edge-cases - 2025-08-22T16:51:21.434537225Z
+secret/data/edge-cases - 2025-08-22T16:51:21.43479821Z
+sys/mounts - 2025-08-22T16:51:28.082337105Z
+secret/data/frontend-app - 2025-08-22T16:51:28.084564528Z
+secret/data/frontend-app - 2025-08-22T16:51:28.084864316Z
+sys/mounts - 2025-08-22T16:51:28.086075567Z
+secret/data/backend-api - 2025-08-22T16:51:28.087510614Z
+secret/data/backend-api - 2025-08-22T16:51:28.087756529Z
+sys/mounts - 2025-08-22T16:51:28.088794533Z
+secret/data/shared-config - 2025-08-22T16:51:28.090128985Z
+secret/data/shared-config - 2025-08-22T16:51:28.090317152Z
+sys/mounts - 2025-08-22T16:51:28.091326556Z
+legacy/old-app - 2025-08-22T16:51:28.092631966Z
+legacy/old-app - 2025-08-22T16:51:28.09278324Z
+sys/mounts - 2025-08-22T16:51:28.093608274Z
+secret/data/edge-cases - 2025-08-22T16:51:28.094931349Z
+secret/data/edge-cases - 2025-08-22T16:51:28.095138247Z
+sys/mounts - 2025-08-22T16:51:28.096076794Z
+secret/data/edge-cases - 2025-08-22T16:51:28.097619625Z
+secret/data/edge-cases - 2025-08-22T16:51:28.097826932Z
+sys/mounts - 2025-08-22T16:51:52.982505937Z
+secret/data/frontend-app - 2025-08-22T16:51:52.984564306Z
+secret/data/frontend-app - 2025-08-22T16:51:52.984895352Z

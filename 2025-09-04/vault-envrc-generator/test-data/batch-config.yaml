@@ -1,0 +1,36 @@
+jobs:
+  - name: "Frontend Application"
+    path: "secret/frontend-app"
+    output: "test-data/frontend.envrc"
+    prefix: "FRONTEND_"
+    transform_keys: true
+    exclude_keys: ["API_KEY"]
+    
+  - name: "Backend API"
+    path: "secret/backend-api"
+    output: "test-data/backend.envrc"
+    prefix: "BACKEND_"
+    format: "envrc"
+    
+  - name: "Shared Configuration"
+    path: "secret/shared-config"
+    output: "test-data/shared.envrc"
+    prefix: "SHARED_"
+    include_keys: ["SMTP_HOST", "SMTP_PORT", "S3_BUCKET"]
+    
+  - name: "Legacy App (KV v1)"
+    path: "legacy/old-app"
+    output: "test-data/legacy.envrc"
+    prefix: "LEGACY_"
+    transform_keys: true
+    
+  - name: "Edge Cases JSON"
+    path: "secret/edge-cases"
+    output: "test-data/edge-cases.json"
+    format: "json"
+    
+  - name: "Edge Cases YAML"
+    path: "secret/edge-cases"
+    output: "test-data/edge-cases.yaml"
+    format: "yaml"
+
