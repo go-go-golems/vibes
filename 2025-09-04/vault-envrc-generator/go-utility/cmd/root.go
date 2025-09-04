@@ -12,6 +12,8 @@ var (
 	cfgFile     string
 	vaultAddr   string
 	vaultToken  string
+	tokenSource string
+	tokenFile   string
 	outputFile  string
 	verbose     bool
 )
@@ -58,12 +60,16 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.vault-envrc-generator.yaml)")
 	rootCmd.PersistentFlags().StringVar(&vaultAddr, "vault-addr", "", "Vault server address (default: $VAULT_ADDR or http://127.0.0.1:8200)")
 	rootCmd.PersistentFlags().StringVar(&vaultToken, "vault-token", "", "Vault authentication token (default: $VAULT_TOKEN)")
+	rootCmd.PersistentFlags().StringVar(&tokenSource, "vault-token-source", "auto", "Token source: auto, env, file, lookup")
+	rootCmd.PersistentFlags().StringVar(&tokenFile, "vault-token-file", "", "Path to token file (default: ~/.vault-token)")
 	rootCmd.PersistentFlags().StringVar(&outputFile, "output", ".envrc", "Output file path")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose output")
 
 	// Bind flags to viper
 	viper.BindPFlag("vault.addr", rootCmd.PersistentFlags().Lookup("vault-addr"))
 	viper.BindPFlag("vault.token", rootCmd.PersistentFlags().Lookup("vault-token"))
+	viper.BindPFlag("vault.token_source", rootCmd.PersistentFlags().Lookup("vault-token-source"))
+	viper.BindPFlag("vault.token_file", rootCmd.PersistentFlags().Lookup("vault-token-file"))
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 }
@@ -92,6 +98,8 @@ func initConfig() {
 	// Set defaults
 	viper.SetDefault("vault.addr", getEnvOrDefault("VAULT_ADDR", "http://127.0.0.1:8200"))
 	viper.SetDefault("vault.token", os.Getenv("VAULT_TOKEN"))
+	viper.SetDefault("vault.token_source", "auto")
+	viper.SetDefault("vault.token_file", "")
 	viper.SetDefault("output", ".envrc")
 	viper.SetDefault("verbose", false)
 

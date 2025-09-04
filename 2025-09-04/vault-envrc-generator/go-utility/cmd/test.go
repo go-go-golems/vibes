@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -45,14 +47,25 @@ func runTest(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 
 	vaultAddr := viper.GetString("vault.addr")
-	vaultToken := viper.GetString("vault.token")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	vaultToken, err := vault.ResolveToken(
+		ctx,
+		viper.GetString("vault.token"),
+		vault.TokenSource(viper.GetString("vault.token_source")),
+		viper.GetString("vault.token_file"),
+		viper.GetBool("verbose"),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to resolve Vault token: %w", err)
+	}
 
 	if vaultAddr == "" {
 		return fmt.Errorf("Vault address not specified. Use --vault-addr or set VAULT_ADDR environment variable")
 	}
 
 	if vaultToken == "" {
-		return fmt.Errorf("Vault token not specified. Use --vault-token or set VAULT_TOKEN environment variable")
+		return fmt.Errorf("Vault token not specified and could not be resolved")
 	}
 
 	fmt.Printf("Testing connection to: %s\n", vaultAddr)
