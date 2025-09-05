@@ -18,15 +18,87 @@ SectionType: Tutorial
 
 # Vault Envrc Generator — Concepts & System
 
-This CLI generates `.envrc`, JSON, and YAML files from HashiCorp Vault and can also seed Vault from local environment and files. It is built with Glazed to provide consistent parameters, structured outputs, and a rich help system.
+This CLI generates `.envrc`, JSON, and YAML files from HashiCorp Vault and can also seed Vault from local environment and files. It is built with the **Glazed** CLI framework to provide consistent parameters, structured outputs, and a rich help system with automatic KV version detection and sophisticated token resolution.
 
-## Commands
+## System Overview
 
-- batch: Run jobs defined in a YAML file to fetch and emit env data. Supports envrc/json/yaml formats, append/merge/overwrite modes, per-section headers (envrc), and aggregated JSON/YAML for stdout and files.
-- generate: Fetch a single Vault path and emit envrc/json/yaml with key transforms, prefixes, templates, and sorted keys.
-- list: Structured listing of directories and secrets, with optional censored values. Emits rows for directories (children) and secrets (keys or data) and supports Glazed outputs (JSON/YAML/CSV/table).
-- seed: Seed KV data into Vault from a YAML spec, with data sourced from env and local files. Supports dry-run.
-- interactive: Lightweight prompt to preview and write envrc/json/yaml for a path.
+The Vault Envrc Generator is designed around the principle of **configuration as code** for environment management. It bridges the gap between HashiCorp Vault's secure secret storage and the practical needs of development and deployment environments.
+
+### Core Philosophy
+- **Declarative Configuration**: Define what you want, not how to get it
+- **Environment Parity**: Same tooling for dev, staging, and production
+- **Secret Normalization**: Consistent format regardless of source structure
+- **Audit Trail**: All operations are logged and trackable
+
+## Commands Deep Dive
+
+### **batch** - Multi-Path Processing Engine
+The most powerful command for complex environment generation scenarios.
+
+**Core Capabilities:**
+- **Multi-job Processing**: Execute multiple related tasks in sequence
+- **Section-based Organization**: Each job can have multiple logical sections
+- **Merge-only Output**: Envrc appends with headers; JSON/YAML shallow-merge keys
+- **Format Flexibility**: Generate envrc, JSON, or YAML from the same configuration
+- **Error Resilience**: Continue processing even if individual sections fail
+- **Template Support**: Dynamic path construction with Go templates
+
+**Use Cases:**
+- Generating complete application environment files
+- Creating deployment-specific configurations
+- Consolidating secrets from multiple Vault paths
+- Building CI/CD environment matrices
+
+### **generate** - Single Path Generator
+Focused command for simple, single-path secret extraction.
+
+**Core Capabilities:**
+- **Single Path Focus**: Extract secrets from one Vault path
+- **Format Transformation**: Convert to envrc, JSON, or YAML
+- **Key Processing**: Filter, transform, and prefix keys
+- **Template Support**: Custom output templates
+- **Dry-run Mode**: Preview without file creation
+
+**Use Cases:**
+- Quick secret extraction for debugging
+- Single-service environment generation
+- Testing Vault connectivity and permissions
+
+### **list** - Vault Explorer & Auditing Tool
+Comprehensive tool for exploring and documenting Vault contents.
+
+**Core Capabilities:**
+- **Recursive Traversal**: Explore directory structures with depth control
+- **Structured Output**: Glazed-powered formatting (table, JSON, YAML, CSV)
+- **Value Inspection**: Optional value display with censoring
+- **Path Documentation**: Understand Vault organization
+
+**Use Cases:**
+- Vault content auditing and documentation
+- Understanding secret organization
+- Debugging access permissions
+
+### **seed** - Vault Population Engine
+Reverse operation that populates Vault from local sources.
+
+**Core Capabilities:**
+- **YAML-driven Configuration**: Declarative seed specifications
+- **Multiple Sources**: Environment variables, files, and static data
+- **Template Paths**: Dynamic path construction
+- **Dry-run Support**: Preview changes before execution
+
+**Use Cases:**
+- Initial Vault setup and population
+- Migrating secrets from other systems
+- Development environment bootstrapping
+
+### **interactive** - Quick Exploration Tool
+Lightweight command-line interface for rapid exploration and testing.
+
+**Use Cases:**
+- Learning the tool's capabilities
+- Quick one-off secret extraction
+- Testing Vault connectivity
 
 ## Vault Layer (Parameters)
 
@@ -38,21 +110,17 @@ This app defines a reusable Glazed layer `vault`:
 
 Commands use InitializeStruct with the `vault` layer to unify configuration.
 
-## Output Formats & Modes
+## Output Semantics
 
-- envrc: Emits export statements; by default, keys are sorted; per-section headers are added in batch mode.
-- json/yaml: Keys can be sorted with `--sort-keys` for deterministic output.
-- Modes (batch):
-  - overwrite: Replace target file.
-  - append: For YAML, appends as multi-doc (`---`); for other formats, raw append.
-  - merge: Shallow merge of top-level keys for JSON/YAML.
+- envrc: Emits export statements. In batch, sections are appended with per-section headers. When writing to an existing file, the global header is suppressed.
+- json/yaml: Shallow merge of top-level keys. Use `--sort-keys` for deterministic key ordering.
 
 ## Aggregation Rules (batch)
 
-- Stdout: Aggregates per job, then prints once:
-  - JSON: merged object
-  - YAML: merged object for `merge` or multi-doc for `append`
-- Files: When a single output target is used, aggregated JSON/YAML is written once at the end under the chosen mode.
+- Stdout: Aggregates per job and prints once.
+  - JSON/YAML: merged object
+  - envrc: concatenated sections with headers
+- Files: Each section writes directly to its target. For JSON/YAML, writes merge into existing content; for envrc, content is appended.
 
 ## Key Transform & Prefix
 
@@ -68,6 +136,6 @@ Logging is configured via Glazed’s logging layer on the root command (stderr o
 
 - Preview envrc for a path: `generate --path ... --format envrc --dry-run`
 - Produce merged JSON/YAML for multiple sections: `batch --format json|yaml --output -`
-- Append multiple YAML documents: `batch --format yaml --output out.yaml --output-mode append`
+- Merged JSON/YAML to stdout: `batch --format json|yaml --output -`
 - Seed Vault from env/files: `seed --config seed.yaml --dry-run`
 - Structured listing: `list --path ... --output json|yaml|csv|table`

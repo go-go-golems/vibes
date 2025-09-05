@@ -21,7 +21,6 @@ type Processor struct {
 type ProcessorOptions struct {
     BasePath           string
     OutputOverride     string
-    OutputModeOverride string
     FormatOverride     string
     ContinueOnError    bool
     DryRun             bool
@@ -91,14 +90,11 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 	}
     log.Debug().Str("job", job.Name).Str("effectiveBase", effectiveBase).Msg("job base path")
 
-	if len(job.Sections) > 0 {
-		// stdout aggregations
+    if len(job.Sections) > 0 {
+		// stdout aggregations (only used when output == "-")
 		var stdoutJSONAgg map[string]interface{}
 		var stdoutYAMLAgg map[string]interface{}
-		var stdoutYAMLDocs []string
-
-        // Track unique rendered output paths encountered across sections
-        uniqueOut := map[string]struct{}{}
+		var stdoutENVRCAgg strings.Builder
 
         for _, sec := range job.Sections {
         log.Debug().Str("section", sec.Name).Msg("section start")
@@ -131,15 +127,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 			}
 
         log.Debug().Str("section", sec.Name).Str("source", renderedSourcePath).Str("output", renderedOutPath).Str("format", format).Msg("section io")
-            uniqueOut[renderedOutPath] = struct{}{}
 
-			mode := job.OutputMode
-			if opts.OutputModeOverride != "" {
-				mode = opts.OutputModeOverride
-			}
-			if mode == "" {
-				mode = "overwrite"
-			}
 
 			// secrets
 			secrets := map[string]interface{}{}
@@ -272,27 +260,26 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 				content = header + content + "\n"
 			}
 
-			// get aggregator
-			switch format {
-			case "json":
-				var next map[string]interface{}
-				if err := json.Unmarshal([]byte(content), &next); err != nil { return fmt.Errorf("failed to parse generated JSON for aggregation: %w", err) }
-				if stdoutJSONAgg == nil { stdoutJSONAgg = map[string]interface{}{} }
-				for k, v := range next { stdoutJSONAgg[k] = v }
-			case "yaml":
-				if mode == "merge" {
+			// stdout vs file handling: aggregate to stdout, otherwise write immediately (merge-only)
+			if renderedOutPath == "-" {
+				switch format {
+				case "json":
+					var next map[string]interface{}
+					if err := json.Unmarshal([]byte(content), &next); err != nil { return fmt.Errorf("failed to parse generated JSON for aggregation: %w", err) }
+					if stdoutJSONAgg == nil { stdoutJSONAgg = map[string]interface{}{} }
+					for k, v := range next { stdoutJSONAgg[k] = v }
+				case "yaml":
 					var next map[string]interface{}
 					if err := yaml.Unmarshal([]byte(content), &next); err != nil { return fmt.Errorf("failed to parse generated YAML for aggregation: %w", err) }
 					if stdoutYAMLAgg == nil { stdoutYAMLAgg = map[string]interface{}{} }
 					for k, v := range next { stdoutYAMLAgg[k] = v }
-				} else {
-					stdoutYAMLDocs = append(stdoutYAMLDocs, content)
+				default:
+					stdoutENVRCAgg.WriteString(content)
 				}
-			default:
-				// This case should ideally not be reached for stdout aggregation
-				// but as a fallback, we can accumulate to a strings.Builder
-				// For now, we'll just print the content directly if not json/yaml
-				fmt.Print(content)
+			} else {
+				if err := output.Write(renderedOutPath, []byte(content), output.WriteOptions{Format: format, SortKeys: opts.SortKeys}); err != nil {
+					return err
+				}
 			}
 		}
 
@@ -344,87 +331,10 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
                     if err != nil { return fmt.Errorf("failed to marshal aggregated YAML: %w", err) }
                     fmt.Print(string(b))
                 }
-            } else if len(stdoutYAMLDocs) > 0 {
-                var sb strings.Builder
-                for i, doc := range stdoutYAMLDocs {
-                    if i > 0 { sb.WriteString("---\n") }
-                    sb.WriteString(doc)
-                }
-                fmt.Print(sb.String())
             }
         }
-
-        // also write to file when a single, non-stdout output path is used
-        if len(uniqueOut) == 1 {
-            var onlyPath string
-            for pth := range uniqueOut { onlyPath = pth }
-            if onlyPath != "-" && !opts.DryRun {
-                // Determine effective mode (defaults applied earlier)
-                mode := job.OutputMode
-                if opts.OutputModeOverride != "" { mode = opts.OutputModeOverride }
-                if mode == "" { mode = "overwrite" }
-
-                // Prefer JSON aggregated content if present
-                if stdoutJSONAgg != nil {
-                    // Write aggregated JSON to file
-                    var b []byte
-                    if opts.SortKeys {
-                        keys := make([]string, 0, len(stdoutJSONAgg))
-                        for k := range stdoutJSONAgg { keys = append(keys, k) }
-                        sort.Strings(keys)
-                        var sb strings.Builder
-                        sb.WriteString("{\n")
-                        for i, k := range keys {
-                            kb, _ := json.Marshal(k)
-                            vb, err := json.Marshal(stdoutJSONAgg[k]); if err != nil { return fmt.Errorf("failed to marshal aggregated JSON value: %w", err) }
-                            if i > 0 { sb.WriteString(",\n") }
-                            sb.WriteString("  ")
-                            sb.Write(kb)
-                            sb.WriteString(": ")
-                            sb.Write(vb)
-                        }
-                        sb.WriteString("\n}")
-                        b = []byte(sb.String())
-                    } else {
-                        var err error
-                        b, err = json.MarshalIndent(stdoutJSONAgg, "", "  ")
-                        if err != nil { return fmt.Errorf("failed to marshal aggregated JSON: %w", err) }
-                    }
-                    log.Debug().Str("output", onlyPath).Str("mode", mode).Msg("writing aggregated json")
-                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "json", SortKeys: opts.SortKeys}); err != nil {
-                        return err
-                    }
-                } else if stdoutYAMLAgg != nil {
-                    // Write aggregated YAML mapping to file (merge mode recommended)
-                    var b []byte
-                    if opts.SortKeys {
-                        keys := make([]string, 0, len(stdoutYAMLAgg))
-                        for k := range stdoutYAMLAgg { keys = append(keys, k) }
-                        sort.Strings(keys)
-                        node := &yaml.Node{Kind: yaml.MappingNode}
-                        for _, k := range keys {
-                            kn := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: k}
-                            var valueDoc yaml.Node
-                            vb, err := yaml.Marshal(stdoutYAMLAgg[k]); if err != nil { return fmt.Errorf("failed to marshal yaml value: %w", err) }
-                            if err := yaml.Unmarshal(vb, &valueDoc); err != nil { return fmt.Errorf("failed to unmarshal yaml value node: %w", err) }
-                            var vn *yaml.Node
-                            if len(valueDoc.Content) == 0 { vn = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!null", Value: "~"} } else { vn = valueDoc.Content[0] }
-                            node.Content = append(node.Content, kn, vn)
-                        }
-                        var err error
-                        b, err = yaml.Marshal(node)
-                        if err != nil { return fmt.Errorf("failed to marshal ordered YAML: %w", err) }
-                    } else {
-                        var err error
-                        b, err = yaml.Marshal(stdoutYAMLAgg)
-                        if err != nil { return fmt.Errorf("failed to marshal aggregated YAML: %w", err) }
-                    }
-                    log.Debug().Str("output", onlyPath).Str("mode", mode).Msg("writing aggregated yaml")
-                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "yaml", SortKeys: opts.SortKeys}); err != nil {
-                        return err
-                    }
-                }
-            }
+        if stdoutENVRCAgg.Len() > 0 {
+            fmt.Print(stdoutENVRCAgg.String())
         }
         return nil
     }
@@ -478,12 +388,10 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 	if opts.FormatOverride != "" { options.Format = opts.FormatOverride }
 	if options.Format == "" { options.Format = "envrc" }
 
-	mode := job.OutputMode
-	if opts.OutputModeOverride != "" { mode = opts.OutputModeOverride }
-	if mode == "" { mode = "overwrite" }
-	if options.Format == "envrc" && renderedOutput != "-" && mode != "overwrite" {
-		if fi, err := os.Stat(renderedOutput); err == nil && fi.Size() > 0 { options.SuppressHeader = true }
-	}
+    // For envrc, suppress header when appending to existing file
+    if options.Format == "envrc" && renderedOutput != "-" {
+        if fi, err := os.Stat(renderedOutput); err == nil && fi.Size() > 0 { options.SuppressHeader = true }
+    }
 
 	generator := envrc.NewGenerator(options)
 	content, err := generator.Generate(secrets)
@@ -495,7 +403,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 		content = header + content + "\n"
 	}
 
-    log.Debug().Str("output", renderedOutput).Str("mode", mode).Msg("writing job output")
+    log.Debug().Str("output", renderedOutput).Msg("writing job output")
     if opts.DryRun { renderedOutput = "-" }
-    return output.Write(renderedOutput, []byte(content), output.WriteOptions{Mode: output.OutputMode(mode), Format: options.Format, SortKeys: opts.SortKeys})
+    return output.Write(renderedOutput, []byte(content), output.WriteOptions{Format: options.Format, SortKeys: opts.SortKeys})
 }
