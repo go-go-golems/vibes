@@ -1,13 +1,17 @@
 package cmd
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"context"
-	"time"
-	"encoding/json"
+	"regexp"
+	"strings"
 	"sync"
+	"text/template"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,7 +22,29 @@ import (
 
 // BatchConfig represents the configuration for batch processing
 type BatchConfig struct {
-	Jobs []BatchJob `yaml:"jobs"`
+	BasePath string     `yaml:"base_path"`
+	Jobs     []BatchJob `yaml:"jobs"`
+}
+
+// TemplateContext used for rendering templated strings such as paths
+type TemplateContext struct {
+	Token TokenContext
+}
+
+type TokenContext struct {
+	Accessor    string
+	CreationTTL string
+	DisplayName string
+	EntityID    string
+	ExpireTime  string
+	ID          string
+	IssueTime   string
+	Meta        map[string]string
+	Policies    []string
+	Path        string
+	TTL         string
+	Type        string
+	OIDCUserID  string
 }
 
 // BatchSection represents one logical section emitted by a job
@@ -41,8 +67,8 @@ type BatchSection struct {
 type BatchJob struct {
 	Name         string            `yaml:"name"`
 	Description  string            `yaml:"description,omitempty"`
-	Path         string            `yaml:"path,omitempty"`   // legacy single-path mode
-	Output       string            `yaml:"output"`
+	Path         string            `yaml:"path,omitempty"`   // legacy single-path mode (templated)
+	Output       string            `yaml:"output"`           // templated
 	OutputMode   string            `yaml:"output_mode,omitempty"` // overwrite (default), append, merge
 	Prefix       string            `yaml:"prefix,omitempty"`
 	ExcludeKeys  []string          `yaml:"exclude_keys,omitempty"`
@@ -58,6 +84,7 @@ var (
 	batchConfigFile string
 	parallel        bool
 	continueOnError bool
+	batchBasePath   string
 )
 
 var outputLocks = struct {
@@ -124,6 +151,10 @@ jobs:
         env_map:                 # explicit mapping ENV_VAR -> key
           GOOGLE_CLIENT_ID: client_id
           GOOGLE_CLIENT_SECRET: client_secret
+
+Templating:
+- You can template paths and outputs using Go templates with token context.
+- Example: path: "secrets/environments/personal/{{ .Token.OIDCUserID }}/manuel/core"
 `,
 	RunE: runBatch,
 }
@@ -134,6 +165,9 @@ func init() {
 	batchCmd.Flags().StringVarP(&batchConfigFile, "config", "c", "", "Batch configuration file (required)")
 	batchCmd.Flags().BoolVar(&parallel, "parallel", false, "Run jobs in parallel")
 	batchCmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "Continue processing if a job fails")
+	batchCmd.Flags().StringVar(&batchBasePath, "base-path", "", "Base Vault path to prepend to relative section paths (overrides YAML base_path)")
+
+	viper.BindPFlag("batch.base_path", batchCmd.Flags().Lookup("base-path"))
 
 	batchCmd.MarkFlagRequired("config")
 }
@@ -175,11 +209,24 @@ func runBatch(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to create Vault client: %w", err)
 	}
 
+	// Build template context from token
+	tctx, err := buildTemplateContext(vaultClient)
+	if err != nil {
+		return fmt.Errorf("failed to build template context: %w", err)
+	}
+
+	// Determine basePath (CLI flag overrides YAML), and render templates
+	basePath := strings.TrimSuffix(config.BasePath, "/")
+	if v := viper.GetString("batch.base_path"); v != "" { basePath = strings.TrimSuffix(v, "/") }
+	if basePath != "" {
+		if bp, err := renderTemplateString(basePath, tctx); err == nil { basePath = strings.TrimSuffix(bp, "/") }
+	}
+
 	// Process jobs
 	if parallel {
-		return processBatchParallel(vaultClient, config.Jobs)
+		return processBatchParallel(vaultClient, config.Jobs, tctx, basePath)
 	} else {
-		return processBatchSequential(vaultClient, config.Jobs)
+		return processBatchSequential(vaultClient, config.Jobs, tctx, basePath)
 	}
 }
 
@@ -197,13 +244,13 @@ func loadBatchConfig(filename string) (*BatchConfig, error) {
 	return &config, nil
 }
 
-func processBatchSequential(vaultClient *vault.Client, jobs []BatchJob) error {
+func processBatchSequential(vaultClient *vault.Client, jobs []BatchJob, tctx TemplateContext, basePath string) error {
 	var errors []error
 
 	for i, job := range jobs {
 		fmt.Printf("[%d/%d] Processing job: %s\n", i+1, len(jobs), job.Name)
 		
-		if err := processJob(vaultClient, job); err != nil {
+		if err := processJob(vaultClient, job, tctx, basePath); err != nil {
 			fmt.Fprintf(os.Stderr, "Job '%s' failed: %v\n", job.Name, err)
 			errors = append(errors, err)
 			
@@ -224,7 +271,7 @@ func processBatchSequential(vaultClient *vault.Client, jobs []BatchJob) error {
 	return nil
 }
 
-func processBatchParallel(vaultClient *vault.Client, jobs []BatchJob) error {
+func processBatchParallel(vaultClient *vault.Client, jobs []BatchJob, tctx TemplateContext, basePath string) error {
 	// For simplicity, we'll implement a basic parallel processing
 	// In a production system, you might want to use worker pools
 	
@@ -238,7 +285,7 @@ func processBatchParallel(vaultClient *vault.Client, jobs []BatchJob) error {
 	// Start all jobs
 	for _, job := range jobs {
 		go func(j BatchJob) {
-			err := processJob(vaultClient, j)
+			err := processJob(vaultClient, j, tctx, basePath)
 			results <- jobResult{job: j, error: err}
 		}(job)
 	}
@@ -268,19 +315,24 @@ func processBatchParallel(vaultClient *vault.Client, jobs []BatchJob) error {
 	return nil
 }
 
-func processJob(vaultClient *vault.Client, job BatchJob) error {
+func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, basePath string) error {
 	// If sections are provided, iterate sections using job-level defaults
 	if len(job.Sections) > 0 {
 		for _, sec := range job.Sections {
-			sourcePath := sec.Path
+			// Join base path and render templated section paths/outputs
+			joinedPath := combineBaseAndPath(basePath, sec.Path)
+			renderedSourcePath, err := renderTemplateString(joinedPath, tctx)
+			if err != nil { return fmt.Errorf("failed to render section path '%s': %w", sec.Path, err) }
 			outPath := job.Output
 			if sec.Output != "" { outPath = sec.Output }
+			renderedOutPath, err := renderTemplateString(outPath, tctx)
+			if err != nil { return fmt.Errorf("failed to render section output '%s': %w", outPath, err) }
 			format := job.Format
 			if sec.Format != "" { format = sec.Format }
 
-			secrets, err := vaultClient.GetSecrets(sourcePath)
+			secrets, err := vaultClient.GetSecrets(renderedSourcePath)
 			if err != nil {
-				return fmt.Errorf("failed to retrieve secrets from path %s: %w", sourcePath, err)
+				return fmt.Errorf("failed to retrieve secrets from path %s: %w", renderedSourcePath, err)
 			}
 
 			// Apply variables: job-level then section-level (section overrides)
@@ -307,8 +359,8 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 			} else {
 				transform = false
 			}
-			template := job.Template
-			if sec.Template != "" { template = sec.Template }
+			templateFile := job.Template
+			if sec.Template != "" { templateFile = sec.Template }
 
 			// If env_map is provided, build explicit mapping and disable transform/prefix
 			selected := secrets
@@ -319,7 +371,7 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 					if v, ok := secrets[srcKey]; ok {
 						mapped[envName] = v
 					} else if viper.GetBool("verbose") {
-						fmt.Fprintf(os.Stderr, "[batch] warning: %s missing key '%s'\n", sourcePath, srcKey)
+						fmt.Fprintf(os.Stderr, "[batch] warning: %s missing key '%s'\n", renderedSourcePath, srcKey)
 					}
 				}
 				selected = mapped
@@ -337,7 +389,7 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 				IncludeKeys:   include,
 				TransformKeys: transform,
 				Format:        format,
-				TemplateFile:  template,
+				TemplateFile:  templateFile,
 				Verbose:       viper.GetBool("verbose"),
 			}
 
@@ -352,7 +404,7 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 				header := fmt.Sprintf("# === %s", job.Name)
 				if sec.Name != "" { header += fmt.Sprintf(": %s", sec.Name) }
 				header += " ===\n"
-				header += fmt.Sprintf("# Source path: %s\n", sourcePath)
+				header += fmt.Sprintf("# Source path: %s\n", renderedSourcePath)
 				if job.Description != "" { header += fmt.Sprintf("# Job: %s\n", job.Description) }
 				if sec.Description != "" { header += fmt.Sprintf("# Section: %s\n", sec.Description) }
 				header += "\n"
@@ -360,14 +412,14 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 			}
 
 			// Ensure output directory exists
-			outputDir := filepath.Dir(outPath)
+			outputDir := filepath.Dir(renderedOutPath)
 			if outputDir != "." {
 				if err := os.MkdirAll(outputDir, 0755); err != nil {
 					return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
 				}
 			}
 
-			unlock := lockForPath(outPath)
+			unlock := lockForPath(renderedOutPath)
 			defer unlock()
 
 			mode := job.OutputMode
@@ -375,20 +427,20 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 
 			switch mode {
 			case "overwrite":
-				if err := os.WriteFile(outPath, []byte(content), 0644); err != nil {
-					return fmt.Errorf("failed to write output file %s: %w", outPath, err)
+				if err := os.WriteFile(renderedOutPath, []byte(content), 0644); err != nil {
+					return fmt.Errorf("failed to write output file %s: %w", renderedOutPath, err)
 				}
 			case "append":
-				f, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-				if err != nil { return fmt.Errorf("failed to open output file %s: %w", outPath, err) }
+				f, err := os.OpenFile(renderedOutPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+				if err != nil { return fmt.Errorf("failed to open output file %s: %w", renderedOutPath, err) }
 				defer f.Close()
-				if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", outPath, err) }
+				if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", renderedOutPath, err) }
 			case "merge":
 				// Only meaningful for json|yaml; envrc falls back to append
 				switch options.Format {
 				case "json":
 					var existing map[string]interface{}
-					if b, err := os.ReadFile(outPath); err == nil && len(b) > 0 {
+					if b, err := os.ReadFile(renderedOutPath); err == nil && len(b) > 0 {
 						_ = json.Unmarshal(b, &existing)
 					}
 					if existing == nil { existing = map[string]interface{}{} }
@@ -399,10 +451,10 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 					for k, v := range next { existing[k] = v }
 					buf, err := json.MarshalIndent(existing, "", "  ")
 					if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
-					if err := os.WriteFile(outPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", outPath, err) }
+					if err := os.WriteFile(renderedOutPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", renderedOutPath, err) }
 				case "yaml":
 					var existing map[string]interface{}
-					if b, err := os.ReadFile(outPath); err == nil && len(b) > 0 {
+					if b, err := os.ReadFile(renderedOutPath); err == nil && len(b) > 0 {
 						_ = yaml.Unmarshal(b, &existing)
 					}
 					if existing == nil { existing = map[string]interface{}{} }
@@ -413,12 +465,12 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 					for k, v := range next { existing[k] = v }
 					buf, err := yaml.Marshal(existing)
 					if err != nil { return fmt.Errorf("failed to marshal merged YAML: %w", err) }
-					if err := os.WriteFile(outPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", outPath, err) }
+					if err := os.WriteFile(renderedOutPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", renderedOutPath, err) }
 				default:
-					f, err := os.OpenFile(outPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-					if err != nil { return fmt.Errorf("failed to open output file %s: %w", outPath, err) }
+					f, err := os.OpenFile(renderedOutPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+					if err != nil { return fmt.Errorf("failed to open output file %s: %w", renderedOutPath, err) }
 					defer f.Close()
-					if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", outPath, err) }
+					if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", renderedOutPath, err) }
 				}
 			default:
 				return fmt.Errorf("unknown output_mode: %s", mode)
@@ -428,10 +480,17 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 	}
 
 	// Legacy single-path job processing
+	// Render templated job paths/outputs
+	joinedJobPath := combineBaseAndPath(basePath, job.Path)
+	renderedPath, err := renderTemplateString(joinedJobPath, tctx)
+	if err != nil { return fmt.Errorf("failed to render job path '%s': %w", job.Path, err) }
+	renderedOutput, err := renderTemplateString(job.Output, tctx)
+	if err != nil { return fmt.Errorf("failed to render job output '%s': %w", job.Output, err) }
+
 	// Retrieve secrets
-	secrets, err := vaultClient.GetSecrets(job.Path)
+	secrets, err := vaultClient.GetSecrets(renderedPath)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve secrets from path %s: %w", job.Path, err)
+		return fmt.Errorf("failed to retrieve secrets from path %s: %w", renderedPath, err)
 	}
 
 	// Apply job variables to secrets if specified
@@ -466,21 +525,21 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 
 	// If envrc, add a section header with job metadata and a trailing newline
 	if options.Format == "envrc" {
-		header := fmt.Sprintf("# === %s ===\n# Source path: %s\n", job.Name, job.Path)
+		header := fmt.Sprintf("# === %s ===\n# Source path: %s\n", job.Name, renderedPath)
 		if job.Description != "" { header += fmt.Sprintf("# Description: %s\n", job.Description) }
 		header += "\n"
 		content = header + content + "\n"
 	}
 
 	// Ensure output directory exists
-	outputDir := filepath.Dir(job.Output)
+	outputDir := filepath.Dir(renderedOutput)
 	if outputDir != "." {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
 		}
 	}
 
-	unlock := lockForPath(job.Output)
+	unlock := lockForPath(renderedOutput)
 	defer unlock()
 
 	mode := job.OutputMode
@@ -488,19 +547,19 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 
 	switch mode {
 	case "overwrite":
-		return os.WriteFile(job.Output, []byte(content), 0644)
+		return os.WriteFile(renderedOutput, []byte(content), 0644)
 	case "append":
-		f, err := os.OpenFile(job.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-		if err != nil { return fmt.Errorf("failed to open output file %s: %w", job.Output, err) }
+		f, err := os.OpenFile(renderedOutput, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+		if err != nil { return fmt.Errorf("failed to open output file %s: %w", renderedOutput, err) }
 		defer f.Close()
-		if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", job.Output, err) }
+		if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", renderedOutput, err) }
 		return nil
 	case "merge":
 		// Only meaningful for json|yaml; envrc falls back to append
 		switch options.Format {
 		case "json":
 			var existing map[string]interface{}
-			if b, err := os.ReadFile(job.Output); err == nil && len(b) > 0 {
+			if b, err := os.ReadFile(renderedOutput); err == nil && len(b) > 0 {
 				_ = json.Unmarshal(b, &existing)
 			}
 			if existing == nil { existing = map[string]interface{}{} }
@@ -511,10 +570,10 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 			for k, v := range next { existing[k] = v }
 			buf, err := json.MarshalIndent(existing, "", "  ")
 			if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
-			return os.WriteFile(job.Output, buf, 0644)
+			return os.WriteFile(renderedOutput, buf, 0644)
 		case "yaml":
 			var existing map[string]interface{}
-			if b, err := os.ReadFile(job.Output); err == nil && len(b) > 0 {
+			if b, err := os.ReadFile(renderedOutput); err == nil && len(b) > 0 {
 				_ = yaml.Unmarshal(b, &existing)
 			}
 			if existing == nil { existing = map[string]interface{}{} }
@@ -525,16 +584,92 @@ func processJob(vaultClient *vault.Client, job BatchJob) error {
 			for k, v := range next { existing[k] = v }
 			buf, err := yaml.Marshal(existing)
 			if err != nil { return fmt.Errorf("failed to marshal merged YAML: %w", err) }
-			return os.WriteFile(job.Output, buf, 0644)
+			return os.WriteFile(renderedOutput, buf, 0644)
 		default:
-			f, err := os.OpenFile(job.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-			if err != nil { return fmt.Errorf("failed to open output file %s: %w", job.Output, err) }
+			f, err := os.OpenFile(renderedOutput, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+			if err != nil { return fmt.Errorf("failed to open output file %s: %w", renderedOutput, err) }
 			defer f.Close()
-			if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", job.Output, err) }
+			if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", renderedOutput, err) }
 			return nil
 		}
 	default:
 		return fmt.Errorf("unknown output_mode: %s", mode)
 	}
+}
+
+func buildTemplateContext(vc *vault.Client) (TemplateContext, error) {
+	client := vc.GetClient()
+	tInfo, err := client.Auth().Token().LookupSelf()
+	if err != nil {
+		return TemplateContext{}, fmt.Errorf("token lookup failed: %w", err)
+	}
+	ctx := TemplateContext{Token: TokenContext{}}
+	if tInfo != nil && tInfo.Data != nil {
+		getStr := func(key string) string {
+			if v, ok := tInfo.Data[key]; ok {
+				if s, ok := v.(string); ok { return s }
+			}
+			return ""
+		}
+		ctx.Token.Accessor = getStr("accessor")
+		ctx.Token.CreationTTL = getStr("creation_ttl")
+		ctx.Token.DisplayName = getStr("display_name")
+		ctx.Token.EntityID = getStr("entity_id")
+		ctx.Token.ExpireTime = getStr("expire_time")
+		ctx.Token.ID = getStr("id")
+		ctx.Token.IssueTime = getStr("issue_time")
+		ctx.Token.Path = getStr("path")
+		ctx.Token.TTL = getStr("ttl")
+		ctx.Token.Type = getStr("type")
+		// Policies
+		if pv, ok := tInfo.Data["policies"]; ok {
+			if arr, ok := pv.([]interface{}); ok {
+				for _, it := range arr {
+					if s, ok := it.(string); ok { ctx.Token.Policies = append(ctx.Token.Policies, s) }
+				}
+			}
+		}
+		// Meta (flatten map[string]string)
+		ctx.Token.Meta = map[string]string{}
+		if mv, ok := tInfo.Data["meta"]; ok {
+			if m, ok := mv.(map[string]interface{}); ok {
+				for k, v := range m {
+					if s, ok := v.(string); ok { ctx.Token.Meta[k] = s }
+				}
+			}
+		}
+		// Derive OIDCUserID from display_name like "oidc-123456"
+		if strings.HasPrefix(ctx.Token.DisplayName, "oidc-") {
+			re := regexp.MustCompile(`oidc-([0-9A-Za-z_-]+)`) 
+			m := re.FindStringSubmatch(ctx.Token.DisplayName)
+			if len(m) == 2 { ctx.Token.OIDCUserID = m[1] }
+		}
+	}
+	return ctx, nil
+}
+
+func renderTemplateString(s string, tctx TemplateContext) (string, error) {
+	// If no template markers, return as-is
+	if !strings.Contains(s, "{{") {
+		return s, nil
+	}
+	tmpl, err := template.New("path").Option("missingkey=error").Parse(s)
+	if err != nil { return "", err }
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, tctx); err != nil { return "", err }
+	return buf.String(), nil
+}
+
+func isVaultAbsolute(p string) bool {
+	return strings.HasPrefix(p, "secrets/") || strings.HasPrefix(p, "secret/") || strings.HasPrefix(p, "auth/") || strings.HasPrefix(p, "sys/") || strings.HasPrefix(p, "transit/")
+}
+
+func combineBaseAndPath(basePath, p string) string {
+	if basePath == "" || isVaultAbsolute(p) {
+		return p
+	}
+	bp := strings.TrimSuffix(basePath, "/")
+	pp := strings.TrimPrefix(p, "/")
+	return bp + "/" + pp
 }
 
