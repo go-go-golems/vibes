@@ -1,16 +1,17 @@
 package batch
 
 import (
-	"fmt"
-	"os"
-	"strings"
+    "fmt"
+    "os"
+    "strings"
+    "sort"
 
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
-	"encoding/json"
-	"vault-envrc-generator/pkg/envrc"
-	"vault-envrc-generator/pkg/output"
-	"vault-envrc-generator/pkg/vault"
+    "github.com/spf13/viper"
+    "gopkg.in/yaml.v3"
+    "encoding/json"
+    "vault-envrc-generator/pkg/envrc"
+    "vault-envrc-generator/pkg/output"
+    "vault-envrc-generator/pkg/vault"
 )
 
 type Processor struct {
@@ -19,11 +20,13 @@ type Processor struct {
 }
 
 type ProcessorOptions struct {
-	BasePath           string
-	OutputOverride     string
-	OutputModeOverride string
-	FormatOverride     string
-	ContinueOnError    bool
+    BasePath           string
+    OutputOverride     string
+    OutputModeOverride string
+    FormatOverride     string
+    ContinueOnError    bool
+    DryRun             bool
+    SortKeys           bool
 }
 
 func (p *Processor) Process(cfg *Config, opts ProcessorOptions) error {
@@ -101,7 +104,10 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 		var stdoutYAMLAgg map[string]interface{}
 		var stdoutYAMLDocs []string
 
-		for _, sec := range job.Sections {
+        // Track unique rendered output paths encountered across sections
+        uniqueOut := map[string]struct{}{}
+
+        for _, sec := range job.Sections {
 			if p.Verbose {
 				fmt.Fprintf(os.Stderr, "[batch] section '%s': start\n", sec.Name)
 			}
@@ -110,17 +116,18 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 			if err != nil {
 				return fmt.Errorf("failed to render section path '%s': %w", sec.Path, err)
 			}
-			outPath := job.Output
-			if sec.Output != "" {
-				outPath = sec.Output
-			}
-			if opts.OutputOverride != "" {
-				outPath = opts.OutputOverride
-			}
-			renderedOutPath, err := vault.RenderTemplateString(outPath, tctx)
-			if err != nil {
-				return fmt.Errorf("failed to render section output '%s': %w", outPath, err)
-			}
+            outPath := job.Output
+            if sec.Output != "" {
+                outPath = sec.Output
+            }
+            if opts.OutputOverride != "" {
+                outPath = opts.OutputOverride
+            }
+            renderedOutPath, err := vault.RenderTemplateString(outPath, tctx)
+            if err != nil {
+                return fmt.Errorf("failed to render section output '%s': %w", outPath, err)
+            }
+            if opts.DryRun { renderedOutPath = "-" }
 			format := job.Format
 			if sec.Format != "" {
 				format = sec.Format
@@ -132,9 +139,10 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 				format = "envrc"
 			}
 
-			if p.Verbose {
-				fmt.Fprintf(os.Stderr, "[batch] section '%s': source='%s' output='%s' format='%s'\n", sec.Name, renderedSourcePath, renderedOutPath, format)
-			}
+            if p.Verbose {
+                fmt.Fprintf(os.Stderr, "[batch] section '%s': source='%s' output='%s' format='%s'\n", sec.Name, renderedSourcePath, renderedOutPath, format)
+            }
+            uniqueOut[renderedOutPath] = struct{}{}
 
 			mode := job.OutputMode
 			if opts.OutputModeOverride != "" {
@@ -241,16 +249,17 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 				suppressHeader = true
 			}
 
-			options := &envrc.Options{
-				Prefix:         prefix,
-				ExcludeKeys:    exclude,
-				IncludeKeys:    include,
-				TransformKeys:  transform,
-				Format:         format,
-				TemplateFile:   templateFile,
-				Verbose:        viper.GetBool("verbose"),
-				SuppressHeader: suppressHeader,
-			}
+            options := &envrc.Options{
+                Prefix:         prefix,
+                ExcludeKeys:    exclude,
+                IncludeKeys:    include,
+                TransformKeys:  transform,
+                Format:         format,
+                TemplateFile:   templateFile,
+                Verbose:        viper.GetBool("verbose"),
+                SuppressHeader: suppressHeader,
+                SortKeys:       opts.SortKeys,
+            }
 
 			generator := envrc.NewGenerator(options)
 			content, err := generator.Generate(selected)
@@ -302,28 +311,138 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 			}
 		}
 
-		// flush outputs
-		if stdoutJSONAgg != nil {
-			b, err := json.MarshalIndent(stdoutJSONAgg, "", "  ")
-			if err != nil { return fmt.Errorf("failed to marshal aggregated JSON: %w", err) }
-			fmt.Print(string(b))
-		}
-		if stdoutYAMLAgg != nil {
-			if len(stdoutYAMLAgg) > 0 {
-				b, err := yaml.Marshal(stdoutYAMLAgg)
-				if err != nil { return fmt.Errorf("failed to marshal aggregated YAML: %w", err) }
-				fmt.Print(string(b))
-			} else if len(stdoutYAMLDocs) > 0 {
-				var sb strings.Builder
-				for i, doc := range stdoutYAMLDocs {
-					if i > 0 { sb.WriteString("---\n") }
-					sb.WriteString(doc)
-				}
-				fmt.Print(sb.String())
-			}
-		}
-		return nil
-	}
+        // flush outputs to stdout
+        if stdoutJSONAgg != nil {
+            if opts.SortKeys {
+                keys := make([]string, 0, len(stdoutJSONAgg))
+                for k := range stdoutJSONAgg { keys = append(keys, k) }
+                sort.Strings(keys)
+                var bld strings.Builder
+                bld.WriteString("{\n")
+                for i, k := range keys {
+                    kb, _ := json.Marshal(k)
+                    vb, err := json.Marshal(stdoutJSONAgg[k]); if err != nil { return fmt.Errorf("failed to marshal aggregated JSON value: %w", err) }
+                    if i > 0 { bld.WriteString(",\n") }
+                    bld.WriteString("  ")
+                    bld.Write(kb)
+                    bld.WriteString(": ")
+                    bld.Write(vb)
+                }
+                bld.WriteString("\n}")
+                fmt.Print(bld.String())
+            } else {
+                b, err := json.MarshalIndent(stdoutJSONAgg, "", "  ")
+                if err != nil { return fmt.Errorf("failed to marshal aggregated JSON: %w", err) }
+                fmt.Print(string(b))
+            }
+        }
+        if stdoutYAMLAgg != nil {
+            if len(stdoutYAMLAgg) > 0 {
+                if opts.SortKeys {
+                    keys := make([]string, 0, len(stdoutYAMLAgg))
+                    for k := range stdoutYAMLAgg { keys = append(keys, k) }
+                    sort.Strings(keys)
+                    node := &yaml.Node{Kind: yaml.MappingNode}
+                    for _, k := range keys {
+                        kn := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: k}
+                        var valueDoc yaml.Node
+                        b, err := yaml.Marshal(stdoutYAMLAgg[k]); if err != nil { return fmt.Errorf("failed to marshal yaml value: %w", err) }
+                        if err := yaml.Unmarshal(b, &valueDoc); err != nil { return fmt.Errorf("failed to unmarshal yaml value node: %w", err) }
+                        var vn *yaml.Node
+                        if len(valueDoc.Content) == 0 { vn = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!null", Value: "~"} } else { vn = valueDoc.Content[0] }
+                        node.Content = append(node.Content, kn, vn)
+                    }
+                    b, err := yaml.Marshal(node); if err != nil { return fmt.Errorf("failed to marshal ordered YAML: %w", err) }
+                    fmt.Print(string(b))
+                } else {
+                    b, err := yaml.Marshal(stdoutYAMLAgg)
+                    if err != nil { return fmt.Errorf("failed to marshal aggregated YAML: %w", err) }
+                    fmt.Print(string(b))
+                }
+            } else if len(stdoutYAMLDocs) > 0 {
+                var sb strings.Builder
+                for i, doc := range stdoutYAMLDocs {
+                    if i > 0 { sb.WriteString("---\n") }
+                    sb.WriteString(doc)
+                }
+                fmt.Print(sb.String())
+            }
+        }
+
+        // also write to file when a single, non-stdout output path is used
+        if len(uniqueOut) == 1 {
+            var onlyPath string
+            for pth := range uniqueOut { onlyPath = pth }
+            if onlyPath != "-" && !opts.DryRun {
+                // Determine effective mode (defaults applied earlier)
+                mode := job.OutputMode
+                if opts.OutputModeOverride != "" { mode = opts.OutputModeOverride }
+                if mode == "" { mode = "overwrite" }
+
+                // Prefer JSON aggregated content if present
+                if stdoutJSONAgg != nil {
+                    // Write aggregated JSON to file
+                    var b []byte
+                    if opts.SortKeys {
+                        keys := make([]string, 0, len(stdoutJSONAgg))
+                        for k := range stdoutJSONAgg { keys = append(keys, k) }
+                        sort.Strings(keys)
+                        var sb strings.Builder
+                        sb.WriteString("{\n")
+                        for i, k := range keys {
+                            kb, _ := json.Marshal(k)
+                            vb, err := json.Marshal(stdoutJSONAgg[k]); if err != nil { return fmt.Errorf("failed to marshal aggregated JSON value: %w", err) }
+                            if i > 0 { sb.WriteString(",\n") }
+                            sb.WriteString("  ")
+                            sb.Write(kb)
+                            sb.WriteString(": ")
+                            sb.Write(vb)
+                        }
+                        sb.WriteString("\n}")
+                        b = []byte(sb.String())
+                    } else {
+                        var err error
+                        b, err = json.MarshalIndent(stdoutJSONAgg, "", "  ")
+                        if err != nil { return fmt.Errorf("failed to marshal aggregated JSON: %w", err) }
+                    }
+                    if p.Verbose { fmt.Fprintf(os.Stderr, "[batch] writing aggregated JSON to '%s' (mode=%s)\n", onlyPath, mode) }
+                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "json", Verbose: p.Verbose, SortKeys: opts.SortKeys}); err != nil {
+                        return err
+                    }
+                } else if stdoutYAMLAgg != nil {
+                    // Write aggregated YAML mapping to file (merge mode recommended)
+                    var b []byte
+                    if opts.SortKeys {
+                        keys := make([]string, 0, len(stdoutYAMLAgg))
+                        for k := range stdoutYAMLAgg { keys = append(keys, k) }
+                        sort.Strings(keys)
+                        node := &yaml.Node{Kind: yaml.MappingNode}
+                        for _, k := range keys {
+                            kn := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: k}
+                            var valueDoc yaml.Node
+                            vb, err := yaml.Marshal(stdoutYAMLAgg[k]); if err != nil { return fmt.Errorf("failed to marshal yaml value: %w", err) }
+                            if err := yaml.Unmarshal(vb, &valueDoc); err != nil { return fmt.Errorf("failed to unmarshal yaml value node: %w", err) }
+                            var vn *yaml.Node
+                            if len(valueDoc.Content) == 0 { vn = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!null", Value: "~"} } else { vn = valueDoc.Content[0] }
+                            node.Content = append(node.Content, kn, vn)
+                        }
+                        var err error
+                        b, err = yaml.Marshal(node)
+                        if err != nil { return fmt.Errorf("failed to marshal ordered YAML: %w", err) }
+                    } else {
+                        var err error
+                        b, err = yaml.Marshal(stdoutYAMLAgg)
+                        if err != nil { return fmt.Errorf("failed to marshal aggregated YAML: %w", err) }
+                    }
+                    if p.Verbose { fmt.Fprintf(os.Stderr, "[batch] writing aggregated YAML to '%s' (mode=%s)\n", onlyPath, mode) }
+                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "yaml", Verbose: p.Verbose, SortKeys: opts.SortKeys}); err != nil {
+                        return err
+                    }
+                }
+            }
+        }
+        return nil
+    }
 
 	// legacy single-path mode
 	joinedJobPath := vault.JoinBaseAndPath(effectiveBase, job.Path)
@@ -369,6 +488,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 		TemplateFile:  job.Template,
 		Verbose:       viper.GetBool("verbose"),
 		SuppressHeader: false,
+		SortKeys:       opts.SortKeys,
 	}
 	if opts.FormatOverride != "" { options.Format = opts.FormatOverride }
 	if options.Format == "" { options.Format = "envrc" }
@@ -391,5 +511,6 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 	}
 
 	if p.Verbose { fmt.Fprintf(os.Stderr, "[batch] writing job output to '%s' (mode=%s)\n", renderedOutput, mode) }
-	return output.Write(renderedOutput, []byte(content), output.WriteOptions{Mode: output.OutputMode(mode), Format: options.Format, Verbose: p.Verbose})
+    if opts.DryRun { renderedOutput = "-" }
+    return output.Write(renderedOutput, []byte(content), output.WriteOptions{Mode: output.OutputMode(mode), Format: options.Format, Verbose: p.Verbose, SortKeys: opts.SortKeys})
 }

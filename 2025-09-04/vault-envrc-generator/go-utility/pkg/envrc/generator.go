@@ -16,14 +16,15 @@ import (
 
 // Options contains configuration for the envrc generator
 type Options struct {
-	Prefix         string
-	ExcludeKeys    []string
-	IncludeKeys    []string
-	TransformKeys  bool
-	Format         string
-	TemplateFile   string
-	Verbose        bool
-	SuppressHeader bool
+    Prefix         string
+    ExcludeKeys    []string
+    IncludeKeys    []string
+    TransformKeys  bool
+    Format         string
+    TemplateFile   string
+    Verbose        bool
+    SuppressHeader bool
+    SortKeys       bool
 }
 
 // Generator handles the generation of .envrc files
@@ -191,20 +192,44 @@ func (g *Generator) generateFromTemplate(secrets map[string]interface{}) (string
 
 // generateJSON creates JSON format output
 func (g *Generator) generateJSON(secrets map[string]interface{}) (string, error) {
-	jsonBytes, err := json.MarshalIndent(secrets, "", "  ")
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal secrets to JSON: %w", err)
-	}
-	return string(jsonBytes), nil
+    // If sorted output is requested, marshal using an ordered representation
+    if g.options.SortKeys {
+        keys := make([]string, 0, len(secrets))
+        for k := range secrets { keys = append(keys, k) }
+        sort.Strings(keys)
+        om := orderedMap{keys: keys, m: secrets}
+        jsonBytes, err := json.Marshal(om)
+        if err != nil {
+            return "", fmt.Errorf("failed to marshal ordered JSON: %w", err)
+        }
+        // MarshalJSON already pretty-prints
+        return string(jsonBytes), nil
+    }
+    jsonBytes, err := json.MarshalIndent(secrets, "", "  ")
+    if err != nil {
+        return "", fmt.Errorf("failed to marshal secrets to JSON: %w", err)
+    }
+    return string(jsonBytes), nil
 }
 
 // generateYAML creates YAML format output
 func (g *Generator) generateYAML(secrets map[string]interface{}) (string, error) {
-	yamlBytes, err := yaml.Marshal(secrets)
-	if err != nil {
-		return "", fmt.Errorf("failed to marshal secrets to YAML: %w", err)
-	}
-	return string(yamlBytes), nil
+    if g.options.SortKeys {
+        keys := make([]string, 0, len(secrets))
+        for k := range secrets { keys = append(keys, k) }
+        sort.Strings(keys)
+        om := orderedMap{keys: keys, m: secrets}
+        b, err := yaml.Marshal(om)
+        if err != nil {
+            return "", fmt.Errorf("failed to marshal ordered YAML: %w", err)
+        }
+        return string(b), nil
+    }
+    yamlBytes, err := yaml.Marshal(secrets)
+    if err != nil {
+        return "", fmt.Errorf("failed to marshal secrets to YAML: %w", err)
+    }
+    return string(yamlBytes), nil
 }
 
 // formatValue converts various types to string representation
@@ -239,4 +264,58 @@ func (g *Generator) escapeValue(value string) string {
 		return fmt.Sprintf("\"%s\"", escaped)
 	}
 	return value
+}
+
+// orderedMap provides deterministic key ordering for JSON and YAML outputs
+type orderedMap struct {
+    keys []string
+    m    map[string]interface{}
+}
+
+// MarshalJSON renders a pretty-printed JSON object with sorted keys
+func (o orderedMap) MarshalJSON() ([]byte, error) {
+    var buf bytes.Buffer
+    buf.WriteByte('{')
+    for i, k := range o.keys {
+        kb, err := json.Marshal(k)
+        if err != nil { return nil, err }
+        vb, err := json.Marshal(o.m[k])
+        if err != nil { return nil, err }
+        if i == 0 {
+            buf.WriteByte('\n')
+        } else {
+            buf.WriteByte(',')
+            buf.WriteByte('\n')
+        }
+        buf.WriteString("  ")
+        buf.Write(kb)
+        buf.WriteString(": ")
+        buf.Write(vb)
+    }
+    if len(o.keys) > 0 {
+        buf.WriteByte('\n')
+    }
+    buf.WriteByte('}')
+    return buf.Bytes(), nil
+}
+
+// MarshalYAML renders a YAML mapping node with keys in order
+func (o orderedMap) MarshalYAML() (interface{}, error) {
+    node := &yaml.Node{Kind: yaml.MappingNode}
+    for _, k := range o.keys {
+        keyNode := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: k}
+        // Encode value into a node by round-tripping through YAML for correctness
+        var valueDoc yaml.Node
+        b, err := yaml.Marshal(o.m[k])
+        if err != nil { return nil, err }
+        if err := yaml.Unmarshal(b, &valueDoc); err != nil { return nil, err }
+        if len(valueDoc.Content) == 0 {
+            valueNode := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!null", Value: "~"}
+            node.Content = append(node.Content, keyNode, valueNode)
+            continue
+        }
+        valueNode := valueDoc.Content[0]
+        node.Content = append(node.Content, keyNode, valueNode)
+    }
+    return node, nil
 }

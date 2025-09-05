@@ -77,12 +77,14 @@ type BatchJob struct {
 }
 
 var (
-	batchConfigFile         string
-	continueOnError         bool
-	batchBasePath           string
-	batchOutputOverride     string
-	batchOutputModeOverride string
-	batchFormatOverride     string
+    batchConfigFile         string
+    continueOnError         bool
+    batchBasePath           string
+    batchOutputOverride     string
+    batchOutputModeOverride string
+    batchFormatOverride     string
+    batchDryRun             bool
+    batchSortKeys           bool
 )
 
 // batchCmd represents the batch command
@@ -147,8 +149,10 @@ func init() {
 	batchCmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "Continue processing if a job fails")
 	batchCmd.Flags().StringVar(&batchBasePath, "base-path", "", "Base Vault path to prepend to relative section paths (overrides YAML base_path)")
 	batchCmd.Flags().StringVar(&batchOutputOverride, "output", "", "Override output for all jobs; use '-' for stdout")
-	batchCmd.Flags().StringVar(&batchOutputModeOverride, "output-mode", "", "Override output mode for all jobs: overwrite|append|merge")
-	batchCmd.Flags().StringVar(&batchFormatOverride, "format", "", "Override format for all jobs: envrc|json|yaml")
+    batchCmd.Flags().StringVar(&batchOutputModeOverride, "output-mode", "", "Override output mode for all jobs: overwrite|append|merge")
+    batchCmd.Flags().StringVar(&batchFormatOverride, "format", "", "Override format for all jobs: envrc|json|yaml")
+    batchCmd.Flags().BoolVar(&batchDryRun, "dry-run", false, "Preview outputs to stdout without writing files")
+    batchCmd.Flags().BoolVar(&batchSortKeys, "sort-keys", true, "Sort keys in JSON/YAML outputs for deterministic ordering")
 
 	viper.BindPFlag("batch.base_path", batchCmd.Flags().Lookup("base-path"))
 
@@ -193,14 +197,16 @@ func runBatch(cmd *cobra.Command, args []string) error {
 	}
 
 	// Delegate to batch processor
-	proc := batch.Processor{Client: vaultClient, Verbose: viper.GetBool("verbose")}
-	return proc.Process(config, batch.ProcessorOptions{
-		BasePath:           viper.GetString("batch.base_path"),
-		OutputOverride:     batchOutputOverride,
-		OutputModeOverride: batchOutputModeOverride,
-		FormatOverride:     batchFormatOverride,
-		ContinueOnError:    continueOnError,
-	})
+    proc := batch.Processor{Client: vaultClient, Verbose: viper.GetBool("verbose")}
+    return proc.Process(config, batch.ProcessorOptions{
+        BasePath:           viper.GetString("batch.base_path"),
+        OutputOverride:     batchOutputOverride,
+        OutputModeOverride: batchOutputModeOverride,
+        FormatOverride:     batchFormatOverride,
+        ContinueOnError:    continueOnError,
+        DryRun:             batchDryRun,
+        SortKeys:           batchSortKeys,
+    })
 }
 
 func loadBatchConfig(filename string) (*batch.Config, error) {

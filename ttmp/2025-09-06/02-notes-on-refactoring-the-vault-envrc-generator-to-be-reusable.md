@@ -144,3 +144,4 @@ cd vibes/2025-09-04/vault-envrc-generator/go-utility && go build -o vault-envrc-
 - `pkg/seed/spec.go`, `pkg/seed/runner.go`
 - `pkg/listing/types.go`, `pkg/listing/walker.go`
 - `cmd/batch.go`, `cmd/seed.go`, `cmd/generate.go`, `cmd/list.go`, `cmd/interactive.go`, `cmd/root.go`
+
