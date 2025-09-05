@@ -8,6 +8,7 @@ import (
     "sort"
     "sync"
 
+    "github.com/rs/zerolog/log"
     "gopkg.in/yaml.v3"
 )
 
@@ -22,7 +23,6 @@ const (
 type WriteOptions struct {
     Mode    OutputMode
     Format  string // envrc|json|yaml
-    Verbose bool
     SortKeys bool
 }
 
@@ -58,14 +58,10 @@ func Write(path string, content []byte, opts WriteOptions) error {
 		}
 	}
 
-	if opts.Verbose {
-		fmt.Fprintf(os.Stderr, "[output] acquiring lock for %s\n", path)
-	}
-	unlock := lockForPath(path)
-	if opts.Verbose {
-		fmt.Fprintf(os.Stderr, "[output] acquired lock for %s\n", path)
-	}
-	defer unlock()
+    log.Debug().Str("path", path).Msg("acquiring output lock")
+    unlock := lockForPath(path)
+    log.Debug().Str("path", path).Msg("acquired output lock")
+    defer unlock()
 
 	// Determine effective mode: JSON always merges
 	effectiveMode := opts.Mode
@@ -73,16 +69,12 @@ func Write(path string, content []byte, opts WriteOptions) error {
         effectiveMode = OutputModeMerge
     }
 
-	if opts.Verbose {
-		fmt.Fprintf(os.Stderr, "[output] write start path=%s mode=%s format=%s size=%d\n", path, effectiveMode, opts.Format, len(content))
-	}
+    log.Debug().Str("path", path).Str("mode", string(effectiveMode)).Str("format", opts.Format).Int("size", len(content)).Msg("write start")
 	switch effectiveMode {
 	case OutputModeOverwrite:
 		err := os.WriteFile(path, content, 0644)
-		if opts.Verbose {
-			fmt.Fprintf(os.Stderr, "[output] overwrite wrote %d bytes to %s (err=%v)\n", len(content), path, err)
-		}
-		return err
+        log.Debug().Str("path", path).Int("bytes", len(content)).Err(err).Msg("overwrite written")
+        return err
 	case OutputModeAppend:
 		// YAML special-case: append as a new document
 		if opts.Format == "yaml" {
@@ -103,10 +95,8 @@ func Write(path string, content []byte, opts WriteOptions) error {
 			if _, err := f.Write(content); err != nil {
 				return fmt.Errorf("failed to append to %s: %w", path, err)
 			}
-			if opts.Verbose {
-				fmt.Fprintf(os.Stderr, "[output] append(yaml-doc) wrote %d bytes to %s\n", len(content), path)
-			}
-			return nil
+            log.Debug().Str("path", path).Int("bytes", len(content)).Msg("append yaml-doc")
+            return nil
 		}
 		// Default append behavior for other formats
 		f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
@@ -117,10 +107,8 @@ func Write(path string, content []byte, opts WriteOptions) error {
 		if _, err := f.Write(content); err != nil {
 			return fmt.Errorf("failed to append to %s: %w", path, err)
 		}
-		if opts.Verbose {
-			fmt.Fprintf(os.Stderr, "[output] append wrote %d bytes to %s\n", len(content), path)
-		}
-		return nil
+        log.Debug().Str("path", path).Int("bytes", len(content)).Msg("append written")
+        return nil
 	case OutputModeMerge:
 		switch opts.Format {
         case "json":
@@ -162,17 +150,15 @@ func Write(path string, content []byte, opts WriteOptions) error {
                 if err := os.WriteFile(path, bld.Bytes(), 0644); err != nil {
                     return err
                 }
-                if opts.Verbose {
-                    fmt.Fprintf(os.Stderr, "[output] merge(json) wrote %d bytes to %s (err=%v)\n", bld.Len(), path, nil)
-                }
-                return nil
-            } else {
-                buf, err := json.MarshalIndent(existing, "", "  ")
-                if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
-                if err := os.WriteFile(path, buf, 0644); err != nil { return err }
-                if opts.Verbose { fmt.Fprintf(os.Stderr, "[output] merge(json) wrote %d bytes to %s (err=%v)\n", len(buf), path, nil) }
-                return nil
-            }
+            log.Debug().Str("path", path).Int("bytes", bld.Len()).Msg("merge json ordered written")
+            return nil
+        } else {
+            buf, err := json.MarshalIndent(existing, "", "  ")
+            if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
+            if err := os.WriteFile(path, buf, 0644); err != nil { return err }
+            log.Debug().Str("path", path).Int("bytes", len(buf)).Msg("merge json written")
+            return nil
+        }
         case "yaml":
             var existing map[string]interface{}
             if b, err := os.ReadFile(path); err == nil && len(b) > 0 {
@@ -207,13 +193,13 @@ func Write(path string, content []byte, opts WriteOptions) error {
                 buf, err := yaml.Marshal(node)
                 if err != nil { return fmt.Errorf("failed to marshal ordered YAML: %w", err) }
                 if err := os.WriteFile(path, buf, 0644); err != nil { return err }
-                if opts.Verbose { fmt.Fprintf(os.Stderr, "[output] merge(yaml) wrote %d bytes to %s (err=%v)\n", len(buf), path, nil) }
+                log.Debug().Str("path", path).Int("bytes", len(buf)).Msg("merge yaml ordered written")
                 return nil
             } else {
                 buf, err := yaml.Marshal(existing)
                 if err != nil { return fmt.Errorf("failed to marshal merged YAML: %w", err) }
                 if err := os.WriteFile(path, buf, 0644); err != nil { return err }
-                if opts.Verbose { fmt.Fprintf(os.Stderr, "[output] merge(yaml) wrote %d bytes to %s (err=%v)\n", len(buf), path, nil) }
+                log.Debug().Str("path", path).Int("bytes", len(buf)).Msg("merge yaml written")
                 return nil
             }
 		default:
@@ -225,10 +211,8 @@ func Write(path string, content []byte, opts WriteOptions) error {
 			if _, err := f.Write(content); err != nil {
 				return fmt.Errorf("failed to append to %s: %w", path, err)
 			}
-			if opts.Verbose {
-				fmt.Fprintf(os.Stderr, "[output] merge(default-append) wrote %d bytes to %s\n", len(content), path)
-			}
-			return nil
+            log.Debug().Str("path", path).Int("bytes", len(content)).Msg("merge default append")
+            return nil
 		}
 	default:
 		return fmt.Errorf("unknown output mode: %s", effectiveMode)
