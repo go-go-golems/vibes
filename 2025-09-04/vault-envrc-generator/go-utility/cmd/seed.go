@@ -91,18 +91,36 @@ func runSeed(cmd *cobra.Command, args []string) error {
         return fmt.Errorf("failed to create Vault client: %w", err)
     }
 
+    // Build template context from token for rendering templated paths
+    tctx, err := buildTemplateContext(client)
+    if err != nil {
+        return fmt.Errorf("failed to build template context: %w", err)
+    }
+
+    // Resolve base path (YAML overrides CLI/Viper), then render templates
     base := strings.TrimSuffix(spec.BasePath, "/")
     if base == "" {
         base = strings.TrimSuffix(viper.GetString("seed.base_path"), "/")
     }
+    if base != "" {
+        if bp, err := renderTemplateString(base, tctx); err == nil {
+            base = strings.TrimSuffix(bp, "/")
+        } else {
+            return fmt.Errorf("failed to render base_path template: %w", err)
+        }
+    }
 
     for i, set := range spec.Sets {
+        // Determine target path: join with base if relative; error if relative without base
         target := set.Path
-        if !strings.HasPrefix(target, "secrets/") {
-            if base == "" {
-                return fmt.Errorf("set %d: relative path '%s' without base_path", i+1, target)
-            }
-            target = base + "/" + strings.TrimPrefix(target, "/")
+        if !isVaultAbsolute(target) && base == "" {
+            return fmt.Errorf("set %d: relative path '%s' without base_path", i+1, target)
+        }
+        target = combineBaseAndPath(base, target)
+        // Render templated target path
+        renderedTarget, err := renderTemplateString(target, tctx)
+        if err != nil {
+            return fmt.Errorf("set %d: failed to render path '%s': %w", i+1, target, err)
         }
 
         data := map[string]interface{}{}
@@ -130,20 +148,20 @@ func runSeed(cmd *cobra.Command, args []string) error {
 
         if len(data) == 0 {
             if viper.GetBool("verbose") {
-                fmt.Fprintf(os.Stderr, "[seed] skipping %s (no data)\n", target)
+                fmt.Fprintf(os.Stderr, "[seed] skipping %s (no data)\n", renderedTarget)
             }
             continue
         }
 
         if seedDryRun {
-            fmt.Printf("[seed] DRY-RUN put %s keys=%v\n", target, keysOf(data))
+            fmt.Printf("[seed] DRY-RUN put %s keys=%v\n", renderedTarget, keysOf(data))
             continue
         }
 
-        if err := client.PutSecrets(target, data); err != nil {
-            return fmt.Errorf("failed to write %s: %w", target, err)
+        if err := client.PutSecrets(renderedTarget, data); err != nil {
+            return fmt.Errorf("failed to write %s: %w", renderedTarget, err)
         }
-        fmt.Printf("[seed] wrote %s (%d keys)\n", target, len(data))
+        fmt.Printf("[seed] wrote %s (%d keys)\n", renderedTarget, len(data))
     }
     return nil
 }
