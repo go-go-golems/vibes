@@ -7,7 +7,7 @@ Generate developer-friendly environment files (.envrc, JSON, YAML) from HashiCor
 - 🔐 KV v1/v2 aware: KV v2-first fallback (no mount-list permission required)
 - 🧭 Token sources: env, file (~/.vault-token), or lookup via `vault token lookup`
 - 🧰 Interfaces: `generate`, `interactive`, `batch`, `list`, `seed`, `test`
-- 🧩 Output: `.envrc`, `json`, `yaml`; append or merge across jobs
+- 🧩 Output: `.envrc`, `json`, `yaml`; envrc appends; JSON/YAML merge across jobs
 - 🧱 Sections-based batch: job-level defaults + per-section overrides, with headers in `.envrc`
 - ✍️ YAML seeding: write secrets into Vault from env, literals, files
 - 🔎 KV v2-aware listing: YAML/text, optional censored values for leaf keys
@@ -64,7 +64,7 @@ A few core concepts help understand how this tool behaves and why:
 - KV Engines: Vault stores secrets under mounts. KV v2 wraps real data under `data/` for reads and `metadata/` for listings. This tool automatically attempts v2 and falls back to v1 to minimize required privileges.
 - Token Resolution: Tokens can be taken from `VAULT_TOKEN`, read from `~/.vault-token`, or resolved via `vault token lookup` (current session). The default `auto` mode tries all three in a safe order.
 - Key Transformation and Prefixing: Many developers prefer shell-safe env names. `transform_keys` converts keys to uppercase and replaces `-` with `_`, then `prefix` is prepended (e.g., `DB_`).
-- Output Modes: Batch jobs can overwrite, append, or merge outputs. Append is ideal for `.envrc`. Merge is ideal for JSON/YAML maps.
+- Output Semantics: In batch, `.envrc` appends section content with headers; `json`/`yaml` shallow-merge top-level keys. Use `--sort-keys` for deterministic output.
 - Sections-Based Batch: Define job-level defaults (output, format, etc.) and a list of sections each pointing at a Vault path. Each section can override defaults for precise control. The `.envrc` formatter emits friendly headers per section including the source path and description.
 
 ## Token Resolution
@@ -130,7 +130,7 @@ jobs:
   - name: "Dev envrc"
     description: "Aggregated development environment variables"
     output: "out/dev/.envrc"
-    output_mode: append        # overwrite | append | merge
+    # merge-only semantics (envrc appends, json/yaml merge)
     format: envrc              # envrc | json | yaml
     transform_keys: true       # job-level default; sections can override
     sections:
@@ -159,7 +159,7 @@ jobs:
 
 Behavior:
 - `.envrc` sections include headers with job/section name, source path, description, and a trailing blank line.
-- `output_mode: append` concatenates `.envrc` chunks; for `json`/`yaml`, `merge` combines maps (last write wins).
+- Merge-only: `.envrc` appends; `json`/`yaml` merge keys (last write wins).
 
 Tri-state `transform_keys` precedence:
 - Section-level `transform_keys: true|false` overrides job.
@@ -238,9 +238,7 @@ Connectivity, health, token introspection, and a simple read.
 - `name`: Human-friendly identifier for logs and headers.
 - `description` (optional): Included in `.envrc` headers.
 - `output`: File to write.
-- `output_mode`: `overwrite` | `append` | `merge`.
-  - `.envrc`: prefer `append` to build a single file from multiple sections.
-  - `json`/`yaml`: prefer `merge` to accumulate a single map across sections.
+  (merge-only: `.envrc` appends; `json`/`yaml` merge)
 - `format`: `envrc` | `json` | `yaml`.
 - `transform_keys` (optional): Default for all sections (overridden by section-level value).
 - `prefix`, `include_keys`, `exclude_keys`, `template`, `variables`: Defaults for sections.
@@ -281,7 +279,7 @@ jobs:
   - base_path: secrets/environments/development/personal/{{ .Token.OIDCUserID }}/local
   - name: personal-envrc
     output: out/personal-{{ .Token.OIDCUserID }}.envrc
-    output_mode: append
+    # merge-only semantics (envrc appends; json/yaml merge)
     format: envrc
     sections:
       - name: core
@@ -326,7 +324,7 @@ export GOOGLE_CLIENT_SECRET=...
 
 ### json / yaml
 
-Maps of key→value. With `output_mode: merge`, later sections/jobs override keys.
+Maps of key→value. Merge-only semantics: later sections/jobs override keys.
 
 Example merged JSON:
 ```json
@@ -385,7 +383,7 @@ jobs:
   - name: dev-envrc
     description: "Aggregated development environment variables for .envrc"
     output: out/dev/.envrc
-    output_mode: append
+    # merge-only semantics (envrc appends; json/yaml merge)
     format: envrc
     transform_keys: true
     sections:
