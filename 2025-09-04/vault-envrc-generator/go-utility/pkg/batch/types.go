@@ -25,16 +25,15 @@ type Section struct {
 
 // Job represents a single job in batch processing
 type Job struct {
-	Name        string            `yaml:"name"`
-	Description string            `yaml:"description,omitempty"`
-	Path        string            `yaml:"path,omitempty"`
-	Output      string            `yaml:"output"`
-	OutputMode  string            `yaml:"output_mode,omitempty"`
-	Prefix      string            `yaml:"prefix,omitempty"`
-	ExcludeKeys []string          `yaml:"exclude_keys,omitempty"`
-	IncludeKeys []string          `yaml:"include_keys,omitempty"`
-	Transform   *bool             `yaml:"transform_keys,omitempty"`
-	Format      string            `yaml:"format,omitempty"`
+    Name        string            `yaml:"name"`
+    Description string            `yaml:"description,omitempty"`
+    Path        string            `yaml:"path,omitempty"`
+    Output      string            `yaml:"output"`
+    Prefix      string            `yaml:"prefix,omitempty"`
+    ExcludeKeys []string          `yaml:"exclude_keys,omitempty"`
+    IncludeKeys []string          `yaml:"include_keys,omitempty"`
+    Transform   *bool             `yaml:"transform_keys,omitempty"`
+    Format      string            `yaml:"format,omitempty"`
 	Template    string            `yaml:"template,omitempty"`
 	Variables   map[string]string `yaml:"variables,omitempty"`
 	Sections    []Section         `yaml:"sections,omitempty"`
