@@ -51,7 +51,7 @@ type TokenContext struct {
 type BatchSection struct {
 	Name        string            `yaml:"name,omitempty"`
 	Description string            `yaml:"description,omitempty"`
-	Path        string            `yaml:"path"`
+	Path        string            `yaml:"path,omitempty"`
 	Prefix      string            `yaml:"prefix,omitempty"`
 	ExcludeKeys []string          `yaml:"exclude_keys,omitempty"`
 	IncludeKeys []string          `yaml:"include_keys,omitempty"`
@@ -61,6 +61,7 @@ type BatchSection struct {
 	Format      string            `yaml:"format,omitempty"` // optional override
 	Output      string            `yaml:"output,omitempty"` // optional override
 	EnvMap      map[string]string `yaml:"env_map,omitempty"` // explicit ENV_VAR -> source_key mapping
+	Fixed       map[string]string `yaml:"fixed,omitempty"` // fixed key->templated value additions
 }
 
 // BatchJob represents a single job in batch processing
@@ -78,6 +79,8 @@ type BatchJob struct {
 	Template     string            `yaml:"template,omitempty"`
 	Variables    map[string]string `yaml:"variables,omitempty"`
 	Sections     []BatchSection    `yaml:"sections,omitempty"`
+	BasePath     string            `yaml:"base_path,omitempty"` // optional per-job base path (templated)
+	Fixed        map[string]string `yaml:"fixed,omitempty"`     // fixed key->templated value additions
 }
 
 var (
@@ -85,6 +88,9 @@ var (
 	parallel        bool
 	continueOnError bool
 	batchBasePath   string
+	batchOutputOverride string
+	batchOutputModeOverride string
+	batchFormatOverride string
 )
 
 var outputLocks = struct {
@@ -166,6 +172,9 @@ func init() {
 	batchCmd.Flags().BoolVar(&parallel, "parallel", false, "Run jobs in parallel")
 	batchCmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "Continue processing if a job fails")
 	batchCmd.Flags().StringVar(&batchBasePath, "base-path", "", "Base Vault path to prepend to relative section paths (overrides YAML base_path)")
+	batchCmd.Flags().StringVar(&batchOutputOverride, "output", "", "Override output for all jobs; use '-' for stdout")
+	batchCmd.Flags().StringVar(&batchOutputModeOverride, "output-mode", "", "Override output mode for all jobs: overwrite|append|merge")
+	batchCmd.Flags().StringVar(&batchFormatOverride, "format", "", "Override format for all jobs: envrc|json|yaml")
 
 	viper.BindPFlag("batch.base_path", batchCmd.Flags().Lookup("base-path"))
 
@@ -221,6 +230,12 @@ func runBatch(cmd *cobra.Command, args []string) error {
 	if basePath != "" {
 		if bp, err := renderTemplateString(basePath, tctx); err == nil { basePath = strings.TrimSuffix(bp, "/") }
 	}
+	if viper.GetBool("verbose") {
+		fmt.Fprintf(os.Stderr, "[batch] effective base_path: '%s'\n", basePath)
+		if batchOutputOverride != "" { fmt.Fprintf(os.Stderr, "[batch] override --output: %s\n", batchOutputOverride) }
+		if batchOutputModeOverride != "" { fmt.Fprintf(os.Stderr, "[batch] override --output-mode: %s\n", batchOutputModeOverride) }
+		if batchFormatOverride != "" { fmt.Fprintf(os.Stderr, "[batch] override --format: %s\n", batchFormatOverride) }
+	}
 
 	// Process jobs
 	if parallel {
@@ -249,6 +264,9 @@ func processBatchSequential(vaultClient *vault.Client, jobs []BatchJob, tctx Tem
 
 	for i, job := range jobs {
 		fmt.Printf("[%d/%d] Processing job: %s\n", i+1, len(jobs), job.Name)
+		if viper.GetBool("verbose") {
+			fmt.Fprintf(os.Stderr, "[batch] job '%s': %d sections\n", job.Name, len(job.Sections))
+		}
 		
 		if err := processJob(vaultClient, job, tctx, basePath); err != nil {
 			fmt.Fprintf(os.Stderr, "Job '%s' failed: %v\n", job.Name, err)
@@ -316,23 +334,73 @@ func processBatchParallel(vaultClient *vault.Client, jobs []BatchJob, tctx Templ
 }
 
 func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, basePath string) error {
+	// Determine effective job base path (job.BasePath overrides global when provided)
+	effectiveBase := basePath
+	if strings.TrimSpace(job.BasePath) != "" {
+		effectiveBase = strings.TrimSuffix(job.BasePath, "/")
+		if rbp, err := renderTemplateString(effectiveBase, tctx); err == nil {
+			effectiveBase = strings.TrimSuffix(rbp, "/")
+		} else {
+			return fmt.Errorf("failed to render job base_path '%s': %w", job.BasePath, err)
+		}
+	}
+
+	// Track whether we've already emitted the global generator header per output path (including stdout "-")
+	headerEmitted := map[string]bool{}
+
 	// If sections are provided, iterate sections using job-level defaults
 	if len(job.Sections) > 0 {
 		for _, sec := range job.Sections {
 			// Join base path and render templated section paths/outputs
-			joinedPath := combineBaseAndPath(basePath, sec.Path)
+			joinedPath := combineBaseAndPath(effectiveBase, sec.Path)
 			renderedSourcePath, err := renderTemplateString(joinedPath, tctx)
 			if err != nil { return fmt.Errorf("failed to render section path '%s': %w", sec.Path, err) }
 			outPath := job.Output
 			if sec.Output != "" { outPath = sec.Output }
+			if batchOutputOverride != "" { outPath = batchOutputOverride }
 			renderedOutPath, err := renderTemplateString(outPath, tctx)
 			if err != nil { return fmt.Errorf("failed to render section output '%s': %w", outPath, err) }
 			format := job.Format
 			if sec.Format != "" { format = sec.Format }
+			if batchFormatOverride != "" { format = batchFormatOverride }
+			if format == "" { format = "envrc" }
+			if viper.GetBool("verbose") {
+				fmt.Fprintf(os.Stderr, "[batch] section '%s': source='%s' output='%s' format='%s'\n", sec.Name, renderedSourcePath, renderedOutPath, format)
+			}
 
-			secrets, err := vaultClient.GetSecrets(renderedSourcePath)
-			if err != nil {
-				return fmt.Errorf("failed to retrieve secrets from path %s: %w", renderedSourcePath, err)
+			// Decide output mode early for header suppression logic
+			mode := job.OutputMode
+			if batchOutputModeOverride != "" { mode = batchOutputModeOverride }
+			if mode == "" { mode = "overwrite" }
+
+			// Start with Vault secrets unless no path provided (allow fixed-only sections)
+			secrets := map[string]interface{}{}
+			if strings.TrimSpace(renderedSourcePath) != "" {
+				s, err := vaultClient.GetSecrets(renderedSourcePath)
+				if err != nil {
+					return fmt.Errorf("failed to retrieve secrets from path %s: %w", renderedSourcePath, err)
+				}
+				for k, v := range s { secrets[k] = v }
+				if viper.GetBool("verbose") {
+					fmt.Fprintf(os.Stderr, "[batch] fetched %d keys from '%s'\n", len(s), renderedSourcePath)
+				}
+			}
+
+			// Apply job-level fixed values (templated)
+			if len(job.Fixed) > 0 {
+				for k, tv := range job.Fixed {
+					rv, err := renderTemplateString(tv, tctx)
+					if err != nil { return fmt.Errorf("failed to render job fixed '%s': %w", k, err) }
+					secrets[k] = rv
+				}
+			}
+			// Apply section-level fixed values (templated)
+			if len(sec.Fixed) > 0 {
+				for k, tv := range sec.Fixed {
+					rv, err := renderTemplateString(tv, tctx)
+					if err != nil { return fmt.Errorf("failed to render section fixed '%s': %w", k, err) }
+					secrets[k] = rv
+				}
 			}
 
 			// Apply variables: job-level then section-level (section overrides)
@@ -383,6 +451,18 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 				include = nil
 			}
 
+			// Decide if we should suppress the generator header for envrc format
+			suppressHeader := false
+			if format == "envrc" {
+				if headerEmitted[renderedOutPath] {
+					suppressHeader = true
+				} else if renderedOutPath != "-" && mode != "overwrite" {
+					if fi, err := os.Stat(renderedOutPath); err == nil && fi.Size() > 0 {
+						suppressHeader = true
+					}
+				}
+			}
+
 			options := &envrc.Options{
 				Prefix:        prefix,
 				ExcludeKeys:   exclude,
@@ -391,12 +471,21 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 				Format:        format,
 				TemplateFile:  templateFile,
 				Verbose:       viper.GetBool("verbose"),
+				SuppressHeader: suppressHeader,
+			}
+
+			// Mark header as emitted for this output path going forward (for stdout and files)
+			if format == "envrc" {
+				headerEmitted[renderedOutPath] = true
 			}
 
 			generator := envrc.NewGenerator(options)
 			content, err := generator.Generate(selected)
 			if err != nil {
 				return fmt.Errorf("failed to generate content: %w", err)
+			}
+			if viper.GetBool("verbose") {
+				fmt.Fprintf(os.Stderr, "[batch] generated %d bytes for section '%s'\n", len(content), sec.Name)
 			}
 
 			// Add envrc header with job+section context and trailing newline
@@ -411,7 +500,14 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 				content = header + content + "\n"
 			}
 
-			// Ensure output directory exists
+			// Output mode override and stdout support
+			if renderedOutPath == "-" {
+				if viper.GetBool("verbose") { fmt.Fprintf(os.Stderr, "[batch] writing section '%s' to stdout\n", sec.Name) }
+				fmt.Print(content)
+				continue
+			}
+
+			// Ensure output directory exists for file outputs
 			outputDir := filepath.Dir(renderedOutPath)
 			if outputDir != "." {
 				if err := os.MkdirAll(outputDir, 0755); err != nil {
@@ -419,78 +515,84 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 				}
 			}
 
+			if viper.GetBool("verbose") {
+				fmt.Fprintf(os.Stderr, "[batch] writing to '%s' (mode=%s)\n", renderedOutPath, mode)
+			}
+
 			unlock := lockForPath(renderedOutPath)
-			defer unlock()
-
-			mode := job.OutputMode
-			if mode == "" { mode = "overwrite" }
-
+			var writeErr error
 			switch mode {
 			case "overwrite":
-				if err := os.WriteFile(renderedOutPath, []byte(content), 0644); err != nil {
-					return fmt.Errorf("failed to write output file %s: %w", renderedOutPath, err)
-				}
+				writeErr = os.WriteFile(renderedOutPath, []byte(content), 0644)
 			case "append":
-				f, err := os.OpenFile(renderedOutPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-				if err != nil { return fmt.Errorf("failed to open output file %s: %w", renderedOutPath, err) }
-				defer f.Close()
-				if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", renderedOutPath, err) }
+				var f *os.File
+				f, writeErr = os.OpenFile(renderedOutPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+				if writeErr == nil { defer f.Close(); _, writeErr = f.WriteString(content) }
 			case "merge":
-				// Only meaningful for json|yaml; envrc falls back to append
 				switch options.Format {
 				case "json":
 					var existing map[string]interface{}
-					if b, err := os.ReadFile(renderedOutPath); err == nil && len(b) > 0 {
-						_ = json.Unmarshal(b, &existing)
-					}
+					if b, err := os.ReadFile(renderedOutPath); err == nil && len(b) > 0 { _ = json.Unmarshal(b, &existing) }
 					if existing == nil { existing = map[string]interface{}{} }
 					var next map[string]interface{}
 					if err := json.Unmarshal([]byte(content), &next); err != nil {
-						return fmt.Errorf("failed to parse generated JSON for merge: %w", err)
+						writeErr = fmt.Errorf("failed to parse generated JSON for merge: %w", err)
+						break
 					}
 					for k, v := range next { existing[k] = v }
-					buf, err := json.MarshalIndent(existing, "", "  ")
-					if err != nil { return fmt.Errorf("failed to marshal merged JSON: %w", err) }
-					if err := os.WriteFile(renderedOutPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", renderedOutPath, err) }
+					var buf []byte
+					buf, writeErr = json.MarshalIndent(existing, "", "  ")
+					if writeErr == nil { writeErr = os.WriteFile(renderedOutPath, buf, 0644) }
 				case "yaml":
 					var existing map[string]interface{}
-					if b, err := os.ReadFile(renderedOutPath); err == nil && len(b) > 0 {
-						_ = yaml.Unmarshal(b, &existing)
-					}
+					if b, err := os.ReadFile(renderedOutPath); err == nil && len(b) > 0 { _ = yaml.Unmarshal(b, &existing) }
 					if existing == nil { existing = map[string]interface{}{} }
 					var next map[string]interface{}
 					if err := yaml.Unmarshal([]byte(content), &next); err != nil {
-						return fmt.Errorf("failed to parse generated YAML for merge: %w", err)
+						writeErr = fmt.Errorf("failed to parse generated YAML for merge: %w", err)
+						break
 					}
 					for k, v := range next { existing[k] = v }
-					buf, err := yaml.Marshal(existing)
-					if err != nil { return fmt.Errorf("failed to marshal merged YAML: %w", err) }
-					if err := os.WriteFile(renderedOutPath, buf, 0644); err != nil { return fmt.Errorf("failed to write output file %s: %w", renderedOutPath, err) }
+					var buf []byte
+					buf, writeErr = yaml.Marshal(existing)
+					if writeErr == nil { writeErr = os.WriteFile(renderedOutPath, buf, 0644) }
 				default:
-					f, err := os.OpenFile(renderedOutPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-					if err != nil { return fmt.Errorf("failed to open output file %s: %w", renderedOutPath, err) }
-					defer f.Close()
-					if _, err := f.WriteString(content); err != nil { return fmt.Errorf("failed to append to %s: %w", renderedOutPath, err) }
+					var f *os.File
+					f, writeErr = os.OpenFile(renderedOutPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+					if writeErr == nil { defer f.Close(); _, writeErr = f.WriteString(content) }
 				}
 			default:
-				return fmt.Errorf("unknown output_mode: %s", mode)
+				writeErr = fmt.Errorf("unknown output_mode: %s", mode)
 			}
+			unlock()
+			if writeErr != nil { return fmt.Errorf("failed writing '%s': %w", renderedOutPath, writeErr) }
 		}
 		return nil
 	}
 
 	// Legacy single-path job processing
-	// Render templated job paths/outputs
-	joinedJobPath := combineBaseAndPath(basePath, job.Path)
+	// Render templated job paths/outputs using effective base
+	joinedJobPath := combineBaseAndPath(effectiveBase, job.Path)
 	renderedPath, err := renderTemplateString(joinedJobPath, tctx)
 	if err != nil { return fmt.Errorf("failed to render job path '%s': %w", job.Path, err) }
-	renderedOutput, err := renderTemplateString(job.Output, tctx)
-	if err != nil { return fmt.Errorf("failed to render job output '%s': %w", job.Output, err) }
+	outPath := job.Output
+	if batchOutputOverride != "" { outPath = batchOutputOverride }
+	renderedOutput, err := renderTemplateString(outPath, tctx)
+	if err != nil { return fmt.Errorf("failed to render job output '%s': %w", outPath, err) }
 
 	// Retrieve secrets
 	secrets, err := vaultClient.GetSecrets(renderedPath)
 	if err != nil {
 		return fmt.Errorf("failed to retrieve secrets from path %s: %w", renderedPath, err)
+	}
+
+	// Apply job-level fixed values (templated)
+	if len(job.Fixed) > 0 {
+		for k, tv := range job.Fixed {
+			rv, err := renderTemplateString(tv, tctx)
+			if err != nil { return fmt.Errorf("failed to render job fixed '%s': %w", k, err) }
+			secrets[k] = rv
+		}
 	}
 
 	// Apply job variables to secrets if specified
@@ -509,11 +611,23 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 		Format:        job.Format,
 		TemplateFile:  job.Template,
 		Verbose:       viper.GetBool("verbose"),
+		SuppressHeader: false,
 	}
+	if batchFormatOverride != "" { options.Format = batchFormatOverride }
 
 	// Set default format if not specified
 	if options.Format == "" {
 		options.Format = "envrc"
+	}
+
+	// For envrc format, suppress header if appending to an existing non-empty file
+	mode := job.OutputMode
+	if batchOutputModeOverride != "" { mode = batchOutputModeOverride }
+	if mode == "" { mode = "overwrite" }
+	if options.Format == "envrc" && renderedOutput != "-" && mode != "overwrite" {
+		if fi, err := os.Stat(renderedOutput); err == nil && fi.Size() > 0 {
+			options.SuppressHeader = true
+		}
 	}
 
 	// Generate content
@@ -531,6 +645,13 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 		content = header + content + "\n"
 	}
 
+	// Output mode override and stdout support
+	if renderedOutput == "-" {
+		if viper.GetBool("verbose") { fmt.Fprintf(os.Stderr, "[batch] writing job '%s' to stdout\n", job.Name) }
+		fmt.Print(content)
+		return nil
+	}
+
 	// Ensure output directory exists
 	outputDir := filepath.Dir(renderedOutput)
 	if outputDir != "." {
@@ -539,11 +660,12 @@ func processJob(vaultClient *vault.Client, job BatchJob, tctx TemplateContext, b
 		}
 	}
 
+	if viper.GetBool("verbose") {
+		fmt.Fprintf(os.Stderr, "[batch] writing job output to '%s' (mode=%s)\n", renderedOutput, mode)
+	}
+
 	unlock := lockForPath(renderedOutput)
 	defer unlock()
-
-	mode := job.OutputMode
-	if mode == "" { mode = "overwrite" }
 
 	switch mode {
 	case "overwrite":

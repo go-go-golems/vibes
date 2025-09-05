@@ -11,6 +11,8 @@ Generate developer-friendly environment files (.envrc, JSON, YAML) from HashiCor
 - 🧱 Sections-based batch: job-level defaults + per-section overrides, with headers in `.envrc`
 - ✍️ YAML seeding: write secrets into Vault from env, literals, files
 - 🔎 KV v2-aware listing: YAML/text, optional censored values for leaf keys
+- 🧩 Token templating for paths/outputs across batch and seed (via token context)
+- 🧷 Fixed values & per-job base_path in batch: inject templated constants and job-local bases
 
 ## Quick Start
 
@@ -151,7 +153,7 @@ jobs:
       # Example of templated personal path using OIDC user ID
       - name: personal-core
         description: "Personal core config for current OIDC user"
-        path: "secrets/environments/personal/{{ .Token.OIDCUserID }}/manuel/core"
+        path: "secrets/environments/development/personal/{{ .Token.OIDCUserID }}/local/core"
         include_keys: [VAULT_ADDR]
 ```
 
@@ -198,7 +200,7 @@ Examples:
 Write secrets to Vault from a YAML spec (env/literal/file sources). KV v2-first, v1 fallback.
 
 ```yaml
-base_path: secrets/environments/personal/102454784610416055110/manuel
+base_path: secrets/environments/development/personal/{{ .Token.OIDCUserID }}/local
 sets:
   - path: core
     data:
@@ -242,9 +244,11 @@ Connectivity, health, token introspection, and a simple read.
 - `format`: `envrc` | `json` | `yaml`.
 - `transform_keys` (optional): Default for all sections (overridden by section-level value).
 - `prefix`, `include_keys`, `exclude_keys`, `template`, `variables`: Defaults for sections.
-- Templating: `output` (and legacy `path`) accept Go templates with token context.
+- Templating: `base_path`, `output` (and legacy `path`) accept Go templates with token context.
   - Context fields under `.Token`: `Accessor`, `CreationTTL`, `DisplayName`, `EntityID`, `ExpireTime`, `ID`, `IssueTime`, `Meta[role]`, `Policies`, `Path`, `TTL`, `Type`, and `OIDCUserID` (extracted from `display_name` like `oidc-<id>`).
 - `base_path`: (YAML top-level) If set, any section `path` that is not an absolute Vault path will be joined as `base_path/<section.path>`. Override via CLI: `--base-path`.
+  - Per-job `base_path`: each job may also specify `base_path`; when present, it overrides the YAML top-level/CLI base for that job.
+  - Absolute escaping: if a section `path` (or job `path`) is an absolute Vault path (prefix `secrets/`, `secret/`, etc.), it is used as-is and not joined with any base path.
 
 ### Sections
 
@@ -256,10 +260,11 @@ Key selection options per section:
   - `transform_keys` and `prefix` are ignored (your env var names are used as-is)
   - `include_keys`/`exclude_keys` are ignored for that section
 - Templating: `path` and `output` accept token-context templates, e.g., `secrets/.../{{ .Token.OIDCUserID }}/...`.
+- `fixed`: map of `key: templated_string` injected into the section before selection/formatting. Useful for constants, computed values, or escaping Vault reads entirely (leave `path` empty to emit only fixed values).
 
 ### Token-based templating
 
-The batch command supports rendering Go templates in `path` and `output` using values derived from your current Vault token (`vault token lookup`). This lets you personalize paths without hardcoding identifiers.
+The batch and seed commands support rendering Go templates using values derived from your current Vault token (`vault token lookup`). This lets you personalize paths without hardcoding identifiers.
 
 - Requirements: the Vault CLI must be installed and authenticated (so `vault token lookup` works).
 - Context available under `.Token`:
@@ -273,7 +278,7 @@ Examples:
 
 ```yaml
 jobs:
-  - base_path: secrets/environments/personal/{{ .Token.OIDCUserID }}
+  - base_path: secrets/environments/development/personal/{{ .Token.OIDCUserID }}/local
   - name: personal-envrc
     output: out/personal-{{ .Token.OIDCUserID }}.envrc
     output_mode: append
@@ -282,10 +287,11 @@ jobs:
       - name: core
         path: core
         include_keys: [VAULT_ADDR]
-      - name: info
-        path: profile
-        env_map:
-          VAULT_DISPLAY_NAME: DisplayName
+      - name: constants
+        path: ""    # no Vault read; use fixed values only
+        fixed:
+          NOW_RFC3339: "{{ .Token.IssueTime }}"
+          ENV_NAME: "development"
 ```
 
 Notes:
