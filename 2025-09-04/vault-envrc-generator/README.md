@@ -124,6 +124,7 @@ Compose multiple outputs from multiple paths. Two schemas are supported.
 
 ```yaml
 jobs:
+  - base_path: secrets/environments/development     # optional: prepended to relative section paths
   - name: "Dev envrc"
     description: "Aggregated development environment variables"
     output: "out/dev/.envrc"
@@ -133,12 +134,12 @@ jobs:
     sections:
       - name: db
         description: "Shared DB user/password"
-        path: secrets/environments/development/shared/database
+        path: shared/database                       # becomes secrets/environments/development/shared/database
         include_keys: [username, password]
         prefix: DATABASE_
         # transform_keys: false  # optional override
       - name: google-oauth
-        path: secrets/external-apis/development/google-oauth
+        path: external-apis/development/google-oauth
         # Option A: include_keys (uses prefix/transform rules)
         # include_keys: [client_id, client_secret]
         # prefix: GOOGLE_
@@ -146,6 +147,12 @@ jobs:
         env_map:
           GOOGLE_CLIENT_ID: client_id
           GOOGLE_CLIENT_SECRET: client_secret
+
+      # Example of templated personal path using OIDC user ID
+      - name: personal-core
+        description: "Personal core config for current OIDC user"
+        path: "secrets/environments/personal/{{ .Token.OIDCUserID }}/manuel/core"
+        include_keys: [VAULT_ADDR]
 ```
 
 Behavior:
@@ -235,6 +242,9 @@ Connectivity, health, token introspection, and a simple read.
 - `format`: `envrc` | `json` | `yaml`.
 - `transform_keys` (optional): Default for all sections (overridden by section-level value).
 - `prefix`, `include_keys`, `exclude_keys`, `template`, `variables`: Defaults for sections.
+- Templating: `output` (and legacy `path`) accept Go templates with token context.
+  - Context fields under `.Token`: `Accessor`, `CreationTTL`, `DisplayName`, `EntityID`, `ExpireTime`, `ID`, `IssueTime`, `Meta[role]`, `Policies`, `Path`, `TTL`, `Type`, and `OIDCUserID` (extracted from `display_name` like `oidc-<id>`).
+- `base_path`: (YAML top-level) If set, any section `path` that is not an absolute Vault path will be joined as `base_path/<section.path>`. Override via CLI: `--base-path`.
 
 ### Sections
 
@@ -245,6 +255,7 @@ Key selection options per section:
 - `env_map`: explicit mapping of `ENV_VAR` → `source_key`. When `env_map` is used:
   - `transform_keys` and `prefix` are ignored (your env var names are used as-is)
   - `include_keys`/`exclude_keys` are ignored for that section
+- Templating: `path` and `output` accept token-context templates, e.g., `secrets/.../{{ .Token.OIDCUserID }}/...`.
 
 ### Concurrency & Safety
 
