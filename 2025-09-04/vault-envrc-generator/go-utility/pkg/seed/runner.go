@@ -1,18 +1,19 @@
 package seed
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+    "fmt"
+    "os"
+    "path/filepath"
+    "strings"
 
-	"github.com/spf13/viper"
-	"vault-envrc-generator/pkg/vault"
+    "github.com/rs/zerolog/log"
+    "github.com/spf13/viper"
+    "vault-envrc-generator/pkg/vault"
 )
 
 type Options struct{ DryRun bool }
 
-func Run(client *vault.Client, spec *Spec, opts Options, verbose bool) error {
+func Run(client *vault.Client, spec *Spec, opts Options) error {
 	// Build template context from token for rendering templated paths
 	tctx, err := vault.BuildTemplateContext(client)
 	if err != nil {
@@ -68,23 +69,18 @@ func Run(client *vault.Client, spec *Spec, opts Options, verbose bool) error {
 		}
 
 		if len(data) == 0 {
-			if verbose {
-				fmt.Fprintf(os.Stderr, "[seed] skipping %s (no data)\n", renderedTarget)
-			}
-			continue
-		}
+            log.Debug().Str("path", renderedTarget).Msg("seed: skipping (no data)")
+            continue
+        }
 
-		if opts.DryRun {
-			fmt.Printf("[seed] DRY-RUN put %s keys=%v\n", renderedTarget, keysOf(data))
-			continue
-		}
+        if opts.DryRun { log.Debug().Str("path", renderedTarget).Interface("keys", keysOf(data)).Msg("seed: dry-run put"); continue }
 
 		if err := client.PutSecrets(renderedTarget, data); err != nil {
 			return fmt.Errorf("failed to write %s: %w", renderedTarget, err)
 		}
-		fmt.Printf("[seed] wrote %s (%d keys)\n", renderedTarget, len(data))
-	}
-	return nil
+        log.Info().Str("path", renderedTarget).Int("keys", len(data)).Msg("seed: wrote secrets")
+    }
+    return nil
 }
 
 func keysOf(m map[string]interface{}) []string {

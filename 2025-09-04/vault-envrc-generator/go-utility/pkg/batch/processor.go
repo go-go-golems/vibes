@@ -6,17 +6,16 @@ import (
     "strings"
     "sort"
 
-    "github.com/spf13/viper"
-    "gopkg.in/yaml.v3"
     "encoding/json"
+    "gopkg.in/yaml.v3"
+    "github.com/rs/zerolog/log"
     "vault-envrc-generator/pkg/envrc"
     "vault-envrc-generator/pkg/output"
     "vault-envrc-generator/pkg/vault"
 )
 
 type Processor struct {
-	Client  *vault.Client
-	Verbose bool
+    Client  *vault.Client
 }
 
 type ProcessorOptions struct {
@@ -52,21 +51,19 @@ func (p *Processor) Process(cfg *Config, opts ProcessorOptions) error {
 
 func (p *Processor) processSequential(jobs []Job, tctx vault.TemplateContext, basePath string, opts ProcessorOptions) error {
 	var errors []error
-	for i, job := range jobs {
-		fmt.Printf("[%d/%d] Processing job: %s\n", i+1, len(jobs), job.Name)
-		if p.Verbose {
-			fmt.Fprintf(os.Stderr, "[batch] job '%s': %d sections\n", job.Name, len(job.Sections))
-		}
-		if err := p.processJob(job, tctx, basePath, opts); err != nil {
-			fmt.Fprintf(os.Stderr, "Job '%s' failed: %v\n", job.Name, err)
-			errors = append(errors, err)
-			if !opts.ContinueOnError {
-				return fmt.Errorf("job '%s' failed: %w", job.Name, err)
-			}
-		} else {
-			fmt.Printf("✓ Job '%s' completed successfully\n", job.Name)
-		}
-	}
+    for i, job := range jobs {
+        fmt.Printf("[%d/%d] Processing job: %s\n", i+1, len(jobs), job.Name)
+        log.Debug().Int("sections", len(job.Sections)).Str("job", job.Name).Msg("batch job start")
+        if err := p.processJob(job, tctx, basePath, opts); err != nil {
+            fmt.Fprintf(os.Stderr, "Job '%s' failed: %v\n", job.Name, err)
+            errors = append(errors, err)
+            if !opts.ContinueOnError {
+                return fmt.Errorf("job '%s' failed: %w", job.Name, err)
+            }
+        } else {
+            fmt.Printf("✓ Job '%s' completed successfully\n", job.Name)
+        }
+    }
 	if len(errors) > 0 {
 		fmt.Printf("\nCompleted with %d errors out of %d jobs\n", len(errors), len(jobs))
 		return fmt.Errorf("batch processing completed with %d errors", len(errors))
@@ -81,9 +78,7 @@ func (p *Processor) processParallel(jobs []Job, tctx vault.TemplateContext, base
 }
 
 func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath string, opts ProcessorOptions) error {
-	if p.Verbose {
-		fmt.Fprintf(os.Stderr, "[batch] job '%s': start (sections=%d)\n", job.Name, len(job.Sections))
-	}
+    log.Debug().Str("job", job.Name).Int("sections", len(job.Sections)).Msg("process job")
 	// job-level base path override
 	effectiveBase := basePath
 	if strings.TrimSpace(job.BasePath) != "" {
@@ -94,9 +89,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 			return fmt.Errorf("failed to render job base_path '%s': %w", job.BasePath, err)
 		}
 	}
-	if p.Verbose {
-		fmt.Fprintf(os.Stderr, "[batch] job '%s': effectiveBase='%s'\n", job.Name, effectiveBase)
-	}
+    log.Debug().Str("job", job.Name).Str("effectiveBase", effectiveBase).Msg("job base path")
 
 	if len(job.Sections) > 0 {
 		// stdout aggregations
@@ -108,9 +101,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
         uniqueOut := map[string]struct{}{}
 
         for _, sec := range job.Sections {
-			if p.Verbose {
-				fmt.Fprintf(os.Stderr, "[batch] section '%s': start\n", sec.Name)
-			}
+        log.Debug().Str("section", sec.Name).Msg("section start")
 			joinedPath := vault.JoinBaseAndPath(effectiveBase, sec.Path)
 			renderedSourcePath, err := vault.RenderTemplateString(joinedPath, tctx)
 			if err != nil {
@@ -139,9 +130,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 				format = "envrc"
 			}
 
-            if p.Verbose {
-                fmt.Fprintf(os.Stderr, "[batch] section '%s': source='%s' output='%s' format='%s'\n", sec.Name, renderedSourcePath, renderedOutPath, format)
-            }
+        log.Debug().Str("section", sec.Name).Str("source", renderedSourcePath).Str("output", renderedOutPath).Str("format", format).Msg("section io")
             uniqueOut[renderedOutPath] = struct{}{}
 
 			mode := job.OutputMode
@@ -162,9 +151,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 				for k, v := range s {
 					secrets[k] = v
 				}
-				if p.Verbose {
-					fmt.Fprintf(os.Stderr, "[batch] fetched %d keys from '%s'\n", len(s), renderedSourcePath)
-				}
+                log.Debug().Int("keys", len(s)).Str("source", renderedSourcePath).Msg("fetched secrets")
 			}
 
 			// fixed values
@@ -232,9 +219,9 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 				for envName, srcKey := range sec.EnvMap {
 					if v, ok := secrets[srcKey]; ok {
 						mapped[envName] = v
-					} else if p.Verbose {
-						fmt.Fprintf(os.Stderr, "[batch] warning: %s missing key '%s'\n", renderedSourcePath, srcKey)
-					}
+        } else {
+            log.Debug().Str("source", renderedSourcePath).Str("key", srcKey).Msg("missing key in env_map")
+        }
 				}
 				selected = mapped
 				transform = false
@@ -256,7 +243,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
                 TransformKeys:  transform,
                 Format:         format,
                 TemplateFile:   templateFile,
-                Verbose:        viper.GetBool("verbose"),
+                Verbose:        false,
                 SuppressHeader: suppressHeader,
                 SortKeys:       opts.SortKeys,
             }
@@ -266,9 +253,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 			if err != nil {
 				return fmt.Errorf("failed to generate content: %w", err)
 			}
-			if p.Verbose {
-				fmt.Fprintf(os.Stderr, "[batch] generated %d bytes for section '%s'\n", len(content), sec.Name)
-			}
+        log.Debug().Int("bytes", len(content)).Str("section", sec.Name).Msg("generated content")
 
 			if options.Format == "envrc" {
 				header := fmt.Sprintf("# === %s", job.Name)
@@ -405,8 +390,8 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
                         b, err = json.MarshalIndent(stdoutJSONAgg, "", "  ")
                         if err != nil { return fmt.Errorf("failed to marshal aggregated JSON: %w", err) }
                     }
-                    if p.Verbose { fmt.Fprintf(os.Stderr, "[batch] writing aggregated JSON to '%s' (mode=%s)\n", onlyPath, mode) }
-                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "json", Verbose: p.Verbose, SortKeys: opts.SortKeys}); err != nil {
+                    log.Debug().Str("output", onlyPath).Str("mode", mode).Msg("writing aggregated json")
+                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "json", SortKeys: opts.SortKeys}); err != nil {
                         return err
                     }
                 } else if stdoutYAMLAgg != nil {
@@ -434,8 +419,8 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
                         b, err = yaml.Marshal(stdoutYAMLAgg)
                         if err != nil { return fmt.Errorf("failed to marshal aggregated YAML: %w", err) }
                     }
-                    if p.Verbose { fmt.Fprintf(os.Stderr, "[batch] writing aggregated YAML to '%s' (mode=%s)\n", onlyPath, mode) }
-                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "yaml", Verbose: p.Verbose, SortKeys: opts.SortKeys}); err != nil {
+                    log.Debug().Str("output", onlyPath).Str("mode", mode).Msg("writing aggregated yaml")
+                    if err := output.Write(onlyPath, b, output.WriteOptions{Mode: output.OutputMode(mode), Format: "yaml", SortKeys: opts.SortKeys}); err != nil {
                         return err
                     }
                 }
@@ -479,17 +464,17 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 		}
 	}
 
-	options := &envrc.Options{
-		Prefix:        job.Prefix,
-		ExcludeKeys:   job.ExcludeKeys,
-		IncludeKeys:   job.IncludeKeys,
-		TransformKeys: func() bool { if job.Transform != nil { return *job.Transform }; return false }(),
-		Format:        job.Format,
-		TemplateFile:  job.Template,
-		Verbose:       viper.GetBool("verbose"),
-		SuppressHeader: false,
-		SortKeys:       opts.SortKeys,
-	}
+    options := &envrc.Options{
+        Prefix:        job.Prefix,
+        ExcludeKeys:   job.ExcludeKeys,
+        IncludeKeys:   job.IncludeKeys,
+        TransformKeys: func() bool { if job.Transform != nil { return *job.Transform }; return false }(),
+        Format:        job.Format,
+        TemplateFile:  job.Template,
+        Verbose:       false,
+        SuppressHeader: false,
+        SortKeys:       opts.SortKeys,
+    }
 	if opts.FormatOverride != "" { options.Format = opts.FormatOverride }
 	if options.Format == "" { options.Format = "envrc" }
 
@@ -510,7 +495,7 @@ func (p *Processor) processJob(job Job, tctx vault.TemplateContext, basePath str
 		content = header + content + "\n"
 	}
 
-	if p.Verbose { fmt.Fprintf(os.Stderr, "[batch] writing job output to '%s' (mode=%s)\n", renderedOutput, mode) }
+    log.Debug().Str("output", renderedOutput).Str("mode", mode).Msg("writing job output")
     if opts.DryRun { renderedOutput = "-" }
-    return output.Write(renderedOutput, []byte(content), output.WriteOptions{Mode: output.OutputMode(mode), Format: options.Format, Verbose: p.Verbose, SortKeys: opts.SortKeys})
+    return output.Write(renderedOutput, []byte(content), output.WriteOptions{Mode: output.OutputMode(mode), Format: options.Format, SortKeys: opts.SortKeys})
 }
