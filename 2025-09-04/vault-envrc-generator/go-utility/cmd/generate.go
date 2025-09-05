@@ -15,14 +15,15 @@ import (
 )
 
 var (
-	secretPath    string
-	templateFile  string
-	prefix        string
-	excludeKeys   []string
-	includeKeys   []string
-	transformKeys bool
-	dryRun        bool
-	format        string
+    secretPath    string
+    templateFile  string
+    prefix        string
+    excludeKeys   []string
+    includeKeys   []string
+    transformKeys bool
+    dryRun        bool
+    format        string
+    sortKeys      bool
 )
 
 // generateCmd represents the generate command
@@ -69,8 +70,9 @@ func init() {
 	generateCmd.Flags().StringSliceVar(&excludeKeys, "exclude", []string{}, "Keys to exclude (comma-separated)")
 	generateCmd.Flags().StringSliceVar(&includeKeys, "include", []string{}, "Keys to include (comma-separated, overrides exclude)")
 	generateCmd.Flags().BoolVar(&transformKeys, "transform-keys", false, "Transform keys to uppercase and replace - with _")
-	generateCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be generated without writing file")
-	generateCmd.Flags().StringVarP(&format, "format", "f", "envrc", "Output format (envrc, json, yaml)")
+    generateCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be generated without writing file")
+    generateCmd.Flags().StringVarP(&format, "format", "f", "envrc", "Output format (envrc, json, yaml)")
+    generateCmd.Flags().BoolVar(&sortKeys, "sort-keys", false, "Sort keys in output (json/yaml) for deterministic order")
 
 	generateCmd.MarkFlagRequired("path")
 }
@@ -111,15 +113,16 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create generator with options
-	generator := envrc.NewGenerator(&envrc.Options{
-		Prefix:        prefix,
-		ExcludeKeys:   excludeKeys,
-		IncludeKeys:   includeKeys,
-		TransformKeys: transformKeys,
-		Format:        format,
-		TemplateFile:  templateFile,
-		Verbose:       viper.GetBool("verbose"),
-	})
+    generator := envrc.NewGenerator(&envrc.Options{
+        Prefix:        prefix,
+        ExcludeKeys:   excludeKeys,
+        IncludeKeys:   includeKeys,
+        TransformKeys: transformKeys,
+        Format:        format,
+        TemplateFile:  templateFile,
+        Verbose:       viper.GetBool("verbose"),
+        SortKeys:      sortKeys,
+    })
 
 	// Generate content
 	content, err := generator.Generate(secrets)
@@ -137,9 +140,9 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 
 	// Write to file (supports '-' for stdout)
 	outputPath := viper.GetString("output")
-	if err := output.Write(outputPath, []byte(content), output.WriteOptions{Mode: output.OutputModeOverwrite, Format: format}); err != nil {
-		return fmt.Errorf("failed to write output file %s: %w", outputPath, err)
-	}
+    if err := output.Write(outputPath, []byte(content), output.WriteOptions{Mode: output.OutputModeOverwrite, Format: format, SortKeys: sortKeys}); err != nil {
+        return fmt.Errorf("failed to write output file %s: %w", outputPath, err)
+    }
 
 	if viper.GetBool("verbose") {
 		fmt.Fprintf(os.Stderr, "Successfully generated %s with %d environment variables\n",
