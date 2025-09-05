@@ -257,6 +257,41 @@ Key selection options per section:
   - `include_keys`/`exclude_keys` are ignored for that section
 - Templating: `path` and `output` accept token-context templates, e.g., `secrets/.../{{ .Token.OIDCUserID }}/...`.
 
+### Token-based templating
+
+The batch command supports rendering Go templates in `path` and `output` using values derived from your current Vault token (`vault token lookup`). This lets you personalize paths without hardcoding identifiers.
+
+- Requirements: the Vault CLI must be installed and authenticated (so `vault token lookup` works).
+- Context available under `.Token`:
+  - Identification: `DisplayName`, `EntityID`, `Type`, `ID` (token id)
+  - Timing: `IssueTime`, `ExpireTime`, `CreationTTL`, `TTL`
+  - Policy & metadata: `Policies` (array), `Meta` (map, e.g., `.Token.Meta.role`)
+  - Path: `Path` (auth mount path that issued the token)
+  - Extra convenience: `OIDCUserID` parsed from `DisplayName` when it looks like `oidc-<id>`
+
+Examples:
+
+```yaml
+jobs:
+  - base_path: secrets/environments/personal/{{ .Token.OIDCUserID }}
+  - name: personal-envrc
+    output: out/personal-{{ .Token.OIDCUserID }}.envrc
+    output_mode: append
+    format: envrc
+    sections:
+      - name: core
+        path: core
+        include_keys: [VAULT_ADDR]
+      - name: info
+        path: profile
+        env_map:
+          VAULT_DISPLAY_NAME: DisplayName
+```
+
+Notes:
+- Treat token-derived values as sensitive. Avoid writing raw token IDs to filenames or logs.
+- If a template references a missing field, rendering fails with a clear error.
+
 ### Concurrency & Safety
 
 - When running with `--parallel`, each output file is protected by an in-process mutex to prevent races.
