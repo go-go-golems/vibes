@@ -16,13 +16,13 @@ import (
 
 // Options contains configuration for the envrc generator
 type Options struct {
-	Prefix        string
-	ExcludeKeys   []string
-	IncludeKeys   []string
-	TransformKeys bool
-	Format        string
-	TemplateFile  string
-	Verbose       bool
+	Prefix         string
+	ExcludeKeys    []string
+	IncludeKeys    []string
+	TransformKeys  bool
+	Format         string
+	TemplateFile   string
+	Verbose        bool
 	SuppressHeader bool
 }
 
@@ -45,7 +45,7 @@ func (g *Generator) Generate(secrets map[string]interface{}) (string, error) {
 	filteredSecrets := g.filterSecrets(secrets)
 
 	// Transform keys if requested
-	if g.options.TransformKeys && strings.EqualFold(g.options.Format, "envrc") {
+	if g.options.TransformKeys {
 		filteredSecrets = g.transformKeys(filteredSecrets)
 	}
 
@@ -156,13 +156,13 @@ func (g *Generator) generateEnvrc(secrets map[string]interface{}) (string, error
 	// Generate export statements
 	for _, key := range keys {
 		value := secrets[key]
-		
+
 		// Convert value to string, handling different types
 		valueStr := g.formatValue(value)
-		
+
 		// Escape special characters in the value
 		escapedValue := g.escapeValue(valueStr)
-		
+
 		buf.WriteString(fmt.Sprintf("export %s=%s\n", key, escapedValue))
 	}
 
@@ -240,4 +240,3 @@ func (g *Generator) escapeValue(value string) string {
 	}
 	return value
 }
-

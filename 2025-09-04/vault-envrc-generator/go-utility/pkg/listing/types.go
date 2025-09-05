@@ -1,7 +1,7 @@
-package cmd
+package listing
 
-// ListEntry represents a listed path; type is either "directory" or "secret"
-type ListEntry struct {
+// Entry represents a listed path; type is either "directory" or "secret"
+type Entry struct {
 	Path     string            `yaml:"path"`
 	Type     string            `yaml:"type"`
 	Children []string          `yaml:"children,omitempty"`

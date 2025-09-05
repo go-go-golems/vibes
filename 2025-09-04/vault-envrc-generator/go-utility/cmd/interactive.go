@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
-	"context"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -178,7 +178,7 @@ func promptForOptions(reader *bufio.Reader, availableKeys []string) (*envrc.Opti
 	fmt.Println("1. Include all keys")
 	fmt.Println("2. Select specific keys to include")
 	fmt.Println("3. Select specific keys to exclude")
-	
+
 	fmt.Print("Choose option [1]: ")
 	if input, err := reader.ReadString('\n'); err != nil {
 		return nil, err
@@ -209,7 +209,7 @@ func promptForOptions(reader *bufio.Reader, availableKeys []string) (*envrc.Opti
 	fmt.Println("1. .envrc (default)")
 	fmt.Println("2. JSON")
 	fmt.Println("3. YAML")
-	
+
 	fmt.Print("Choose format [1]: ")
 	if input, err := reader.ReadString('\n'); err != nil {
 		return nil, err
@@ -233,7 +233,7 @@ func promptForKeys(reader *bufio.Reader, availableKeys []string, action string) 
 	for i, key := range availableKeys {
 		fmt.Printf("  %d. %s\n", i+1, key)
 	}
-	
+
 	fmt.Printf("Enter selection: ")
 	input, err := reader.ReadString('\n')
 	if err != nil {
@@ -247,10 +247,10 @@ func promptForKeys(reader *bufio.Reader, availableKeys []string, action string) 
 
 	var selectedKeys []string
 	parts := strings.Split(input, ",")
-	
+
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
-		
+
 		// Try to parse as number
 		if num, err := strconv.Atoi(part); err == nil {
 			if num >= 1 && num <= len(availableKeys) {
@@ -271,8 +271,7 @@ func promptConfirmation(reader *bufio.Reader, message string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	response := strings.ToLower(strings.TrimSpace(input))
 	return response == "y" || response == "yes", nil
 }
-

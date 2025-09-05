@@ -83,7 +83,7 @@ func (c *Client) getKVv1Secrets(path string) (map[string]interface{}, error) {
 func (c *Client) getKVv2Secrets(mountPath, secretPath string) (map[string]interface{}, error) {
 	// KV v2 requires reading from data/ prefix
 	fullPath := fmt.Sprintf("%s/data/%s", mountPath, secretPath)
-	
+
 	secret, err := c.client.Logical().Read(fullPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read secret from KV v2 path %s: %w", fullPath, err)
@@ -208,4 +208,3 @@ func (c *Client) TestConnection() error {
 
 	return nil
 }
-

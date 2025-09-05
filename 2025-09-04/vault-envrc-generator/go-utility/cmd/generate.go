@@ -1,27 +1,28 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
-	"context"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"vault-envrc-generator/pkg/envrc"
+	"vault-envrc-generator/pkg/output"
 	"vault-envrc-generator/pkg/vault"
 )
 
 var (
-	secretPath     string
-	templateFile   string
-	prefix         string
-	excludeKeys    []string
-	includeKeys    []string
-	transformKeys  bool
-	dryRun         bool
-	format         string
+	secretPath    string
+	templateFile  string
+	prefix        string
+	excludeKeys   []string
+	includeKeys   []string
+	transformKeys bool
+	dryRun        bool
+	format        string
 )
 
 // generateCmd represents the generate command
@@ -134,14 +135,14 @@ func runGenerate(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// Write to file
+	// Write to file (supports '-' for stdout)
 	outputPath := viper.GetString("output")
-	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
+	if err := output.Write(outputPath, []byte(content), output.WriteOptions{Mode: output.OutputModeOverwrite, Format: format}); err != nil {
 		return fmt.Errorf("failed to write output file %s: %w", outputPath, err)
 	}
 
 	if viper.GetBool("verbose") {
-		fmt.Fprintf(os.Stderr, "Successfully generated %s with %d environment variables\n", 
+		fmt.Fprintf(os.Stderr, "Successfully generated %s with %d environment variables\n",
 			outputPath, countEnvVars(content))
 	}
 
@@ -159,4 +160,3 @@ func countEnvVars(content string) int {
 	}
 	return count
 }
-
