@@ -1,0 +1,75 @@
+# Test batch configuration for vault-envrc-generator
+# Updated to work with current implementation (post-consultant fixes)
+
+base_path: secrets/test
+
+jobs:
+  - name: "Frontend Application"
+    description: "Frontend app environment variables"
+    path: "secret/frontend-app"
+    output: "test-data/frontend.envrc"
+    format: "envrc"
+    prefix: "FRONTEND_"
+    transform_keys: true
+    exclude_keys: ["API_KEY"]
+    
+  - name: "Backend API"
+    description: "Backend API configuration"
+    path: "secret/backend-api"
+    output: "test-data/backend.envrc"
+    format: "envrc"
+    prefix: "BACKEND_"
+    
+  - name: "Shared Configuration"
+    description: "Shared infrastructure settings"
+    path: "secret/shared-config"
+    output: "test-data/shared.envrc"
+    format: "envrc"
+    prefix: "SHARED_"
+    include_keys: ["SMTP_HOST", "SMTP_PORT", "S3_BUCKET"]
+    
+  - name: "Legacy App (KV v1)"
+    description: "Legacy application using KV v1"
+    path: "legacy/old-app"
+    output: "test-data/legacy.envrc"
+    format: "envrc"
+    prefix: "LEGACY_"
+    transform_keys: true
+    
+  - name: "Edge Cases JSON"
+    description: "Edge cases in JSON format"
+    path: "secret/edge-cases"
+    output: "test-data/edge-cases.json"
+    format: "json"
+    
+  - name: "Edge Cases YAML"
+    description: "Edge cases in YAML format"
+    path: "secret/edge-cases"
+    output: "test-data/edge-cases.yaml"
+    format: "yaml"
+    
+  - name: "Multi-section Example"
+    description: "Example using sections for complex configuration"
+    output: "test-data/multi-section.envrc"
+    format: "envrc"
+    sections:
+      - name: database
+        description: "Database configuration"
+        path: "database"
+        prefix: "DB_"
+        transform_keys: true
+        
+      - name: cache
+        description: "Cache configuration"
+        path: "redis"
+        prefix: "CACHE_"
+        transform_keys: true
+        include_keys: ["host", "port", "password"]
+        
+      - name: api-keys
+        description: "API keys with env mapping"
+        path: "api-keys"
+        env_map:
+          OPENAI_API_KEY: openai_key
+          ANTHROPIC_API_KEY: anthropic_key
+

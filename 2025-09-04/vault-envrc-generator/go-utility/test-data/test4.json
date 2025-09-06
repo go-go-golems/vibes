@@ -1,0 +1,7 @@
+{
+  "enabled": "true",
+  "password": "complex-pass!@#$%^&*()",
+  "timeout": "30",
+  "url": "https://legacy.example.com:8443/api/v1",
+  "username": "legacy-user"
+}
