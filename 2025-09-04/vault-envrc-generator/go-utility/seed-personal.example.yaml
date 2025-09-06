@@ -1,0 +1,40 @@
+base_path: secrets/environments/personal/102454784610416055110/manuel
+sets:
+  - path: core
+    data:
+      VAULT_ADDR: https://vault.mento.co/
+    env:
+      OP_ACCOUNT: OP_ACCOUNT
+      OP_VAULT: OP_VAULT
+
+  - path: google
+    env:
+      client_email: GOOGLE_EMAIL
+    files:
+      private_key: ~/.keys/google-sa-private-key.pem
+
+  - path: slack
+    env:
+      client_id: SLACK_CLIENT_ID
+      client_secret: SLACK_CLIENT_SECRET
+      signing_key: SLACK_SIGNING_KEY
+      app_token: SLACK_APP_TOKEN
+      bot_token: SLACK_BOT_TOKEN
+
+  - path: db
+    data:
+      type: postgres
+      username: postgres
+      password: your_password_here
+      server: localhost
+      port: "5432"
+      database: your_app_name_development
+      ssl_disable: "true"
+
+  - path: elasticsearch
+    env:
+      url: ELASTICSEARCH_URL
+      username: ELASTICSEARCH_USER
+      password: ELASTICSEARCH_PASSWORD
+
+

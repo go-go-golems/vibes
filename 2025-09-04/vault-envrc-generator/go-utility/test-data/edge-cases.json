@@ -1,0 +1,10 @@
+{
+  "UPPER_CASE_KEY": "upper case value",
+  "boolean_value": "true",
+  "empty_value": "",
+  "multiline_value": "line1\\nline2\\nline3",
+  "number_value": "42",
+  "quotes_value": "value with \"quotes\" inside",
+  "spaces_value": "value with spaces",
+  "special-chars-key": "special value"
+}
