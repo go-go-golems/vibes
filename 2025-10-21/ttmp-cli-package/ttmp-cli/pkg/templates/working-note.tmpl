@@ -1,0 +1,30 @@
+---
+Title: {{.Title}}
+Ticket: {{.Ticket}}
+Status: draft
+Topics:
+{{- range .Topics}}
+- {{.}}
+{{- end}}
+DocType: working-note
+LastUpdated: {{.Date}}
+---
+
+# {{.Title}}
+
+## Summary
+
+Quick summary of what this note covers (1-2 sentences for LLM context).
+
+## Notes
+
+Free-form working notes, meeting notes, or exploratory thoughts.
+
+## Action Items
+
+- [ ] 
+
+## References
+
+- 
+

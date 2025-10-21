@@ -1,0 +1,59 @@
+---
+Title: {{.Title}}
+Ticket: {{.Ticket}}
+Status: draft
+Topics:
+{{- range .Topics}}
+- {{.}}
+{{- end}}
+DocType: index
+Intent: {{.Intent}}
+{{- if .Owners}}
+Owners:
+{{- range .Owners}}
+- {{.}}
+{{- end}}
+{{- end}}
+Summary: >
+  {{.Summary}}
+LastUpdated: {{.Date}}
+---
+
+# {{.Title}}
+
+## Overview
+
+Brief description of the ticket scope and objectives.
+
+## Status
+
+Current status: **{{.Status}}**
+
+## Key Links
+
+- Related PR: 
+- Design doc: 
+- Related tickets: 
+
+## Active Context
+
+### Code Touchpoints
+
+List the main files and modules this ticket affects:
+
+- 
+
+### Dependencies
+
+External dependencies or blockers:
+
+- 
+
+## Open Tasks
+
+See [tasks.md](./tasks.md) for the canonical task list.
+
+## Recent Changes
+
+See [changelog.md](./changelog.md) for the detailed timeline.
+

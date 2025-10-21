@@ -1,0 +1,54 @@
+---
+Title: {{.Title}}
+Ticket: {{.Ticket}}
+Status: draft
+Topics:
+{{- range .Topics}}
+- {{.}}
+{{- end}}
+DocType: reference
+Intent: {{.Intent}}
+LastUpdated: {{.Date}}
+---
+
+# {{.Title}}
+
+## Goal
+
+What this reference helps accomplish.
+
+## Context Chunks
+
+Key information to provide to LLMs:
+
+### Background
+
+Background information and context.
+
+### Key Concepts
+
+- **Concept 1**: Definition
+- **Concept 2**: Definition
+
+### Code References
+
+```
+// Relevant code snippets or API signatures
+```
+
+## Usage Prompt
+
+Suggested prompt template for LLM:
+
+```
+[Your prompt template here]
+```
+
+## Expected Output
+
+What the LLM should produce when given this context.
+
+## Notes
+
+Additional notes and caveats.
+
