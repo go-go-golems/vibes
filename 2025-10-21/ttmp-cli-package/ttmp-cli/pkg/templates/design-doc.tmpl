@@ -1,0 +1,56 @@
+---
+Title: {{.Title}}
+Ticket: {{.Ticket}}
+Status: draft
+Topics:
+{{- range .Topics}}
+- {{.}}
+{{- end}}
+DocType: design-doc
+Intent: {{.Intent}}
+LastUpdated: {{.Date}}
+---
+
+# {{.Title}}
+
+## Executive Summary
+
+One paragraph overview of the design decision and its rationale.
+
+## Context and Problem Statement
+
+What problem are we solving? What is the current state?
+
+## Proposed Solution
+
+### Architecture
+
+High-level architecture and design approach.
+
+### Key Components
+
+- **Component 1**: Description
+- **Component 2**: Description
+
+### Data Flow
+
+How data moves through the system.
+
+## Alternatives Considered
+
+### Alternative 1
+
+Description and why it was not chosen.
+
+## Decision
+
+Final decision and rationale.
+
+## Implementation Notes
+
+Key implementation details and gotchas.
+
+## References
+
+- 
+

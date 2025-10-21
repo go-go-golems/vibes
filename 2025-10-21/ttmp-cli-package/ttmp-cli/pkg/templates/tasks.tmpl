@@ -1,0 +1,31 @@
+---
+Title: Tasks for {{.Ticket}}
+Ticket: {{.Ticket}}
+Status: active
+Topics:
+{{- range .Topics}}
+- {{.}}
+{{- end}}
+DocType: task-list
+LastUpdated: {{.Date}}
+---
+
+# Tasks for {{.Ticket}}
+
+## Active Tasks
+
+- [ ] Task 1
+- [ ] Task 2
+
+## Completed Tasks
+
+- [x] Initial setup
+
+## Blocked Tasks
+
+- [ ] Task requiring external dependency
+
+## Notes
+
+Task management notes and priorities.
+

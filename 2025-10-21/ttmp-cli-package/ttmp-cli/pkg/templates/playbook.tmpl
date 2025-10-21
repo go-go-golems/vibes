@@ -1,0 +1,65 @@
+---
+Title: {{.Title}}
+Ticket: {{.Ticket}}
+Status: draft
+Topics:
+{{- range .Topics}}
+- {{.}}
+{{- end}}
+DocType: playbook
+LastUpdated: {{.Date}}
+---
+
+# {{.Title}}
+
+## Purpose
+
+What this playbook accomplishes.
+
+## Prerequisites
+
+- Environment requirements
+- Dependencies
+- Access needed
+
+## Steps
+
+### 1. First Step
+
+```bash
+# Command or action
+```
+
+Expected output:
+```
+```
+
+### 2. Second Step
+
+```bash
+# Command or action
+```
+
+Expected output:
+```
+```
+
+## Verification
+
+How to verify the playbook succeeded:
+
+```bash
+# Verification commands
+```
+
+## Troubleshooting
+
+Common issues and solutions:
+
+- **Issue**: Description
+  - **Solution**: Fix
+
+## Exit Criteria
+
+What indicates successful completion.
+
