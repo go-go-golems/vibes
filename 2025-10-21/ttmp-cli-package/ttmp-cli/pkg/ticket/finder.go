@@ -20,49 +20,71 @@ var ticketDirPattern = regexp.MustCompile(`^(?:[A-Z]+-\d+|\d{3,}(?:-[A-Za-z].*)?
 
 // FindTickets finds all ticket directories in the ttmp/ directory
 func FindTickets(ttmpRoot string) ([]metadata.TicketInfo, error) {
-    entries, err := os.ReadDir(ttmpRoot)
-    if err != nil {
+    // Walk the root and discover any directory containing an index.md file;
+    // parse its frontmatter to derive TicketInfo. This supports arbitrary
+    // directory naming conventions and date-bucketed layouts.
+    var tickets []metadata.TicketInfo
+
+    // Normalize root
+    fi, err := os.Stat(ttmpRoot)
+    if err != nil || !fi.IsDir() {
         return nil, fmt.Errorf("failed to read ttmp directory: %w", err)
     }
 
-    var tickets []metadata.TicketInfo
-    for _, entry := range entries {
-        if !entry.IsDir() {
-            continue
-        }
+    // Track directories we've already added (by index dir path)
+    seen := map[string]bool{}
 
-        name := entry.Name()
-        if !ticketDirPattern.MatchString(name) {
-            continue
-        }
-
-        ticketTop := filepath.Join(ttmpRoot, name)
-
-        // Try to parse the ticket from the top-level directory
-        if ti, err := ParseTicket(ticketTop); err == nil && ti != nil && ti.HasIndex {
-            tickets = append(tickets, *ti)
-            continue
-        }
-
-        // If no index at top level, look one level deeper for a slug directory containing index.md
-        subEntries, _ := os.ReadDir(ticketTop)
-        for _, se := range subEntries {
-            if !se.IsDir() {
-                continue
+    // Depth-limited walk: up to 4 levels deep from root
+    _ = filepath.WalkDir(ttmpRoot, func(path string, d os.DirEntry, err error) error {
+        if err != nil { return nil }
+        if d.IsDir() {
+            // Avoid deep recursion into heavy dirs
+            if strings.Count(strings.TrimPrefix(path, ttmpRoot), string(os.PathSeparator)) > 4 {
+                return filepath.SkipDir
             }
-            candidate := filepath.Join(ticketTop, se.Name())
-            if ti, err := ParseTicket(candidate); err == nil && ti != nil && ti.HasIndex {
-                tickets = append(tickets, *ti)
-                break
+            return nil
+        }
+        if filepath.Base(path) != "index.md" {
+            return nil
+        }
+        indexDir := filepath.Dir(path)
+        if seen[indexDir] { return nil }
+
+        // Parse metadata
+        meta, _, perr := metadata.ParseFile(path)
+        if perr != nil || meta == nil {
+            return nil
+        }
+        ti := metadata.TicketInfo{
+            Ticket:    meta.Ticket,
+            Path:      indexDir,
+            IndexPath: path,
+            HasIndex:  true,
+            Status:    meta.Status,
+            Topics:    meta.Topics,
+            Owners:    meta.Owners,
+        }
+        // Derive slug from directory name, or relative path under root
+        ti.Slug, _ = filepath.Rel(ttmpRoot, indexDir)
+        // Derive LastUpdated if present
+        if meta.LastUpdated != "" {
+            if t, e := time.Parse("2006-01-02", meta.LastUpdated); e == nil {
+                ti.LastUpdated = t
             }
         }
-    }
+        // Enumerate documents under the index directory
+        if docs, derr := FindDocuments(indexDir); derr == nil {
+            ti.Documents = docs
+        }
+        tickets = append(tickets, ti)
+        seen[indexDir] = true
+        return nil
+    })
 
-    // Sort by ticket identifier (lexicographic is fine for numeric or ABC-123)
+    // Prefer tickets that actually have a non-empty Ticket field; but keep others
     sort.Slice(tickets, func(i, j int) bool {
         return tickets[i].Ticket < tickets[j].Ticket
     })
-
     return tickets, nil
 }
 
@@ -98,11 +120,7 @@ func ParseTicket(ticketPath string) (*metadata.TicketInfo, error) {
         ticket = parts[0]
     }
 
-    ticketInfo := &metadata.TicketInfo{
-        Ticket: ticket,
-        Slug:   slug,
-        Path:   ticketPath,
-    }
+    ticketInfo := &metadata.TicketInfo{ Ticket: ticket, Slug: slug, Path: ticketPath }
 
     // Try to find an index.md at this level or below
     indexPath := filepath.Join(ticketPath, "index.md")
@@ -132,25 +150,14 @@ func ParseTicket(ticketPath string) (*metadata.TicketInfo, error) {
         ticketInfo.HasIndex = true
         ticketInfo.IndexPath = indexPath
         ticketInfo.Path = indexDir
-
-        // Derive slug from relative path inside the ticket directory for numeric tickets
-        if ticket != "" {
-            rel, _ := filepath.Rel(ticketPath, indexDir)
-            rel = filepath.ToSlash(rel)
-            if rel != "." && rel != "" {
-                ticketInfo.Slug = rel
-            }
-        }
-
-        // Parse index metadata
+        // Parse index metadata; prefer metadata.Ticket as canonical ID
         if meta, _, err := metadata.ParseFile(indexPath); err == nil && meta != nil {
+            if meta.Ticket != "" { ticketInfo.Ticket = meta.Ticket }
             ticketInfo.Status = meta.Status
             ticketInfo.Topics = meta.Topics
             ticketInfo.Owners = meta.Owners
             if meta.LastUpdated != "" {
-                if t, err := time.Parse("2006-01-02", meta.LastUpdated); err == nil {
-                    ticketInfo.LastUpdated = t
-                }
+                if t, err := time.Parse("2006-01-02", meta.LastUpdated); err == nil { ticketInfo.LastUpdated = t }
             }
         }
     }
@@ -224,31 +231,36 @@ func GetTicketFromBranch() (string, error) {
 
 // GetCurrentTicket tries to determine the current ticket from context
 func GetCurrentTicket(ttmpRoot string) (string, error) {
-	// Try to get from git branch
-	if ticket, err := GetTicketFromBranch(); err == nil && ticket != "" {
-		return ticket, nil
-	}
-
-	// Try to get from current directory
-	cwd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	// Check if we're inside a ticket directory
-	if strings.Contains(cwd, ttmpRoot) {
-		relPath, err := filepath.Rel(ttmpRoot, cwd)
-		if err == nil {
-			parts := strings.Split(relPath, string(os.PathSeparator))
-			if len(parts) > 0 && ticketDirPattern.MatchString(parts[0]) {
-				ticketParts := strings.SplitN(parts[0], "-", 3)
-				if len(ticketParts) >= 2 {
-					return ticketParts[0] + "-" + ticketParts[1], nil
-				}
-			}
-		}
-	}
-
-	return "", fmt.Errorf("could not determine current ticket")
+    // Try to get from git branch
+    if ticket, err := GetTicketFromBranch(); err == nil && ticket != "" {
+        return ticket, nil
+    }
+    // Normalize paths
+    absRoot, _ := filepath.Abs(ttmpRoot)
+    cwd, err := os.Getwd()
+    if err != nil {
+        return "", err
+    }
+    absCwd, _ := filepath.Abs(cwd)
+    // Ensure cwd is under root
+    rel, err := filepath.Rel(absRoot, absCwd)
+    if err != nil || strings.HasPrefix(rel, "..") {
+        return "", fmt.Errorf("cwd not under ttmp root")
+    }
+    // Walk up from cwd to root, search for nearest index.md and read Ticket
+    dir := absCwd
+    for {
+        indexPath := filepath.Join(dir, "index.md")
+        if _, err := os.Stat(indexPath); err == nil {
+            if meta, _, perr := metadata.ParseFile(indexPath); perr == nil && meta != nil && meta.Ticket != "" {
+                return meta.Ticket, nil
+            }
+        }
+        if dir == absRoot { break }
+        parent := filepath.Dir(dir)
+        if parent == dir { break }
+        dir = parent
+    }
+    return "", fmt.Errorf("could not determine current ticket")
 }
 
