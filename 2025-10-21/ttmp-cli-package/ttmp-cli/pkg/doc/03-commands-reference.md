@@ -62,7 +62,8 @@ ttmp add <doc-type> <name> [options]
 **Parameters:**
 - `doc-type` (positional, required): working-note | design-doc | reference | playbook | script
 - `name` (positional, required): Name/slug for the document
-- `--ticket` (optional): Ticket identifier (default: infer from current directory)
+- `--ticket` (optional): Ticket identifier (default: inferred from nearest `index.md` under `--root`)
+- `--root` (optional): Root directory for ttmp (default: ./ttmp or auto-discovered)
 - `--topics` (optional): Comma-separated topics (default: inherit from ticket)
 
 **Examples:**
@@ -204,7 +205,7 @@ ttmp list tickets [options]
 ```
 
 **Parameters:**
-- `--root` (optional): Root directory for ttmp (default: ./ttmp)
+- `--root` (optional): Root directory for ttmp (default: ./ttmp or auto-discovered)
 - `--output` (optional): Output format (table | json | yaml | csv)
 - `--fields` (optional): Comma-separated list of fields to display
 
@@ -217,6 +218,7 @@ ttmp list tickets --fields ticket,status,topics
 
 **Output:**
 Structured list with ticket, slug, status, has_index, doc_count, topics, owners.
+Tickets are discovered by reading `index.md` metadata anywhere under the ttmp root (supports nested/date-bucketed layouts).
 
 ## ttmp list docs
 
