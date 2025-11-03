@@ -1,6 +1,6 @@
 # Testing Scenario for docmgr (Documentation Manager)
 
-This directory contains an end-to-end scenario to validate the `docmgr` CLI against a mock repository and a realistic ticket workflow. It creates a temporary repo, scaffolds a ticket workspace under `ttmp/`, adds documents, enriches metadata, runs doctor checks, and exercises search capabilities (including reverse lookup, external sources, and date filters).
+This directory contains an end-to-end scenario to validate the `docmgr` CLI against a mock repository and a realistic ticket workflow. It creates a temporary repo, scaffolds a ticket workspace under `ttmp/`, adds documents, enriches metadata, runs doctor checks, and exercises search capabilities (including reverse lookup, external sources, and date filters). It also demonstrates managing `tasks.md` and updating `changelog.md` via dedicated verbs.
 
 ## Prerequisites
 

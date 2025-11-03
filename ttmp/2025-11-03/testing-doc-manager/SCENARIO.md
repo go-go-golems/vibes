@@ -21,6 +21,10 @@ This scenario creates a mock codebase (`acme-chat-app`) and a ticket workspace u
 7) 06-doctor-advanced.sh — induce warnings (unknown vocab, missing file, duplicate index), use ignore-glob, then fix and pass
 8) 07-status.sh — summarize workspace and staleness
 
+Optional manual steps:
+- Use `docmgr changelog update` to append dated entries and include related files with notes
+- Use `docmgr tasks` to manage the ticket checklist in `tasks.md`
+
 ## Expected Results
 
 - `ttmp/MEN-4242-normalize-chat-api-paths-and-websocket-lifecycle/` exists with RFC-aligned scaffolding
@@ -28,6 +32,8 @@ This scenario creates a mock codebase (`acme-chat-app`) and a ticket workspace u
 - `index.md` updated with Owners, Summary, ExternalSources, and RelatedFiles
 - `doctor` reports OK unless staleness or multiple index.md introduced
 - `search` returns expected rows and snippets for queries and filters
+-. `changelog.md` shows appended dated entries where used
+-. `tasks.md` can be listed/updated via CLI
 
 ## Commands Summary
 
@@ -81,6 +87,23 @@ This scenario creates a mock codebase (`acme-chat-app`) and a ticket workspace u
 - File suggestions (heuristics): `docmgr search --ticket MEN-4242 --topics chat --files`
 
 ### Doctor (advanced)
+### Changelog
+- Minimal entry:
+  - `docmgr changelog update --ticket MEN-4242 --entry "Normalize chat API paths"`
+- With related files and notes:
+  - `docmgr changelog update --ticket MEN-4242 \
+     --files backend/chat/api/register.go,web/src/store/api/chatApi.ts \
+     --file-note "backend/chat/api/register.go:Source of path normalization" \
+     --file-note "web/src/store/api/chatApi.ts=Frontend integration"`
+- Suggestions only / apply suggestions:
+  - `docmgr changelog update --ticket MEN-4242 --suggest --query WebSocket`
+  - `docmgr changelog update --ticket MEN-4242 --suggest --apply-suggestions --query WebSocket`
+
+### Tasks
+- List tasks: `docmgr tasks list --ticket MEN-4242 --root ttmp`
+- Add task: `docmgr tasks add --ticket MEN-4242 --text "Run smoke test suite" --root ttmp`
+- Check/uncheck: `docmgr tasks check|uncheck --ticket MEN-4242 --id 1 --root ttmp`
+- Edit/remove: `docmgr tasks edit|remove --ticket MEN-4242 --id 1 --root ttmp`
 ### Status
 - Full status: `docmgr status`
 - Summary only: `docmgr status --summary-only`
