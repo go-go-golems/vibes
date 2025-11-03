@@ -174,7 +174,7 @@ Caveats
 - [x] Default root to `ttmp/`; support legacy via `--root`.
 - [x] Expand `doctor` with staleness and unique `index` checks.
 - [x] Implement vocabulary loader and `vocab list|add`.
-- [ ] Add `relate` with `--suggest` (git + ripgrep heuristics).
+- [x] Add `relate` with `--suggest` (git + ripgrep heuristics).
 - [x] Add `meta update` for frontmatter edits.
 - [x] Split `list` into `list tickets|docs` with presenters.
 - [ ] Implement ticket inference from branch name.

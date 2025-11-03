@@ -929,6 +929,37 @@ docmgr/pkg/commands/search.go
   - Added parseDate helper function for flexible date parsing
 ```
 
+## Update: Relate Command and File Suggestion Reasons (2025-11-03)
+
+### 12. Relate Code and Documents
+
+**Files Modified/Added:**
+- `docmgr/pkg/commands/relate.go` — New `relate` command (update RelatedFiles, suggest/apply files)
+- `docmgr/pkg/commands/search.go` — Suggestions now include `reason`; added git status heuristics
+- `docmgr/cmd/docmgr/main.go` — Registered `relate` with Cobra
+
+**Relate Features:**
+- `docmgr relate --ticket <id> --files <paths>` — add files to ticket `index.md`
+- `docmgr relate --doc <path> --files <paths>` — add files to a specific doc
+- `--remove-files` — remove entries
+- `--suggest` — suggest files using:
+  - Existing docs’ `RelatedFiles`
+  - Git history (recent commits)
+  - Git status (modified, staged, untracked)
+  - ripgrep/grep (content search)
+- `--apply-suggestions` — apply suggestions automatically
+
+**Suggestion Output:**
+- Adds `source` and `reason` columns to explain why a file was suggested:
+  - related_files → "referenced by documents"
+  - git_history → "recent commit activity"
+  - git_modified/staged/untracked → "working tree modified" / "staged for commit" / "untracked new file"
+  - ripgrep → "content match: <term>"
+
+**Docs and Scripts:**
+- Updated help docs (`cli-guide`, `how-to-use`, `how-to-setup`, `templates-and-guidelines`) to cover `relate`
+- Scenario `04-relate-and-doctor.sh` now uses `docmgr relate` instead of raw `meta update`
+
 ---
 
 ## Updated Status
