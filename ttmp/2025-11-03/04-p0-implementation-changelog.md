@@ -977,6 +977,7 @@ docmgr/pkg/commands/search.go
 **.ttmp.yaml:**
 - Searched recursively from CWD upwards
 - Fields: `root`, `defaults.owners`, `defaults.intent`, `filenamePrefixPolicy`, `docTypeToggles`
+- Relative paths (for example, `root: ttmp`) are resolved relative to the `.ttmp.yaml` location
 - `init` applies defaults; commands use `root` when the flag remains at default
 
 **Docs and Scripts:**
