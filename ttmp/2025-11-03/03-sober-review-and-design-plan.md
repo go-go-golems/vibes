@@ -169,11 +169,11 @@ Caveats
 - P2 (3–5 days): CLI `search`, strict conventions, deep doctor, templates/guidelines, optional config file.
 
 ## 12) Work Plan Checklist
-- [ ] Make `init` idempotent; add `--force` and preserve content.
-- [ ] Scaffold `various/`, `tasks.md`, `changelog.md`, optional `archive/`.
-- [ ] Default root to `ttmp/`; support legacy via `--root`.
-- [ ] Expand `doctor` with staleness and unique `index` checks.
-- [ ] Implement vocabulary loader and `vocab list|edit|add|assign`.
+- [x] Make `init` idempotent; add `--force` and preserve content.
+- [x] Scaffold `various/`, `tasks.md`, `changelog.md`, optional `archive/`.
+- [x] Default root to `ttmp/`; support legacy via `--root`.
+- [x] Expand `doctor` with staleness and unique `index` checks.
+- [x] Implement vocabulary loader and `vocab list|add`.
 - [ ] Add `relate` with `--suggest` (git + ripgrep heuristics).
 - [ ] Add `meta update` for frontmatter edits.
 - [ ] Split `list` into `list tickets|docs` with presenters.
