@@ -178,9 +178,9 @@ Caveats
 - [x] Add `meta update` for frontmatter edits.
 - [x] Split `list` into `list tickets|docs` with presenters.
 - [ ] Implement ticket inference from branch name.
-- [ ] Implement CLI `search` parity with server.
+- [x] Implement CLI `search` parity with server.
 - [ ] Add filename prefix policy and optional enforcement.
-- [ ] Create `ttmp/_templates/` and `ttmp/_guidelines/` scaffolds.
+- [x] Create `ttmp/_templates/` and `ttmp/_guidelines/` scaffolds.
 - [ ] Build migration command `migrate --dry-run` and a report.
 - [ ] Add unit/integration/golden tests for all above.
 

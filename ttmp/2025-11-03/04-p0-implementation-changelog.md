@@ -678,3 +678,276 @@ docmgr/cmd/docmgr/main.go
 - Add `relate` command with `--suggest` (P1)
 - Add vocabulary validation to `init` and `add` commands (P1)
 
+---
+
+## Update: Templates and Guidelines (2025-11-03)
+
+### 9. Templates and Guidelines System
+
+**Files Created:**
+- `docmgr/pkg/commands/templates.go` - Template content for all document types
+- `docmgr/pkg/commands/guidelines.go` - Guideline content for all document types
+- `docmgr/pkg/commands/guidelines_cmd.go` - Guidelines command implementation
+
+**Files Modified:**
+- `docmgr/pkg/commands/init.go` - Added scaffolding for `_templates/` and `_guidelines/` directories
+- `docmgr/cmd/docmgr/main.go` - Added guidelines command
+
+**Implementation:**
+
+1. **Templates (`ttmp/_templates/`):**
+   - Created templates for all 9 document types: index, design-doc, reference, working-note, tutorial, playbook, task-list, log, script
+   - Each template includes proper frontmatter with placeholders ({{TITLE}}, {{TICKET}}, etc.)
+   - Templates provide structured starting points for each document type
+   - Templates are scaffolded automatically when `init` is run
+
+2. **Guidelines (`ttmp/_guidelines/`):**
+   - Created guidelines for all 9 document types
+   - Each guideline explains the purpose, required elements, and best practices
+   - Guidelines help ensure consistent documentation quality
+   - Guidelines are scaffolded automatically when `init` is run
+
+3. **Guidelines Command:**
+   - `docmgr guidelines --list` - Lists all available document types
+   - `docmgr guidelines --doc-type <type>` - Shows guidelines for a specific type
+   - Loads guidelines from file system if available, falls back to embedded content
+   - Supports `--root` parameter to specify root directory
+
+**Usage Examples:**
+```bash
+# List available document types
+docmgr guidelines --list
+
+# Show guidelines for design documents
+docmgr guidelines --doc-type design-doc
+
+# Show guidelines for reference documents
+docmgr guidelines --doc-type reference
+```
+
+**Integration:**
+- Templates and guidelines are automatically created in `ttmp/_templates/` and `ttmp/_guidelines/` when running `docmgr init`
+- Templates use placeholder syntax ({{TITLE}}, {{TICKET}}, etc.) for future template variable substitution
+- Guidelines are accessible via the `guidelines` command for easy reference during document creation
+
+### Files Changed Summary
+
+```
+docmgr/pkg/commands/templates.go (NEW)
+  - Template content map for all document types
+  - GetTemplate helper function
+
+docmgr/pkg/commands/guidelines.go (NEW)
+  - Guideline content map for all document types
+  - GetGuideline and ListGuidelineTypes helper functions
+
+docmgr/pkg/commands/guidelines_cmd.go (NEW)
+  - Guidelines command implementation
+  - File system and embedded content fallback
+
+docmgr/pkg/commands/init.go
+  - Added scaffoldTemplatesAndGuidelines function
+  - Creates _templates/ and _guidelines/ directories at root level
+
+docmgr/cmd/docmgr/main.go
+  - Added guidelines command registration
+```
+
+---
+
+## Updated Status
+
+**Completed Tasks:**
+1. ✅ Make `init` idempotent with `--force` flag
+2. ✅ Scaffold RFC-aligned directories/files (`various/`, `tasks.md`, `changelog.md`, `archive/`)
+3. ✅ Default root to `ttmp/` with `--root` override
+4. ✅ Expand `doctor` with staleness and unique `index` checks
+5. ✅ Remove backwards compatibility (`active/` subdirectory)
+6. ✅ Implement vocabulary loader and `vocab list|add` commands
+7. ✅ Add `meta update` command for frontmatter edits
+8. ✅ Split `list` into `list tickets|docs` with presenters
+9. ✅ Create `ttmp/_templates/` and `ttmp/_guidelines/` scaffolds
+
+**Next Steps:**
+- Add `relate` command with `--suggest` (P1)
+- Add vocabulary validation to `init` and `add` commands (P1)
+- Implement template variable substitution in `add` command (P1)
+
+---
+
+## Update: Search Functionality (2025-11-03)
+
+### 10. Search Command Implementation
+
+**Files Created:**
+- `docmgr/pkg/commands/search.go` - Search command with full-text search and file suggestions
+
+**Files Modified:**
+- `docmgr/cmd/docmgr/main.go` - Added search command registration
+
+**Implementation:**
+
+1. **Full-Text Search:**
+   - Searches document content (not just frontmatter)
+   - Case-insensitive matching
+   - Extracts snippets around matches (100 chars context)
+   - Skips templates and guidelines directories
+
+2. **Metadata Filtering:**
+   - Filter by ticket (`--ticket`)
+   - Filter by topics (`--topics`, matches any topic)
+   - Filter by document type (`--doc-type`)
+   - Filter by status (`--status`)
+   - Filters can be combined with content search
+
+3. **File Suggestions (`--files` flag):**
+   - Uses multiple heuristics to suggest related files:
+     - **RelatedFiles**: Extracts files from document `RelatedFiles` metadata
+     - **Git History**: Analyzes recent git commits (last 30) to find changed files
+     - **Ripgrep/Grep**: Searches code files for query/topic terms
+   - Falls back to grep if ripgrep not available
+   - Only suggests code files (common extensions: .go, .ts, .js, .py, etc.)
+   - Each suggestion includes source information for file suggestions
+
+**Usage Examples:**
+```bash
+# Full-text search
+docmgr search "authentication"
+
+# Search with metadata filters
+docmgr search "API" --ticket MEN-3475
+docmgr search "database" --topics backend --doc-type design-doc
+
+# Search only by metadata (no query)
+docmgr search --ticket MEN-3475 --topics chat --status active
+
+# Suggest related files
+docmgr search --ticket MEN-3475 --topics chat --files
+docmgr search "authentication" --files
+```
+
+**Features:**
+- Combines content search with metadata filtering
+- Content snippet extraction for context
+- Multiple file suggestion heuristics
+- Graceful fallback when git/ripgrep not available
+- Output includes source information for file suggestions
+
+### Files Changed Summary
+
+```
+docmgr/pkg/commands/search.go (NEW)
+  - Full-text search implementation
+  - Metadata filtering
+  - File suggestion heuristics (git, ripgrep, RelatedFiles)
+  - Snippet extraction for search results
+
+docmgr/cmd/docmgr/main.go
+  - Added search command registration
+```
+
+---
+
+## Update: Enhanced Search Features (2025-11-03)
+
+### 11. Additional Search Functionality
+
+**Files Modified:**
+- `docmgr/pkg/commands/search.go` - Added reverse lookup, external source search, and date range filtering
+
+**Implementation:**
+
+1. **Reverse Lookup (`--file`, `--dir`):**
+   - **`--file`**: Find documents that reference a specific file path in `RelatedFiles`
+   - **`--dir`**: Find documents in a directory or referencing files in that directory
+   - Supports partial matching (contains check)
+   - Example: `docmgr search --file pkg/commands/add.go` → finds docs mentioning this file
+   - Example: `docmgr search --dir pkg/commands/` → finds docs in or referencing files in that directory
+
+2. **External Source Search (`--external-source`):**
+   - Find documents that reference a specific external source URL
+   - Searches in `ExternalSources` metadata field
+   - Supports partial matching
+   - Example: `docmgr search --external-source "https://github.com/..."`
+
+3. **Date Range Filtering (`--since`, `--until`, `--created-since`, `--updated-since`):**
+   - **`--since`**: Filter documents updated since a date
+   - **`--until`**: Filter documents updated until a date
+   - **`--created-since`**: Filter documents created since a date (uses file modification time)
+   - **`--updated-since`**: Filter documents updated since a date (uses `LastUpdated` field)
+   - Supports multiple date formats:
+     - **Relative dates**: "2 weeks ago", "1 day ago", "3 months ago"
+     - **Predefined ranges**: "today", "yesterday", "last week", "this month", "last month", "last year"
+     - **Absolute dates**: "2025-01-01", "2025-01-01 15:04:05", RFC3339 format
+   - Examples:
+     - `docmgr search --updated-since "2 weeks ago"`
+     - `docmgr search --created-since "2025-01-01" --until "2025-01-31"`
+     - `docmgr search --since "last month"`
+
+**Date Parsing Features:**
+- Handles relative dates with numbers: "2 weeks ago", "5 days ago"
+- Handles predefined ranges: "today", "yesterday", "last week", "this month"
+- Handles absolute dates: "2025-01-01", RFC3339
+- Case-insensitive parsing
+- Proper timezone handling
+
+**Usage Examples:**
+```bash
+# Reverse lookup - find docs for a file
+docmgr search --file pkg/commands/add.go
+
+# Reverse lookup - find docs for a directory
+docmgr search --dir pkg/commands/
+
+# Find docs referencing an external source
+docmgr search --external-source "https://github.com/example/repo"
+
+# Date range filtering
+docmgr search --updated-since "2 weeks ago"
+docmgr search --created-since "2025-01-01" --until "2025-01-31"
+docmgr search --since "last month" --status active
+
+# Combined filters
+docmgr search --file pkg/commands/add.go --updated-since "1 week ago"
+docmgr search --dir pkg/commands/ --topics backend --doc-type design-doc
+```
+
+**Features:**
+- Reverse lookup works with `RelatedFiles` metadata
+- Directory lookup checks both document location and referenced files
+- External source search uses `ExternalSources` metadata
+- Date parsing supports multiple formats and relative dates
+- All filters can be combined together
+
+### Files Changed Summary
+
+```
+docmgr/pkg/commands/search.go
+  - Added reverse lookup (--file, --dir)
+  - Added external source search (--external-source)
+  - Added date range filtering (--since, --until, --created-since, --updated-since)
+  - Added parseDate helper function for flexible date parsing
+```
+
+---
+
+## Updated Status
+
+**Completed Tasks:**
+1. ✅ Make `init` idempotent with `--force` flag
+2. ✅ Scaffold RFC-aligned directories/files (`various/`, `tasks.md`, `changelog.md`, `archive/`)
+3. ✅ Default root to `ttmp/` with `--root` override
+4. ✅ Expand `doctor` with staleness and unique `index` checks
+5. ✅ Remove backwards compatibility (`active/` subdirectory)
+6. ✅ Implement vocabulary loader and `vocab list|add` commands
+7. ✅ Add `meta update` command for frontmatter edits
+8. ✅ Split `list` into `list tickets|docs` with presenters
+9. ✅ Create `ttmp/_templates/` and `ttmp/_guidelines/` scaffolds
+10. ✅ Implement CLI `search` parity with server
+11. ✅ Enhanced search with reverse lookup, external source search, and date filtering
+
+**Next Steps:**
+- Add `relate` command with `--suggest` (P1)
+- Add vocabulary validation to `init` and `add` commands (P1)
+- Implement template variable substitution in `add` command (P1)
+
