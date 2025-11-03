@@ -88,7 +88,7 @@ Caveats
 
 ### P1 – RFC Command Coverage and Validation
 - Vocabulary
-  - Load `doc/vocabulary.yaml`; add `vocab list|edit|add|assign` commands.
+  - Load vocabulary from `ttmp/vocabulary.yaml` by default (configurable via `.ttmp.yaml:vocabulary`); add `vocab list|edit|add|assign` commands.
   - Validate `Topics`, `DocType`, and `Intent` in `init`, `add`, and `doctor`.
 - `relate`
   - `ttmp relate --ticket MEN-XXXX --files ...` to update `RelatedFiles` in `index.md` (and optionally in a target doc).
@@ -110,7 +110,7 @@ Caveats
 - Templates and guidelines
   - `ttmp/_templates/` for doc scaffolds per type; `ttmp/_guidelines/` for quick LLM-ready reminders.
 - Config file
-  - Optional `.ttmp.yaml` at repo root: root path, defaults (owners, intent), filename prefix policy, doc-type registry toggles.
+  - Optional `.ttmp.yaml` at repo root: root path, vocabulary path, defaults (owners, intent), filename prefix policy, doc-type registry toggles.
 
 ## 6) Command Specifications (CLI)
 - `ttmp init <ticket?> --title <str> --topics <comma> [--owners ...] [--intent ...] [--root ...] [--force]`
@@ -123,7 +123,7 @@ Caveats
 - `ttmp meta update --doc <path> --field <key> --value <val>`
   - Supports multi-doc selection via `--ticket`, `--doc-type`.
 - `ttmp vocab list|edit|add|assign ...`
-  - Operate on `doc/vocabulary.yaml`; validate on write.
+  - Operate on `<root>/vocabulary.yaml` (default `ttmp/vocabulary.yaml`, overridable via `.ttmp.yaml:vocabulary`); validate on write.
 - `ttmp list tickets|docs [--format table|json|markdown] [--ticket ...] [--status ...] [--topics ...]`
 - `ttmp doctor --ticket <id?> [--all] [--strict]`
   - Checks: required fields; vocabulary; staleness; layout sanity; unique `index`.
@@ -304,7 +304,7 @@ This architecture choice is excellent for our use case because:
 **Fix strategy:**
 - P0: Add staleness check (compare `LastUpdated` to `time.Now()`)
 - P0: Check for duplicate `index.md` files in subdirectories
-- P1: Load `doc/vocabulary.yaml` and validate Topics/DocType/Intent against it
+- P1: Load workspace vocabulary (default `ttmp/vocabulary.yaml`, configurable via `.ttmp.yaml:vocabulary`) and validate Topics/DocType/Intent against it
 - P2: Validate `RelatedFiles` actually exist in repo, check subdirectory presence
 
 **Code references:**
