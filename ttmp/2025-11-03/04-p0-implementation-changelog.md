@@ -960,6 +960,29 @@ docmgr/pkg/commands/search.go
 - Updated help docs (`cli-guide`, `how-to-use`, `how-to-setup`, `templates-and-guidelines`) to cover `relate`
 - Scenario `04-relate-and-doctor.sh` now uses `docmgr relate` instead of raw `meta update`
 
+## Update: Status Command and .ttmp.yaml Support (2025-11-03)
+
+### 13. Workspace Status Summary
+
+**Files Added/Modified:**
+- `docmgr/pkg/commands/status.go` — New `status` command to summarize tickets/docs and staleness
+- `docmgr/pkg/commands/config.go` — `.ttmp.yaml` discovery and config loader
+- Commands (`init`, `add`, `list tickets|docs`, `search`, `doctor`, `import file`, `meta update`, `guidelines`, `relate`) now honor config root via `ResolveRoot`
+
+**Status Features:**
+- Per-ticket rows: ticket, title, status, last_updated, stale, docs, design_docs, reference_docs, playbooks, path
+- Summary row: root, tickets_total, tickets_stale, docs_total, design_docs, reference_docs, playbooks, stale_after_days, status
+- Flags: `--root`, `--ticket`, `--stale-after`, `--summary-only`
+
+**.ttmp.yaml:**
+- Searched recursively from CWD upwards
+- Fields: `root`, `defaults.owners`, `defaults.intent`, `filenamePrefixPolicy`, `docTypeToggles`
+- `init` applies defaults; commands use `root` when the flag remains at default
+
+**Docs and Scripts:**
+- Added docs (setup section for `.ttmp.yaml`; CLI guide section for `status`)
+- Scenario: `.ttmp.yaml` in mock repo; new `07-status.sh`; `run-all.sh` calls it
+
 ---
 
 ## Updated Status
