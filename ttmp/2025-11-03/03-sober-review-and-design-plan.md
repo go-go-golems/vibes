@@ -175,8 +175,8 @@ Caveats
 - [x] Expand `doctor` with staleness and unique `index` checks.
 - [x] Implement vocabulary loader and `vocab list|add`.
 - [ ] Add `relate` with `--suggest` (git + ripgrep heuristics).
-- [ ] Add `meta update` for frontmatter edits.
-- [ ] Split `list` into `list tickets|docs` with presenters.
+- [x] Add `meta update` for frontmatter edits.
+- [x] Split `list` into `list tickets|docs` with presenters.
 - [ ] Implement ticket inference from branch name.
 - [ ] Implement CLI `search` parity with server.
 - [ ] Add filename prefix policy and optional enforcement.
