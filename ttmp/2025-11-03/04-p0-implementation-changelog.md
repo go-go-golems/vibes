@@ -552,6 +552,129 @@ docmgr/cmd/docmgr/main.go
 
 **Next Steps:**
 - Add `relate` command with `--suggest` (P1)
-- Add `meta update` command (P1)
+- Add vocabulary validation to `init` and `add` commands (P1)
+
+---
+
+## Update: Meta Update & List Split (2025-11-03)
+
+### 7. Meta Update Command
+
+**Files Created:**
+- `docmgr/pkg/commands/meta_update.go` - Update document frontmatter command
+
+**Files Modified:**
+- `docmgr/cmd/docmgr/main.go` - Added meta parent command
+
+**Implementation:**
+- Updates frontmatter fields in document files
+- Supports updating single file (`--doc`) or multiple files (`--ticket`, optionally filtered by `--doc-type`)
+- Case-insensitive field names
+- Supports all document fields: Title, Ticket, Status, Topics, DocType, Intent, Owners, RelatedFiles, ExternalSources, Summary
+- Automatically updates `LastUpdated` timestamp
+- Parses comma-separated values for list fields (Topics, Owners, RelatedFiles, ExternalSources)
+
+**Usage Examples:**
+```bash
+# Update specific document
+docmgr meta update --doc ttmp/MEN-1234-slug/index.md --field Status --value review
+
+# Update all docs for a ticket
+docmgr meta update --ticket MEN-1234 --field Status --value active
+
+# Update all design-docs for a ticket
+docmgr meta update --ticket MEN-1234 --doc-type design-doc --field Topics --value chat,backend
+```
+
+**Features:**
+- Reads existing frontmatter and preserves content
+- Updates specified field while preserving other fields
+- Handles list fields (comma-separated input)
+- Updates LastUpdated automatically
+
+### 8. Split List Command
+
+**Files Created:**
+- `docmgr/pkg/commands/list_tickets.go` - List ticket workspaces command
+- `docmgr/pkg/commands/list_docs.go` - List individual documents command
+
+**Files Modified:**
+- `docmgr/cmd/docmgr/main.go` - Changed list to parent command with tickets/docs subcommands
+
+**Implementation:**
+
+1. **List Tickets (`list tickets`):**
+   - Lists ticket workspaces (directories with `index.md`)
+   - Filters: `--ticket`, `--status`
+   - Output: ticket, title, status, topics, path, last_updated
+   - Same functionality as old `list` command
+
+2. **List Docs (`list docs`):**
+   - Lists individual documents across all workspaces
+   - Recursively scans all `.md` files
+   - Excludes `index.md` files (use `list tickets` for those)
+   - Filters: `--ticket`, `--status`, `--doc-type`, `--topics`
+   - Topic filtering: matches any topic from filter list
+   - Output: ticket, doc_type, title, status, topics, path, last_updated
+
+**Usage Examples:**
+```bash
+# List all tickets
+docmgr list tickets
+
+# List tickets with status filter
+docmgr list tickets --status active
+
+# List all documents
+docmgr list docs
+
+# List design documents for a ticket
+docmgr list docs --ticket MEN-1234 --doc-type design-doc
+
+# List documents by topic
+docmgr list docs --topics chat,backend
+```
+
+**Breaking Change:**
+- Old `docmgr list` command replaced with `docmgr list tickets`
+- New `docmgr list docs` command for individual documents
+
+### Files Changed Summary (Meta Update & List Split)
+
+```
+docmgr/pkg/commands/meta_update.go (NEW)
+  - Meta update command implementation
+  - Field update logic with case-insensitive matching
+  - Multi-file update support
+
+docmgr/pkg/commands/list_tickets.go (NEW)
+  - List ticket workspaces command
+
+docmgr/pkg/commands/list_docs.go (NEW)
+  - List individual documents command
+  - Recursive file scanning
+  - Advanced filtering options
+
+docmgr/cmd/docmgr/main.go
+  - Added meta parent command
+  - Changed list to parent command with tickets/docs subcommands
+```
+
+---
+
+## Updated Status
+
+**Completed Tasks:**
+1. ✅ Make `init` idempotent with `--force` flag
+2. ✅ Scaffold RFC-aligned directories/files (`various/`, `tasks.md`, `changelog.md`, `archive/`)
+3. ✅ Default root to `ttmp/` with `--root` override
+4. ✅ Expand `doctor` with staleness and unique `index` checks
+5. ✅ Remove backwards compatibility (`active/` subdirectory)
+6. ✅ Implement vocabulary loader and `vocab list|add` commands
+7. ✅ Add `meta update` command for frontmatter edits
+8. ✅ Split `list` into `list tickets|docs` with presenters
+
+**Next Steps:**
+- Add `relate` command with `--suggest` (P1)
 - Add vocabulary validation to `init` and `add` commands (P1)
 
