@@ -164,7 +164,7 @@ DocType feeds tooling to assemble prompt packs or run ticket-level health checks
 3. **Capture working notes:** add ad-hoc fragments via `ttmp add working-note "storyboard sync"`; the template keeps summaries and metadata consistent while allowing free-form exploration.
 4. **Document prompts as references:** when a prompt stabilizes, run `ttmp add reference "websocket triage"` which opens a pre-filled Markdown file under `reference/` with fields for goal, context chunk list, and call-to-action for the LLM.
 5. **Maintain scripts:** store scratch helpers in `scripts/` with short README entries. CLI option `ttmp add script verify-ws` can scaffold a `scripts/verify-ws.sh` and `scripts/verify-ws.md` pair.
-6. **Log decisions:** after notable outcomes, append entries to `changelog.md` via `ttmp log add "Aligned backend routes with frontend"` to keep the LLM consistent.
+6. **Log decisions:** after notable outcomes, append entries to `changelog.md` (in this implementation: `docmgr changelog update --ticket MEN-3475 --entry "Aligned backend routes with frontend"`). Optionally include `--files` and `--file-note` to capture relevant paths with short rationale.
 7. **Close-out:** when a ticket wraps, set `Status: archived`, ensure reusable `tutorial` or `reference` docs are linked from longer-lived documentation, and run `ttmp doctor --ticket MEN-3475` to confirm metadata hygiene.
 
 The workflow keeps the process “guardrailed but flexible” by combining required metadata with optional sections.
