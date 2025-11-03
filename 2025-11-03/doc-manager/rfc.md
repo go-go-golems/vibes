@@ -81,7 +81,7 @@ Status: active            # draft | active | review | archived
 Topics:
 - chat
 - backend
-DocType: design-doc       # valid values defined in doc/vocabulary.yaml
+DocType: design-doc       # valid values defined in the workspace vocabulary file
 Intent: short-term        # short-term | long-term | throwaway
 Owners:
 - manuel
@@ -96,7 +96,7 @@ LastUpdated: 2025-10-16
 
 - **Status (required):** default `draft`, then `active`, `review`, or `archived`. This gives lightweight lifecycle signaling without a heavy process.
 - **Topics (required):** references to controlled vocabulary (section 7). Use lowercase slugs.
-- **DocType:** guides tooling and should map to entries in `doc/vocabulary.yaml` (for example `index`, `design-doc`, `reference`, `working-note`, `tutorial`, `playbook`, `task-list`, `log`, `script`). Tooling will warn when a ticket lacks an `index`.
+- **DocType:** guides tooling and should map to entries in the workspace vocabulary file (for example `index`, `design-doc`, `reference`, `working-note`, `tutorial`, `playbook`, `task-list`, `log`, `script`). Tooling will warn when a ticket lacks an `index`.
 - **Intent:** indicates expected lifespan (`short-term`, `long-term`, `throwaway`), helping decide what graduates into permanent docs.
 - **RelatedFiles:** list of repository paths relevant to the doc; CLI can populate via heuristics.
 - **Summary / LastUpdated:** optional but improve scanability and diffing.
@@ -105,7 +105,7 @@ LastUpdated: 2025-10-16
 `index.md` anchors the ticket. It should reference files, symbols, or other context that is relevant to the ticket.
 
 ## 7. Topic Dictionary
-Maintain controlled vocabularies at `doc/vocabulary.yaml`. Example snippet:
+Maintain controlled vocabularies at `ttmp/vocabulary.yaml` by default (configurable via `.ttmp.yaml:vocabulary`). Example snippet:
 
 ```yaml
 topics:
