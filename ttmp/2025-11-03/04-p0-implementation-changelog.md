@@ -980,6 +980,18 @@ docmgr/pkg/commands/search.go
 - Relative paths (for example, `root: ttmp`) are resolved relative to the `.ttmp.yaml` location
 - `init` applies defaults; commands use `root` when the flag remains at default
 
+### 14. Vocabulary Path Configuration
+
+**Change:** `.ttmp.yaml` can now set a `vocabulary` path. If unset, vocabulary defaults to `<root>/vocabulary.yaml` (with `root` defaulting to `ttmp`). Relative paths are resolved relative to the `.ttmp.yaml` location.
+
+**Code:**
+- `pkg/commands/config.go` — added `Vocabulary` to config and `ResolveVocabularyPath()`
+- `pkg/commands/vocabulary.go` — `LoadVocabulary()` and `SaveVocabulary()` now use the resolved path; legacy `doc/vocabulary.yaml` is still recognized as a fallback
+- `pkg/commands/vocab_{add,list}.go` — help text updated
+
+**Docs:**
+- Setup tutorial updated to reflect default `ttmp/vocabulary.yaml` and override via `.ttmp.yaml:vocabulary`
+
 **Docs and Scripts:**
 - Added docs (setup section for `.ttmp.yaml`; CLI guide section for `status`)
 - Scenario: `.ttmp.yaml` in mock repo; new `07-status.sh`; `run-all.sh` calls it
