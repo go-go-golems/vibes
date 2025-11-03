@@ -992,6 +992,17 @@ docmgr/pkg/commands/search.go
 **Docs:**
 - Setup tutorial updated to reflect default `ttmp/vocabulary.yaml` and override via `.ttmp.yaml:vocabulary`
 
+### 15. .docmgrignore Support
+
+**Change:** The `doctor` command now honors a repository-level `.docmgrignore` file for path exclusions. Each non-empty line is a glob or name to ignore; lines starting with `#` are comments. Patterns are merged with `--ignore-glob` and `--ignore-dir`.
+
+**Code:**
+- `pkg/commands/doctor.go` — added `loadDocmgrIgnore()` and pattern normalization; merged patterns; help text mentions `.docmgrignore`
+
+**Docs and Scenario:**
+- `01-create-mock-codebase.sh` creates `.docmgrignore` with `.git/`, `node_modules/`, `dist/`
+- CLI Guide and Setup tutorial document `.docmgrignore` usage
+
 **Docs and Scripts:**
 - Added docs (setup section for `.ttmp.yaml`; CLI guide section for `status`)
 - Scenario: `.ttmp.yaml` in mock repo; new `07-status.sh`; `run-all.sh` calls it
