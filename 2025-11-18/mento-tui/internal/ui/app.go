@@ -38,7 +38,7 @@ func NewModel(cfg *config.AppConfig) Model {
 		currentScreen: DashboardScreen,
 		dashboard:     NewDashboardModel(manager),
 		logViewer:     NewLogViewerModel(manager),
-		config:        NewConfigModel(manager),
+		config:        NewConfigModel(manager, cfg),
 		help:          NewHelpModel(manager),
 		manager:       manager,
 	}
@@ -96,9 +96,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
-		// Check if log viewer is in search mode BEFORE updating
+		// Check if current screen is in search mode BEFORE updating
 		// (so we know if it will consume the key)
-		isInSearchMode := m.currentScreen == LogViewerScreen && m.logViewer.searchMode
+		isInSearchMode := (m.currentScreen == LogViewerScreen && m.logViewer.searchMode) ||
+			(m.currentScreen == ConfigScreen && m.config.searchMode)
 
 		// Update current screen first (so it can consume keys)
 		var cmd tea.Cmd
@@ -123,6 +124,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			tmpModel, cmd = m.config.Update(msg)
 			if c, ok := tmpModel.(ConfigModel); ok {
 				m.config = c
+				// If config screen was in search mode, don't process global keys
+				// (it may have consumed the key to exit search mode)
+				if isInSearchMode {
+					return m, cmd
+				}
 			}
 		case HelpScreen:
 			tmpModel, cmd = m.help.Update(msg)

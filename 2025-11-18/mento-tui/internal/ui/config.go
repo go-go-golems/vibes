@@ -2,89 +2,42 @@ package ui
 
 import (
 	"fmt"
-	"mento-tui/internal/models"
+	"mento-tui/internal/config"
 	"mento-tui/internal/services"
-	"os"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type ConfigModel struct {
-	manager  *services.Manager
-	viewport viewport.Model
-	config   *models.Config
-	width    int
-	height   int
+	manager     *services.Manager
+	viewport    viewport.Model
+	cfg         *config.AppConfig
+	width       int
+	height      int
+	searchMode  bool
+	searchInput textinput.Model
+	searchQuery string
 }
 
-func NewConfigModel(manager *services.Manager) ConfigModel {
-	config := loadConfig()
+func NewConfigModel(manager *services.Manager, cfg *config.AppConfig) ConfigModel {
+	ti := textinput.New()
+	ti.Placeholder = "Search env vars..."
+	ti.CharLimit = 100
+	ti.Width = 50
+	ti.Focus()
+
 	return ConfigModel{
-		manager:  manager,
-		viewport: viewport.New(80, 20),
-		config:   config,
+		manager:     manager,
+		viewport:    viewport.New(80, 20),
+		cfg:         cfg,
+		searchMode:  false,
+		searchInput: ti,
+		searchQuery: "",
 	}
-}
-
-func loadConfig() *models.Config {
-	return &models.Config{
-		EnvSources: []models.EnvSource{
-			{Path: ".envrc", Loaded: true},
-			{Path: ".env.local", Loaded: true},
-			{Path: "web/sso-app/.env.staging", Loaded: true},
-		},
-		Database: map[string]string{
-			"ONE_ON_ONE_V3_DATABASE_URL": maskSecret(os.Getenv("ONE_ON_ONE_V3_DATABASE_URL")),
-			"WORKFLOWS_DATABASE_URL":     maskSecret(os.Getenv("WORKFLOWS_DATABASE_URL")),
-			"IDENTITY_SERVICE_DB_DSN":    maskSecret("postgres://postgres:***@localhost:5432"),
-			"IDENTITY_SERVICE_DB_DRIVER": "pgx",
-		},
-		OAuth: map[string]string{
-			"STYTCH_PROJECT_ID":     maskSecret(os.Getenv("STYTCH_PROJECT_ID")),
-			"STYTCH_SECRET":         maskSecret("secret-test-***"),
-			"GOOGLE_CLIENT_ID":      maskSecret(os.Getenv("GOOGLE_CLIENT_ID")),
-			"GOOGLE_CLIENT_SECRET":  maskSecret("GOCSPX-***"),
-			"SLACK_CLIENT_ID":       maskSecret("123456789.***"),
-			"SLACK_CLIENT_SECRET":   maskSecret("***"),
-			"GITHUB_CLIENT_ID":      maskSecret("Iv1.***"),
-			"LINEAR_CLIENT_ID":      maskSecret("***"),
-		},
-		ServiceConfig: map[string]string{
-			"IDENTITY_SERVICE_PORT":         "8083",
-			"VITE_PORT":                     "5173",
-			"MENTO_SERVICE_PORT":            "8082",
-			"MENTO_SERVICE_PUBLIC_BASE_URL": "http://localhost:8082",
-			"LOG_LEVEL":                     "debug",
-		},
-	}
-}
-
-func maskSecret(s string) string {
-	if s == "" {
-		return "not set"
-	}
-	if len(s) <= 10 {
-		return "***"
-	}
-	// Show first few chars and mask the rest
-	if strings.Contains(s, "@") {
-		// For URLs, mask password
-		parts := strings.Split(s, "@")
-		if len(parts) > 1 {
-			userPass := strings.Split(parts[0], ":")
-			if len(userPass) > 1 {
-				return userPass[0] + ":***@" + parts[1]
-			}
-		}
-	}
-	// For other secrets, show prefix
-	if len(s) > 20 {
-		return s[:15] + "***"
-	}
-	return s[:5] + "***"
 }
 
 func (m ConfigModel) Init() tea.Cmd {
@@ -92,62 +45,132 @@ func (m ConfigModel) Init() tea.Cmd {
 }
 
 func (m ConfigModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	// Handle search mode first
+	if m.searchMode {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "esc":
+				m.searchMode = false
+				m.searchInput.SetValue("")
+				m.searchQuery = ""
+				m.updateViewport()
+				return m, nil
+			case "enter":
+				m.searchMode = false
+				m.searchQuery = m.searchInput.Value()
+				m.updateViewport()
+				return m, nil
+			}
+		}
+		// Update search input
+		m.searchInput, cmd = m.searchInput.Update(msg)
+		m.searchQuery = m.searchInput.Value() // Update filter in real-time
+		m.updateViewport()
+		return m, cmd
+	}
+
+	// Normal mode handling
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		m.viewport.Width = msg.Width - 4
-		m.viewport.Height = msg.Height - 8
+		m.viewport.Height = m.height - 8
+		m.searchInput.Width = min(50, m.width-20)
 		m.updateViewport()
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "/":
+			m.searchMode = true
+			m.searchInput.SetValue("")
+			m.searchInput.Focus()
+			return m, nil
+		}
 	}
 
-	var cmd tea.Cmd
 	m.viewport, cmd = m.viewport.Update(msg)
 	return m, cmd
 }
 
 func (m *ConfigModel) updateViewport() {
 	var content strings.Builder
+	query := strings.ToLower(m.searchQuery)
 
-	// Environment Sources
-	content.WriteString(ConfigSectionStyle.Render("ENVIRONMENT SOURCES"))
-	content.WriteString("\n")
-	for _, src := range m.config.EnvSources {
-		icon := "✅"
-		if !src.Loaded {
-			icon = "❌"
+	// Environment variables from YAML config (grouped by service)
+	content.WriteString(ConfigSectionStyle.Render("ENVIRONMENT (YAML)"))
+	content.WriteString("\n\n")
+	
+	hasMatches := false
+	for _, svc := range m.cfg.Services {
+		// Filter env vars for this service
+		filtered := m.filterEnvVars(svc.EnvVars, query)
+		
+		// Skip service section if no matches and search is active
+		if query != "" && len(filtered) == 0 {
+			continue
 		}
-		content.WriteString(fmt.Sprintf("%s %s\n", icon, src.Path))
+		
+		if len(filtered) > 0 {
+			hasMatches = true
+		}
+		
+		// Service header
+		content.WriteString(ConfigSectionStyle.Render(strings.ToUpper(svc.Name)))
+		content.WriteString("\n")
+		// Env vars box
+		content.WriteString(m.renderEnvVarsBox(filtered))
+		content.WriteString("\n\n")
 	}
-	content.WriteString("\n")
-
-	// Database
-	content.WriteString(ConfigSectionStyle.Render("DATABASE"))
-	content.WriteString("\n")
-	content.WriteString(m.renderConfigBox(m.config.Database))
-	content.WriteString("\n")
-
-	// OAuth
-	content.WriteString(ConfigSectionStyle.Render("OAUTH CREDENTIALS"))
-	content.WriteString("\n")
-	content.WriteString(m.renderConfigBox(m.config.OAuth))
-	content.WriteString("\n")
-
-	// Service Config
-	content.WriteString(ConfigSectionStyle.Render("SERVICE CONFIGURATION"))
-	content.WriteString("\n")
-	content.WriteString(m.renderConfigBox(m.config.ServiceConfig))
+	
+	// Show message if search active but no matches
+	if query != "" && !hasMatches {
+		content.WriteString(ConfigValueStyle.Render("No matches found for: " + m.searchQuery))
+		content.WriteString("\n")
+	}
 
 	m.viewport.SetContent(content.String())
 }
 
-func (m ConfigModel) renderConfigBox(items map[string]string) string {
+func (m ConfigModel) filterEnvVars(items []string, query string) []string {
+	if query == "" {
+		return items
+	}
+	
+	queryLower := strings.ToLower(query)
+	filtered := make([]string, 0)
+	
+	for _, kv := range items {
+		// Check if key or value matches (case-insensitive)
+		kvLower := strings.ToLower(kv)
+		if strings.Contains(kvLower, queryLower) {
+			filtered = append(filtered, kv)
+		}
+	}
+	
+	return filtered
+}
+
+func (m ConfigModel) renderEnvVarsBox(items []string) string {
 	var content strings.Builder
-	for key, value := range items {
-		line := fmt.Sprintf("%s  %s",
-			ConfigKeyStyle.Render(key),
-			ConfigValueStyle.Render(value))
-		content.WriteString(line)
+	for _, kv := range items {
+		// Parse KEY=VALUE for better formatting
+		parts := strings.SplitN(kv, "=", 2)
+		if len(parts) == 2 {
+			key := parts[0]
+			value := parts[1]
+			line := fmt.Sprintf("%s  %s",
+				ConfigKeyStyle.Render(key),
+				ConfigValueStyle.Render(value))
+			content.WriteString(line)
+		} else {
+			// Fallback if no = found
+			line := fmt.Sprintf("%s",
+				ConfigValueStyle.Render(kv))
+			content.WriteString(line)
+		}
 		content.WriteString("\n")
 	}
 
@@ -163,27 +186,60 @@ func (m ConfigModel) View() string {
 
 	var b strings.Builder
 
-	// Header using Lipgloss JoinHorizontal
-	left := " CONFIGURATION"
-	right := "[E] Edit  [ESC] Back"
-	rightW := lipgloss.Width(right)
-	leftW := max(0, m.width-rightW)
-
-	header := lipgloss.NewStyle().
-		Width(m.width).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderBottom(true).
-		BorderForeground(ColorBorder).
-		Render(lipgloss.JoinHorizontal(lipgloss.Top,
-			lipgloss.NewStyle().Width(leftW).Render(left),
-			lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
-		))
+	// Header with search mode support
+	var header string
+	if m.searchMode {
+		left := " CONFIGURATION"
+		searchPrompt := "Search: " + m.searchInput.View()
+		right := "[Enter] Apply  [ESC] Cancel"
+		rightW := lipgloss.Width(right)
+		searchW := max(0, m.width-rightW-lipgloss.Width(left))
+		
+		header = lipgloss.NewStyle().
+			Width(m.width).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderBottom(true).
+			BorderForeground(ColorBorder).
+			Render(lipgloss.JoinHorizontal(lipgloss.Top,
+				lipgloss.NewStyle().Width(lipgloss.Width(left)).Render(left),
+				lipgloss.NewStyle().Width(searchW).Render(searchPrompt),
+				lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+			))
+	} else {
+		left := " CONFIGURATION"
+		right := "[E] Edit  [/] Search  [ESC] Back"
+		rightW := lipgloss.Width(right)
+		leftW := max(0, m.width-rightW)
+		
+		header = lipgloss.NewStyle().
+			Width(m.width).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderBottom(true).
+			BorderForeground(ColorBorder).
+			Render(lipgloss.JoinHorizontal(lipgloss.Top,
+				lipgloss.NewStyle().Width(leftW).Render(left),
+				lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+			))
+	}
 
 	b.WriteString(header)
 	b.WriteString("\n\n")
 
 	// Viewport with config
 	b.WriteString(m.viewport.View())
+	
+	// Footer with search status (if search active)
+	if m.searchQuery != "" {
+		b.WriteString("\n")
+		footer := lipgloss.NewStyle().
+			Width(m.width).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderTop(true).
+			BorderForeground(ColorBorder).
+			Padding(0, 1).
+			Render(" Filter: '" + m.searchQuery + "'")
+		b.WriteString(footer)
+	}
 
 	return b.String()
 }
