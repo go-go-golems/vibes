@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"mento-tui/internal/config"
 	"mento-tui/internal/models"
 	"os"
 	"os/exec"
@@ -21,35 +22,40 @@ type Manager struct {
 	mu            sync.RWMutex
 }
 
-func NewManager() *Manager {
+func NewManager(cfg *config.AppConfig) *Manager {
+	services := make([]*models.Service, 0, len(cfg.Services))
+	
+	for _, svcCfg := range cfg.Services {
+		// Determine working directory with fallback
+		workingDir := cfg.GetServiceWorkingDirectory(&svcCfg)
+		
+		// Determine log buffer size with fallback
+		logBufferSize := cfg.GetServiceLogBufferSize(&svcCfg)
+		
+		// Set Port for backward compatibility (use first port)
+		port := 0
+		if len(svcCfg.Ports) > 0 {
+			port = svcCfg.Ports[0]
+		}
+		
+		svc := &models.Service{
+			Name:             svcCfg.Name,
+			Port:             port, // Backward compatibility
+			Ports:            svcCfg.Ports,
+			Status:           models.StatusStopped,
+			LogBuffer:        models.NewLogBuffer(logBufferSize),
+			BinaryPath:       svcCfg.BinaryPath,
+			WorkingDirectory: workingDir,
+			Args:             svcCfg.ArgsList,
+			EnvVars:          svcCfg.EnvVars,
+		}
+		
+		services = append(services, svc)
+	}
+	
 	return &Manager{
-		Services: []*models.Service{
-			{
-				Name:       "Identity Server",
-				Port:       8083,
-				Status:     models.StatusStopped,
-				LogBuffer:  models.NewLogBuffer(1000),
-				BinaryPath: "./mock-binaries/identity-server",
-				EnvVars:    []string{"IDENTITY_SERVICE_PORT=8083"},
-			},
-			{
-				Name:       "Frontend (Vite)",
-				Port:       5173,
-				Status:     models.StatusStopped,
-				LogBuffer:  models.NewLogBuffer(1000),
-				BinaryPath: "./mock-binaries/frontend",
-				EnvVars:    []string{"VITE_PORT=5173"},
-			},
-			{
-				Name:       "Mento Worker",
-				Port:       8082,
-				Status:     models.StatusStopped,
-				LogBuffer:  models.NewLogBuffer(1000),
-				BinaryPath: "./mock-binaries/worker",
-				EnvVars:    []string{"MENTO_SERVICE_PORT=8082"},
-			},
-		},
-		GlobalLog:     models.NewLogBuffer(10000),
+		Services:      services,
+		GlobalLog:     models.NewLogBuffer(cfg.GetGlobalLogBufferSize()),
 		SelectedIndex: 0,
 	}
 }
@@ -79,8 +85,14 @@ func (m *Manager) StartService(index int) error {
 	svc.Status = models.StatusStarting
 	svc.StartTime = time.Now()
 
-	// Start the service
-	cmd := exec.Command(svc.BinaryPath)
+	// Start the service with args
+	cmd := exec.Command(svc.BinaryPath, svc.Args...)
+	
+	// Set working directory with fallback precedence: service -> global -> default
+	if svc.WorkingDirectory != "" {
+		cmd.Dir = svc.WorkingDirectory
+	}
+	
 	cmd.Env = append(os.Environ(), svc.EnvVars...)
 
 	// Create pipes for stdout and stderr

@@ -98,11 +98,94 @@ go build -o mock-binaries/worker mock-binaries/worker.go
 go build -o mento-tui cmd/main.go
 ```
 
+## Configuration
+
+Mento-tui uses a YAML configuration file to define services and their settings. By default, it looks for `mento-tui.yaml` in the current directory.
+
+### Configuration File Setup
+
+1. Copy the example configuration:
+```bash
+cp mento-tui.yaml.example mento-tui.yaml
+```
+
+2. Edit `mento-tui.yaml` to match your environment:
+```yaml
+services:
+  - name: "Identity Server"
+    ports: [8083]
+    binary_path: "./mock-binaries/identity-server"
+    working_directory: "./identity-service"     # optional
+    args: ["--port", "8083", "--debug"]         # or string: "--port 8083 --debug"
+    env_vars:
+      - "IDENTITY_SERVICE_PORT=8083"
+    log_buffer_size: 1000                       # optional
+
+  - name: "Frontend (Vite)"
+    ports: [5173]
+    binary_path: "./mock-binaries/frontend"
+    args: ["--host", "0.0.0.0", "--port", "5173"]
+    env_vars:
+      - "VITE_PORT=5173"
+
+  - name: "Mento Worker"
+    ports: [8082, 9090]                         # multiple ports supported
+    binary_path: "./mock-binaries/worker"
+    args: "--config worker.yaml --verbose"      # string format also supported
+    env_vars:
+      - "MENTO_SERVICE_PORT=8082"
+
+global:
+  working_directory: "."      # default PWD for services (optional)
+  log_buffer_size: 10000      # default global buffer size (optional)
+```
+
+### Configuration Options
+
+#### Service Configuration
+- **name** (required): Service display name
+- **ports** (required): List of ports the service uses (preferred) or **port** (single port, deprecated)
+- **binary_path** (required): Path to the service binary
+- **working_directory** (optional): Working directory for the service process
+- **args** (optional): Command-line arguments as a list `["--arg", "value"]` or string `"--arg value"`
+- **env_vars** (optional): List of environment variables in `KEY=value` format
+- **log_buffer_size** (optional): Per-service log buffer size (defaults to global or 1000)
+
+#### Global Configuration
+- **working_directory** (optional): Default working directory for services without explicit PWD
+- **log_buffer_size** (optional): Default log buffer size (defaults to 10000)
+
+### Using a Custom Config File
+
+Specify a different configuration file with the `--config` flag:
+```bash
+./mento-tui --config /path/to/custom-config.yaml
+```
+
 ## Usage
 
 ### Starting the Application
+
+**Note**: This is a TUI (Terminal User Interface) application. For best results, run it in a terminal multiplexer like `tmux` or `screen`, or in a dedicated terminal window.
+
 ```bash
+# Using the compiled binary
 ./mento-tui
+
+# Or using go run
+go run cmd/main.go
+
+# With a custom config file
+./mento-tui --config ./my-config.yaml
+
+# Or with go run
+go run cmd/main.go --config ./my-config.yaml
+```
+
+**Running in tmux** (recommended):
+```bash
+tmux new-session -d -s mento-tui 'go run cmd/main.go'
+tmux attach -t mento-tui
 ```
 
 ### Keyboard Shortcuts
@@ -208,16 +291,15 @@ The application has been thoroughly tested with:
 
 ### Adding a New Service
 1. Create a new mock binary in `mock-binaries/`
-2. Add service definition in `services/manager.go`:
-```go
-{
-    Name:       "New Service",
-    Port:       9000,
-    Status:     models.StatusStopped,
-    LogBuffer:  models.NewLogBuffer(1000),
-    BinaryPath: "./mock-binaries/new-service",
-    EnvVars:    []string{"SERVICE_PORT=9000"},
-}
+2. Add service definition to `mento-tui.yaml`:
+```yaml
+services:
+  - name: "New Service"
+    ports: [9000]
+    binary_path: "./mock-binaries/new-service"
+    args: ["--port", "9000"]
+    env_vars:
+      - "SERVICE_PORT=9000"
 ```
 
 ### Adding a New Screen

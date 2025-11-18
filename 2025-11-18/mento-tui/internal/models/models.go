@@ -46,17 +46,20 @@ func (s ServiceStatus) Icon() string {
 }
 
 type Service struct {
-	Name       string
-	Port       int
-	Status     ServiceStatus
-	PID        int
-	CPUPercent float64
-	MemoryMB   int
-	StartTime  time.Time
-	Cmd        *exec.Cmd
-	LogBuffer  *LogBuffer
-	BinaryPath string
-	EnvVars    []string
+	Name             string
+	Port             int       // Deprecated: use Ports instead, kept for backward compatibility
+	Ports            []int      // Preferred: supports multiple ports
+	Status           ServiceStatus
+	PID              int
+	CPUPercent       float64
+	MemoryMB         int
+	StartTime        time.Time
+	Cmd              *exec.Cmd
+	LogBuffer        *LogBuffer
+	BinaryPath       string
+	WorkingDirectory string
+	Args             []string
+	EnvVars          []string
 }
 
 type LogLine struct {

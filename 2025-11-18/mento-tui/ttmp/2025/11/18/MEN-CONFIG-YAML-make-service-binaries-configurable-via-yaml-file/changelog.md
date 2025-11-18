@@ -50,3 +50,19 @@ Updated Implementation Guide: made per-service working_directory and log_buffer_
 
 - /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/ttmp/2025/11/18/MEN-CONFIG-YAML-make-service-binaries-configurable-via-yaml-file/implementation-guide/01-implementation-guide-yaml-configurable-services.md — Guide updated for optional fields and multi-ports
 
+
+## 2025-11-18
+
+Implemented YAML-based service configuration system. Added config package with Load and Validate functions, extended Service model with WorkingDirectory, Args, and Ports fields, updated Manager to use config, added CLI --config flag, created example config file, and updated README documentation.
+
+### Related Files
+
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/README.md — Updated with YAML configuration documentation
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/cmd/main.go — Added --config flag and config loading
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/config/config.go — New config package with YAML loader and validation
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/models/models.go — Extended Service struct with WorkingDirectory
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/services/manager.go — Updated to accept config and build services from YAML
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/app.go — Updated to accept and pass config to manager
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/dashboard.go — Updated to display multiple ports per service
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/mento-tui.yaml.example — Example configuration file
+

@@ -129,11 +129,12 @@ func (m DashboardModel) renderServiceCard(svc *models.Service, selected bool) st
 
 	var content strings.Builder
 
-	// Service name and port
-	nameLine := fmt.Sprintf("%s%sPort: %d",
+	// Service name and port(s)
+	portStr := formatPorts(svc.Ports)
+	nameLine := fmt.Sprintf("%s%sPort: %s",
 		ServiceNameStyle.Render(svc.Name),
 		strings.Repeat(" ", 50-len(svc.Name)),
-		svc.Port)
+		portStr)
 	content.WriteString(nameLine)
 	content.WriteString("\n")
 
@@ -169,4 +170,20 @@ func (m DashboardModel) renderServiceCard(svc *models.Service, selected bool) st
 	}
 
 	return style.Width(m.width - 8).Render(content.String())
+}
+
+// formatPorts formats ports for display
+func formatPorts(ports []int) string {
+	if len(ports) == 0 {
+		return "N/A"
+	}
+	if len(ports) == 1 {
+		return fmt.Sprintf("%d", ports[0])
+	}
+	// Multiple ports: join with comma
+	portStrs := make([]string, len(ports))
+	for i, p := range ports {
+		portStrs[i] = fmt.Sprintf("%d", p)
+	}
+	return strings.Join(portStrs, ", ")
 }

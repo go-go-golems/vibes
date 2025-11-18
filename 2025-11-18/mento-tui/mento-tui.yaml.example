@@ -1,0 +1,36 @@
+# mento-tui.yaml - Example Configuration File
+# Copy this file to mento-tui.yaml and customize for your environment
+
+services:
+  - name: "Identity Server"
+    # Prefer 'ports' (list). 'port' (single) is also accepted and normalized.
+    ports: [8083]
+    binary_path: "./mock-binaries/identity-server"
+    working_directory: "./identity-service"     # optional
+    args: ["--port", "8083", "--debug"]         # or string: "--port 8083 --debug"
+    env_vars:
+      - "IDENTITY_SERVICE_PORT=8083"
+    log_buffer_size: 1000                       # optional (falls back to global or default)
+
+  - name: "Frontend (Vite)"
+    ports: [5173]
+    binary_path: "./mock-binaries/frontend"
+    working_directory: "./frontend"             # optional
+    args: ["--host", "0.0.0.0", "--port", "5173"]
+    env_vars:
+      - "VITE_PORT=5173"
+    log_buffer_size: 1000                       # optional
+
+  - name: "Mento Worker"
+    ports: [8082, 9090]                         # multiple exposed ports supported
+    binary_path: "./mock-binaries/worker"
+    working_directory: "."                      # optional
+    args: "--config worker.yaml --verbose"      # string format also supported
+    env_vars:
+      - "MENTO_SERVICE_PORT=8082"
+    log_buffer_size: 1000                       # optional
+
+global:
+  working_directory: "."      # default PWD for services without explicit PWD (optional)
+  log_buffer_size: 10000      # default global buffer size (optional)
+
