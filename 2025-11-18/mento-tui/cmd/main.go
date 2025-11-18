@@ -1,33 +1,46 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"mento-tui/internal/config"
-	"mento-tui/internal/ui"
+	"mento-tui/internal/cmd"
 	"os"
 
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/go-go-golems/glazed/pkg/cli"
+	"github.com/go-go-golems/glazed/pkg/help"
+	help_cmd "github.com/go-go-golems/glazed/pkg/help/cmd"
 )
 
 func main() {
-	configPath := flag.String("config", "./mento-tui.yaml", "path to config file")
-	flag.Parse()
-
-	cfg, err := config.Load(*configPath)
+	// Create and register the mento-tui command
+	mentoTuiCmd, err := cmd.NewMentoTuiCommand()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error creating command: %v\n", err)
 		os.Exit(1)
 	}
 
-	p := tea.NewProgram(
-		ui.NewModel(cfg),
-		tea.WithAltScreen(),
-		tea.WithMouseCellMotion(),
-	)
+	// Convert to Cobra command - this becomes the root command
+	rootCmd, err := cli.BuildCobraCommand(mentoTuiCmd)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error building command: %v\n", err)
+		os.Exit(1)
+	}
 
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error running program: %v\n", err)
+	// Setup help system
+	helpSystem := help.NewHelpSystem()
+	
+	// Load documentation from embedded filesystem
+	err = cmd.AddDocToHelpSystem(helpSystem)
+	if err != nil {
+		// Non-fatal: help system will work without docs
+		fmt.Fprintf(os.Stderr, "Warning: failed to load help documentation: %v\n", err)
+	}
+
+	// Register help system with root command
+	help_cmd.SetupCobraRootCommand(helpSystem, rootCmd)
+
+	// Execute the application
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }
