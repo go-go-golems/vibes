@@ -9,3 +9,12 @@ func max(a, b int) int {
 	return b
 }
 
+// min returns the minimum of two integers
+// Note: Go 1.21+ has builtin min(), but keeping this for compatibility
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+

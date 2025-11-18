@@ -6,6 +6,7 @@ import (
 	"mento-tui/internal/services"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -18,14 +19,24 @@ type LogViewerModel struct {
 	width       int
 	height      int
 	autoScroll  bool
+	searchMode  bool
+	searchInput textinput.Model
 }
 
 func NewLogViewerModel(manager *services.Manager) LogViewerModel {
+	ti := textinput.New()
+	ti.Placeholder = "Search logs..."
+	ti.CharLimit = 100
+	ti.Width = 50
+	ti.Focus()
+
 	return LogViewerModel{
 		manager:     manager,
 		viewport:    viewport.New(80, 20),
 		selectedTab: 3, // Start with "All"
 		autoScroll:  true,
+		searchMode:  false,
+		searchInput: ti,
 	}
 }
 
@@ -34,14 +45,45 @@ func (m LogViewerModel) Init() tea.Cmd {
 }
 
 func (m LogViewerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
+	// Handle search mode first
+	if m.searchMode {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "esc":
+				m.searchMode = false
+				m.searchInput.SetValue("")
+				m.updateViewport()
+				return m, nil
+			case "enter":
+				m.searchMode = false
+				m.updateViewport()
+				return m, nil
+			}
+		}
+		// Update search input
+		m.searchInput, cmd = m.searchInput.Update(msg)
+		m.updateViewport()
+		return m, cmd
+	}
+
+	// Normal mode handling
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		m.viewport.Width = msg.Width - 4
 		m.viewport.Height = msg.Height - 10
+		m.searchInput.Width = min(50, m.width-20)
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "/":
+			m.searchMode = true
+			m.searchInput.SetValue("")
+			m.searchInput.Focus()
+			return m, nil
 		case "tab":
 			m.selectedTab = (m.selectedTab + 1) % 4
 			m.updateViewport()
@@ -60,7 +102,6 @@ func (m LogViewerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	var cmd tea.Cmd
 	m.viewport, cmd = m.viewport.Update(msg)
 	return m, cmd
 }
@@ -76,6 +117,20 @@ func (m *LogViewerModel) updateViewport() {
 		lines = m.manager.GlobalLog.GetFilteredLines("Mento Worker")
 	case 3:
 		lines = m.manager.GlobalLog.GetLines()
+	}
+
+	// Apply search filter if active
+	searchQuery := m.searchInput.Value()
+	if searchQuery != "" {
+		filtered := make([]models.LogLine, 0)
+		query := strings.ToLower(searchQuery)
+		for _, line := range lines {
+			if strings.Contains(strings.ToLower(line.Message), query) ||
+				strings.Contains(strings.ToLower(line.Service), query) {
+				filtered = append(filtered, line)
+			}
+		}
+		lines = filtered
 	}
 
 	var content strings.Builder
@@ -112,20 +167,40 @@ func (m LogViewerModel) View() string {
 	var b strings.Builder
 
 	// Header using Lipgloss JoinHorizontal
-	left := " LOG VIEWER"
-	right := "[TAB] Switch  [/] Search  [ESC] Back"
-	rightW := lipgloss.Width(right)
-	leftW := max(0, m.width-rightW)
+	var header string
+	if m.searchMode {
+		left := " LOG VIEWER"
+		searchPrompt := fmt.Sprintf("Search: %s", m.searchInput.View())
+		right := "[Enter] Apply  [ESC] Cancel"
+		rightW := lipgloss.Width(right)
+		searchW := max(0, m.width-rightW-lipgloss.Width(left))
+		
+		header = lipgloss.NewStyle().
+			Width(m.width).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderBottom(true).
+			BorderForeground(ColorBorder).
+			Render(lipgloss.JoinHorizontal(lipgloss.Top,
+				lipgloss.NewStyle().Width(lipgloss.Width(left)).Render(left),
+				lipgloss.NewStyle().Width(searchW).Render(searchPrompt),
+				lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+			))
+	} else {
+		left := " LOG VIEWER"
+		right := "[TAB] Switch  [/] Search  [ESC] Back"
+		rightW := lipgloss.Width(right)
+		leftW := max(0, m.width-rightW)
 
-	header := lipgloss.NewStyle().
-		Width(m.width).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderBottom(true).
-		BorderForeground(ColorBorder).
-		Render(lipgloss.JoinHorizontal(lipgloss.Top,
-			lipgloss.NewStyle().Width(leftW).Render(left),
-			lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
-		))
+		header = lipgloss.NewStyle().
+			Width(m.width).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderBottom(true).
+			BorderForeground(ColorBorder).
+			Render(lipgloss.JoinHorizontal(lipgloss.Top,
+				lipgloss.NewStyle().Width(leftW).Render(left),
+				lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+			))
+	}
 
 	b.WriteString(header)
 	b.WriteString("\n")
@@ -171,9 +246,40 @@ func (m LogViewerModel) View() string {
 	b.WriteString("\n")
 
 	// Footer using Lipgloss JoinHorizontal
-	lines := m.manager.GlobalLog.GetLines()
-	leftFooter := " Filter: <none>"
-	rightFooter := fmt.Sprintf("Lines: %d / %d", len(lines), len(lines))
+	allLines := m.manager.GlobalLog.GetLines()
+	var leftFooter string
+	searchQuery := m.searchInput.Value()
+	
+	// Get filtered lines count for display
+	var filteredLines []models.LogLine
+	switch m.selectedTab {
+	case 0:
+		filteredLines = m.manager.GlobalLog.GetFilteredLines("Identity Server")
+	case 1:
+		filteredLines = m.manager.GlobalLog.GetFilteredLines("Frontend (Vite)")
+	case 2:
+		filteredLines = m.manager.GlobalLog.GetFilteredLines("Mento Worker")
+	case 3:
+		filteredLines = m.manager.GlobalLog.GetLines()
+	}
+	
+	// Apply search filter if active
+	if searchQuery != "" {
+		filtered := make([]models.LogLine, 0)
+		query := strings.ToLower(searchQuery)
+		for _, line := range filteredLines {
+			if strings.Contains(strings.ToLower(line.Message), query) ||
+				strings.Contains(strings.ToLower(line.Service), query) {
+				filtered = append(filtered, line)
+			}
+		}
+		filteredLines = filtered
+		leftFooter = fmt.Sprintf(" Filter: '%s' (%d matches)", searchQuery, len(filteredLines))
+	} else {
+		leftFooter = " Filter: <none>"
+	}
+	
+	rightFooter := fmt.Sprintf("Lines: %d / %d", len(filteredLines), len(allLines))
 	rightFooterW := lipgloss.Width(rightFooter)
 	leftFooterW := max(0, m.width-rightFooterW)
 

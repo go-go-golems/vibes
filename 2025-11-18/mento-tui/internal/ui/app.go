@@ -104,7 +104,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 
-		case "t":
+		case "t", "l":
 			if m.currentScreen == DashboardScreen {
 				m.currentScreen = LogViewerScreen
 			}
