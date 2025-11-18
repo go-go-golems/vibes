@@ -66,3 +66,13 @@ Implemented YAML-based service configuration system. Added config package with L
 - /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/dashboard.go — Updated to display multiple ports per service
 - /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/mento-tui.yaml.example — Example configuration file
 
+
+## 2025-11-18
+
+Config viewer now reads environment variables from YAML (mento-tui.yaml) via AppConfig; removed hardcoded env lists.
+
+### Related Files
+
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/app.go — Pass AppConfig into ConfigModel
+- /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/config.go — Render env per service from YAML AppConfig
+
