@@ -1,0 +1,30 @@
+ HELP                                                                                [ESC] Back
+  ║  Identity Server                                   Port: 8083                              ║
+  ║  ✅ RUNNING                                           PID: 4944                            ║
+
+GLOBAL KEYS
+
+  q, ctrl+c           Quit application
+  h, ?                Show this help screen
+  esc                 Go back / Return to dashboard
+
+
+DASHBOARD
+
+  ↑/k, ↓/j        Navigate between services
+  r                   Restart selected service
+  s                   Stop selected service
+  enter               Start selected service (if stopped)
+  a                   Start all services
+  x                   Stop all services
+  t                   View tail logs
+  c                   View configuration
+  e                   View environment
+
+
+LOG VIEWER
+
+
+
+
+

@@ -1,0 +1,30 @@
+ CONFIGURATION                                                       [E] Edit  [ESC] Back
+  ║  Identity Server                                   Port: 8083                              ║
+  ║  ✅ RUNNING                                           PID: 4944                            ║
+
+
+DATABASE
+  ╭────────────────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  IDENTITY_SERVICE_DB_DRIVER      pgx                                                       │
+  │  ONE_ON_ONE_V3_DATABASE_URL      not set                                                   │
+  │  WORKFLOWS_DATABASE_URL          not set                                                   │
+  │  IDENTITY_SERVICE_DB_DSN         postgres:***@localhost:5432                               │
+  │                                                                                            │
+  │                                                                                            │
+  ╰────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+OAUTH CREDENTIALS
+  ╭────────────────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  GOOGLE_CLIENT_ID                not set                                                   │
+  │  GOOGLE_CLIENT_SECRET            ***                                                       │
+  │  SLACK_CLIENT_ID                 12345***                                                  │
+  │  SLACK_CLIENT_SECRET             ***                                                       │
+  │  GITHUB_CLIENT_ID                ***                                                       │
+
+
+
+
+

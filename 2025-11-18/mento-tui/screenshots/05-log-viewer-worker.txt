@@ -1,0 +1,30 @@
+ LOG VIEWER                                             [TAB] Switch  [/] Search  [ESC] Back
+  ║  Identity Server                                   Port: 8083                              ║
+    Identity      Frontend      Worker      All                         Auto-scroll: ON
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+19:09:44 [Mento Worker] [Worker] Connecting to database...
+19:09:46 [Mento Worker] [Worker] ✅ Database connected
+19:09:46 [Mento Worker] [Worker] Starting server on :8082...
+19:09:47 [Mento Worker] [Worker] ✅ Server listening on :8082
+19:10:00 [Mento Worker] 2025/11/17 19:10:00 [Worker] ⏱️ DocLens query completed in 200ms
+19:10:01 [Mento Worker] 2025/11/17 19:10:01 [Worker] Processing 1:1 document: "Weekly Sync - Q4"
+19:10:02 [Mento Worker] 2025/11/17 19:10:02 [Worker] Relevance score: 0.89 (high match)
+19:10:04 [Mento Worker] 2025/11/17 19:10:04 [Worker] ⏱️ Database query completed in 44ms
+19:10:05 [Mento Worker] 2025/11/17 19:10:05 [Worker] Syncing calendar events for user_605
+19:10:07 [Mento Worker] 2025/11/17 19:10:07 [Worker] Found 12 upcoming 1:1 meetings
+19:10:08 [Mento Worker] 2025/11/17 19:10:08 [Worker] ⏱️ Workflow execution completed in 1.3s
+19:10:10 [Mento Worker] 2025/11/17 19:10:10 [Worker] Caching results for 30 minutes
+19:10:11 [Mento Worker] 2025/11/17 19:10:11 [Worker] Background job scheduled for 20:10
+19:10:11 [Mento Worker] 2025/11/17 19:10:11 [Worker] ⏱️ DocLens query completed in 211ms
+19:10:12 [Mento Worker] 2025/11/17 19:10:12 [Worker] Processing 1:1 document: "Weekly Sync - Q4"
+19:10:13 [Mento Worker] 2025/11/17 19:10:13 [Worker] Relevance score: 0.89 (high match)
+19:10:15 [Mento Worker] 2025/11/17 19:10:15 [Worker] ⏱️ Database query completed in 55ms
+19:10:16 [Mento Worker] 2025/11/17 19:10:16 [Worker] Syncing calendar events for user_616
+19:10:18 [Mento Worker] 2025/11/17 19:10:18 [Worker] Found 13 upcoming 1:1 meetings
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+  Filter: <none>                                                            Lines: 29 / 29
+
+
+
