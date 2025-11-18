@@ -40,6 +40,12 @@ A comprehensive Terminal User Interface (TUI) application for managing multiple 
 - Context-sensitive help
 - Feature descriptions
 
+#### 5. Command-Line Help System
+- Access help documentation from the command line
+- Configuration YAML reference guide
+- Service management tutorials
+- Usage examples and best practices
+
 ## Architecture
 
 ### Project Structure
@@ -72,6 +78,7 @@ mento-tui/
 - **UI Components**: [Bubbles](https://github.com/charmbracelet/bubbles) - TUI components
 - **Styling**: [Lipgloss](https://github.com/charmbracelet/lipgloss) - Terminal styling
 - **Process Monitoring**: [gopsutil](https://github.com/shirou/gopsutil) - System and process utilities
+- **CLI Framework**: [Glazed](https://github.com/go-go-golems/glazed) - Command-line interface framework
 - **Language**: Go 1.18+
 
 ## Installation
@@ -215,6 +222,30 @@ tmux attach -t mento-tui
 
 #### Configuration Viewer
 - `↑`/`k`, `↓`/`j` - Scroll configuration
+
+## Help System
+
+Mento-tui includes a comprehensive help system accessible from the command line. Access help documentation using:
+
+```bash
+# Show all available help topics
+mento-tui help
+
+# Show specific help topic
+mento-tui help config-yaml-reference  # Configuration file reference
+mento-tui help usage                   # Command usage guide
+mento-tui help service-management      # Service management guide
+mento-tui help getting-started         # Getting started tutorial
+
+# Show command help
+mento-tui --help
+```
+
+The help system provides:
+- **Configuration Reference**: Complete documentation of the YAML configuration file format
+- **Usage Guide**: Command-line options and usage patterns
+- **Service Management Guide**: Detailed guide to using the TUI dashboard
+- **Getting Started Tutorial**: Step-by-step setup instructions
 
 ## Mock Services
 
