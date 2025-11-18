@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"mento-tui/internal/config"
 	"mento-tui/internal/services"
 	"time"
 
@@ -30,8 +31,8 @@ type Model struct {
 
 type tickMsg time.Time
 
-func NewModel() Model {
-	manager := services.NewManager()
+func NewModel(cfg *config.AppConfig) Model {
+	manager := services.NewManager(cfg)
 
 	return Model{
 		currentScreen: DashboardScreen,

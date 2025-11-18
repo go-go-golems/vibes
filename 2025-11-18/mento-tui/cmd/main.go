@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"mento-tui/internal/config"
 	"mento-tui/internal/ui"
 	"os"
 
@@ -9,14 +11,17 @@ import (
 )
 
 func main() {
-	// Set working directory to project root for mock binaries
-	if err := os.Chdir("/home/ubuntu/mento-tui"); err != nil {
-		fmt.Printf("Error changing directory: %v\n", err)
+	configPath := flag.String("config", "./mento-tui.yaml", "path to config file")
+	flag.Parse()
+
+	cfg, err := config.Load(*configPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
 		os.Exit(1)
 	}
 
 	p := tea.NewProgram(
-		ui.NewModel(),
+		ui.NewModel(cfg),
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)

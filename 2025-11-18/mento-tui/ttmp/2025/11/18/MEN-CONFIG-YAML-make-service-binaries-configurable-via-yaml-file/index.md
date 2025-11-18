@@ -17,7 +17,13 @@ RelatedFiles:
         Contains hardcoded working directory that should be configurable
         CLI --config flag; remove hardcoded chdir; load YAML config
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/go.mod
-      Note: Add YAML dependency (gopkg.in/yaml.v3)
+      Note: |-
+        Add YAML dependency (gopkg.in/yaml.v3)
+        Added gopkg.in/yaml.v3 dependency
+    - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/config/config.go
+      Note: YAML configuration loader with validation and normalization
+    - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/config/config_test.go
+      Note: Unit tests for config loader and validation
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/models/models.go
       Note: |-
         Defines Service struct that will be populated from YAML config
@@ -32,12 +38,15 @@ RelatedFiles:
       Note: Config viewer reference for environment/config display
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/dashboard.go
       Note: Dashboard rendering; display multiple ports per service
+    - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/mento-tui.yaml
+      Note: Default configuration file
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/ttmp/2025/11/18/MEN-CONFIG-YAML-make-service-binaries-configurable-via-yaml-file/various/02-additional-configuration-options.md
       Note: Comprehensive list of additional configuration options
 ExternalSources: []
 Summary: ""
 LastUpdated: 2025-11-18T09:11:14.737571111-05:00
 ---
+
 
 
 
