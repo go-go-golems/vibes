@@ -1,0 +1,30 @@
+ LOG VIEWER                                             [TAB] Switch  [/] Search  [ESC] Back
+  │  Identity Server                                   Port: 8083                              │
+    Identity      Frontend      Worker      All                         Auto-scroll: ON
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+19:10:57 [Mento Worker] 2025/11/17 19:10:57 [Worker] Relevance score: 0.89 (high match)
+19:10:59 [Mento Worker] 2025/11/17 19:10:59 [Worker] ⏱️ Database query completed in 59ms
+19:11:00 [Mento Worker] [Worker] Connecting to database...
+19:11:02 [Mento Worker] [Worker] ✅ Database connected
+19:11:02 [Mento Worker] [Worker] Starting server on :8082...
+19:11:03 [Mento Worker] [Worker] ✅ Server listening on :8082
+19:11:16 [Mento Worker] 2025/11/17 19:11:16 [Worker] ⏱️ DocLens query completed in 276ms
+19:11:17 [Mento Worker] 2025/11/17 19:11:17 [Worker] Processing 1:1 document: "Weekly Sync - Q4"
+19:11:18 [Mento Worker] 2025/11/17 19:11:18 [Worker] Relevance score: 0.89 (high match)
+19:11:20 [Mento Worker] 2025/11/17 19:11:20 [Worker] ⏱️ Database query completed in 40ms
+19:11:21 [Mento Worker] 2025/11/17 19:11:21 [Worker] Syncing calendar events for user_681
+19:11:30 [Mento Worker] [Worker] Connecting to database...
+19:11:32 [Mento Worker] [Worker] ✅ Database connected
+19:11:32 [Mento Worker] [Worker] Starting server on :8082...
+19:11:33 [Mento Worker] [Worker] ✅ Server listening on :8082
+19:11:52 [Mento Worker] [Worker] Connecting to database...
+19:11:54 [Mento Worker] [Worker] ✅ Database connected
+19:11:54 [Mento Worker] [Worker] Starting server on :8082...
+19:11:55 [Mento Worker] [Worker] ✅ Server listening on :8082
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+  Filter: <none>                                                            Lines: 103 / 103
+
+
+

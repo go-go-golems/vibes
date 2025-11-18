@@ -1,0 +1,30 @@
+ CONFIGURATION                                                       [E] Edit  [ESC] Back
+  ║  Identity Server                                   Port: 8083                              ║
+  ║  ✅ RUNNING                                           PID: 4944                            ║
+
+ENVIRONMENT SOURCES
+✅ .envrc
+✅ .env.local
+✅ web/sso-app/.env.staging
+
+
+DATABASE
+  ╭────────────────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  ONE_ON_ONE_V3_DATABASE_URL      not set                                                   │
+  │  WORKFLOWS_DATABASE_URL          not set                                                   │
+  │  IDENTITY_SERVICE_DB_DSN         postgres:***@localhost:5432                               │
+  │  IDENTITY_SERVICE_DB_DRIVER      pgx                                                       │
+  │                                                                                            │
+  │                                                                                            │
+  ╰────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+OAUTH CREDENTIALS
+  ╭────────────────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+
+
+
+
+

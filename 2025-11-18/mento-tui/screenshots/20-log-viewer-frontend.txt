@@ -1,0 +1,30 @@
+ LOG VIEWER                                             [TAB] Switch  [/] Search  [ESC] Back
+  │  Identity Server                                   Port: 8083                              │
+    Identity      Frontend      Worker      All                         Auto-scroll: ON
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+19:09:43 [Frontend (Vite)] [Frontend] VITE v5.0.0 starting...
+19:09:44 [Frontend (Vite)] [Frontend] VITE v5.0.0 ready in 432 ms
+19:09:44 [Frontend (Vite)] [Frontend] ➜  Local:   http://localhost:5173/
+19:10:07 [Frontend (Vite)] 2025/11/17 19:10:07 [Frontend] GET /dashboard - 200 OK
+19:10:19 [Frontend (Vite)] 2025/11/17 19:10:19 [Frontend] [vite] hmr update
+/src/components/Dashboard.tsx
+19:10:21 [Frontend (Vite)] 2025/11/17 19:10:21 [Frontend] Compiled successfully in 810ms
+19:10:39 [Frontend (Vite)] 2025/11/17 19:10:39 [Frontend] [vite] hmr update
+/src/components/ServiceCard.tsx
+19:10:41 [Frontend (Vite)] 2025/11/17 19:10:41 [Frontend] Compiled successfully in 820ms
+19:10:59 [Frontend (Vite)] 2025/11/17 19:10:59 [Frontend] [vite] hmr update
+/src/components/LogViewer.tsx
+19:11:01 [Frontend (Vite)] 2025/11/17 19:11:01 [Frontend] Compiled successfully in 830ms
+19:11:19 [Frontend (Vite)] 2025/11/17 19:11:19 [Frontend] [vite] hmr update
+/src/components/ConfigPanel.tsx
+19:11:21 [Frontend (Vite)] 2025/11/17 19:11:21 [Frontend] Compiled successfully in 840ms
+19:11:39 [Frontend (Vite)] 2025/11/17 19:11:39 [Frontend] [vite] hmr update
+/src/components/Dashboard.tsx
+19:11:52 [Frontend (Vite)] [Frontend] VITE v5.0.0 starting...
+19:11:53 [Frontend (Vite)] [Frontend] VITE v5.0.0 ready in 432 ms
+────────────────────────────────────────────────────────────────────────────────────────────────────
+  Filter: <none>                                                            Lines: 110 / 110
+
+
+

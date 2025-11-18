@@ -1,0 +1,30 @@
+ LOG VIEWER                                             [TAB] Switch  [/] Search  [ESC] Back
+  ║  Identity Server                                   Port: 8083                              ║
+    Identity      Frontend      Worker      All                         Auto-scroll: ON
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+19:09:45 [Identity Server] [Identity] ✅ Server listening on :8083
+19:09:46 [Mento Worker] [Worker] ✅ Database connected
+19:09:46 [Mento Worker] [Worker] Starting server on :8082...
+19:09:47 [Mento Worker] [Worker] ✅ Server listening on :8082
+19:09:55 [Identity Server] 2025/11/17 19:09:55 [Identity] WebSocket connection established:
+ws_abc595
+19:10:00 [Mento Worker] 2025/11/17 19:10:00 [Worker] ⏱️ DocLens query completed in 200ms
+19:10:01 [Mento Worker] 2025/11/17 19:10:01 [Worker] Processing 1:1 document: "Weekly Sync - Q4"
+19:10:02 [Mento Worker] 2025/11/17 19:10:02 [Worker] Relevance score: 0.89 (high match)
+19:10:04 [Mento Worker] 2025/11/17 19:10:04 [Worker] ⏱️ Database query completed in 44ms
+19:10:05 [Identity Server] 2025/11/17 19:10:05 [Identity] WebSocket connection established:
+ws_abc605
+19:10:05 [Mento Worker] 2025/11/17 19:10:05 [Worker] Syncing calendar events for user_605
+19:10:07 [Mento Worker] 2025/11/17 19:10:07 [Worker] Found 12 upcoming 1:1 meetings
+19:10:07 [Identity Server] 2025/11/17 19:10:07 [Identity] GET / - 200 OK (12ms)
+19:10:07 [Frontend (Vite)] 2025/11/17 19:10:07 [Frontend] GET /dashboard - 200 OK
+19:10:08 [Mento Worker] 2025/11/17 19:10:08 [Worker] ⏱️ Workflow execution completed in 1.3s
+19:10:10 [Mento Worker] 2025/11/17 19:10:10 [Worker] Caching results for 30 minutes
+19:10:11 [Mento Worker] 2025/11/17 19:10:11 [Worker] Background job scheduled for 20:10
+19:10:11 [Mento Worker] 2025/11/17 19:10:11 [Worker] ⏱️ DocLens query completed in 211ms
+────────────────────────────────────────────────────────────────────────────────────────────────────
+  Filter: <none>                                                            Lines: 24 / 24
+
+
+
