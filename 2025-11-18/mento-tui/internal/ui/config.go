@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
+	"github.com/elliotchance/orderedmap"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -105,15 +106,19 @@ func (m *ConfigModel) updateViewport() {
 	
 	hasMatches := false
 	for _, svc := range m.cfg.Services {
+		if svc.EnvVars == nil {
+			continue
+		}
+		
 		// Filter env vars for this service
 		filtered := m.filterEnvVars(svc.EnvVars, query)
 		
 		// Skip service section if no matches and search is active
-		if query != "" && len(filtered) == 0 {
+		if query != "" && filtered == nil {
 			continue
 		}
 		
-		if len(filtered) > 0 {
+		if filtered != nil {
 			hasMatches = true
 		}
 		
@@ -134,43 +139,51 @@ func (m *ConfigModel) updateViewport() {
 	m.viewport.SetContent(content.String())
 }
 
-func (m ConfigModel) filterEnvVars(items []string, query string) []string {
+func (m ConfigModel) filterEnvVars(envVars *orderedmap.OrderedMap, query string) *orderedmap.OrderedMap {
 	if query == "" {
-		return items
+		return envVars
+	}
+	
+	if envVars == nil {
+		return nil
 	}
 	
 	queryLower := strings.ToLower(query)
-	filtered := make([]string, 0)
+	filtered := orderedmap.NewOrderedMap()
 	
-	for _, kv := range items {
+	for el := envVars.Front(); el != nil; el = el.Next() {
+		key := el.Key.(string)
+		value := el.Value.(string)
+		
 		// Check if key or value matches (case-insensitive)
-		kvLower := strings.ToLower(kv)
-		if strings.Contains(kvLower, queryLower) {
-			filtered = append(filtered, kv)
+		keyMatch := strings.Contains(strings.ToLower(key), queryLower)
+		valueMatch := strings.Contains(strings.ToLower(value), queryLower)
+		
+		if keyMatch || valueMatch {
+			filtered.Set(key, value)
 		}
+	}
+	
+	if filtered.Len() == 0 {
+		return nil
 	}
 	
 	return filtered
 }
 
-func (m ConfigModel) renderEnvVarsBox(items []string) string {
+func (m ConfigModel) renderEnvVarsBox(envVars *orderedmap.OrderedMap) string {
+	if envVars == nil {
+		return ConfigBoxStyle.Width(m.width - 8).Render("")
+	}
+	
 	var content strings.Builder
-	for _, kv := range items {
-		// Parse KEY=VALUE for better formatting
-		parts := strings.SplitN(kv, "=", 2)
-		if len(parts) == 2 {
-			key := parts[0]
-			value := parts[1]
-			line := fmt.Sprintf("%s  %s",
-				ConfigKeyStyle.Render(key),
-				ConfigValueStyle.Render(value))
-			content.WriteString(line)
-		} else {
-			// Fallback if no = found
-			line := fmt.Sprintf("%s",
-				ConfigValueStyle.Render(kv))
-			content.WriteString(line)
-		}
+	for el := envVars.Front(); el != nil; el = el.Next() {
+		key := el.Key.(string)
+		value := el.Value.(string)
+		line := fmt.Sprintf("%s  %s",
+			ConfigKeyStyle.Render(key),
+			ConfigValueStyle.Render(value))
+		content.WriteString(line)
 		content.WriteString("\n")
 	}
 
@@ -207,7 +220,7 @@ func (m ConfigModel) View() string {
 			))
 	} else {
 		left := " CONFIGURATION"
-		right := "[E] Edit  [/] Search  [ESC] Back"
+		right := "[/] Search  [ESC] Back"
 		rightW := lipgloss.Width(right)
 		leftW := max(0, m.width-rightW)
 		

@@ -8,8 +8,17 @@ services:
     binary_path: "./mock-binaries/identity-server"
     working_directory: "./identity-service"     # optional
     args: ["--port", "8083", "--debug"]         # or string: "--port 8083 --debug"
-    env_vars:
-      - "IDENTITY_SERVICE_PORT=8083"
+    env_vars:                                    # Map format preserves order
+      IDENTITY_SERVICE_PORT: "8083"
+      IDENTITY_SERVICE_DB_DSN: "postgres://postgres:password@localhost:5432/identity_db"
+      IDENTITY_SERVICE_DB_DRIVER: "pgx"
+      IDENTITY_SERVICE_LOG_LEVEL: "debug"
+      IDENTITY_SERVICE_ENABLE_METRICS: "true"
+      IDENTITY_SERVICE_METRICS_PORT: "9090"
+      IDENTITY_SERVICE_JWT_SECRET: "your-secret-key-here"
+      IDENTITY_SERVICE_SESSION_TIMEOUT: "3600"
+      IDENTITY_SERVICE_CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+      IDENTITY_SERVICE_RATE_LIMIT: "100"
     log_buffer_size: 1000                       # optional (falls back to global or default)
 
   - name: "Frontend (Vite)"
@@ -17,8 +26,17 @@ services:
     binary_path: "./mock-binaries/frontend"
     working_directory: "./frontend"             # optional
     args: ["--host", "0.0.0.0", "--port", "5173"]
-    env_vars:
-      - "VITE_PORT=5173"
+    env_vars:                                    # Map format preserves order
+      VITE_PORT: "5173"
+      VITE_API_URL: "http://localhost:8082"
+      VITE_IDENTITY_URL: "http://localhost:8083"
+      VITE_ENABLE_DEV_TOOLS: "true"
+      VITE_LOG_LEVEL: "info"
+      VITE_ENABLE_HOT_RELOAD: "true"
+      VITE_BUILD_TARGET: "development"
+      VITE_PUBLIC_PATH: "/"
+      VITE_ASSETS_DIR: "assets"
+      VITE_SOURCE_MAP: "true"
     log_buffer_size: 1000                       # optional
 
   - name: "Mento Worker"
@@ -26,8 +44,18 @@ services:
     binary_path: "./mock-binaries/worker"
     working_directory: "."                      # optional
     args: "--config worker.yaml --verbose"      # string format also supported
-    env_vars:
-      - "MENTO_SERVICE_PORT=8082"
+    env_vars:                                    # Map format preserves order
+      MENTO_SERVICE_PORT: "8082"
+      MENTO_SERVICE_PUBLIC_BASE_URL: "http://localhost:8082"
+      MENTO_SERVICE_LOG_LEVEL: "debug"
+      MENTO_SERVICE_DB_URL: "postgres://postgres:password@localhost:5432/mento_db"
+      MENTO_SERVICE_REDIS_URL: "redis://localhost:6379/0"
+      MENTO_SERVICE_WORKER_POOL_SIZE: "10"
+      MENTO_SERVICE_QUEUE_NAME: "mento-tasks"
+      MENTO_SERVICE_MAX_RETRIES: "3"
+      MENTO_SERVICE_RETRY_DELAY: "5s"
+      MENTO_SERVICE_ENABLE_PROFILING: "false"
+      MENTO_SERVICE_PROFILING_PORT: "6060"
     log_buffer_size: 1000                       # optional
 
 global:

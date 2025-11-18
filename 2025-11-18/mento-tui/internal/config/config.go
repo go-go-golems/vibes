@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/elliotchance/orderedmap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,33 +20,62 @@ type GlobalConfig struct {
 }
 
 type ServiceConfig struct {
-	Name             string   `yaml:"name"`
-	Ports            []int    `yaml:"ports"`
-	Port             int      `yaml:"port"`
-	BinaryPath       string   `yaml:"binary_path"`
-	WorkingDirectory string   `yaml:"working_directory"`
-	Args             string   `yaml:"args"` // Can be string or list, handled in UnmarshalYAML
-	ArgsList         []string `yaml:"-"`    // Parsed args list
-	EnvVars          []string `yaml:"env_vars"`
-	LogBufferSize    int      `yaml:"log_buffer_size"`
+	Name             string                  `yaml:"name"`
+	Ports            []int                  `yaml:"ports"`
+	Port             int                    `yaml:"port"`
+	BinaryPath       string                 `yaml:"binary_path"`
+	WorkingDirectory string                 `yaml:"working_directory"`
+	Args             string                 `yaml:"args"` // Can be string or list, handled in UnmarshalYAML
+	ArgsList         []string               `yaml:"-"`    // Parsed args list
+	EnvVars          *orderedmap.OrderedMap `yaml:"env_vars"`
+	LogBufferSize    int                    `yaml:"log_buffer_size"`
 }
 
-// UnmarshalYAML custom unmarshaler to handle args as both string and list
-func (sc *ServiceConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	// Define a temporary struct to capture raw YAML
+// UnmarshalYAML custom unmarshaler to handle args as both string and list, and env_vars as map
+func (sc *ServiceConfig) UnmarshalYAML(value *yaml.Node) error {
+	// First, parse env_vars from the YAML node to preserve order
+	sc.EnvVars = orderedmap.NewOrderedMap()
+	if value != nil && value.Kind == yaml.MappingNode {
+		for i := 0; i < len(value.Content)-1; i += 2 {
+			keyNode := value.Content[i]
+			valueNode := value.Content[i+1]
+			if keyNode.Value == "env_vars" {
+				if valueNode.Kind == yaml.MappingNode {
+					// Parse the mapping preserving order
+					for j := 0; j < len(valueNode.Content)-1; j += 2 {
+						envKey := valueNode.Content[j].Value
+						envVal := valueNode.Content[j+1].Value
+						sc.EnvVars.Set(envKey, envVal)
+					}
+				} else if valueNode.Kind == yaml.SequenceNode {
+					// List format (backward compatibility): parse "KEY=VALUE" strings
+					for _, item := range valueNode.Content {
+						if item.Value != "" {
+							parts := strings.SplitN(item.Value, "=", 2)
+							if len(parts) == 2 {
+								sc.EnvVars.Set(parts[0], parts[1])
+							}
+						}
+					}
+				}
+				break
+			}
+		}
+	}
+
+	// Now parse the rest of the config normally
 	type rawServiceConfig struct {
-		Name             string   `yaml:"name"`
-		Ports            []int    `yaml:"ports"`
-		Port             int      `yaml:"port"`
-		BinaryPath       string   `yaml:"binary_path"`
-		WorkingDirectory string   `yaml:"working_directory"`
+		Name             string      `yaml:"name"`
+		Ports            []int       `yaml:"ports"`
+		Port             int         `yaml:"port"`
+		BinaryPath       string      `yaml:"binary_path"`
+		WorkingDirectory string      `yaml:"working_directory"`
 		Args             interface{} `yaml:"args"` // Use interface{} to handle both string and list
-		EnvVars          []string `yaml:"env_vars"`
-		LogBufferSize    int      `yaml:"log_buffer_size"`
+		LogBufferSize    int         `yaml:"log_buffer_size"`
 	}
 
 	var raw rawServiceConfig
-	if err := unmarshal(&raw); err != nil {
+	if err := value.Decode(&raw); err != nil {
 		return err
 	}
 
@@ -54,7 +84,6 @@ func (sc *ServiceConfig) UnmarshalYAML(unmarshal func(interface{}) error) error 
 	sc.Port = raw.Port
 	sc.BinaryPath = raw.BinaryPath
 	sc.WorkingDirectory = raw.WorkingDirectory
-	sc.EnvVars = raw.EnvVars
 	sc.LogBufferSize = raw.LogBufferSize
 
 	// Handle args: can be string or list

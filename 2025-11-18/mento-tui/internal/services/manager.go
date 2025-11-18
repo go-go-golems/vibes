@@ -38,6 +38,16 @@ func NewManager(cfg *config.AppConfig) *Manager {
 			port = svcCfg.Ports[0]
 		}
 		
+		// Convert OrderedMap to []string format for exec.Cmd.Env
+		envVars := make([]string, 0)
+		if svcCfg.EnvVars != nil {
+			for el := svcCfg.EnvVars.Front(); el != nil; el = el.Next() {
+				key := el.Key.(string)
+				value := el.Value.(string)
+				envVars = append(envVars, key+"="+value)
+			}
+		}
+		
 		svc := &models.Service{
 			Name:             svcCfg.Name,
 			Port:             port, // Backward compatibility
@@ -47,7 +57,7 @@ func NewManager(cfg *config.AppConfig) *Manager {
 			BinaryPath:       svcCfg.BinaryPath,
 			WorkingDirectory: workingDir,
 			Args:             svcCfg.ArgsList,
-			EnvVars:          svcCfg.EnvVars,
+			EnvVars:          envVars,
 		}
 		
 		services = append(services, svc)
