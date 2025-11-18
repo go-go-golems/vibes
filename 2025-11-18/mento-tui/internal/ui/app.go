@@ -88,17 +88,60 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tickCmd()
 
 	case tea.KeyMsg:
+		// Always allow quit keys regardless of screen state
 		switch msg.String() {
 		case "ctrl+c", "q":
 			m.quitting = true
 			m.manager.StopAll()
 			return m, tea.Quit
+		}
 
+		// Check if log viewer is in search mode BEFORE updating
+		// (so we know if it will consume the key)
+		isInSearchMode := m.currentScreen == LogViewerScreen && m.logViewer.searchMode
+
+		// Update current screen first (so it can consume keys)
+		var cmd tea.Cmd
+		var tmpModel tea.Model
+		switch m.currentScreen {
+		case DashboardScreen:
+			tmpModel, cmd = m.dashboard.Update(msg)
+			if d, ok := tmpModel.(DashboardModel); ok {
+				m.dashboard = d
+			}
+		case LogViewerScreen:
+			tmpModel, cmd = m.logViewer.Update(msg)
+			if l, ok := tmpModel.(LogViewerModel); ok {
+				m.logViewer = l
+				// If log viewer was in search mode, don't process global keys
+				// (it may have consumed the key to exit search mode)
+				if isInSearchMode {
+					return m, cmd
+				}
+			}
+		case ConfigScreen:
+			tmpModel, cmd = m.config.Update(msg)
+			if c, ok := tmpModel.(ConfigModel); ok {
+				m.config = c
+			}
+		case HelpScreen:
+			tmpModel, cmd = m.help.Update(msg)
+			if h, ok := tmpModel.(HelpModel); ok {
+				m.help = h
+			}
+		}
+
+		// Now handle global keys only if not in special mode
+		switch msg.String() {
 		case "h", "?":
 			m.currentScreen = HelpScreen
 			return m, nil
 
 		case "esc":
+			// Only handle if not in search mode (already handled by log viewer)
+			if isInSearchMode {
+				return m, cmd // Already handled by log viewer
+			}
 			if m.currentScreen != DashboardScreen {
 				m.currentScreen = DashboardScreen
 			}
@@ -131,9 +174,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		}
+
+		return m, cmd
 	}
 
-	// Update current screen
+	// Update current screen for non-key messages
 	var cmd tea.Cmd
 	var tmpModel tea.Model
 	switch m.currentScreen {
