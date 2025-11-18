@@ -163,14 +163,21 @@ func (m ConfigModel) View() string {
 
 	var b strings.Builder
 
-	// Header
+	// Header using Lipgloss JoinHorizontal
+	left := " CONFIGURATION"
+	right := "[E] Edit  [ESC] Back"
+	rightW := lipgloss.Width(right)
+	leftW := max(0, m.width-rightW)
+
 	header := lipgloss.NewStyle().
 		Width(m.width).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		BorderForeground(ColorBorder).
-		Render(fmt.Sprintf(" CONFIGURATION%s[E] Edit  [ESC] Back",
-			strings.Repeat(" ", m.width-45)))
+		Render(lipgloss.JoinHorizontal(lipgloss.Top,
+			lipgloss.NewStyle().Width(leftW).Render(left),
+			lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+		))
 
 	b.WriteString(header)
 	b.WriteString("\n\n")

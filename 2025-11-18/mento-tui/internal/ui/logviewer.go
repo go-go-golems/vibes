@@ -98,43 +98,63 @@ func (m LogViewerModel) View() string {
 		return "Loading..."
 	}
 
+	// Minimum width check
+	if m.width < 40 {
+		return lipgloss.NewStyle().
+			Foreground(ColorError).
+			Padding(1, 2).
+			Render("Terminal too narrow. Please widen the window (minimum 40 characters).")
+	}
+
 	// Update viewport content
 	m.updateViewport()
 
 	var b strings.Builder
 
-	// Header
+	// Header using Lipgloss JoinHorizontal
+	left := " LOG VIEWER"
+	right := "[TAB] Switch  [/] Search  [ESC] Back"
+	rightW := lipgloss.Width(right)
+	leftW := max(0, m.width-rightW)
+
 	header := lipgloss.NewStyle().
 		Width(m.width).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		BorderForeground(ColorBorder).
-		Render(fmt.Sprintf(" LOG VIEWER%s[TAB] Switch  [/] Search  [ESC] Back",
-			strings.Repeat(" ", m.width-55)))
+		Render(lipgloss.JoinHorizontal(lipgloss.Top,
+			lipgloss.NewStyle().Width(leftW).Render(left),
+			lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+		))
 
 	b.WriteString(header)
 	b.WriteString("\n")
 
-	// Tab bar
+	// Tab bar using Lipgloss JoinHorizontal
 	tabs := []string{"Identity", "Frontend", "Worker", "All"}
-	var tabBar strings.Builder
-	tabBar.WriteString(" ")
+	var tabsSeg strings.Builder
+	tabsSeg.WriteString(" ")
 	for i, tab := range tabs {
 		if i == m.selectedTab {
-			tabBar.WriteString(ButtonActiveStyle.Render(tab))
+			tabsSeg.WriteString(ButtonActiveStyle.Render(tab))
 		} else {
-			tabBar.WriteString(ButtonStyle.Render(tab))
+			tabsSeg.WriteString(ButtonStyle.Render(tab))
 		}
 	}
 	autoScrollStatus := "OFF"
 	if m.autoScroll {
 		autoScrollStatus = "ON"
 	}
-	tabBar.WriteString(fmt.Sprintf("%sAuto-scroll: %s",
-		strings.Repeat(" ", m.width-len(tabs)*12-30),
-		autoScrollStatus))
+	rightTab := fmt.Sprintf("Auto-scroll: %s", autoScrollStatus)
+	rightTabW := lipgloss.Width(rightTab)
+	leftTabW := max(0, m.width-rightTabW)
 
-	b.WriteString(tabBar.String())
+	tabBar := lipgloss.JoinHorizontal(lipgloss.Top,
+		lipgloss.NewStyle().Width(leftTabW).Render(tabsSeg.String()),
+		lipgloss.NewStyle().Width(rightTabW).Align(lipgloss.Right).Render(rightTab),
+	)
+
+	b.WriteString(tabBar)
 	b.WriteString("\n")
 
 	// Separator
@@ -150,17 +170,23 @@ func (m LogViewerModel) View() string {
 	b.WriteString(m.viewport.View())
 	b.WriteString("\n")
 
-	// Footer
+	// Footer using Lipgloss JoinHorizontal
 	lines := m.manager.GlobalLog.GetLines()
+	leftFooter := " Filter: <none>"
+	rightFooter := fmt.Sprintf("Lines: %d / %d", len(lines), len(lines))
+	rightFooterW := lipgloss.Width(rightFooter)
+	leftFooterW := max(0, m.width-rightFooterW)
+
 	footer := lipgloss.NewStyle().
 		Width(m.width).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderTop(true).
 		BorderForeground(ColorBorder).
 		Padding(0, 1).
-		Render(fmt.Sprintf(" Filter: <none>%sLines: %d / %d",
-			strings.Repeat(" ", m.width-40),
-			len(lines), len(lines)))
+		Render(lipgloss.JoinHorizontal(lipgloss.Top,
+			lipgloss.NewStyle().Width(leftFooterW).Render(leftFooter),
+			lipgloss.NewStyle().Width(rightFooterW).Align(lipgloss.Right).Render(rightFooter),
+		))
 
 	b.WriteString(footer)
 

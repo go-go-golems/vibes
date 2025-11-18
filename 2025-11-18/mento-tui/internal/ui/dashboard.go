@@ -74,29 +74,51 @@ func (m DashboardModel) View() string {
 		return "Loading..."
 	}
 
+	// Minimum width check
+	if m.width < 40 {
+		return lipgloss.NewStyle().
+			Foreground(ColorError).
+			Padding(1, 2).
+			Render("Terminal too narrow. Please widen the window (minimum 40 characters).")
+	}
+
 	var b strings.Builder
 
-	// Header
+	// Header using Lipgloss JoinHorizontal
+	left := " MENTO SERVICES MANAGER"
+	right := "[Q] Quit  [H] Help"
+	rightW := lipgloss.Width(right)
+	leftW := max(0, m.width-rightW)
+
 	header := lipgloss.NewStyle().
 		Width(m.width).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		BorderForeground(ColorBorder).
-		Render(fmt.Sprintf(" MENTO SERVICES MANAGER%s[Q] Quit  [H] Help",
-			strings.Repeat(" ", m.width-50)))
+		Render(lipgloss.JoinHorizontal(lipgloss.Top,
+			lipgloss.NewStyle().Width(leftW).Render(left),
+			lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+		))
 
 	b.WriteString(header)
 	b.WriteString("\n\n")
 
-	// Service Status Title
+	// Service Status Title using Lipgloss JoinHorizontal
 	uptime := m.manager.GetUptime()
 	uptimeStr := fmt.Sprintf("%02d:%02d:%02d",
 		int(uptime.Hours()),
 		int(uptime.Minutes())%60,
 		int(uptime.Seconds())%60)
 
-	statusLine := fmt.Sprintf(" SERVICE STATUS%sUptime: %s",
-		strings.Repeat(" ", m.width-35), uptimeStr)
+	leftStatus := " SERVICE STATUS"
+	rightStatus := fmt.Sprintf("Uptime: %s", uptimeStr)
+	rightStatusW := lipgloss.Width(rightStatus)
+	leftStatusW := max(0, m.width-rightStatusW)
+
+	statusLine := lipgloss.JoinHorizontal(lipgloss.Top,
+		lipgloss.NewStyle().Width(leftStatusW).Render(leftStatus),
+		lipgloss.NewStyle().Width(rightStatusW).Align(lipgloss.Right).Render(rightStatus),
+	)
 	b.WriteString(statusLine)
 	b.WriteString("\n\n")
 
@@ -129,26 +151,21 @@ func (m DashboardModel) renderServiceCard(svc *models.Service, selected bool) st
 
 	var content strings.Builder
 
-	// Service name and port(s)
+	// Service name and port(s) using Lipgloss Width
 	portStr := formatPorts(svc.Ports)
-	nameLine := fmt.Sprintf("%s%sPort: %s",
-		ServiceNameStyle.Render(svc.Name),
-		strings.Repeat(" ", 50-len(svc.Name)),
-		portStr)
+	nameCol := lipgloss.NewStyle().Width(50).Render(ServiceNameStyle.Render(svc.Name))
+	nameLine := nameCol + fmt.Sprintf("Port: %s", portStr)
 	content.WriteString(nameLine)
 	content.WriteString("\n")
 
-	// Status and PID
+	// Status and PID using Lipgloss Width
 	statusStyle := StatusStyle(svc.Status.String())
 	pidInfo := ""
 	if svc.PID > 0 {
 		pidInfo = fmt.Sprintf("PID: %d", svc.PID)
 	}
-	statusLine := fmt.Sprintf("%s %s%s%s",
-		svc.Status.Icon(),
-		statusStyle.Render(svc.Status.String()),
-		strings.Repeat(" ", 50-len(svc.Status.String())),
-		pidInfo)
+	statusCol := lipgloss.NewStyle().Width(50).Render(statusStyle.Render(svc.Status.String()))
+	statusLine := fmt.Sprintf("%s %s%s", svc.Status.Icon(), statusCol, pidInfo)
 	content.WriteString(statusLine)
 	content.WriteString("\n")
 
