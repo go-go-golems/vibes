@@ -16,6 +16,8 @@ docTypes:
       description: Ticket landing page
     - slug: implementation-guide
       description: Design and implementation plan documents
+    - slug: bug-report
+      description: Bug reports documenting issues, root causes, and investigation findings
 intent:
     - slug: long-term
       description: Likely to persist
