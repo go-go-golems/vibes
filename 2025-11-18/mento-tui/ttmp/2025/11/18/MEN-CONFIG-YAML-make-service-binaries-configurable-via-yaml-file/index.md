@@ -33,11 +33,17 @@ RelatedFiles:
         Contains hardcoded service definitions that need to be made configurable
         Service lifecycle
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/app.go
-      Note: UI wiring; pass config to manager and screens
+      Note: |-
+        UI wiring; pass config to manager and screens
+        Bug report documents missing 'l' key handler
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/config.go
       Note: Config viewer reference for environment/config display
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/dashboard.go
-      Note: Dashboard rendering; display multiple ports per service
+      Note: |-
+        Dashboard rendering; display multiple ports per service
+        Bug report documents UI hint inconsistency
+    - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/internal/ui/logviewer.go
+      Note: Bug report documents resize crash and missing search functionality
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/mento-tui.yaml
       Note: Default configuration file
     - Path: /home/manuel/code/wesen/corporate-headquarters/vibes/2025-11-18/mento-tui/ttmp/2025/11/18/MEN-CONFIG-YAML-make-service-binaries-configurable-via-yaml-file/various/02-additional-configuration-options.md
@@ -46,6 +52,7 @@ ExternalSources: []
 Summary: ""
 LastUpdated: 2025-11-18T09:11:14.737571111-05:00
 ---
+
 
 
 
