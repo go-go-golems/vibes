@@ -98,10 +98,8 @@ func (m *HelpModel) updateViewport() {
 		content.WriteString("\n\n")
 
 		for _, binding := range section.bindings {
-			line := fmt.Sprintf("  %s%s%s",
-				HelpKeyStyle.Render(binding.key),
-				strings.Repeat(" ", 20-len(binding.key)),
-				HelpDescStyle.Render(binding.desc))
+			keyCol := lipgloss.NewStyle().Width(20).Render(HelpKeyStyle.Render(binding.key))
+			line := fmt.Sprintf("  %s%s", keyCol, HelpDescStyle.Render(binding.desc))
 			content.WriteString(line)
 			content.WriteString("\n")
 		}
@@ -127,14 +125,21 @@ func (m HelpModel) View() string {
 
 	var b strings.Builder
 
-	// Header
+	// Header using Lipgloss JoinHorizontal
+	left := " HELP"
+	right := "[ESC] Back"
+	rightW := lipgloss.Width(right)
+	leftW := max(0, m.width-rightW)
+
 	header := lipgloss.NewStyle().
 		Width(m.width).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		BorderForeground(ColorBorder).
-		Render(fmt.Sprintf(" HELP%s[ESC] Back",
-			strings.Repeat(" ", m.width-20)))
+		Render(lipgloss.JoinHorizontal(lipgloss.Top,
+			lipgloss.NewStyle().Width(leftW).Render(left),
+			lipgloss.NewStyle().Width(rightW).Align(lipgloss.Right).Render(right),
+		))
 
 	b.WriteString(header)
 	b.WriteString("\n\n")
