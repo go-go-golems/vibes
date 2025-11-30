@@ -1,0 +1,143 @@
+================================================================================
+FACT EXTRACTION ANALYSIS REPORT
+================================================================================
+
+📄 DOCUMENT STATISTICS
+   Total documents analyzed: 30
+   Total input tokens: 529,636
+   Total output tokens: 33,197
+   Total cost: $0.0994
+
+📊 DOCUMENT CATEGORIES
+   book_excerpt: 6
+   transcript: 5
+   court_filing: 4
+   mixed_document: 4
+   financial_document: 3
+   letter: 3
+   media_article: 2
+   email: 1
+   public_record: 1
+   report: 1
+
+🔗 RDF TRIPLE STATISTICS
+   Total triples extracted: 256
+   Average triples per document: 8.5
+
+👤 TOP 15 ACTORS (by number of relationships)
+    1. Jeffrey Epstein: 39 relationships
+    2. Alan M. Dershowitz: 25 relationships
+    3. Donald J. Trump: 18 relationships
+    4. Paul Cassell: 14 relationships
+    5. Gordon Getty: 13 relationships
+    6. Paul G. Cassell: 10 relationships
+    7. Author: 9 relationships
+    8. Witness: 8 relationships
+    9. Bradley J. Edwards: 6 relationships
+   10. Jane Doe #3: 6 relationships
+   11. Claudio Irigoyen: 5 relationships
+   12. Peggy Siegal: 5 relationships
+   13. Virginia Roberts Giuffre: 5 relationships
+   14. Alfredo Rodriguez: 4 relationships
+   15. Amanda Ens: 4 relationships
+
+🎯 TOP 15 TARGETS (by number of relationships)
+    1. Jeffrey Epstein: 16 relationships
+    2. Alan M. Dershowitz: 8 relationships
+    3. Virginia Roberts: 7 relationships
+    4. unnamed female victim: 5 relationships
+    5. Prince Andrew: 5 relationships
+    6. Yitzhak Rabin: 4 relationships
+    7. Virginia Roberts Giuffre: 4 relationships
+    8. Mark Filip: 4 relationships
+    9. Ghislaine Maxwell: 4 relationships
+   10. Professor Alan Dershowitz: 3 relationships
+   11. Alan Dershowitz: 3 relationships
+   12. public: 2 relationships
+   13. period of production theory: 2 relationships
+   14. flight logs: 2 relationships
+   15. United States Attorney's Office: 2 relationships
+
+⚡ TOP 10 ACTIONS
+    1. attended: 6 occurrences
+    2. proposed: 5 occurrences
+    3. filed: 5 occurrences
+    4. testified about: 4 occurrences
+    5. sent letter to: 4 occurrences
+    6. sent email to: 4 occurrences
+    7. has ownership interest in: 4 occurrences
+    8. photographed with: 3 occurrences
+    9. sexually abused by: 2 occurrences
+   10. sexually abused: 2 occurrences
+
+🏷️  TOP 15 TAGS
+    1. sexual abuse: 11 occurrences
+    2. media: 8 occurrences
+    3. investigation: 8 occurrences
+    4. allegations: 8 occurrences
+    5. real estate: 7 occurrences
+    6. deposition: 7 occurrences
+    7. email: 6 occurrences
+    8. trafficking: 6 occurrences
+    9. legal strategy: 5 occurrences
+   10. discovery: 5 occurrences
+   11. ownership: 5 occurrences
+   12. court filing: 5 occurrences
+   13. evidence: 5 occurrences
+   14. photograph: 4 occurrences
+   15. event: 4 occurrences
+
+📝 TOP 10 EXPLICIT TOPICS
+    1. management role: 4 occurrences
+    2. ownership interest: 3 occurrences
+    3. sexual abuse allegations: 2 occurrences
+    4. response to motion to seal: 2 occurrences
+    5. recommendation to buy XLF call spreads: 2 occurrences
+    6. further upside potential in financials and options trading: 2 occurrences
+    7. document naming alleged abuser: 2 occurrences
+    8. youth photographs: 1 occurrences
+    9. work experience in oil fields: 1 occurrences
+   10. witness intimidation: 1 occurrences
+
+🔍 SAMPLE JEFFREY EPSTEIN RELATIONSHIPS (first 10)
+    1. Jeffrey Epstein → photographed at → Coney Island
+       Explicit: youth photographs
+       Implicit: early life background
+
+    2. Jeffrey Epstein → photographed in → high school yearbook
+       Explicit: education background
+       Implicit: personal history
+
+    3. Jeffrey Epstein → attended event with → Ghislaine Maxwell and Tony Randall at Plaza Hotel, New York City
+       Explicit: social event
+       Implicit: social network
+
+    4. Jeffrey Epstein → attended reception with → Ghislaine Maxwell at Mar-a-Lago
+       Explicit: social gathering
+       Implicit: elite connections
+
+    5. Jeffrey Epstein → attended event with → Donald Trump at Laura Belle club, New York City
+       Explicit: Victoria's Secret Angels party
+       Implicit: high-profile socialization
+
+    6. Jeffrey Epstein → photographed with → Alan Dershowitz at Cambridge, MA
+       Explicit: personal association
+       Implicit: social and legal circles
+
+    7. Jeffrey Epstein → photographed with → Ghislaine Maxwell at Cipriani, New York City
+       Explicit: Wall Street Rising benefit concert
+       Implicit: philanthropy and social events
+
+    8. Jeffrey Epstein → attended launch event with → Adrianna Ross at Hotel QT, New York City
+       Explicit: Radar magazine launch
+       Implicit: media and social engagement
+
+    9. Stephen Hawking → attended conference sponsored by → Jeffrey Epstein at Case Western Reserve University, St. Thomas, US Virgin Islands
+       Explicit: scientific conference
+       Implicit: philanthropy and science
+
+   10. Jeffrey Epstein → served sentence at → Palm Beach County Stockade at Palm Beach, Florida
+       Explicit: incarceration
+       Implicit: legal proceedings
+
+================================================================================

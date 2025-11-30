@@ -1,0 +1,35 @@
+[
+  {
+    "canonical_name": "Unnamed female victim",
+    "aliases": [
+      "unnamed female victim",
+      "Unnamed female victim"
+    ],
+    "confidence": 0.85,
+    "reason": "Both entities refer to 'unnamed female victim' with slightly different capitalization. They share related contexts of abuse and victimization within the same document, suggesting they likely refer to the same individual or similar individuals with overlapping descriptions."
+  },
+  {
+    "canonical_name": "Black Women in Hollywood lunch",
+    "aliases": [
+      "Black Women in Hollywood lunch"
+    ],
+    "confidence": 1.0,
+    "reason": "Only one entity with this exact name available."
+  },
+  {
+    "canonical_name": "Madonna",
+    "aliases": [
+      "Madonna"
+    ],
+    "confidence": 0.0,
+    "reason": "No other entities refer to 'Madonna'; only one mention."
+  },
+  {
+    "canonical_name": "Alan Rogers",
+    "aliases": [
+      "generation length research"
+    ],
+    "confidence": 0.1,
+    "reason": "There is no strong evidence that 'generation length research' and 'Alan Rogers' refer to the same entity. 'Alan Rogers' is a personal name, whereas 'generation length research' appears to be a research topic or work. They both appear once and in the same document, but their sample contexts indicate different entity types."
+  }
+]

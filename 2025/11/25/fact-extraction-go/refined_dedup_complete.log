@@ -1,0 +1,133 @@
+2025-11-19 09:45:46,984 - INFO - Building entity profiles...
+2025-11-19 09:45:47,043 - INFO - Built profiles for 306 entities
+2025-11-19 09:45:47,043 - INFO - Building relation profiles...
+2025-11-19 09:45:47,065 - INFO - Built profiles for 172 relations
+2025-11-19 09:45:59,178 - INFO - Loading embedding model: all-MiniLM-L6-v2
+2025-11-19 09:45:59,179 - INFO - Use pytorch device_name: cpu
+2025-11-19 09:45:59,179 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-11-19 09:45:59,866 - INFO - Finding entity candidates using embeddings...
+Batches:   0%|          | 0/10 [00:00<?, ?it/s]Batches:  10%|█         | 1/10 [00:00<00:02,  3.69it/s]Batches:  20%|██        | 2/10 [00:00<00:01,  5.26it/s]Batches:  30%|███       | 3/10 [00:00<00:01,  6.24it/s]Batches:  40%|████      | 4/10 [00:00<00:00,  6.93it/s]Batches:  60%|██████    | 6/10 [00:00<00:00,  9.31it/s]Batches:  70%|███████   | 7/10 [00:00<00:00,  9.38it/s]Batches:  90%|█████████ | 9/10 [00:01<00:00, 11.68it/s]Batches: 100%|██████████| 10/10 [00:01<00:00,  9.56it/s]
+2025-11-19 09:46:00,923 - INFO - Loading faiss with AVX512 support.
+2025-11-19 09:46:01,059 - INFO - Successfully loaded faiss with AVX512 support.
+2025-11-19 09:46:01,084 - INFO - Found candidates for 137 entities
+2025-11-19 09:46:01,084 - INFO - Finding relation candidates using embeddings...
+Batches:   0%|          | 0/6 [00:00<?, ?it/s]Batches:  17%|█▋        | 1/6 [00:00<00:00,  7.98it/s]Batches:  50%|█████     | 3/6 [00:00<00:00, 10.25it/s]Batches:  83%|████████▎ | 5/6 [00:00<00:00, 12.09it/s]Batches: 100%|██████████| 6/6 [00:00<00:00, 12.82it/s]
+2025-11-19 09:46:01,561 - INFO - Found candidates for 38 relations
+2025-11-19 09:46:01,681 - INFO - Using LLM for entity merge decisions...
+2025-11-19 09:46:01,681 - INFO - Processing entity group 1/38 (2 entities)
+2025-11-19 09:46:04,246 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:04,253 - INFO - Processing entity group 2/38 (12 entities)
+2025-11-19 09:46:11,385 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:11,386 - INFO - Processing entity group 3/38 (2 entities)
+2025-11-19 09:46:12,433 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:12,438 - INFO - Processing entity group 4/38 (2 entities)
+2025-11-19 09:46:13,960 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:13,961 - INFO - Processing entity group 5/38 (2 entities)
+2025-11-19 09:46:15,262 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:15,263 - INFO - Processing entity group 6/38 (4 entities)
+2025-11-19 09:46:15,616 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:15,617 - INFO - Processing entity group 7/38 (2 entities)
+2025-11-19 09:46:16,753 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:16,754 - INFO - Processing entity group 8/38 (2 entities)
+2025-11-19 09:46:17,257 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:17,258 - INFO - Processing entity group 9/38 (3 entities)
+2025-11-19 09:46:18,745 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:18,746 - INFO - Processing entity group 10/38 (43 entities)
+2025-11-19 09:46:31,368 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:31,368 - INFO - Processing entity group 11/38 (2 entities)
+2025-11-19 09:46:33,325 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:33,326 - INFO - Processing entity group 12/38 (2 entities)
+2025-11-19 09:46:33,722 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:33,723 - INFO - Processing entity group 13/38 (2 entities)
+2025-11-19 09:46:35,527 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:35,528 - INFO - Processing entity group 14/38 (4 entities)
+2025-11-19 09:46:37,265 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:37,265 - INFO - Processing entity group 15/38 (2 entities)
+2025-11-19 09:46:38,676 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:38,677 - INFO - Processing entity group 16/38 (2 entities)
+2025-11-19 09:46:40,166 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:40,167 - INFO - Processing entity group 17/38 (2 entities)
+2025-11-19 09:46:41,725 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:41,725 - INFO - Processing entity group 18/38 (2 entities)
+2025-11-19 09:46:42,077 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:42,078 - INFO - Processing entity group 19/38 (2 entities)
+2025-11-19 09:46:42,471 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:42,472 - INFO - Processing entity group 20/38 (2 entities)
+2025-11-19 09:46:43,968 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:43,969 - INFO - Processing entity group 21/38 (2 entities)
+2025-11-19 09:46:45,275 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:45,276 - INFO - Processing entity group 22/38 (2 entities)
+2025-11-19 09:46:47,207 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:47,208 - INFO - Processing entity group 23/38 (2 entities)
+2025-11-19 09:46:48,787 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:48,787 - INFO - Processing entity group 24/38 (2 entities)
+2025-11-19 09:46:49,974 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:49,975 - INFO - Processing entity group 25/38 (3 entities)
+2025-11-19 09:46:52,004 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:52,005 - INFO - Processing entity group 26/38 (2 entities)
+2025-11-19 09:46:53,045 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:53,046 - INFO - Processing entity group 27/38 (2 entities)
+2025-11-19 09:46:53,432 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:53,433 - INFO - Processing entity group 28/38 (2 entities)
+2025-11-19 09:46:54,504 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:54,505 - INFO - Processing entity group 29/38 (2 entities)
+2025-11-19 09:46:55,521 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:55,522 - INFO - Processing entity group 30/38 (5 entities)
+2025-11-19 09:46:59,202 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:46:59,203 - INFO - Processing entity group 31/38 (2 entities)
+2025-11-19 09:47:00,332 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:00,334 - INFO - Processing entity group 32/38 (2 entities)
+2025-11-19 09:47:00,921 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:00,921 - INFO - Processing entity group 33/38 (2 entities)
+2025-11-19 09:47:02,250 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:02,251 - INFO - Processing entity group 34/38 (2 entities)
+2025-11-19 09:47:02,672 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:02,673 - INFO - Processing entity group 35/38 (2 entities)
+2025-11-19 09:47:03,958 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:03,959 - INFO - Processing entity group 36/38 (3 entities)
+2025-11-19 09:47:06,938 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:06,939 - INFO - Processing entity group 37/38 (2 entities)
+2025-11-19 09:47:08,343 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:08,344 - INFO - Processing entity group 38/38 (2 entities)
+2025-11-19 09:47:09,386 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:09,387 - INFO - Entity merging complete. Cost: $0.0069
+2025-11-19 09:47:09,387 - INFO - Using LLM for relation merge decisions...
+2025-11-19 09:47:09,387 - INFO - Processing relation group 1/14 (5 relations)
+2025-11-19 09:47:10,874 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:10,875 - INFO - Processing relation group 2/14 (3 relations)
+2025-11-19 09:47:12,402 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:12,403 - INFO - Processing relation group 3/14 (2 relations)
+2025-11-19 09:47:13,837 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:13,838 - INFO - Processing relation group 4/14 (3 relations)
+2025-11-19 09:47:14,935 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:14,936 - INFO - Processing relation group 5/14 (3 relations)
+2025-11-19 09:47:16,856 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:16,857 - INFO - Processing relation group 6/14 (3 relations)
+2025-11-19 09:47:18,255 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:18,256 - INFO - Processing relation group 7/14 (3 relations)
+2025-11-19 09:47:19,934 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:19,934 - INFO - Processing relation group 8/14 (2 relations)
+2025-11-19 09:47:21,431 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:21,432 - INFO - Processing relation group 9/14 (2 relations)
+2025-11-19 09:47:22,764 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:22,765 - INFO - Processing relation group 10/14 (2 relations)
+2025-11-19 09:47:24,035 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:24,036 - INFO - Processing relation group 11/14 (2 relations)
+2025-11-19 09:47:25,254 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:25,255 - INFO - Processing relation group 12/14 (2 relations)
+2025-11-19 09:47:26,512 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:26,513 - INFO - Processing relation group 13/14 (4 relations)
+2025-11-19 09:47:28,000 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:28,001 - INFO - Processing relation group 14/14 (2 relations)
+2025-11-19 09:47:29,475 - INFO - HTTP Request: POST https://api.manus.im/api/llm-proxy/v1/chat/completions "HTTP/1.1 200 OK"
+2025-11-19 09:47:29,476 - INFO - Relation merging complete. Cost: $0.0020
+2025-11-19 09:47:29,477 - INFO - Results saved to refined_dedup_complete.json
+
+================================================================================
+REFINED DEDUPLICATION RESULTS
+================================================================================
+Entity groups: 55
+Entities merged: 108
+Relation groups: 15
+Relations merged: 33
+================================================================================

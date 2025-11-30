@@ -1,0 +1,643 @@
+{
+  "entity_merges": [
+    {
+      "canonical_name": "American Hustle 10 Nominations",
+      "aliases": [
+        "10 nominations for American Hustle"
+      ],
+      "confidence": 0.99,
+      "reason": "The entity '10 nominations for American Hustle' refers to a specific fact about the film American Hustle's achievement. It co-occurs with David O. Russell who directed the film. The description and actions overlap specifically around the film receiving 10 nominations, making this a single entity describing the award nominations for that movie."
+    },
+    {
+      "canonical_name": "David O. Russell",
+      "aliases": [
+        "David O. Russell"
+      ],
+      "confidence": 1.0,
+      "reason": "David O. Russell is a person described as a film director associated with American Hustle that garnered 10 nominations. There is no ambiguity about this entity and it is distinct from the '10 nominations for American Hustle' entity which describes an event/fact rather than a person."
+    },
+    {
+      "canonical_name": "Alan M. Dershowitz",
+      "aliases": [
+        "Alan M. Dershowitz",
+        "Alan Dershowitz"
+      ],
+      "confidence": 0.98,
+      "reason": "Both entities describe the same prominent American attorney and legal scholar involved in litigation concerning allegations of sexual abuse, sharing references to Virginia Roberts, flight logs, defense motions, and similar actions and contexts."
+    },
+    {
+      "canonical_name": "Woman who alleged sexual abuse by Dershowitz",
+      "aliases": [
+        "Woman who alleged sexual abuse by Dershowitz"
+      ],
+      "confidence": 1.0,
+      "reason": "Single entity describing the woman alleging abuse, co-occurring with the Attorney who represents her, clearly referring to the same individual."
+    },
+    {
+      "canonical_name": "Attorney",
+      "aliases": [
+        "Attorney"
+      ],
+      "confidence": 1.0,
+      "reason": "Only one entity, the legal representative of the woman alleging abuse by Dershowitz, clearly identified as such."
+    },
+    {
+      "canonical_name": "Prince Andrew",
+      "aliases": [
+        "Prince Andrew"
+      ],
+      "confidence": 0.95,
+      "reason": "Single entity describing the British royal accused by Virginia Roberts of sexual misconduct during visits to Epstein's properties, with multiple mentions and high confidence."
+    },
+    {
+      "canonical_name": "Virginia Roberts Giuffre",
+      "aliases": [
+        "Virginia Roberts Giuffre"
+      ],
+      "confidence": 0.95,
+      "reason": "Mentioned as co-occurring with entities on Prince Andrew and Dershowitz allegations; although not separately listed here as an entity, implicitly referenced as the alleged victim in multiple entries."
+    },
+    {
+      "canonical_name": "Jane Doe #3",
+      "aliases": [
+        "Jane Doe #3"
+      ],
+      "confidence": 0.95,
+      "reason": "Though appearing in multiple entities related to allegations and legal responses against Dershowitz, treated as one entity representing a complainant who filed allegations and motions."
+    },
+    {
+      "canonical_name": "Jeffrey Epstein",
+      "aliases": [
+        "Jeffrey Epstein"
+      ],
+      "confidence": 0.98,
+      "reason": "Referenced in multiple co-occurrings and actions, primarily as a related subject but not duplicated as multiple entities here."
+    },
+    {
+      "canonical_name": "Other allegation and testimony related entities",
+      "aliases": [
+        "Questions about Alan Dershowitz and sexual abuse",
+        "Testimony about Alan Dershowitz",
+        "allegations of sexual misconduct against Alan M. Dershowitz",
+        "Alan Dershowitz and other academicians",
+        "approximately seven years to allege misconduct by Alan M. Dershowitz",
+        "credible evidence for allegations against Dershowitz",
+        "Prince Andrew and Alan Dershowitz sexually abused Virginia Roberts"
+      ],
+      "confidence": 0.9,
+      "reason": "These entities represent various aspects related to allegations, testimonies, and timing around Dershowitz and associated individuals, but are thematic or descriptive and do not represent separate entities from the persons involved."
+    },
+    {
+      "canonical_name": "Alfonso Cuar\u00f3n",
+      "aliases": [
+        "first Latino director to win an Oscar"
+      ],
+      "confidence": 0.99,
+      "reason": "The description and actions clearly link Alfonso Cuar\u00f3n as the person who became the first Latino director to win an Oscar, supported by co-occurrence and explicit sample citations."
+    },
+    {
+      "canonical_name": "Bank of Mexico",
+      "aliases": [
+        "Bank of Mexico"
+      ],
+      "confidence": 0.95,
+      "reason": "No other entities clearly refer to the Bank of Mexico; it is distinct from 'Mexican monetary policy' which is an abstract concept rather than an organization."
+    },
+    {
+      "canonical_name": "Mexican monetary policy",
+      "aliases": [
+        "Mexican monetary policy"
+      ],
+      "confidence": 0.9,
+      "reason": "'Mexican monetary policy' is a concept distinct from the Bank of Mexico, referring to the policy framework rather than the organization."
+    },
+    {
+      "canonical_name": "Barry Krischer",
+      "aliases": [
+        "State Attorney Barry Krischer",
+        "Barry Krischer"
+      ],
+      "confidence": 0.98,
+      "reason": "Both mentions refer to the same individual, Barry Krischer, who was the State Attorney during the Epstein investigation. One is a formal title usage ('State Attorney Barry Krischer'), the other a simpler name ('Barry Krischer'). Actions, context, and co-occurrences align consistently."
+    },
+    {
+      "canonical_name": "Cate Blanchett",
+      "aliases": [
+        "Best Actress Oscar for Blue Jasmine"
+      ],
+      "confidence": 0.9,
+      "reason": "The Best Actress Oscar for Blue Jasmine refers specifically to the award won by Cate Blanchett, and the co-occurrence, actions (won), and sample reasoning link the award entity directly to Cate Blanchett, indicating they represent the same real-world entity in context."
+    },
+    {
+      "canonical_name": "Bill Clinton",
+      "aliases": [
+        "Former President Bill Clinton",
+        "Bill Clinton"
+      ],
+      "confidence": 0.98,
+      "reason": "Both entities refer to the 42nd President of the United States serving from 1993 to 2001 with consistent descriptions. The differences in mention contexts (presence on Epstein's island, connections to Epstein) do not contradict but add complementary information. Both are persons and co-occur with related entities such as Little Saint James Island and Jeffrey Epstein, indicating the same real-world individual."
+    },
+    {
+      "canonical_name": "Jeffrey Epstein",
+      "aliases": [
+        "Jeffrey Epstein",
+        "Epstein",
+        "Jeffrey Epstein on behalf of L.M., E.W., and Jane Doe",
+        "Jeffrey Epstein's legal counsel",
+        "Jeffrey Epstein's counsel",
+        "Jeffrey Epstein's attorneys",
+        "Jeffrey Epstein's sexual abuse of minors",
+        "Jeffrey Epstein's trafficking ring",
+        "Jeffrey Epstein's sex trafficking organization",
+        "Jeffrey Epstein on solicitation of prostitution charges"
+      ],
+      "confidence": 1.0,
+      "reason": "All references relate to the same individual, financier and convicted sex offender involved in multiple legal actions concerning sexual abuse and trafficking, with consistent associations to same legal events, victims, defense team, and charges."
+    },
+    {
+      "canonical_name": "Bradley J. Edwards",
+      "aliases": [
+        "Bradley J. Edwards"
+      ],
+      "confidence": 0.99,
+      "reason": "Single unique person, attorney representing Epstein victims including Jane Doe #3, consistently associated with filed civil lawsuits against Epstein and opposing Dershowitz."
+    },
+    {
+      "canonical_name": "Ghislaine Maxwell",
+      "aliases": [
+        "Ghislaine Maxwell"
+      ],
+      "confidence": 0.98,
+      "reason": "Unique person described as Epstein's close associate and facilitator of sex trafficking, directly linked with abuse and documented in affidavits."
+    },
+    {
+      "canonical_name": "Virginia Roberts Giuffre",
+      "aliases": [
+        "Virginia Roberts Giuffre",
+        "Virginia Roberts",
+        "Jane Doe #3"
+      ],
+      "confidence": 0.99,
+      "reason": "All names refer to the same alleged victim and key plaintiff in the Epstein case with consistent allegations, legal representation, and co-occurrence with Dershowitz and attorneys Edwards and Cassell."
+    },
+    {
+      "canonical_name": "Alan M. Dershowitz",
+      "aliases": [
+        "Alan M. Dershowitz"
+      ],
+      "confidence": 0.99,
+      "reason": "Unique individual referenced as Epstein's former legal counsel and defendant in sexual abuse allegations, co-occurring with Virginia Giuffre and Edwards."
+    },
+    {
+      "canonical_name": "R. Alexander Acosta",
+      "aliases": [
+        "R. Alexander Acosta",
+        "U.S. Attorney Alex Acosta"
+      ],
+      "confidence": 0.98,
+      "reason": "Same person identified as U.S. Attorney involved in Epstein federal case with consistent references to position and involvement."
+    },
+    {
+      "canonical_name": "Palm Beach Police Department",
+      "aliases": [
+        "Palm Beach Police Department"
+      ],
+      "confidence": 0.99,
+      "reason": "Unique organization responsible for investigations related to Epstein's illegal activities at Palm Beach mansion."
+    },
+    {
+      "canonical_name": "Jeffrey Herman",
+      "aliases": [
+        "Jeffrey Herman"
+      ],
+      "confidence": 0.95,
+      "reason": "Unique civil attorney representing Epstein victims, co-occurring with civil lawsuits filed."
+    },
+    {
+      "canonical_name": "Epstein victims",
+      "aliases": [
+        "Epstein victims and families",
+        "victims of Jeffrey Epstein",
+        "victims L.M., E.W., and Jane Doe in civil cases against Epstein",
+        "Epstein's victims' lawyers"
+      ],
+      "confidence": 0.9,
+      "reason": "These refer broadly to the victims of Epstein\u2019s abuses or their legal representation, often co-occurring with specific victims and attorneys."
+    },
+    {
+      "canonical_name": "Sexual abuse allegations by Virginia Giuffre",
+      "aliases": [
+        "sexual abuse allegations on behalf of Virginia Giuffre",
+        "sexual abuse allegations by Virginia Giuffre"
+      ],
+      "confidence": 0.98,
+      "reason": "Both entries document allegations made by Virginia Giuffre regarding abuse by Epstein and others."
+    },
+    {
+      "canonical_name": "Legal events and investigations",
+      "aliases": [
+        "state solicitation charges",
+        "sexual abuse allegations on behalf of Virginia Giuffre",
+        "Jeffrey Epstein on solicitation of prostitution charges",
+        "further contact between Jeffrey Epstein's defense team and U.S. Attorney Alex Acosta",
+        "a review of the federal involvement in the Jeffrey Epstein case",
+        "a limited review of the federal investigation involving Jeffrey Epstein",
+        "prosecution of Jeffrey Epstein may have been politically motivated",
+        "their efforts with the State Attorney's Office regarding prosecution of Epstein",
+        "sworn testimony regarding Jeffrey Epstein's house"
+      ],
+      "confidence": 0.93,
+      "reason": "Entries relate to legal events, investigations, reviews, and proceedings associated with Epstein\u2019s criminal case and its prosecution."
+    },
+    {
+      "canonical_name": "Jeffrey Epstein's defense team",
+      "aliases": [
+        "Epstein's legal team",
+        "Jeffrey Epstein's attorneys",
+        "Jeffrey Epstein's counsel"
+      ],
+      "confidence": 0.92,
+      "reason": "These entries refer to group or individuals in Epstein's legal defense, negotiating plea deals and defending against charges."
+    },
+    {
+      "canonical_name": "Bradley J. Edwards and Paul G. Cassell",
+      "aliases": [
+        "Plaintiffs' attorneys (Edwards and Cassell)"
+      ],
+      "confidence": 0.98,
+      "reason": "Both entities refer to the same legal team of attorneys involved in filing motions and responses related to sexual abuse allegations and litigation on behalf of Virginia Giuffre. Naming variation includes full names versus a descriptive label."
+    },
+    {
+      "canonical_name": "DJT Holdings LLC",
+      "aliases": [
+        "DJT Holdings LLC"
+      ],
+      "confidence": 1.0,
+      "reason": "DJT Holdings LLC is a holding company controlling many LLCs. DJT Holdings Managing Member LLC appears as a related but distinct controlling member entity, without direct evidence tying them as the same entity."
+    },
+    {
+      "canonical_name": "DJT Holdings Managing Member LLC",
+      "aliases": [
+        "DJT Holdings Managing Member LLC"
+      ],
+      "confidence": 1.0,
+      "reason": "The entity owns 100% interest in TRUMP PRODUCTIONS LLC and holds Managing Member role, but no explicit evidence it is identical to DJT Holdings LLC."
+    },
+    {
+      "canonical_name": "U.S. Attorney's Office in Miami (USAO)",
+      "aliases": [
+        "The USAO in Miami",
+        "Federal prosecutors in Miami",
+        "Federal prosecutors in the USAO Miami"
+      ],
+      "confidence": 0.9,
+      "reason": "All entities refer to federal prosecutorial authorities in Miami connected to the USAO, including overlapping contexts of actions and co-occurring entities regarding Epstein case prosecutions, demonstrating they refer to the same institution."
+    },
+    {
+      "canonical_name": "Flight logs related to Jeffrey Epstein's investigations",
+      "aliases": [
+        "flight logs related to Jeffrey Epstein's investigations",
+        "Flight logs"
+      ],
+      "confidence": 0.99,
+      "reason": "Both entities refer to records documenting flights associated with Jeffrey Epstein's planes and investigations. They share similar descriptions regarding documentation of passenger movement and are used as evidence, with overlapping mentions of reviewing and analyzing such logs."
+    },
+    {
+      "canonical_name": "Mark Filip",
+      "aliases": [
+        "Honorable Mark Filip",
+        "Mark Filip and the Office of the Deputy Attorney General"
+      ],
+      "confidence": 0.9,
+      "reason": "Both refer to Mark Filip in his capacity as Deputy Attorney General. The first is a personal reference, the second combines him with his official office, but the context and co-occurring entities indicate they refer to the same real-world entity."
+    },
+    {
+      "canonical_name": "Trump\u2019s polling average",
+      "aliases": [
+        "Including Trump\u2019s polling average variable",
+        "Trump\u2019s increase in polling average"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to measures or changes in Trump's polling average and their impacts; one is the inclusion of Trump's polling average variable in a model and the other is the increase in Trump's polling average, highlighting related statistical and causal effects on MXN and the model's R-squared."
+    },
+    {
+      "canonical_name": "Juan Alessi and Alfredo Rodriguez",
+      "aliases": [
+        "Juan Alessi and Alfredo Rodriguez",
+        "the testimony of Juan Alessi and Alfredo Rodriguez exonerates him"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to the same two individuals, Juan Alessi and Alfredo Rodriguez, referenced together. The second entity explicitly mentions their testimony and is contextually connected to the first; hence they represent the same real-world entities."
+    },
+    {
+      "canonical_name": "Mexican peso",
+      "aliases": [
+        "Mexican peso undervaluation at up to 15%"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to the same concept of the Mexican currency (MXN). The second entity is a specific attribute (undervaluation estimate) of the Mexican peso exchange rate. They co-occur with related financial analysis contexts and describe aspects of the same real-world currency."
+    },
+    {
+      "canonical_name": "Mexican peso",
+      "aliases": [
+        "neutral stance on Mexican peso",
+        "Mexican peso due to swing state votes"
+      ],
+      "confidence": 0.85,
+      "reason": "Both entities refer to the Mexican peso in the context of US elections and polling impacts, with overlapping contextual mentions involving valuation risks and political factors affecting the currency, indicating they describe the same real-world entity."
+    },
+    {
+      "canonical_name": "Michael Reiter",
+      "aliases": [
+        "Michael Reiter",
+        "Palm Beach Police Chief Michael Reiter"
+      ],
+      "confidence": 0.98,
+      "reason": "Both entities are described as Chief of Police involved in actions related to the Epstein investigation, one explicitly as 'Chief of Police of the Palm Beach Police Department' and the other as 'Palm Beach Police Chief Michael Reiter'; both performed assertive actions like writing to Barry Krischer and referring the case to the FBI confirming they are the same individual."
+    },
+    {
+      "canonical_name": "Motion for Clarification of Confidentiality Order or Relief from that Order",
+      "aliases": [
+        "Motion for Clarification regarding Confidentiality Order"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities are court motions related to clarification or relief regarding a confidentiality order, involving Alan Dershowitz or his defense counsel, indicating they likely refer to the same legal motion despite slight difference in title wording."
+    },
+    {
+      "canonical_name": "Non-Prosecution Agreement with U.S. Attorney's Office",
+      "aliases": [
+        "non-prosecution agreement (NPA) with US Attorney\u2019s Office",
+        "non-prosecution agreement",
+        "Non-Prosecution Agreement with U.S. Attorney's Office"
+      ],
+      "confidence": 0.99,
+      "reason": "All three entities refer to the same legal agreement involving Jeffrey Epstein and the U.S. Attorney's Office that deferred federal prosecution in favor of state charges; they describe the same document with slightly different naming and focus."
+    },
+    {
+      "canonical_name": "Oscars",
+      "aliases": [
+        "Oscars",
+        "seven Oscars"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to the Oscars awards event. 'seven Oscars' specifically refers to the number of Oscars won by a film but both describe the same awards entity."
+    },
+    {
+      "canonical_name": "Paul Cassell",
+      "aliases": [
+        "Professor Cassell"
+      ],
+      "confidence": 0.95,
+      "reason": "Both entities refer to a law professor and attorney involved in legal proceedings related to Jeffrey Epstein and Virginia Roberts, representing victims and providing expert legal opinions. The descriptions and roles overlap significantly, and the distinct mentions likely refer to the same individual in different contexts."
+    },
+    {
+      "canonical_name": "Steve McQueen",
+      "aliases": [
+        "first black and British director to win an Oscar"
+      ],
+      "confidence": 0.99,
+      "reason": "The description and mentions align exactly: Steve McQueen is identified as the first black and British director to win an Oscar, with co-occurrence and matching context supporting that these refer to the same real-world entity."
+    },
+    {
+      "canonical_name": "Trump National Golf Club - Bedminster",
+      "aliases": [
+        "Trump National Golf Club - Bedminster",
+        "TRUMP NATIONAL GOLF CLUB - BEDMINSTER"
+      ],
+      "confidence": 0.98,
+      "reason": "Both entities refer to the same golf club located in Bedminster, New Jersey, owned by Donald J. Trump through his holding companies. The descriptions and locations match, and both have co-occurring references to Donald J. Trump."
+    },
+    {
+      "canonical_name": "Trump National Golf Club Washington DC Member Corp",
+      "aliases": [
+        "TRUMP NATIONAL GOLF CLUB WASHINGTON DC MEMBER CORP"
+      ],
+      "confidence": 1.0,
+      "reason": "Unique managing member corporation for the Washington DC Trump National Golf Club, controlled by DJT Holdings LLC. No other similar named entity to merge with."
+    },
+    {
+      "canonical_name": "Trump National Golf Club - Los Angeles",
+      "aliases": [
+        "TRUMP NATIONAL GOLF CLUB - LOS ANGELES"
+      ],
+      "confidence": 0.98,
+      "reason": "Distinct golf club entity located in Los Angeles, owned and managed by Trump business entities. No other similar named entity to merge with."
+    },
+    {
+      "canonical_name": "Trump National Golf Club Colts Neck",
+      "aliases": [
+        "TRUMP NATIONAL GOLF CLUB COLTS NECK"
+      ],
+      "confidence": 0.98,
+      "reason": "Golf club located in New York, part of Trump golf resorts holdings, with ownership interest linked to Donald J. Trump."
+    },
+    {
+      "canonical_name": "Trump Organization LLCs and Corporations",
+      "aliases": [
+        "Trump Organization LLCs and Corporations",
+        "TRUMP PRODUCTIONS LLC"
+      ],
+      "confidence": 0.8,
+      "reason": "TRUMP PRODUCTIONS LLC is owned 100% by DJT Holdings Managing Member LLC, which is under Trump holdings. Trump Organization LLCs and Corporations includes various Trump-related LLCs and entities, indicating TRUMP PRODUCTIONS LLC is one of many such entities owned or managed under the Trump umbrella."
+    },
+    {
+      "canonical_name": "Trump International Golf Club",
+      "aliases": [
+        "Trump International Golf Club - Jupiter",
+        "Trump International Golf Club - Doonbeg"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to golf clubs that are part of the Trump International Golf Club portfolio, co-occurring with Donald J. Trump and described as assets and holdings under his name, indicating they represent locations or branches of the same overarching golf club brand."
+    },
+    {
+      "canonical_name": "Media and court actions by Alan M. Dershowitz",
+      "aliases": [
+        "media interviews denying allegations and accusing plaintiffs",
+        "court filings and media to attack allegations and plaintiffs"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities describe similar sets of actions related to Alan M. Dershowitz where he uses media and court filings to deny allegations and attack plaintiffs. They co-occur with Dershowitz and share overlapping themes and purposes, indicating they refer to the same real-world entity or combined set of actions."
+    },
+    {
+      "canonical_name": "Federal prosecution of Jeffrey Epstein not warranted",
+      "aliases": [
+        "federal prosecution of Jeffrey Epstein not warranted based on substantive arguments",
+        "federal prosecution of Epstein was unwarranted due to lack of federal jurisdiction and the local nature of the conduct"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities describe assessments or arguments that federal prosecution of Jeffrey Epstein was not justified, citing jurisdictional or substantive reasons. They share thematic overlap around the lack of grounds for prosecution, co-occurrence with legal entities, and consistent reasoning about the unwarranted nature of prosecution."
+    },
+    {
+      "canonical_name": "U.S. Attorney Acosta's authorization of federal prosecution of Jeffrey Epstein",
+      "aliases": [
+        "that U.S. Attorney Acosta would not be abusing his prosecutorial discretion by authorizing federal prosecution of Jeffrey Epstein"
+      ],
+      "confidence": 0.85,
+      "reason": "This entity specifically refers to U.S. Attorney Acosta's prosecutorial discretion regarding Epstein's prosecution, referencing CEOS's conclusion and delegation to Acosta. It is related but distinct from the other entities which focus on arguments against prosecution."
+    },
+    {
+      "canonical_name": "Underage girls for sexual exploitation",
+      "aliases": [
+        "other underage girls for sexual exploitation",
+        "underage girls"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to underage girls targeted and used in Epstein's pyramid sex trafficking scheme; their descriptions, roles as targets, and co-occurrence with Jeffrey Epstein strongly indicate they represent the same real-world group."
+    },
+    {
+      "canonical_name": "victims of Jeffrey Epstein",
+      "aliases": [
+        "victims and attorneys representing victims",
+        "victims and witnesses"
+      ],
+      "confidence": 0.9,
+      "reason": "Both entities refer to victims associated with Jeffrey Epstein who were targeted for harassment, intimidation, or legal obstruction, indicating they represent overlapping groups of victims."
+    }
+  ],
+  "relation_merges": [
+    {
+      "canonical_name": "owns",
+      "aliases": [
+        "owns",
+        "has ownership interest in",
+        "owned",
+        "is Shareholder of",
+        "owns trust"
+      ],
+      "confidence": 0.95,
+      "reason": "All these relations describe legal or beneficial ownership, possession, or controlling interest by the actor in a target entity or asset. Despite small differences in wording or focus (e.g., shareholder vs trustee), they semantically express ownership or control rights over the target."
+    },
+    {
+      "canonical_name": "pleaded guilty",
+      "aliases": [
+        "pleaded guilty to",
+        "entered guilty pleas"
+      ],
+      "confidence": 1.0,
+      "reason": "All three relations describe the legal action where the actor admits criminal responsibility or guilt to specified charges, typically in a court setting; the actors, targets, and usage contexts are consistent and the difference is primarily in phrasing rather than meaning."
+    },
+    {
+      "canonical_name": "sexually assaulted",
+      "aliases": [
+        "sexually abused"
+      ],
+      "confidence": 0.98,
+      "reason": "Both relations describe non-consensual, coercive sexual acts perpetrated by the actor against the victim, involving similar actions such as forced sexual contact and abuse. The terms 'assaulted' and 'abused' share high semantic overlap in the context of non-consensual sexual offenses."
+    },
+    {
+      "canonical_name": "represent",
+      "aliases": [
+        "represented",
+        "represents"
+      ],
+      "confidence": 0.98,
+      "reason": "All three relations denote legal representation where an attorney or law firm acts on behalf of a client in legal matters. The verbs differ only in tense or grammatical form but share the same core semantic meaning of legal advocacy."
+    },
+    {
+      "canonical_name": "alleged sexual abuse by",
+      "aliases": [
+        "alleged abuse by",
+        "made allegations of sexual abuse against"
+      ],
+      "confidence": 0.95,
+      "reason": "Both relations describe formal or informal claims or accusations made by a victim that another individual committed sexual abuse, typically framed as allegations rather than confirmed states."
+    },
+    {
+      "canonical_name": "was sexually abused by",
+      "aliases": [
+        "was sexually abused by"
+      ],
+      "confidence": 1.0,
+      "reason": "This relation describes the state indicating that the abuse actually occurred to the victim, as opposed to the victim making an allegation or claim."
+    },
+    {
+      "canonical_name": "request",
+      "aliases": [
+        "seeks",
+        "requested",
+        "request"
+      ],
+      "confidence": 0.95,
+      "reason": "All three relations describe formal actions of appealing, demanding, or pursuing some form of legal relief or official action. 'seeks' emphasizes pursuing a legal outcome, while 'requested' and 'request' emphasize expressing a formal appeal; however, semantically, they all involve one party formally asking another for a particular response or action within legal contexts."
+    },
+    {
+      "canonical_name": "invoked Fifth Amendment",
+      "aliases": [
+        "invoked Fifth Amendment privilege",
+        "invoked Fifth Amendment",
+        "took Fifth Amendment"
+      ],
+      "confidence": 0.98,
+      "reason": "All three relations describe the same legal action of refusing to answer questions on grounds of self-incrimination by invoking the Fifth Amendment right. They only differ in phrasing but share identical semantics, typical actors, targets, and legal context."
+    },
+    {
+      "canonical_name": "has liability",
+      "aliases": [
+        "has mortgage liability"
+      ],
+      "confidence": 0.9,
+      "reason": "Both relations indicate financial obligations owed by the actor to a creditor. 'Has mortgage liability' is a specific type of 'has liability' referring to secured real estate debt, so they share the core semantic meaning of owed debt/liability."
+    },
+    {
+      "canonical_name": "impose",
+      "aliases": [
+        "impose",
+        "imposed"
+      ],
+      "confidence": 0.98,
+      "reason": "Both 'impose' and 'imposed' describe the action of formally establishing or enforcing a requirement, condition, or obligation typically by an authority such as prosecutors. Sample citations indicate similar contexts where deadlines or terms are established or enforced."
+    },
+    {
+      "canonical_name": "filed",
+      "aliases": [
+        "files"
+      ],
+      "confidence": 0.98,
+      "reason": "Both 'filed' and 'files' describe the action of formally submitting legal documents or motions to a court. Their actors and targets closely overlap, focusing on the legal filing process, and their sample citations reflect the same procedural context."
+    },
+    {
+      "canonical_name": "assert",
+      "aliases": [
+        "assert",
+        "asserts"
+      ],
+      "confidence": 0.9,
+      "reason": "Both 'assert' and 'asserts' involve stating a claim or position confidently and with conviction, often in a legal or formal context. The difference in type (state vs. action) is minor and does not affect semantic equivalence in this usage."
+    },
+    {
+      "canonical_name": "state",
+      "aliases": [
+        "states",
+        "state"
+      ],
+      "confidence": 0.9,
+      "reason": "Both 'states' and 'state' describe the act of declaring or expressing information, opinions, or facts. They share similar typical actors related to official communication and convey messages or positions, making their semantic meaning effectively equivalent."
+    },
+    {
+      "canonical_name": "assert",
+      "aliases": [
+        "stated",
+        "claims",
+        "claimed",
+        "asserted"
+      ],
+      "confidence": 0.95,
+      "reason": "All four relations involve making a factual or argumentative assertion, often publicly or in legal/rhetorical contexts. 'stated' emphasizes making assertions publicly, 'claims' and 'claimed' focus on asserting something often defensively or in contradiction, and 'asserted' pertains to alleging facts or status, especially legally. Given their overlapping semantics around declaring or affirming facts/opinions, they are semantically equivalent."
+    },
+    {
+      "canonical_name": "provide",
+      "aliases": [
+        "provides",
+        "provided"
+      ],
+      "confidence": 0.95,
+      "reason": "Both 'provides' and 'provided' refer to the action of submitting or delivering documents, evidence, or information for consideration, typically by the same actor (Alan M. Dershowitz) to related targets (calendars, travel documents, flight logs). Their meanings are essentially identical except for grammatical tense."
+    }
+  ],
+  "stats": {
+    "entity_groups": 55,
+    "entities_merged": 108,
+    "relation_groups": 15,
+    "relations_merged": 33
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "database": "bolt",
+  "db_path": "cayley_facts.db",
+  "load": [
+    "facts.nq"
+  ]
+}

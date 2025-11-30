@@ -1,0 +1,23 @@
+{
+  "data": {
+    "@context": {
+      "@base": "http://example.com/",
+      "@vocab": "http://example.com/"
+    },
+    "@id": "alice",
+    "likes": { "@id": "bob" }
+  },
+  "query": {
+    "@context": { "@vocab": "http://cayley.io/linkedql#" },
+    "@type": "Select",
+    "from": {
+      "@type": "ReverseProperties",
+      "from": { "@type": "Match", "pattern": {} },
+      "names": ["http://example.com/likes"]
+    },
+    "tags": []
+  },
+  "results": [
+    { "http://example.com/likes": { "@id": "http://example.com/alice" } }
+  ]
+}

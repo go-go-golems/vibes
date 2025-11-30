@@ -1,0 +1,154 @@
+✓ Database initialized at: fact_extraction.db
+
+Found 30 documents to analyze
+
+Analyzing HOUSE_OVERSIGHT_010477...
+  ✓ Analyzed HOUSE_OVERSIGHT_010477: 16 triples extracted
+Progress: 1/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010486_part1...
+  ⚠️  Skipping triple with missing target: {'timestamp': '2006-05', 'actor': 'Assistant State Attorney Daliah Weiss', 'action': 'was removed from case', 'target': '', 'location': "Palm Beach State Attorney's Office", 'tags': ['case reassignment', 'conflict of interest'], 'explicit_topic': 'Prosecutor removed', 'implicit_topic': 'legal maneuvering'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010486_part1: 16 triples extracted
+Progress: 2/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010486_part2...
+  ⚠️  Skipping triple with missing target: {'timestamp': 'June 30, 2008', 'actor': 'Jeffrey Epstein', 'action': 'pled guilty in state court', 'target': None, 'tags': ['guilty plea', 'state court', 'sexual offense'], 'explicit_topic': 'plea and sentencing', 'implicit_topic': 'criminal justice resolution'}
+  ⚠️  Skipping triple with missing target: {'timestamp': 'July 21, 2009', 'actor': 'Jeffrey Epstein', 'action': 'was released from jail after serving less than thirteen months', 'target': None, 'tags': ['early release', 'sentencing'], 'explicit_topic': 'prison release', 'implicit_topic': 'criminal sentences and compliance'}
+  ⚠️  Skipping triple with missing target: {'timestamp': '2009', 'actor': 'Jeffrey Epstein', 'action': 'was restricted from accessing pornography and social networking for sexual purposes', 'target': None, 'tags': ['restrictions', 'post-release conditions'], 'explicit_topic': 'legal restrictions', 'implicit_topic': 'behavioral limitations'}
+  ⚠️  Skipping triple with missing target: {'timestamp': 'November 3, 2009', 'actor': 'Alfredo Rodriguez', 'action': 'was detained and questioned by FBI agents', 'target': None, 'tags': ['detention', 'law enforcement'], 'explicit_topic': 'law enforcement action', 'implicit_topic': 'criminal investigation'}
+  ⚠️  Skipping triple with missing target: {'timestamp': 'June 18, 2010', 'actor': 'Alfredo Rodriguez', 'action': 'appeared in court facing charges of corruptly concealing records and documents', 'target': None, 'tags': ['court appearance', 'criminal charges'], 'explicit_topic': 'criminal prosecution', 'implicit_topic': 'legal consequences'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010486_part2: 7 triples extracted
+Progress: 3/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010560...
+  ✓ Analyzed HOUSE_OVERSIGHT_010560: 10 triples extracted
+Progress: 4/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010566...
+  ⚠️  Skipping triple with missing target: {'timestamp': '2010-06-29', 'actor': 'Ghislaine Maxwell', 'action': 'avoided deposition by falsely claiming a family emergency', 'tags': ['deposition avoidance', 'witness evasion'], 'explicit_topic': 'deposition evasion', 'implicit_topic': 'obstruction of civil proceedings'}
+  ⚠️  Skipping triple with missing target: {'timestamp': 'circa 2005-2009', 'actor': 'Scott Rothstein', 'action': 'operated Ponzi scheme unrelated to Edwards', 'tags': ['Ponzi scheme', 'legal ethics'], 'explicit_topic': 'Ponzi scheme operation', 'implicit_topic': 'fraud unrelated to Edwards'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010566: 16 triples extracted
+Progress: 5/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010609...
+  ✓ Analyzed HOUSE_OVERSIGHT_010609: 7 triples extracted
+Progress: 6/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010617_part1...
+  ✓ Analyzed HOUSE_OVERSIGHT_010617_part1: 7 triples extracted
+Progress: 7/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010617_part2...
+  ✓ Analyzed HOUSE_OVERSIGHT_010617_part2: 0 triples extracted
+Progress: 8/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010617_part3...
+  ✓ Analyzed HOUSE_OVERSIGHT_010617_part3: 11 triples extracted
+Progress: 9/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010715...
+  ⚠️  Skipping triple with missing target: {'timestamp': '2012-02-27', 'actor': 'Spike Jones', 'action': 'arrived and remained superstitious about chances for Best Original Screenplay', 'tags': ['Oscar nominee', 'award superstition'], 'explicit_topic': 'Oscar nominee behavior', 'implicit_topic': 'award ceremony anticipation'}
+  ⚠️  Skipping triple with missing target: {'timestamp': '2012-03-01', 'actor': 'Harvey Weinstein and Bob Weinstein', 'action': 'honored nominees with seated dinner', 'tags': ['award sponsor activity', 'Oscar week'], 'explicit_topic': 'nominees honored dinner', 'implicit_topic': 'Oscar campaigning'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010715: 13 triples extracted
+Progress: 10/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010723...
+  ✓ Analyzed HOUSE_OVERSIGHT_010723: 9 triples extracted
+Progress: 11/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010732...
+  ✓ Analyzed HOUSE_OVERSIGHT_010732: 7 triples extracted
+Progress: 12/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010735...
+  ✓ Analyzed HOUSE_OVERSIGHT_010735: 17 triples extracted
+Progress: 13/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010754...
+  ⚠️  Skipping triple with missing target: {'timestamp': '1995-11-04', 'actor': 'Yitzhak Rabin', 'action': 'was assassinated', 'target': None, 'tags': ['assassination', 'legacy', 'peace process'], 'explicit_topic': "Rabin's assassination", 'implicit_topic': 'endangering Israeli peace efforts'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010754: 5 triples extracted
+Progress: 14/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010757_part1...
+  ✓ Analyzed HOUSE_OVERSIGHT_010757_part1: 15 triples extracted
+Progress: 15/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010757_part2...
+  ⚠️  Skipping triple with missing target: {'timestamp': '2009-08-07', 'actor': 'Juan Alessi', 'action': "gave sworn testimony about Jeffrey Epstein's house and presence of Alan Dershowitz", 'target': None, 'explicit_topic': 'house staff testimony', 'implicit_topic': 'context of allegations'}
+  ⚠️  Skipping triple with missing target: {'timestamp': '2000-01', 'actor': 'Alan M. Dershowitz', 'action': "claimed presence in New York during relevant January 2000 timeframe, not at Jeffrey Epstein's ranch in New Mexico", 'target': None, 'explicit_topic': 'travel records', 'implicit_topic': 'timeline alibi'}
+  ⚠️  Skipping triple with missing target: {'timestamp': '2000-12', 'actor': 'Alan M. Dershowitz', 'action': "exhibited personal and his wife's calendar entries consistent with Court TV appearances and travel in New York, Boston, Cambridge", 'target': None, 'explicit_topic': 'calendar evidence', 'implicit_topic': 'establishing whereabouts'}
+  ⚠️  Skipping triple with missing target: {'timestamp': '2000-12-11', 'actor': 'Jeffrey Epstein', 'action': 'traveled from Palm Beach International Airport to Teterboro Airport with passengers including Ghislaine Maxwell and Virginia Roberts', 'target': None, 'explicit_topic': 'flight movement', 'implicit_topic': 'Epstein flight logs'}
+  ⚠️  Skipping triple with missing target: {'actor': 'Alan M. Dershowitz', 'action': 'disputed assertions that he took a New York apartment for Court TV appearances', 'target': None, 'explicit_topic': 'personal accommodations', 'implicit_topic': 'media appearances'}
+  ⚠️  Skipping triple with missing target: {'actor': 'Alan M. Dershowitz', 'action': 'described massages noted in calendars and denied any involvement with underage masseuses', 'target': None, 'explicit_topic': 'calendar massage entries', 'implicit_topic': 'defense against inappropriate claims'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010757_part2: 8 triples extracted
+Progress: 16/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010757_part3...
+  ⚠️  Skipping triple with missing target: {'timestamp': '2014-12-30', 'actor': 'Paul G. Cassell', 'action': 'met with Virginia Roberts', 'tags': ['meeting', 'victim consultation'], 'explicit_topic': 'meeting with victim related to sex trafficking case', 'implicit_topic': 'case preparation'}
+  ⚠️  Skipping triple with missing target: {'timestamp': '2014-09', 'actor': 'Paul G. Cassell', 'action': 'had telephone call with Virginia Roberts', 'tags': ['communication', 'case preparation'], 'explicit_topic': 'phone communication with victim', 'implicit_topic': 'legal consultation'}
+  ⚠️  Skipping triple with missing target: {'timestamp': 'circa 2005-2009', 'actor': 'Virginia Roberts', 'action': 'filed complaints and lawsuits alleging sexual abuse', 'tags': ['legal action', 'sexual abuse allegations'], 'explicit_topic': 'complaints about sexual abuse by Jeffrey Epstein and associates', 'implicit_topic': 'civil litigation against trafficking ring'}
+  ⚠️  Skipping triple with missing target: {'actor': 'Ghislaine Maxwell', 'action': 'evaded deposition', 'tags': ['legal avoidance', 'key figure in trafficking ring'], 'explicit_topic': 'refusal to attend deposition regarding sex trafficking', 'implicit_topic': 'concealment of criminal activities'}
+  ⚠️  Skipping triple with missing target: {'actor': 'Jean Luc Brunel', 'action': 'evaded deposition', 'tags': ['legal avoidance', 'sex trafficking involvement'], 'explicit_topic': 'refusal to answer investigation questions', 'implicit_topic': 'concealment of trafficking activities'}
+  ⚠️  Skipping triple with missing target: {'actor': 'Paul G. Cassell', 'action': 'reviewed and relied on flight logs and police reports', 'tags': ['evidence review', 'investigation'], 'explicit_topic': 'investigation of sex trafficking ring activities', 'implicit_topic': 'supporting allegations in litigation'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010757_part3: 7 triples extracted
+Progress: 17/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010757_part4...
+  ✓ Analyzed HOUSE_OVERSIGHT_010757_part4: 11 triples extracted
+Progress: 18/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010757_part5...
+  ✓ Analyzed HOUSE_OVERSIGHT_010757_part5: 15 triples extracted
+Progress: 19/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010757_part6...
+  ⚠️  Skipping triple with missing target: {'timestamp': '2015-10-20', 'actor': 'Paul G. Cassell', 'action': 'signed deposition errata sheet affirming transcript accuracy', 'tags': ['deposition affirmation', 'official certification'], 'explicit_topic': 'accuracy and corrections to deposition transcript', 'implicit_topic': 'formal testimony record keeping'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010757_part6: 7 triples extracted
+Progress: 20/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010887...
+  ✓ Analyzed HOUSE_OVERSIGHT_010887: 13 triples extracted
+Progress: 21/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010912_part1...
+  ⚠️  Skipping triple with missing target: {'timestamp': '1976', 'actor': 'J. Paul Getty', 'action': 'died', 'tags': ['death', 'family patriarch'], 'explicit_topic': 'death of J. Paul Getty', 'implicit_topic': 'transition of family trust'}
+  ✓ Analyzed HOUSE_OVERSIGHT_010912_part1: 14 triples extracted
+Progress: 22/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010912_part2...
+  ✓ Analyzed HOUSE_OVERSIGHT_010912_part2: 0 triples extracted
+Progress: 23/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010912_part3...
+  ✓ Analyzed HOUSE_OVERSIGHT_010912_part3: 0 triples extracted
+Progress: 24/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010912_part4...
+  ✓ Analyzed HOUSE_OVERSIGHT_010912_part4: 21 triples extracted
+Progress: 25/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_010912_part5...
+  ✓ Analyzed HOUSE_OVERSIGHT_010912_part5: 0 triples extracted
+Progress: 26/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_011170_part1...
+  ✓ Analyzed HOUSE_OVERSIGHT_011170_part1: 0 triples extracted
+Progress: 27/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_011170_part2...
+  ✓ Analyzed HOUSE_OVERSIGHT_011170_part2: 0 triples extracted
+Progress: 28/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_011170_part3...
+  ✓ Analyzed HOUSE_OVERSIGHT_011170_part3: 0 triples extracted
+Progress: 29/30 documents analyzed
+
+Analyzing HOUSE_OVERSIGHT_011277...
+  ✓ Analyzed HOUSE_OVERSIGHT_011277: 4 triples extracted
+Progress: 30/30 documents analyzed
+
+
+=== Analysis Complete ===
+Total documents: 30
+Total triples extracted: 256
+Total cost: $0.0994
