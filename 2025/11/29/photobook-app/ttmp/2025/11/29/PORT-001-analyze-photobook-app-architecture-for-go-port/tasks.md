@@ -12,12 +12,12 @@
 - [ ] Phase 1: Implement configuration system (env vars, typed config struct, validation)
 - [ ] Phase 1: Set up SQLite database connection and Goose migrations
 - [ ] Phase 1: Create database migrations (users, photos, pdf_jobs tables)
-- [ ] Phase 1: Implement storage interface and disk storage implementation
-- [ ] Phase 1: Set up structured logging with zerolog
-- [ ] Phase 2: Implement email/password authentication (registration, login, password hashing)
-- [ ] Phase 2: Implement JWT session management (same format as current: app_session_id cookie)
-- [ ] Phase 2: Create auth adapter interface (stub for future OAuth providers)
-- [ ] Phase 2: Implement tRPC auth procedures (auth.me, auth.logout)
+- [x] Phase 1: Implement storage interface and disk storage implementation
+- [x] Phase 1: Set up structured logging with zerolog
+- [x] Phase 2: Implement email/password authentication (registration, login, password hashing)
+- [x] Phase 2: Implement JWT session management (same format as current: app_session_id cookie)
+- [x] Phase 2: Create auth adapter interface (stub for future OAuth providers)
+- [x] Phase 2: Implement tRPC auth procedures (auth.me, auth.logout)
 - [ ] Phase 3: Create photo repository (SQLite implementation with CRUD operations)
 - [ ] Phase 3: Implement photo service (business logic for upload, list, reorder, delete)
 - [ ] Phase 3: Implement tRPC photo procedures (photo.list, photo.upload, photo.updatePositions, photo.delete, photo.deleteAll)

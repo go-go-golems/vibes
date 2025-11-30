@@ -9,6 +9,20 @@ DocType: index
 Intent: long-term
 Owners: []
 RelatedFiles:
+    - Path: ../../../../../../../../../../photobook-backend-go/cmd/photobook-cli/cmds/config/config.go
+      Note: CLI command to validate configuration
+    - Path: ../../../../../../../../../../photobook-backend-go/cmd/photobook-cli/cmds/db/db.go
+      Note: CLI command to check database status
+    - Path: ../../../../../../../../../../photobook-backend-go/cmd/photobook-cli/cmds/storage/storage.go
+      Note: CLI commands for storage operations
+    - Path: ../../../../../../../../../../photobook-backend-go/internal/config/config.go
+      Note: Configuration system with environment variable loading and validation
+    - Path: ../../../../../../../../../../photobook-backend-go/internal/db/db.go
+      Note: Database connection and migration management
+    - Path: ../../../../../../../../../../photobook-backend-go/internal/storage/disk.go
+      Note: Disk storage implementation
+    - Path: ../../../../../../../../../../photobook-backend-go/internal/storage/storage.go
+      Note: Storage interface definition
     - Path: 2025/11/29/photobook-app/client/src/pages/Home.tsx
       Note: Frontend implementation with tRPC integration
     - Path: 2025/11/29/photobook-app/server/_core/cookies.ts
@@ -39,10 +53,14 @@ RelatedFiles:
       Note: Combined debate round exploring job queue abstraction
     - Path: 2025/11/29/photobook-app/ttmp/2025/11/29/PORT-001-analyze-photobook-app-architecture-for-go-port/reference/debate-round-8-10-mechanics.md
       Note: Debate round covering PDF generation library choice
+    - Path: 2025/11/29/photobook-backend-go
+      Note: Go backend project root - moved next to photobook-app for git check-in
 ExternalSources: []
 Summary: Comprehensive documentation of Node/tRPC + MySQL/storage architecture, frontend-backend integration, PDF worker implementation, and identified gaps for Go port
 LastUpdated: 2025-11-29T20:20:00-05:00
 ---
+
+
 
 
 
