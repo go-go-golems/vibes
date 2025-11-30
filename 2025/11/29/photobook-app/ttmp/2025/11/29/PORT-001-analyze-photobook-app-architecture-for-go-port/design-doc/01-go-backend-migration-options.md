@@ -34,152 +34,209 @@ LastUpdated: 2025-11-29T21:35:00-05:00
 
 ## Executive Summary
 
-We need a Go backend that mirrors current photobook behaviors (photo upload/list/reorder/delete; PDF jobs with async processing) while simplifying local dev (SQLite + filesystem) and keeping a path to cloud (MySQL/Postgres + S3). Two options:
+This document outlines two architectural approaches for migrating the photobook application backend from Node.js/TypeScript to Go. The goal is to create a Go service that maintains feature parity with the current implementation (photo management, PDF generation, authentication) while simplifying local development and providing a clear path to cloud deployment.
 
-1) **Minimal Go monolith** — REST/JSON API, SQLite, disk storage, in-process polling worker with DB-based locking. Fastest to ship; good for local/offline; easy to swap DB/storage later.
-2) **Go monolith with job runner abstraction** — Same API, but formal job queue (claim/complete), optional separate worker process, ready for multi-instance and cloud storage/DB.
+**Core Requirements**: The Go backend must support photo upload/list/reorder/delete operations, asynchronous PDF job processing, user authentication, and storage management. It should work seamlessly with the existing React frontend that currently uses tRPC for API communication.
 
-Auth: default to email/password sessions (JWT cookie); keep optional OAuth provider hooks (Google/GitHub/etc.) instead of hard Manus dependency.
+**Two Migration Options**:
+
+1) **Minimal Go monolith** — This approach prioritizes simplicity and speed of implementation. It uses a REST/JSON API (compatible with tRPC protocol), SQLite for local development, filesystem-based storage, and an in-process polling worker with database-based job locking. This is the fastest path to a working Go backend, ideal for local/offline use cases, and designed with pluggable interfaces so database and storage backends can be swapped later without major refactoring.
+
+2) **Go monolith with job runner abstraction** — This approach adds more structure for scalability. It maintains the same API surface but introduces formal job queue abstractions (claim/complete semantics), supports an optional separate worker process, and is designed from the start to handle multiple instances and cloud storage/database backends. This option requires more upfront design but provides a smoother transition path when scaling becomes necessary.
+
+**Authentication Strategy**: The default authentication mechanism will be email/password with JWT session cookies, removing the hard dependency on Manus OAuth. However, the design includes optional OAuth provider hooks (Google, GitHub, etc.) that can be added later without major architectural changes. This provides flexibility while keeping the initial implementation simple.
 
 ## Problem Statement
 
-- Current production bundle serves only static assets; API is missing.
-- Node/tRPC stack unused by the client; we want a Go service we can run locally with no external infra.
-- Background PDF worker risks double-processing; no locking/queue.
-- OAuth via Manus is not required; we need a simpler auth path that can later plug in common providers.
+The current Node.js/TypeScript backend has several critical issues that motivate the migration to Go:
+
+**Production Build Gap**: The production build process (`pnpm build`) bundles `server/index.ts`, which only serves static files and completely omits the API server. The actual API server exists in `server/_core/index.ts` but is not included in the production bundle, meaning deployed applications have no backend functionality. This is a critical blocker that must be resolved.
+
+**Infrastructure Complexity**: The current Node/tRPC stack requires external infrastructure dependencies (MySQL database, Forge storage proxy, Manus OAuth service) that complicate local development and deployment. We need a Go service that can run entirely locally with no external dependencies, using SQLite and filesystem storage by default, while maintaining the ability to swap in cloud services when needed.
+
+**Worker Concurrency Issues**: The current PDF worker implementation polls for pending jobs every 10 seconds but has no locking mechanism. Multiple worker instances can process the same job simultaneously, leading to duplicate work, wasted resources, and potential data corruption. The Go implementation must include proper job claiming/locking to prevent this.
+
+**Authentication Dependency**: The current implementation has a hard dependency on Manus OAuth, which adds complexity and vendor lock-in. We need a simpler authentication path that works out of the box (email/password) but can accommodate common OAuth providers (Google, GitHub, etc.) through pluggable adapters when needed.
 
 ## Proposed Solution
 
-Replace the backend with a Go HTTP API (REST/JSON) that matches current behavior. Use interfaces for storage and DB to allow SQLite+disk by default and S3/MySQL later. Implement a PDF worker with explicit job claiming to avoid duplicates. Provide a lightweight auth module (email/password) with optional OAuth adapters.
+Replace the entire Node.js backend with a Go HTTP API that maintains behavioral parity with the current implementation. The solution uses a layered architecture with pluggable interfaces for storage and database access, allowing SQLite and filesystem storage by default while maintaining a clear upgrade path to MySQL/Postgres and S3-compatible storage.
+
+**API Compatibility**: The Go service will implement a tRPC-compatible API surface, accepting the same JSON payloads and procedure names that the React frontend currently expects. This minimizes frontend changes—the existing tRPC client can point to the Go endpoint with minimal or no modifications.
+
+**Storage Abstraction**: A `Storage` interface abstracts blob storage operations (`Put`, `Open`, `Delete`), with a disk-based implementation for local development and an S3-compatible implementation for production. Both implementations maintain the same key format (`user-<id>/photos/...`, `user-<id>/pdfs/...`) to ensure consistency.
+
+**Database Abstraction**: Similarly, database access is abstracted through repository interfaces, allowing SQLite for local development and MySQL/Postgres for production. The schema maintains parity with the current MySQL schema to ease data migration.
+
+**Worker Improvements**: The PDF worker implements explicit job claiming using database row-level state transitions. Jobs transition from `pending` → `processing` → `completed`/`failed`, with the `processing` state acting as a lock to prevent duplicate processing. This eliminates the race condition present in the current implementation.
+
+**Authentication Simplification**: A lightweight authentication module provides email/password authentication with JWT session cookies by default. The design includes extension points for OAuth providers, allowing Google, GitHub, or other providers to be added without architectural changes.
 
 ## Design Decisions
 
-- Use REST/JSON instead of tRPC to simplify the Go implementation and make it easy for the React client to call.
-- Keep schema parity with existing tables (`users`, `photos`, `pdfJobs` → `pdf_jobs`) to ease data migration.
-- Provide pluggable storage (`disk`, later `s3`) and database (`sqlite`, later `mysql/postgres`).
-- PDF worker uses DB row state transitions for locking; option to separate worker from API.
-- Default auth is email/password + JWT cookie; OAuth providers added via adapters.
+**API Protocol**: We'll implement a tRPC-compatible JSON-over-HTTP protocol rather than pure REST. This decision preserves compatibility with the existing React frontend, which uses tRPC hooks extensively. The frontend can continue using the same procedure names (`photo.upload`, `pdf.createJob`, etc.) and payload shapes, minimizing migration effort. Internally, the Go service uses clean service interfaces that could expose REST endpoints later if desired, but the primary interface remains tRPC-compatible for frontend compatibility.
+
+**Schema Parity**: The database schema maintains close parity with the existing MySQL tables (`users`, `photos`, `pdfJobs` → `pdf_jobs` in SQLite). Column names are normalized (camelCase → snake_case for SQLite conventions), but the data model remains identical. This ensures that data migration scripts can be straightforward and that the application logic remains consistent across both implementations.
+
+**Pluggable Backends**: Both storage and database are abstracted behind interfaces, allowing implementations to be swapped via configuration. The default implementation uses SQLite and filesystem storage for local development (zero external dependencies), while production can use MySQL/Postgres and S3-compatible storage. The interfaces are designed to be minimal but complete, ensuring that swapping implementations doesn't require changes to business logic.
+
+**Worker Locking Strategy**: The PDF worker uses database row state transitions (`pending` → `processing` → `completed`/`failed`) as a locking mechanism. When claiming jobs, the worker atomically updates the status from `pending` to `processing`, preventing other workers from claiming the same job. This approach works with any SQL database and doesn't require external coordination services like Redis. The worker can run as a goroutine within the API process (Option 1) or as a separate binary (Option 2), with the same locking mechanism working in both cases.
+
+**Authentication Default**: Email/password authentication with JWT session cookies is the default, removing the Manus dependency. The JWT format matches the current implementation (HS256, same cookie name `app_session_id`) to maintain session compatibility. OAuth providers are added via adapter pattern—the core auth service doesn't know about OAuth, but adapters can be registered to handle OAuth flows and map provider identities to users.
 
 ## Alternatives Considered
 
-- Keep Node/tRPC and add Go only for PDF: rejected (still leaves API gap and duplicate stacks).
-- gRPC instead of REST: heavier for the current frontend; not necessary for scope.
-- Full queue/broker (e.g., Redis): overkill for local/offline; can add later if needed.
+**Hybrid Approach (Node API + Go Worker)**: We considered keeping the Node.js/tRPC API server and only migrating the PDF worker to Go. This was rejected because it doesn't solve the production build issue (the API server still wouldn't be bundled), creates maintenance burden with two language stacks, and doesn't address the infrastructure complexity problem. A full migration to Go provides a cleaner architecture and better long-term maintainability.
+
+**gRPC Protocol**: Using gRPC instead of REST/JSON was considered for better type safety and performance. However, this would require significant frontend changes (gRPC-web setup, code generation, different client libraries) and adds complexity that isn't justified for the current scope. The tRPC-compatible JSON-over-HTTP approach provides a good balance of type safety (through shared TypeScript types) and simplicity.
+
+**External Queue/Broker (Redis/RabbitMQ)**: A full message queue system like Redis or RabbitMQ would provide robust job distribution and retry mechanisms. However, this adds external infrastructure dependencies that complicate local development and deployment. The database-based job claiming approach works well for the current scale and can be upgraded to a proper queue system later if needed. For multi-instance deployments, PostgreSQL's `SKIP LOCKED` feature provides efficient job claiming without external dependencies.
 
 ## Implementation Plan
 
-1) Freeze REST contracts and add a small TS client for React.
-2) Implement Go service (handlers, SQLite migrations, disk storage, JWT auth).
-3) Build PDF worker with job claiming and status updates.
-4) Wire React to REST endpoints (upload/reorder/delete/photos; create/poll PDF jobs; auth).
-5) Add pluggable backends (MySQL/S3) and optional OAuth providers.
+**Phase 1: API Contract Definition** — Freeze the tRPC procedure contracts (input/output types, procedure names) and create a small TypeScript client module for the React frontend. This ensures that both frontend and backend teams have a clear contract to work against. The client module can be a thin wrapper around fetch calls that matches the existing tRPC hook interface, allowing gradual migration.
+
+**Phase 2: Core Go Service** — Implement the foundational Go service including HTTP handlers, SQLite database migrations, disk-based storage implementation, and JWT-based authentication. This phase focuses on getting a working local development environment with all core features (photo CRUD, user auth, basic PDF job creation). The service should be runnable with a single binary and no external dependencies.
+
+**Phase 3: PDF Worker** — Build the PDF generation worker with proper job claiming logic, status updates, and error handling. This includes implementing the PDF generation algorithm (matching the current jsPDF+canvas approach: A4 portrait, 10mm margins, aspect-fit images), storage integration for uploading completed PDFs, and structured logging. The worker should handle failures gracefully and provide clear error messages.
+
+**Phase 4: Frontend Integration** — Wire the React frontend to the Go API endpoints, ensuring all existing functionality works (photo upload/list/reorder/delete, PDF job creation/polling, authentication). This may require updating the tRPC client configuration to point to the Go endpoint, but the procedure calls should remain largely unchanged. Add any missing UI elements (login form, job status display) as needed.
+
+**Phase 5: Production Readiness** — Add pluggable backends for MySQL/Postgres and S3-compatible storage, allowing the service to run in production environments. Implement optional OAuth providers (starting with Google/GitHub) as adapters to the core auth system. Add monitoring, logging, and deployment configurations.
 
 ## Open Questions
 
-- Do we need signed URLs for disk storage? (recommended for multi-user setups)
-- Retention/cleanup policy for photos/PDFs?
-- Which OAuth providers to prioritize, if any?
+**Signed URLs for Disk Storage**: When serving files from disk storage via `/media/*` endpoints, do we need signed URLs with expiration times? For single-user local development, direct file serving with authentication middleware is sufficient. However, for multi-user setups or production deployments, signed URLs provide better security (time-limited access, no need to expose authentication cookies) and can prevent URL sharing. Recommendation: implement signed URLs from the start to avoid refactoring later, but make them optional via configuration.
+
+**Data Retention and Cleanup**: What is the retention policy for photos and generated PDFs? Should photos be automatically deleted after a certain period? Should failed PDF jobs be cleaned up? Should completed PDFs be archived or deleted? These decisions affect storage costs and user experience. Recommendation: start with no automatic cleanup (manual deletion only) but add a cleanup job/endpoint that can be run periodically. Document the policy clearly for users.
+
+**OAuth Provider Priority**: If we implement OAuth providers, which ones should be prioritized? Common choices include Google (widest adoption), GitHub (developer-friendly), and Microsoft (enterprise). The current implementation uses Manus OAuth, but we're removing that dependency. Recommendation: start with email/password only, then add Google OAuth as the first provider (most universal). GitHub can follow if there's developer demand. The adapter pattern allows adding providers incrementally without architectural changes.
 
 ## References
 
-- Current architecture reference: `reference/01-current-architecture-and-data-flow.md`
-- Ticket: `index.md`
+**Current Architecture Documentation**: The comprehensive reference document `reference/01-current-architecture-and-data-flow.md` contains detailed information about the current Node.js implementation, including API contracts, data flows, authentication mechanisms, PDF generation algorithms, and identified gaps. This document serves as the source of truth for ensuring behavioral parity during migration.
+
+**Ticket Overview**: The main ticket index (`index.md`) provides an overview of the migration effort, links to all related documentation, and tracks the overall progress. It's the entry point for understanding the scope and status of the Go port project.
 
 ---
 
 ## Detailed Design
 
+This section provides the technical specifications for implementing the Go backend. The design applies to both migration options (minimal monolith and job runner abstraction), with differences noted where applicable. The API surface, data model, storage interface, and authentication model are common to both approaches.
+
 ### Common API surface (applies to both options)
 
-- Auth
-  - `POST /api/auth/login` (email/password) → set JWT cookie `app_session_id`
-  - `POST /api/auth/logout`
-  - `GET /api/auth/me`
-- Photos
-  - `POST /api/photos` (multipart or JSON+base64) → create photo, store blob via storage interface
-  - `GET /api/photos` → ordered list
-  - `PATCH /api/photos/positions` → reorder
-  - `DELETE /api/photos/:id`
-  - `DELETE /api/photos` (delete all)
-- PDF jobs
-  - `POST /api/pdf-jobs` `{photoIds: number[]}` → `{jobId}`
-  - `GET /api/pdf-jobs` → list jobs
-  - `GET /api/pdf-jobs/:id` → job detail (status/resultUrl/logs)
-- Health
-  - `GET /api/health`
+The API surface maintains compatibility with the current tRPC implementation, accepting the same procedure names and payload shapes. The React frontend can continue using tRPC hooks with minimal changes—only the endpoint URL needs to be updated.
+
+**Authentication Endpoints**: These endpoints handle user authentication and session management. The login endpoint accepts email/password credentials, validates them, and sets a JWT session cookie (`app_session_id`) matching the current implementation. The logout endpoint clears the session cookie, and the `me` endpoint returns the current authenticated user's information.
+
+**Photo Management Endpoints**: These endpoints handle the core photobook functionality. Photo upload accepts either multipart form data or JSON with base64-encoded image data (matching current implementation), stores the blob via the storage interface, and creates a database record. The list endpoint returns photos ordered by the `position` field. The positions endpoint allows batch reordering of photos. Delete endpoints support both individual photo deletion and bulk deletion of all user photos.
+
+**PDF Job Endpoints**: These endpoints manage asynchronous PDF generation. Creating a job accepts an array of photo IDs and returns a job ID. The job is inserted with `status=pending` and will be picked up by the worker. The list endpoint returns all jobs for the authenticated user, and the detail endpoint provides full job information including status, result URL (when completed), error messages (when failed), and structured logs.
+
+**Health Check**: A simple health endpoint for monitoring and load balancer checks. Returns a simple JSON response indicating service availability.
 
 ### Data model (parity with current schema)
 
-- `users(id, open_id, name, email, login_method, role[user|admin], created_at, updated_at, last_signed_in)`
-- `photos(id, user_id, file_key, url, filename, mime_type, size, position, created_at, updated_at)`
-- `pdf_jobs(id, user_id, status[pending|processing|completed|failed], photo_ids(json), result_url, error_message, logs, created_at, updated_at, completed_at)`
-- (Optional) `user_identities` for OAuth providers (provider, provider_user_id, user_id, metadata)
+The database schema maintains close parity with the current MySQL schema to ensure data migration is straightforward and application logic remains consistent. Column names are normalized to snake_case for SQLite conventions, but the data model is identical.
+
+**Users Table**: Stores user account information. The `open_id` field serves dual purpose: for email/password authentication, it stores a generated unique identifier; for OAuth providers, it stores the provider's user ID. The `role` field uses a CHECK constraint to ensure only valid values (`user` or `admin`). Timestamps track account creation, last update, and last sign-in for session management.
+
+**Photos Table**: Stores photo metadata and references to storage blobs. The `file_key` field contains the storage path (e.g., `user-42/photos/abc123-image.jpg`), while `url` contains the full URL for accessing the photo (either a direct file path for disk storage or a signed URL for S3). The `position` field enables user-defined ordering of photos. Note that deleting a photo row doesn't automatically delete the storage blob—this must be handled explicitly via the storage interface.
+
+**PDF Jobs Table**: Tracks PDF generation jobs with their current status and results. The `photo_ids` field stores a JSON array of photo IDs (as text in SQLite, matching the current MySQL implementation). The `status` field transitions through `pending` → `processing` → `completed`/`failed`, with the `processing` state acting as a lock. The `logs` field stores structured JSON log entries for debugging and progress tracking. The `completed_at` timestamp is set when a job finishes (either successfully or with failure).
+
+**User Identities Table (Optional)**: This table is only needed if implementing OAuth providers. It stores the mapping between OAuth provider identities and local user accounts, allowing users to link multiple OAuth accounts to a single local account. The `metadata` field can store provider-specific information (profile picture URL, etc.).
 
 ### Storage interface
 
-- `Put(ctx, relKey string, data []byte, contentType string) (url string, err error)`
-- `Open(ctx, relKey string) (io.ReadCloser, error)`
-- `Delete(ctx, relKey string) error` (recommended to enable cleanup)
+The storage interface abstracts blob storage operations, allowing implementations to be swapped without changing business logic. The interface is designed to be minimal but complete, covering the essential operations needed for photo and PDF storage.
 
-Implementations:
-- **Disk (default)**: writes under `./data/storage`; serve via `/media/<relKey>` with auth or signed URLs.
-- **S3/MinIO (later)**: use AWS SDK; keep key format `user-<id>/photos/...`, `user-<id>/pdfs/...`.
+**Core Operations**: The `Put` method stores a blob at a given relative key (e.g., `user-42/photos/abc123-image.jpg`) and returns a URL for accessing it. The `Open` method retrieves a blob for reading (used by the PDF worker to load photos). The `Delete` method removes a blob, which is essential for cleanup operations (deleting photos should also delete their storage blobs, failed jobs may need cleanup, etc.).
+
+**Disk Implementation (Default)**: The disk-based implementation writes files under `./data/storage/<relKey>`, maintaining the directory structure implied by the key. Files are served via HTTP endpoints at `/media/<relKey>` with authentication middleware ensuring only the owner can access their files. Alternatively, signed URLs can be generated using HMAC signatures with expiration times for better security in multi-user scenarios.
+
+**S3-Compatible Implementation (Production)**: The S3 implementation uses the AWS SDK (or MinIO SDK for S3-compatible storage) to store blobs in cloud storage. It maintains the same key format (`user-<id>/photos/...`, `user-<id>/pdfs/...`) to ensure consistency. The implementation generates pre-signed URLs for accessing files, with configurable expiration times. This implementation can be swapped in via configuration without code changes to the rest of the application.
 
 ### Auth model
 
-- Default: email/password (bcrypt hash). Sessions are JWT cookies (`app_session_id`, HS256, secret env).
-- Optional OAuth: adapters for Google/GitHub/etc.; store mapping in `user_identities`.
-- Admin: environment variable `OWNER_OPEN_ID` maps to admin role; also allow an `admins` table if needed later.
+The authentication model provides a simple default (email/password) while maintaining extensibility for OAuth providers. The session mechanism matches the current implementation to ensure compatibility.
+
+**Email/Password Authentication**: The default authentication method uses email addresses as usernames and bcrypt-hashed passwords for secure storage. When a user logs in, the system validates credentials, generates a JWT session token, and sets it as an HTTP-only cookie named `app_session_id` (matching the current implementation). The JWT uses HS256 algorithm with a secret from environment variables, and includes user ID, open ID, role, name, and expiration time in the claims.
+
+**OAuth Provider Adapters**: OAuth providers (Google, GitHub, etc.) are added via adapter pattern. The core authentication service doesn't know about OAuth—instead, adapters handle OAuth flows (authorization redirect, token exchange, user info fetching) and map provider identities to local user accounts. Provider mappings are stored in the optional `user_identities` table, allowing users to link multiple OAuth accounts to a single local account.
+
+**Admin Role Assignment**: Admin users are identified via the `OWNER_OPEN_ID` environment variable, matching the current implementation. When a user's `open_id` matches this value, their role is automatically set to `admin`. For more complex admin management in the future, an `admins` table can be added, but the environment variable approach is sufficient for initial implementation.
 
 ### Worker model
 
-- Claim jobs with status `pending` → set to `processing` with `updated_at` for lease semantics.
-- Retry/backoff: optional; at minimum, avoid duplicate claims via UPDATE WHERE status='pending'.
-- Logging: store JSON log lines in `logs`; cap size to avoid oversized rows.
-- PDF generation: gofpdf/unidoc; aspect-fit to A4 with margins; one photo per page.
-- Output: upload PDF via storage interface; set `result_url`, `completed_at`, `status=completed`; on error set `status=failed` + `error_message`.
+The PDF worker implements asynchronous job processing with proper concurrency control to prevent duplicate processing. The design matches the current worker's behavior while fixing the locking issues.
+
+**Job Claiming**: Jobs are claimed atomically by updating their status from `pending` to `processing` in a single database operation (`UPDATE ... WHERE status='pending' LIMIT N`). This prevents multiple workers from claiming the same job. The `updated_at` timestamp can be used for lease semantics—if a job remains in `processing` state for too long (e.g., worker crashed), it can be reset to `pending` for retry. For PostgreSQL/MySQL, `SKIP LOCKED` can be used for more efficient claiming in multi-instance deployments.
+
+**Retry and Backoff**: Retry logic is optional for the initial implementation. The minimum requirement is avoiding duplicate claims through the atomic status update. If a job fails, it transitions to `failed` state with an error message. Future enhancements could add automatic retry with exponential backoff, but manual retry (user creates a new job) is acceptable for initial implementation.
+
+**Structured Logging**: The worker stores structured log entries (JSON array) in the `logs` field of the job record. Each log entry includes timestamp, level (info/warn/error), and message. Log size should be capped (e.g., 64KB) to prevent oversized database rows. Logs are useful for debugging failed jobs and tracking progress during PDF generation.
+
+**PDF Generation Algorithm**: The PDF generation matches the current implementation: A4 portrait format, 10mm margins on all sides, one photo per page. Images are aspect-fitted within the available space (190mm × 277mm), maintaining aspect ratio and centering. The Go implementation uses gofpdf or unidoc libraries for PDF generation, loading images via the storage interface and rendering them to PDF pages.
+
+**Job Completion**: When PDF generation succeeds, the worker uploads the PDF via the storage interface, sets `result_url` to the storage URL, sets `completed_at` timestamp, and transitions status to `completed`. On any error, the worker sets `status=failed`, stores the error message in `error_message`, and includes error details in the logs. The job record provides complete information for debugging and user feedback.
 
 ### Option 1 — Minimal Go monolith (SQLite + disk, polling worker)
 
-- Single binary (API + worker goroutine).
-- DB: SQLite file (e.g., `./data/app.db`); migrations via Goose or similar.
-- Storage: disk under `./data/storage`; static handler for `/media/...`.
-- Worker: ticker (e.g., 10s) with `UPDATE ... WHERE status='pending' LIMIT N` to claim; no external queue.
-- Pros: simplest; no extra services; good offline story.
-- Cons: single-process; polling; scaling requires changing worker + storage backends.
+This option prioritizes simplicity and speed of implementation, creating a single binary that handles both API requests and background job processing.
+
+**Architecture**: The service runs as a single Go binary that starts an HTTP server for API requests and a background goroutine for PDF job processing. Both share the same database connection and storage interface, simplifying deployment and development. The worker runs on a ticker (e.g., every 10 seconds) and processes jobs in the same process as the API server.
+
+**Database**: SQLite is used as the default database, stored as a single file (e.g., `./data/app.db`). Migrations are managed via a tool like Goose or similar, ensuring schema changes are versioned and repeatable. SQLite provides excellent performance for single-user or small-scale deployments and requires no external database server.
+
+**Storage**: Files are stored on the local filesystem under `./data/storage`, maintaining the directory structure from storage keys. A static file handler serves files via `/media/*` endpoints with authentication middleware. Alternatively, signed URLs can be generated for better security in multi-user scenarios.
+
+**Worker Implementation**: The worker uses a simple polling approach: every 10 seconds, it queries for pending jobs, claims them atomically via status update, and processes them sequentially. There's no external queue or message broker—everything is coordinated through the database. This approach is simple and works well for single-instance deployments.
+
+**Advantages**: This is the simplest approach with the fastest time to implementation. It requires no external services (no database server, no message queue, no cloud storage), making it ideal for local development and offline use cases. The pluggable interfaces allow upgrading to cloud backends later without major refactoring.
+
+**Limitations**: This approach is single-process and doesn't scale horizontally without changes. The polling approach has some overhead (checking for jobs every 10 seconds even when idle), though this is negligible for small deployments. Scaling to multiple instances requires moving to Option 2 or adding external coordination.
 
 ### Option 2 — Go monolith with job runner abstraction
 
-- API binary plus (optional) separate worker binary sharing DB/storage.
-- DB: start SQLite; also support MySQL/Postgres by swapping DSN.
-- Runner: interfaces `Enqueue`, `Claim`, `Complete/Fail`, optional `job_runs` for retries.
-- Storage: pluggable (`disk`, `s3`).
-- Pros: ready for multiple instances; clearer separation of concerns; smoother path to cloud.
-- Cons: a bit more code/complexity than Option 1.
+This option adds more structure for scalability, introducing formal job queue abstractions and supporting separate worker processes for better resource isolation and horizontal scaling.
+
+**Architecture**: The service can run as either a single binary (API + worker) or as separate binaries (API server and worker process) sharing the same database and storage backends. The job runner abstraction provides clean interfaces (`Enqueue`, `Claim`, `Complete`, `Fail`) that can be implemented with database-backed queues or external message brokers later.
+
+**Database Flexibility**: While SQLite is still supported for local development, this option is designed to work seamlessly with MySQL or Postgres by simply swapping the database DSN. The repository interfaces abstract database-specific features (like `SKIP LOCKED` in Postgres for efficient job claiming), allowing the same code to work across database backends.
+
+**Job Runner Abstraction**: The job runner provides formal interfaces for job management: `Enqueue` creates a new job, `Claim` atomically claims pending jobs (with optional limit), `Complete` marks a job as successfully finished, and `Fail` marks a job as failed with error details. An optional `job_runs` table can track retry attempts, enabling sophisticated retry logic with exponential backoff.
+
+**Storage Pluggability**: Storage remains pluggable (`disk` for local, `s3` for production), but this option is designed with cloud storage in mind from the start. The storage interface is the same as Option 1, but the architecture assumes that storage may be remote and accessed over the network.
+
+**Advantages**: This approach is ready for multiple instances from day one—multiple API servers can run behind a load balancer, and multiple worker processes can claim jobs without conflicts. The separation of concerns (API vs. worker) makes it easier to scale each component independently. The path to cloud deployment is smoother since the architecture already assumes distributed components.
+
+**Trade-offs**: This option requires more upfront design and code complexity than Option 1. The job runner abstraction adds an extra layer, and supporting separate worker processes requires more configuration. However, this complexity pays off when scaling becomes necessary, avoiding a major architectural refactor later.
 
 ---
 
 ## Detailed Design — Minimal Go monolith (SQLite + disk, tRPC-compatible surface)
 
-The React frontend now calls tRPC under `/api/trpc`. We’ll preserve the same shapes and endpoints but implement them in Go using plain JSON over POST (tRPC-style batched envelopes). Internally we keep clean service interfaces so we can also expose REST later if desired.
+This section provides the detailed technical design for Option 1 (Minimal Go monolith). This is the recommended starting point for the migration, as it provides the fastest path to a working Go backend while maintaining compatibility with the existing React frontend.
+
+**tRPC Compatibility**: The React frontend currently uses tRPC hooks to call backend procedures under `/api/trpc`. Rather than requiring frontend changes to use REST, we'll implement a tRPC-compatible API surface in Go. This means accepting the same JSON payloads and procedure names (`photo.upload`, `pdf.createJob`, etc.) that the frontend expects. The Go implementation uses plain JSON over POST requests, matching tRPC's batched envelope format. Internally, the Go service uses clean service interfaces that could expose REST endpoints later if desired, but the primary interface remains tRPC-compatible to minimize frontend migration effort.
 
 ### Go project layout (proposed)
 
-```
-cmd/api/main.go            // wire HTTP server, routes, middleware
-internal/config/config.go  // env loading
-internal/http/trpc.go      // tRPC-style router/handler multiplexer
-internal/http/middleware.go// auth/session, logging, recovery
-internal/auth/auth.go      // email/password, session JWT
-internal/photos/service.go // use cases for photos
-internal/photos/store.go   // DB + storage integration
-internal/pdfjobs/service.go// job creation/query
-internal/pdfjobs/worker.go // ticker worker
-internal/storage/storage.go// interface + disk impl
-internal/db/db.go          // SQLite connection + migrations
-internal/db/migrations/... // SQL migrations
-pkg/types/types.go         // shared models (User, Photo, PdfJob, error types)
-```
+The project follows standard Go project layout conventions with clear separation of concerns. The `cmd/` directory contains the main application entry point, `internal/` contains private implementation code (not importable by other projects), and `pkg/` contains public packages that could be reused.
+
+**Application Entry**: `cmd/api/main.go` wires together the HTTP server, routes, and middleware, following dependency injection patterns. This is the single point where all components are assembled and the server is started.
+
+**Configuration**: `internal/config/config.go` handles environment variable loading and validation, providing a typed configuration struct to the rest of the application. This centralizes all configuration logic and makes it easy to see what environment variables are required.
+
+**HTTP Layer**: `internal/http/trpc.go` implements the tRPC-compatible router and handler multiplexer, parsing incoming JSON requests and routing them to appropriate handlers. `internal/http/middleware.go` contains HTTP middleware for authentication, logging, error recovery, and request context management.
+
+**Business Logic**: `internal/auth/auth.go` implements authentication logic (email/password validation, JWT generation/verification, session management). `internal/photos/service.go` contains photo management business logic (upload, list, reorder, delete), while `internal/photos/store.go` handles database and storage integration. Similarly, `internal/pdfjobs/service.go` handles PDF job creation and querying, while `internal/pdfjobs/worker.go` implements the background worker that processes jobs.
+
+**Infrastructure**: `internal/storage/storage.go` defines the storage interface and provides the disk-based implementation. `internal/db/db.go` manages database connections and provides migration utilities. `internal/db/migrations/` contains SQL migration files (versioned, sequential) that define the schema.
+
+**Shared Types**: `pkg/types/types.go` contains shared data models (User, Photo, PdfJob, error types) that are used across the application. These types match the current TypeScript types to ensure API compatibility.
 
 ### Schema (SQLite migrations)
 
@@ -280,12 +337,15 @@ Similar methods for updatePositions, delete, deleteAll, pdf.createJob, pdf.listJ
 
 ### Control flow (API)
 
-1) Middleware parses cookie `app_session_id`, verifies JWT, loads user from DB (optional for public routes like health).
-2) tRPC dispatcher maps `photo.upload`, `photo.list`, etc., to handlers.
-3) Handlers call services:
-   - `photos.Service.Upload(ctx, user, input)` → storage.Put → repo.InsertPhoto → return URL/fileKey.
-   - `pdf.Service.CreateJob(ctx, user, photoIDs)` → repo.InsertJob(status=pending).
-4) Responses are encoded as JSON matching existing return shapes.
+The API request flow follows a standard middleware → router → handler → service → repository pattern, ensuring clean separation of concerns and testability.
+
+**Request Processing**: When a request arrives, authentication middleware first parses the `app_session_id` cookie, verifies the JWT signature and expiration, and loads the user record from the database. For public routes (like health checks), authentication is optional. The middleware attaches the authenticated user (or nil) to the request context for downstream handlers to access.
+
+**Routing**: The tRPC dispatcher parses the incoming JSON payload to determine which procedure is being called (`photo.upload`, `photo.list`, `pdf.createJob`, etc.) and routes the request to the appropriate handler function. The dispatcher handles both single procedure calls and batched calls (multiple procedures in one request).
+
+**Handler Execution**: Handlers receive the request context (with authenticated user), parse input parameters, and call service layer methods. For example, `photo.upload` handler calls `photos.Service.Upload(ctx, user, input)`, which orchestrates the business logic: validates input, calls `storage.Put()` to store the blob, calls `repo.InsertPhoto()` to create the database record, and returns the URL and file key. Similarly, `pdf.createJob` handler calls `pdf.Service.CreateJob(ctx, user, photoIDs)`, which validates the photo IDs belong to the user and calls `repo.InsertJob()` with `status=pending`.
+
+**Response Encoding**: Handlers return Go structs that match the expected JSON response shapes. The tRPC dispatcher encodes these structs as JSON and returns them to the client. The response format matches exactly what the current Node.js implementation returns, ensuring frontend compatibility.
 
 ### Control flow (worker)
 
@@ -409,7 +469,12 @@ type PdfJob struct {
 
 ### Risks and mitigations
 
-- **Duplicate job processing**: Use DB claiming; consider SKIP LOCKED when moving to Postgres/MySQL.
-- **Orphaned blobs**: Add `Delete` to storage interface; delete on photo delete and failed job cleanup.
-- **Large files**: Enforce max upload size; consider streaming uploads.
-- **HTTP over non-HTTPS**: Ensure `secure` cookie handling behind a proxy that sets `x-forwarded-proto`.
+This section identifies potential risks in the Go implementation and provides mitigation strategies based on lessons learned from the current Node.js implementation.
+
+**Duplicate Job Processing**: The current Node.js worker has no locking mechanism, allowing multiple instances to process the same job. **Mitigation**: The Go implementation uses database-based job claiming with atomic status updates (`UPDATE ... WHERE status='pending'`). When moving to Postgres/MySQL, use `SKIP LOCKED` for efficient concurrent job claiming without blocking. This ensures only one worker processes each job, even with multiple worker instances.
+
+**Orphaned Storage Blobs**: The current implementation doesn't delete storage blobs when photos are deleted or jobs fail, leading to storage bloat over time. **Mitigation**: Add `Delete` method to the storage interface and call it explicitly when deleting photos or cleaning up failed jobs. Implement a periodic cleanup job that identifies orphaned blobs (photos without database records, old failed PDFs) and removes them. Document storage lifecycle policies clearly.
+
+**Large File Uploads**: Base64-encoded image uploads can be large (50MB+), consuming significant memory and potentially causing timeouts. **Mitigation**: Enforce maximum upload size limits (e.g., 10MB per photo) at the HTTP middleware level. Consider implementing streaming uploads for very large files, though base64 encoding is acceptable for typical photo sizes. Monitor memory usage during upload processing and add timeouts to prevent resource exhaustion.
+
+**Cookie Security on HTTP**: The current implementation sets `secure` cookie flag based on request protocol, which may fail on plain HTTP deployments. **Mitigation**: Ensure proper handling of `x-forwarded-proto` header when running behind a reverse proxy (common in production). The cookie middleware should check both `req.Protocol` and `x-forwarded-proto` header to determine if the connection is secure. For local development, allow `secure=false` when explicitly configured, but default to secure in production environments.
