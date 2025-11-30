@@ -1,0 +1,155 @@
+Running Cayley Graph Queries...
+================================
+
+1. Graph Statistics
+
+📊 Graph Database Statistics
+================================================================================
+Total quads: 1776
+Unique subjects (actors): 344
+Unique predicates (actions): 220
+
+Top 10 predicates:
+  1. "tag": 522
+  2. "implicit_topic": 256
+  3. "doc_id": 256
+  4. "explicit_topic": 256
+  5. "timestamp": 151
+  6. "location": 79
+  7. "attended": 6
+  8. "proposed": 5
+  9. "filed": 5
+  10. "sent letter to": 4
+
+2. Jeffrey Epstein's Relationships (first 20)
+
+🔍 Relationships for: Jeffrey Epstein
+================================================================================
+1. Jeffrey Epstein → ["took virginity of"] → "unnamed female victim"
+
+2. Jeffrey Epstein → ["groomed"] → "unnamed female victim"
+
+3. Jeffrey Epstein → ["sexually abused"] → "unnamed female victim"
+
+4. Jeffrey Epstein → ["contacted"] → "unnamed female victim"
+
+5. Jeffrey Epstein → ["inflicted sexual abuse during massages using a purple massage device"] → "unnamed female victim"
+
+6. Jeffrey Epstein → ["signed plea agreement with"] → "U.S. Attorney's Office"
+
+7. Jeffrey Epstein → ["took virginity of"] → "unnamed female victim"
+
+8. Jeffrey Epstein → ["groomed"] → "unnamed female victim"
+
+9. Jeffrey Epstein → ["sexually abused"] → "unnamed female victim"
+
+10. Jeffrey Epstein → ["contacted"] → "unnamed female victim"
+
+11. Jeffrey Epstein → ["inflicted sexual abuse during massages using a purple massage device"] → "unnamed female victim"
+
+12. Jeffrey Epstein → ["photographed at"] → "Coney Island"
+
+13. Jeffrey Epstein → ["photographed at"] → "Lafayette High School, Brooklyn, New York"
+
+14. Jeffrey Epstein → ["paid for deep-tissue massages provided by"] → "Swedish massage therapist"
+
+15. Jeffrey Epstein → ["sexually assaulted"] → "multiple underage girls"
+
+16. Jeffrey Epstein → ["reported to jail to serve sentence"] → "Palm Beach County Jail"
+
+17. Jeffrey Epstein → ["required to register as"] → "level 3 sex offender"
+
+18. Jeffrey Epstein → ["attended launch event with"] → "Adrianna Ross"
+
+19. Jeffrey Epstein → ["attended reception with"] → "Ghislaine Maxwell"
+
+3. Alan Dershowitz's Relationships (first 15)
+
+🔍 Relationships for: Alan M. Dershowitz
+================================================================================
+1. Alan M. Dershowitz → ["sent letter to"] → "attorney Jack Scarola"
+
+2. Alan M. Dershowitz → ["made public denials on"] → "Virginia Giuffre's allegations"
+
+3. Alan M. Dershowitz → ["argued against"] → "Jane Doe #3's defamatory allegations"
+
+4. Alan M. Dershowitz → ["asserted he had contacted Jeffrey Epstein to coordinate allegations and timelines"] → "Jeffrey Epstein"
+
+5. Alan M. Dershowitz → ["asserted he never was on Jeffrey Epstein's plane with underage females during relevant timeframes"] → "Virginia Roberts"
+
+6. Alan M. Dershowitz → ["offered to make Jeffrey Epstein available for questioning"] → "Palm Beach Police Department"
+
+7. Alan M. Dershowitz → ["provided flight logs to Palm Beach Police Department"] → "Palm Beach Police Department"
+
+8. Alan M. Dershowitz → ["stated that he was never on a private airplane with"] → "Virginia Giuffre or any underage woman"
+
+9. Alan M. Dershowitz → ["stated awareness of Juan Alessi and Alfredo Rodriguez sworn testimony which exculpated him"] → "Juan Alessi"
+
+10. Alan M. Dershowitz → ["is named in"] → "Epstein's address book"
+
+11. Alan M. Dershowitz → ["filed"] → "Motion for Limited Intervention"
+
+12. Alan M. Dershowitz → ["spoke publicly about flight logs and travel records disproving allegations by Virginia Roberts"] → "public"
+
+13. Alan M. Dershowitz → ["made media appearances asserting flight logs exonerate him"] → "public"
+
+14. Alan M. Dershowitz → ["served as"] → "Jeffrey Epstein's defense attorney"
+
+4. Donald Trump's Network
+
+👥 Direct connections to: Donald J. Trump
+================================================================================
+
+📤 Outgoing relationships:
+  1. "TW VENTURE II LLC"
+  2. "numerous business entities"
+  3. "real estate, golf clubs, licensing deals, and management fees"
+  4. "TRUMP ORGANIZATION LLC"
+  5. "book deals including 'Crippled America' and other publications"
+  6. "President at Highlander Hall, Inc."
+  7. "President at multiple Trump companies and LLCs such as 40 Wall Street LLC, Trump International Golf Club, Trump Organization"
+  8. "various family trusts including The Fred C. Trump Trusts"
+  9. "TRUMP OCEAN MANAGING MEMBER LLC"
+  10. "DJT Holdings LLC"
+  11. "1290 Avenue of the Americas"
+  12. "golf resort revenue and related businesses notably Mar-a-Lago Club, Trump National Golf Clubs"
+  13. "TRUMP NATIONAL GOLF CLUB COLTS NECK MEMBER CORP"
+  14. "TRUMP PARK AVENUE ACQUISITION LLC"
+  15. "TRUMP MARKS PUERTO RICO II LLC"
+  16. "TRUMP NATIONAL GOLF CLUB - COLTS NECK"
+  17. "TRUMP VINEYARD ESTATES LLC"
+  18. "TRUMP WHITE PLAINS LLC"
+
+📥 Incoming relationships:
+
+5. Prince Andrew's Connections
+
+👥 Direct connections to: Prince Andrew
+================================================================================
+
+📤 Outgoing relationships:
+  1. "Jeffrey Epstein"
+
+📥 Incoming relationships:
+  1. "Jeffrey Epstein"
+  2. "Jeffrey Epstein"
+  3. "Jane Doe #3"
+  4. "Paul Cassell"
+  5. "Virginia Roberts Giuffre"
+
+6. Ghislaine Maxwell's Network
+
+👥 Direct connections to: Ghislaine Maxwell
+================================================================================
+
+📤 Outgoing relationships:
+  1. "Virginia Roberts Giuffre"
+  2. "Virginia Roberts Giuffre"
+
+📥 Incoming relationships:
+  1. "Jeffrey Epstein"
+  2. "Jeffrey Epstein"
+  3. "Jeffrey Epstein"
+  4. "Virginia Roberts Giuffre"
+
+All queries saved to queries_output.txt

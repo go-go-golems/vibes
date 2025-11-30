@@ -1,0 +1,17 @@
+{
+  "data": {
+    "@context": {
+      "@base": "http://example.com/",
+      "@vocab": "http://example.com/"
+    },
+    "@id": "alice",
+    "name": [0, 1]
+  },
+  "query": {
+    "@context": { "@vocab": "http://cayley.io/linkedql#" },
+    "@type": "LessThan",
+    "from": { "@type": "Match", "pattern": {} },
+    "value": 1
+  },
+  "results": [0]
+}

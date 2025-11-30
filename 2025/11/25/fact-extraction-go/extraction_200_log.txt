@@ -1,0 +1,201 @@
+================================================================================
+ENHANCED FACT EXTRACTION PIPELINE
+================================================================================
+✓ Database initialized at: fact_extraction_200.db
+Found 200 documents to analyze
+
+Analyzing HOUSE_OVERSIGHT_010477... (1/200)
+  ✓ Analyzed: 10 triples extracted
+  Cost: $0.0008 | Total: $0.0008
+
+Analyzing HOUSE_OVERSIGHT_010486_part1... (2/200)
+  ✓ Analyzed: 10 triples extracted
+  Cost: $0.0009 | Total: $0.0017
+
+Analyzing HOUSE_OVERSIGHT_010486_part2... (3/200)
+  ✓ Analyzed: 13 triples extracted
+  Cost: $0.0014 | Total: $0.0031
+
+Analyzing HOUSE_OVERSIGHT_010560... (4/200)
+  ✓ Analyzed: 14 triples extracted
+  Cost: $0.0014 | Total: $0.0045
+
+Analyzing HOUSE_OVERSIGHT_010566... (5/200)
+  ✓ Analyzed: 7 triples extracted
+  Cost: $0.0011 | Total: $0.0056
+
+Analyzing HOUSE_OVERSIGHT_010609... (6/200)
+  ✓ Analyzed: 5 triples extracted
+  Cost: $0.0009 | Total: $0.0065
+
+Analyzing HOUSE_OVERSIGHT_010617_part1... (7/200)
+  ✓ Analyzed: 4 triples extracted
+  Cost: $0.0009 | Total: $0.0073
+
+Analyzing HOUSE_OVERSIGHT_010617_part2... (8/200)
+  ✓ Analyzed: 10 triples extracted
+  Cost: $0.0013 | Total: $0.0086
+
+Analyzing HOUSE_OVERSIGHT_010617_part3... (9/200)
+  ✓ Analyzed: 37 triples extracted
+  Cost: $0.0033 | Total: $0.0119
+
+Analyzing HOUSE_OVERSIGHT_010715... (10/200)
+  ✓ Analyzed: 26 triples extracted
+  Cost: $0.0022 | Total: $0.0141
+
+📊 Progress: 10/200 documents | $0.0141
+
+Analyzing HOUSE_OVERSIGHT_010723... (11/200)
+  ✓ Analyzed: 9 triples extracted
+  Cost: $0.0011 | Total: $0.0152
+
+Analyzing HOUSE_OVERSIGHT_010732... (12/200)
+  ✓ Analyzed: 7 triples extracted
+  Cost: $0.0010 | Total: $0.0163
+
+Analyzing HOUSE_OVERSIGHT_010735... (13/200)
+  ✓ Analyzed: 7 triples extracted
+  Cost: $0.0010 | Total: $0.0173
+
+Analyzing HOUSE_OVERSIGHT_010754... (14/200)
+  ✓ Analyzed: 5 triples extracted
+  Cost: $0.0009 | Total: $0.0182
+
+Analyzing HOUSE_OVERSIGHT_010757_part1... (15/200)
+  ✓ Analyzed: 6 triples extracted
+  Cost: $0.0009 | Total: $0.0191
+
+Analyzing HOUSE_OVERSIGHT_010757_part2... (16/200)
+  ✓ Analyzed: 8 triples extracted
+  Cost: $0.0010 | Total: $0.0201
+
+Analyzing HOUSE_OVERSIGHT_010757_part3... (17/200)
+  ✓ Analyzed: 6 triples extracted
+  Cost: $0.0010 | Total: $0.0212
+
+Analyzing HOUSE_OVERSIGHT_010757_part4... (18/200)
+  ✓ Analyzed: 8 triples extracted
+  Cost: $0.0011 | Total: $0.0223
+
+Analyzing HOUSE_OVERSIGHT_010757_part5... (19/200)
+  ✓ Analyzed: 6 triples extracted
+  Cost: $0.0010 | Total: $0.0233
+
+Analyzing HOUSE_OVERSIGHT_010757_part6... (20/200)
+  ✓ Analyzed: 5 triples extracted
+  Cost: $0.0010 | Total: $0.0243
+
+📊 Progress: 20/200 documents | $0.0243
+
+Analyzing HOUSE_OVERSIGHT_010887... (21/200)
+  ✓ Analyzed: 7 triples extracted
+  Cost: $0.0011 | Total: $0.0254
+
+Analyzing HOUSE_OVERSIGHT_010912_part1... (22/200)
+  ✓ Analyzed: 7 triples extracted
+  Cost: $0.0010 | Total: $0.0264
+
+Analyzing HOUSE_OVERSIGHT_010912_part2... (23/200)
+  ✓ Analyzed: 0 triples extracted
+  Cost: $0.0005 | Total: $0.0268
+
+Analyzing HOUSE_OVERSIGHT_010912_part3... (24/200)
+  ✓ Analyzed: 2 triples extracted
+  Cost: $0.0006 | Total: $0.0274
+
+Analyzing HOUSE_OVERSIGHT_010912_part4... (25/200)
+  ✓ Analyzed: 11 triples extracted
+  Cost: $0.0011 | Total: $0.0286
+
+Analyzing HOUSE_OVERSIGHT_010912_part5... (26/200)
+  ✓ Analyzed: 12 triples extracted
+  Cost: $0.0012 | Total: $0.0298
+
+Analyzing HOUSE_OVERSIGHT_011170_part1... (27/200)
+  ✓ Analyzed: 12 triples extracted
+  Cost: $0.0015 | Total: $0.0313
+
+Analyzing HOUSE_OVERSIGHT_011170_part2... (28/200)
+  ✓ Analyzed: 8 triples extracted
+  Cost: $0.0013 | Total: $0.0325
+
+Analyzing HOUSE_OVERSIGHT_011170_part3... (29/200)
+  ✓ Analyzed: 10 triples extracted
+  Cost: $0.0013 | Total: $0.0339
+
+Analyzing HOUSE_OVERSIGHT_011277... (30/200)
+  ✓ Analyzed: 5 triples extracted
+  Cost: $0.0008 | Total: $0.0346
+
+📊 Progress: 30/200 documents | $0.0346
+
+Analyzing HOUSE_OVERSIGHT_011280... (31/200)
+  ✓ Analyzed: 5 triples extracted
+  Cost: $0.0008 | Total: $0.0355
+
+Analyzing HOUSE_OVERSIGHT_011284... (32/200)
+  ✓ Analyzed: 16 triples extracted
+  Cost: $0.0017 | Total: $0.0372
+
+Analyzing HOUSE_OVERSIGHT_011304_part1... (33/200)
+  ✓ Analyzed: 7 triples extracted
+  Cost: $0.0010 | Total: $0.0382
+
+Analyzing HOUSE_OVERSIGHT_011304_part2... (34/200)
+  ✓ Analyzed: 14 triples extracted
+  Cost: $0.0014 | Total: $0.0396
+
+Analyzing HOUSE_OVERSIGHT_011304_part3... (35/200)
+  ✓ Analyzed: 6 triples extracted
+  Cost: $0.0009 | Total: $0.0406
+
+Analyzing HOUSE_OVERSIGHT_011463... (36/200)
+  ✓ Analyzed: 13 triples extracted
+  Cost: $0.0014 | Total: $0.0420
+
+Analyzing HOUSE_OVERSIGHT_011472_part1... (37/200)
+  ✓ Analyzed: 9 triples extracted
+  Cost: $0.0011 | Total: $0.0431
+
+Analyzing HOUSE_OVERSIGHT_011472_part10... (38/200)
+  ✓ Analyzed: 10 triples extracted
+  Cost: $0.0012 | Total: $0.0443
+
+Analyzing HOUSE_OVERSIGHT_011472_part11... (39/200)
+  ✓ Analyzed: 13 triples extracted
+  Cost: $0.0013 | Total: $0.0456
+
+Analyzing HOUSE_OVERSIGHT_011472_part2... (40/200)
+  ✓ Analyzed: 9 triples extracted
+  Cost: $0.0011 | Total: $0.0467
+
+📊 Progress: 40/200 documents | $0.0467
+
+Analyzing HOUSE_OVERSIGHT_011472_part3... (41/200)
+  ✓ Analyzed: 8 triples extracted
+  Cost: $0.0010 | Total: $0.0477
+
+Analyzing HOUSE_OVERSIGHT_011472_part4... (42/200)
+  ✓ Analyzed: 10 triples extracted
+  Cost: $0.0012 | Total: $0.0489
+
+Analyzing HOUSE_OVERSIGHT_011472_part5... (43/200)
+  ✗ Error: Error binding parameter 5: type 'list' is not supported
+Traceback (most recent call last):
+  File "/home/ubuntu/fact-extraction-go/extract_facts_enhanced.py", line 325, in process_directory
+    self.save_result(result)
+  File "/home/ubuntu/fact-extraction-go/extract_facts_enhanced.py", line 268, in save_result
+    cursor.execute("""
+sqlite3.ProgrammingError: Error binding parameter 5: type 'list' is not supported
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/fact-extraction-go/extract_facts_enhanced.py", line 386, in <module>
+    main()
+  File "/home/ubuntu/fact-extraction-go/extract_facts_enhanced.py", line 365, in main
+    extractor.process_directory("data_200", limit=200)
+  File "/home/ubuntu/fact-extraction-go/extract_facts_enhanced.py", line 344, in process_directory
+    cursor.execute("""
+sqlite3.OperationalError: database is locked

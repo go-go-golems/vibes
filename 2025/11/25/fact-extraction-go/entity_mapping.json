@@ -1,0 +1,183 @@
+{
+  "entity_groups": [
+    {
+      "canonical": "Bradley J. Edwards",
+      "variants": [
+        "Bradley J. Edwards"
+      ]
+    },
+    {
+      "canonical": "Barry Krischer",
+      "variants": [
+        "State Attorney Barry Krischer"
+      ]
+    },
+    {
+      "canonical": "Paul G. Cassell",
+      "variants": [
+        "Paul Cassell",
+        "Paul G. Cassell",
+        "Legal team of Paul Cassell"
+      ]
+    },
+    {
+      "canonical": "Virginia Roberts",
+      "variants": [
+        "Virginia Roberts",
+        "Virginia Roberts and others",
+        "Virginia Roberts deposition"
+      ]
+    },
+    {
+      "canonical": "Virginia Giuffre",
+      "variants": [
+        "Virginia Giuffre's allegations"
+      ]
+    },
+    {
+      "canonical": "Jeffrey Epstein",
+      "variants": [
+        "Jeffrey Epstein",
+        "Jeffrey Epstein's residence"
+      ]
+    },
+    {
+      "canonical": "Palm Beach Police",
+      "variants": [
+        "Palm Beach Police",
+        "Palm Beach Police report"
+      ]
+    },
+    {
+      "canonical": "Bill Clinton",
+      "variants": [
+        "Bill Clinton",
+        "President Clinton"
+      ]
+    },
+    {
+      "canonical": "Alan Dershowitz",
+      "variants": [
+        "Defendant Alan Dershowitz",
+        "Professor Alan Dershowitz",
+        "Alan Dershowitz"
+      ]
+    },
+    {
+      "canonical": "Jeffrey Epstein",
+      "variants": [
+        "Jeffrey Epstein's Gulfstream leaving",
+        "Jeffrey Epstein federal prosecution case",
+        "Jeffrey Epstein's defense attorney",
+        "Defense team of Jeffrey Epstein"
+      ]
+    },
+    {
+      "canonical": "Alex Acosta",
+      "variants": [
+        "U.S. Attorney Alex Acosta",
+        "Alex Acosta"
+      ]
+    },
+    {
+      "canonical": "Ghislaine Maxwell",
+      "variants": [
+        "Ghislaine Maxwell",
+        "Ghislaine Maxwell and Tony Randall"
+      ]
+    },
+    {
+      "canonical": "Virginia Roberts Giuffre",
+      "variants": [
+        "Virginia Giuffre",
+        "Virginia Roberts Giuffre"
+      ]
+    },
+    {
+      "canonical": "David Weinstein",
+      "variants": [
+        "Assistant U.S. Attorney David Weinstein",
+        "David Weinstein"
+      ]
+    },
+    {
+      "canonical": "Getty",
+      "variants": [
+        "Gordon Getty",
+        "George Getty"
+      ]
+    },
+    {
+      "canonical": "BofA Merrill Lynch",
+      "variants": [
+        "BofA Merrill Lynch",
+        "BofA Merrill Lynch clients"
+      ]
+    },
+    {
+      "canonical": "Bob Trivers",
+      "variants": [
+        "Bob Trivers",
+        "Trivers' reciprocal altruism"
+      ]
+    },
+    {
+      "canonical": "Richard Alexander",
+      "variants": [
+        "Richard Alexander",
+        "R. Alexander Acosta"
+      ]
+    },
+    {
+      "canonical": "Jeffrey Epstein",
+      "variants": [
+        "Jeffrey Epstein's mansion"
+      ]
+    }
+  ],
+  "mapping": {
+    "Bradley J. Edwards": "Bradley J. Edwards",
+    "State Attorney Barry Krischer": "Barry Krischer",
+    "Paul Cassell": "Paul G. Cassell",
+    "Paul G. Cassell": "Paul G. Cassell",
+    "Legal team of Paul Cassell": "Paul G. Cassell",
+    "Virginia Roberts": "Virginia Roberts",
+    "Virginia Roberts and others": "Virginia Roberts",
+    "Virginia Roberts deposition": "Virginia Roberts",
+    "Virginia Giuffre's allegations": "Virginia Giuffre",
+    "Jeffrey Epstein": "Jeffrey Epstein",
+    "Jeffrey Epstein's residence": "Jeffrey Epstein",
+    "Palm Beach Police": "Palm Beach Police",
+    "Palm Beach Police report": "Palm Beach Police",
+    "Bill Clinton": "Bill Clinton",
+    "President Clinton": "Bill Clinton",
+    "Defendant Alan Dershowitz": "Alan Dershowitz",
+    "Professor Alan Dershowitz": "Alan Dershowitz",
+    "Alan Dershowitz": "Alan Dershowitz",
+    "Jeffrey Epstein's Gulfstream leaving": "Jeffrey Epstein",
+    "Jeffrey Epstein federal prosecution case": "Jeffrey Epstein",
+    "Jeffrey Epstein's defense attorney": "Jeffrey Epstein",
+    "Defense team of Jeffrey Epstein": "Jeffrey Epstein",
+    "U.S. Attorney Alex Acosta": "Alex Acosta",
+    "Alex Acosta": "Alex Acosta",
+    "Ghislaine Maxwell": "Ghislaine Maxwell",
+    "Ghislaine Maxwell and Tony Randall": "Ghislaine Maxwell",
+    "Virginia Giuffre": "Virginia Roberts Giuffre",
+    "Virginia Roberts Giuffre": "Virginia Roberts Giuffre",
+    "Assistant U.S. Attorney David Weinstein": "David Weinstein",
+    "David Weinstein": "David Weinstein",
+    "Gordon Getty": "Getty",
+    "George Getty": "Getty",
+    "BofA Merrill Lynch": "BofA Merrill Lynch",
+    "BofA Merrill Lynch clients": "BofA Merrill Lynch",
+    "Bob Trivers": "Bob Trivers",
+    "Trivers' reciprocal altruism": "Bob Trivers",
+    "Richard Alexander": "Richard Alexander",
+    "R. Alexander Acosta": "Richard Alexander",
+    "Jeffrey Epstein's mansion": "Jeffrey Epstein"
+  },
+  "stats": {
+    "total_groups": 19,
+    "total_mappings": 39
+  }
+}
