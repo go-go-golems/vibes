@@ -1,7 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Play, Pause, ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
+import { Upload, Play, Pause, ChevronLeft, ChevronRight, Trash2, X, ArrowUp, ArrowDown, Shuffle, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 import {
   DndContext,
   closestCenter,
@@ -21,9 +24,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 interface ImageFile {
-  id: string;
+  id: number;
   url: string;
   name: string;
+  position: number;
 }
 
 function SortableThumbnail({ image, isSelected, onClick, onDelete }: {
@@ -78,11 +82,31 @@ function SortableThumbnail({ image, isSelected, onClick, onDelete }: {
 }
 
 export default function Home() {
-  const [images, setImages] = useState<ImageFile[]>([]);
+  const { user, loading: authLoading } = useAuth();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const slideshowIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Fetch photos from server
+  const { data: photos = [], isLoading, refetch } = trpc.photo.list.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  // Mutations
+  const uploadMutation = trpc.photo.upload.useMutation();
+  const updatePositionsMutation = trpc.photo.updatePositions.useMutation();
+  const deleteMutation = trpc.photo.delete.useMutation();
+  const deleteAllMutation = trpc.photo.deleteAll.useMutation();
+  const createPdfJobMutation = trpc.pdf.createJob.useMutation();
+
+  const images: ImageFile[] = photos.map(p => ({
+    id: p.id,
+    url: p.url,
+    name: p.filename,
+    position: p.position,
+  }));
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -91,39 +115,74 @@ export default function Home() {
     })
   );
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files) return;
+    if (!files || !user) return;
 
-    const newImages: ImageFile[] = [];
-    Array.from(files).forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        const url = URL.createObjectURL(file);
-        newImages.push({
-          id: `${Date.now()}-${Math.random()}`,
-          url,
-          name: file.name,
+    setIsUploading(true);
+    const toastId = toast.loading("Uploading images...");
+
+    try {
+      let uploadedCount = 0;
+      const currentMaxPosition = Math.max(0, ...photos.map(p => p.position));
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith("image/")) continue;
+
+        // Convert file to base64
+        const reader = new FileReader();
+        const base64Data = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => {
+            const result = reader.result as string;
+            const base64 = result.split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
         });
-      }
-    });
 
-    if (newImages.length > 0) {
-      setImages((prev) => [...prev, ...newImages]);
-      toast.success(`Added ${newImages.length} image${newImages.length > 1 ? "s" : ""}`);
-    } else {
-      toast.error("No valid image files found");
+        await uploadMutation.mutateAsync({
+          filename: file.name,
+          mimeType: file.type,
+          data: base64Data,
+          position: currentMaxPosition + i + 1,
+        });
+
+        uploadedCount++;
+        toast.loading(`Uploading ${uploadedCount}/${files.length}...`, { id: toastId });
+      }
+
+      await refetch();
+      toast.success(`Uploaded ${uploadedCount} image${uploadedCount > 1 ? "s" : ""}`, { id: toastId });
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload images", { id: toastId });
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      setImages((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
+      const oldIndex = images.findIndex((item) => item.id === active.id);
+      const newIndex = images.findIndex((item) => item.id === over.id);
 
-        // Update selected index if the selected image was moved
+      const reordered = arrayMove(images, oldIndex, newIndex);
+
+      // Update positions
+      const updates = reordered.map((img, idx) => ({
+        id: img.id,
+        position: idx,
+      }));
+
+      try {
+        await updatePositionsMutation.mutateAsync({ updates });
+        await refetch();
+
+        // Update selected index
         if (oldIndex === selectedIndex) {
           setSelectedIndex(newIndex);
         } else if (oldIndex < selectedIndex && newIndex >= selectedIndex) {
@@ -131,9 +190,10 @@ export default function Home() {
         } else if (oldIndex > selectedIndex && newIndex <= selectedIndex) {
           setSelectedIndex(selectedIndex + 1);
         }
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      } catch (error) {
+        console.error("Reorder error:", error);
+        toast.error("Failed to reorder images");
+      }
     }
   };
 
@@ -160,26 +220,128 @@ export default function Home() {
     }
   };
 
-  const handleDeleteImage = (id: string) => {
+  const handleDeleteImage = async (id: number) => {
     const index = images.findIndex((img) => img.id === id);
-    setImages((prev) => prev.filter((img) => img.id !== id));
     
-    if (index === selectedIndex && selectedIndex >= images.length - 1) {
-      setSelectedIndex(Math.max(0, images.length - 2));
-    } else if (index < selectedIndex) {
-      setSelectedIndex(selectedIndex - 1);
+    try {
+      await deleteMutation.mutateAsync({ id });
+      await refetch();
+      
+      if (index === selectedIndex && selectedIndex >= images.length - 1) {
+        setSelectedIndex(Math.max(0, images.length - 2));
+      } else if (index < selectedIndex) {
+        setSelectedIndex(selectedIndex - 1);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete image");
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (slideshowIntervalRef.current) {
       clearInterval(slideshowIntervalRef.current);
       slideshowIntervalRef.current = null;
     }
-    setImages([]);
-    setSelectedIndex(0);
-    setIsPlaying(false);
-    toast.success("All images cleared");
+
+    try {
+      await deleteAllMutation.mutateAsync();
+      await refetch();
+      setSelectedIndex(0);
+      setIsPlaying(false);
+      toast.success("All images cleared");
+    } catch (error) {
+      console.error("Clear all error:", error);
+      toast.error("Failed to clear images");
+    }
+  };
+
+  const handleRandomize = async () => {
+    const shuffled = [...images].sort(() => Math.random() - 0.5);
+    const updates = shuffled.map((img, idx) => ({
+      id: img.id,
+      position: idx,
+    }));
+
+    try {
+      await updatePositionsMutation.mutateAsync({ updates });
+      await refetch();
+      setSelectedIndex(0);
+      toast.success("Images randomized");
+    } catch (error) {
+      console.error("Randomize error:", error);
+      toast.error("Failed to randomize images");
+    }
+  };
+
+  const handleMoveUp = async (index: number) => {
+    if (index === 0) return;
+    const newImages = [...images];
+    [newImages[index - 1], newImages[index]] = [newImages[index], newImages[index - 1]];
+    
+    const updates = newImages.map((img, idx) => ({
+      id: img.id,
+      position: idx,
+    }));
+
+    try {
+      await updatePositionsMutation.mutateAsync({ updates });
+      await refetch();
+      
+      if (selectedIndex === index) {
+        setSelectedIndex(index - 1);
+      } else if (selectedIndex === index - 1) {
+        setSelectedIndex(index);
+      }
+    } catch (error) {
+      console.error("Move up error:", error);
+      toast.error("Failed to move image");
+    }
+  };
+
+  const handleMoveDown = async (index: number) => {
+    if (index === images.length - 1) return;
+    const newImages = [...images];
+    [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+    
+    const updates = newImages.map((img, idx) => ({
+      id: img.id,
+      position: idx,
+    }));
+
+    try {
+      await updatePositionsMutation.mutateAsync({ updates });
+      await refetch();
+      
+      if (selectedIndex === index) {
+        setSelectedIndex(index + 1);
+      } else if (selectedIndex === index + 1) {
+        setSelectedIndex(index);
+      }
+    } catch (error) {
+      console.error("Move down error:", error);
+      toast.error("Failed to move image");
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (images.length === 0) {
+      toast.error("No images to download");
+      return;
+    }
+
+    const toastId = toast.loading("Creating PDF generation job...");
+
+    try {
+      const photoIds = images.map(img => img.id);
+      const result = await createPdfJobMutation.mutateAsync({ photoIds });
+      
+      toast.success(result.message, { id: toastId });
+      toast.info("You can check the PDF status in the jobs list. The PDF will be ready shortly.");
+    } catch (error) {
+      console.error("PDF job error:", error);
+      toast.error("Failed to create PDF job", { id: toastId });
+    }
   };
 
   // Keyboard navigation
@@ -196,6 +358,32 @@ export default function Home() {
     }
   };
 
+  // Show login prompt if not authenticated
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-semibold mb-4 text-foreground">Please Log In</h2>
+          <p className="text-muted-foreground mb-6">
+            You need to be logged in to use the Photobook Creator.
+          </p>
+          <Button onClick={() => window.location.href = getLoginUrl()} size="lg">
+            Log In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-hidden" onKeyDown={handleKeyDown} tabIndex={0}>
       {/* Header */}
@@ -210,16 +398,33 @@ export default function Home() {
               multiple
               onChange={handleFileUpload}
               className="hidden"
+              disabled={isUploading}
             />
-            <Button onClick={() => fileInputRef.current?.click()} variant="default" size="sm" className="md:h-10">
-              <Upload className="w-4 h-4 mr-2" />
+            <Button 
+              onClick={() => fileInputRef.current?.click()} 
+              variant="default" 
+              size="sm" 
+              className="md:h-10"
+              disabled={isUploading}
+            >
+              {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
               Upload Images
             </Button>
             {images.length > 0 && (
-              <Button onClick={handleClearAll} variant="destructive" size="sm" className="md:h-10">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Clear All
-              </Button>
+              <>
+                <Button onClick={handleDownloadPDF} variant="outline" size="sm" className="md:h-10">
+                  <Download className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">PDF</span>
+                </Button>
+                <Button onClick={handleRandomize} variant="outline" size="sm" className="md:h-10">
+                  <Shuffle className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Randomize</span>
+                </Button>
+                <Button onClick={handleClearAll} variant="destructive" size="sm" className="md:h-10">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Clear All</span>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -235,8 +440,8 @@ export default function Home() {
               <p className="text-muted-foreground mb-6">
                 Upload a folder of images to start creating your photobook. You can reorder them and view them in a beautiful slideshow.
               </p>
-              <Button onClick={() => fileInputRef.current?.click()} size="lg" variant="default">
-                <Upload className="w-5 h-5 mr-2" />
+              <Button onClick={() => fileInputRef.current?.click()} size="lg" variant="default" disabled={isUploading}>
+                {isUploading ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Upload className="w-5 h-5 mr-2" />}
                 Upload Your First Images
               </Button>
             </div>
@@ -274,6 +479,34 @@ export default function Home() {
 
             {/* Right Side - Preview */}
             <div className="flex-1 flex flex-col">
+              {/* Reorder Controls */}
+              <div className="border-b border-border bg-card p-3">
+                <div className="container flex items-center justify-center gap-3">
+                  <Button 
+                    onClick={() => handleMoveUp(selectedIndex)} 
+                    variant="outline" 
+                    size="lg"
+                    disabled={selectedIndex === 0}
+                    className="h-12 px-6"
+                  >
+                    <ArrowUp className="w-5 h-5 mr-2" />
+                    Move Up
+                  </Button>
+                  <div className="text-sm text-muted-foreground min-w-[100px] text-center">
+                    Position {selectedIndex + 1} of {images.length}
+                  </div>
+                  <Button 
+                    onClick={() => handleMoveDown(selectedIndex)} 
+                    variant="outline" 
+                    size="lg"
+                    disabled={selectedIndex === images.length - 1}
+                    className="h-12 px-6"
+                  >
+                    <ArrowDown className="w-5 h-5 mr-2" />
+                    Move Down
+                  </Button>
+                </div>
+              </div>
               {/* Preview Area */}
               <div className="flex-1 flex items-center justify-center p-8 bg-background">
                 <div className="relative max-w-5xl w-full h-full flex items-center justify-center">
