@@ -100,3 +100,18 @@ Frontend: ImageLayoutsTab now builds/sends LayoutRequest (frame/crop/presentatio
 ## 2025-11-30
 
 CLI+Frontend migration: ImageLayoutsTab now builds/sends LayoutRequest (frame/crop/presentation) with fill mode, crop strategy, pan, offsets; template cards display LayoutRequest page info; updated LayoutTemplateManager copy to reference LayoutRequest. API types accept LayoutRequest for templates/overrides; LaidOutImage overrides typed for new shape. Added imagelayout CLI smoke-test playbook covering compute/frame/crop/presentation commands with sample spec. CLI verbs already scoped per mode via layout frame/crop/presentation commands.
+
+## 2025-11-30
+
+Migrated CLI logging off Viper: root command now uses InitLoggerFromCobra (no deprecation warnings). Verified imagelayout CLI commands run without logging warnings (compute/layout frame/crop/presentation against /tmp/layout.yaml).
+
+
+## 2025-11-30
+
+Removed legacy ViewportSettings and InputsFromSettings; engine and tests now rely solely on LayoutRequest. Updated TypeScript API to drop legacy settings interfaces; templates/overrides are LayoutRequest-only. Ran gofmt and go test ./... to validate.
+
+
+## 2025-11-30
+
+Docs cleanup: removed legacy ViewportSettings references from usage examples, analysis overview, crop revamp analysis now notes legacy removal, and Zine App design overview now points to LayoutRequest.
+

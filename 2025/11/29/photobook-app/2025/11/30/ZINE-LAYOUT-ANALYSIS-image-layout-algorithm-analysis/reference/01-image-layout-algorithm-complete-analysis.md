@@ -25,9 +25,9 @@ RelatedFiles:
     - Path: ../../../../../../../../../../zine-layout/pkg/imagelayout/engine/engine_test.go
       Note: Comprehensive test suite for all algorithms
     - Path: ../../../../../../../../../../zine-layout/pkg/imagelayout/types.go
-      Note: Core type definitions (Rect, LayoutRequest, ViewportSettings legacy)
+      Note: Core type definitions (Rect, LayoutRequest)
     - Path: ../../../../../../../../../../zine-layout/pkg/imagelayout/engine/inputs.go
-      Note: Modern LayoutRequest normalization
+      Note: LayoutRequest normalization
     - Path: ../../../../../../../../../../zine-layout/pkg/pagelayout/renderer/renderer.go
       Note: Page renderer that uses ViewportResult for cropping and placement
     - Path: ../../../../../../../../../../zine-layout/pkg/services/layout.go
@@ -57,7 +57,7 @@ This document is the long-form reference for the `imagelayout` package. It expla
 - Page renderer (`pkg/pagelayout/renderer/renderer.go`)
 - Web API (`web/src/api.ts` type shapes)
 
-The `REVAMP-CROP-ALGORITHM` work introduced the modern `LayoutRequest` (frame/crop/presentation) and grouped `NormalizedInputs`, replacing the flat legacy `ViewportSettings`.
+The `REVAMP-CROP-ALGORITHM` work introduced the modern `LayoutRequest` (frame/crop/presentation) and grouped `NormalizedInputs`, replacing the flat legacy `ViewportSettings` (now removed).
 
 ## Modern API: LayoutRequest (REVAMP-CROP-ALGORITHM)
 
@@ -72,7 +72,7 @@ The modern request model splits decisions into three ordered phases: first pick 
 ## Package Structure
 
 Each file in the package has a clear role. Use this as a map when chasing behavior:
-- `types.go` defines the public structs (Rect, ImageMeta, legacy ViewportSettings, LayoutRequest, ViewportResult, Trace).
+- `types.go` defines the public structs (Rect, ImageMeta, LayoutRequest, ViewportResult, Trace).
 - `defaults.go` supplies sane defaults for both modern and legacy inputs.
 - `engine/inputs.go` normalizes requests (`InputsFromRequest`) and adapts legacy settings.
 - `engine/normalized_inputs.go` groups internal structs for frame, crop, presentation, and source.
@@ -105,7 +105,7 @@ type LayoutRequest struct {
 }
 ```
 
-Legacy `ViewportSettings` persists for backward compatibility and CLI flags. Prefer `LayoutRequest` for new code.
+Legacy `ViewportSettings` has been removed; use `LayoutRequest` everywhere.
 
 ## Algorithm Overview
 
@@ -197,8 +197,6 @@ Normalization is where bad inputs are rejected and ambiguous intent is resolved.
 - **Crop**: pick requested ratio (crop override > target ratio > source ratio), clamp zoom/extent, normalize units (px vs normalized).
 - **Presentation**: default user scale to 1, offsets to 0, clamp flags.
 - Emit grouped structs (`FrameInputs`, `CropInputs`, `PresentationInputs`, `SourceMeta`) to reduce illegal combos.
-
-Legacy adapter `InputsFromSettings` mirrors the above for `ViewportSettings`; keep for older CLI/specs.
 
 ## Viewport Computation
 

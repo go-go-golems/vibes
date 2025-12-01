@@ -11,3 +11,4 @@
 - [ ] Run full test matrix + update docs/changelog
 - [x] Scope CLI verbs per mode (frame/crop/presentation)
 - [x] Add imagelayout CLI playbook smoke test
+- [ ] Live-update preview in ImageLayoutsTab when frame/crop parameters (e.g., aspect ratio, fill, strategy) change

@@ -16,10 +16,13 @@ RelatedFiles:
         CLI smoke test targets LayoutRequest compute/analysis verbs
     - Path: ../../../../../../../../../../zine-layout/cmd/zine-layout/cmds/imagelayout/layout_commands.go
       Note: frame/crop/presentation inspection verbs
+    - Path: ../../../../../../../../../../zine-layout/cmd/zine-layout/main.go
+      Note: CLI logging migrated off Viper; smoke test now runs clean
 ExternalSources: []
 Summary: Quick smoke test for imagelayout CLI using LayoutRequest inputs
 LastUpdated: 2025-12-01T00:00:00-05:00
 ---
+
 
 
 # Imagelayout CLI Smoke Test

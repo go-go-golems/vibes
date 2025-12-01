@@ -13,7 +13,7 @@ RelatedFiles:
     - Path: ../../../../../../../../../zine-layout/pkg/imagelayout/engine/engine.go
       Note: Core imagelayout algorithms - InputsFromSettings and ComputeViewport
     - Path: ../../../../../../../../../zine-layout/pkg/imagelayout/types.go
-      Note: Type definitions for ViewportSettings
+      Note: Type definitions for LayoutRequest
     - Path: ../../../../../../../../../zine-layout/pkg/pagelayout/renderer/renderer.go
       Note: Page rendering algorithm - RenderPage
     - Path: ../../../../../../../../../zine-layout/pkg/pagelayout/settings.go
@@ -94,7 +94,7 @@ LastUpdated: 2025-11-30T15:00:00-05:00
 
 | Type | Purpose | Location |
 |------|---------|----------|
-| `ViewportSettings` | Input configuration (mode, paper size, margins, crop ratio, positioning) | ```27:58:zine-layout/pkg/imagelayout/types.go``` |
+| `LayoutRequest` | Input configuration (mode, paper size, margins, crop ratio, positioning) | ```27:58:zine-layout/pkg/imagelayout/types.go``` |
 | `ViewportResult` | Output (SourceRect, TargetRect, CanvasRect, Scale, Mode) | ```69:75:zine-layout/pkg/imagelayout/types.go``` |
 | `Rect` | Rectangle with float coords (X, Y, W, H) | ```4:9:zine-layout/pkg/imagelayout/types.go``` |
 | `FocusPoint` | Align source point to target position | ```61:66:zine-layout/pkg/imagelayout/types.go``` |
@@ -327,7 +327,7 @@ Three levels (additive):
 ### Data Flow
 
 ```
-ViewportSettings (imagelayout input)
+LayoutRequest (imagelayout input)
     ↓
 ViewportResult (imagelayout output)
     ↓
