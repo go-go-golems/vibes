@@ -115,3 +115,8 @@ Removed legacy ViewportSettings and InputsFromSettings; engine and tests now rel
 
 Docs cleanup: removed legacy ViewportSettings references from usage examples, analysis overview, crop revamp analysis now notes legacy removal, and Zine App design overview now points to LayoutRequest.
 
+
+## 2025-11-30
+
+UI: ImageLayoutsTab preview now derives from current LayoutRequest state; pan/zoom/fill/aspect changes live-update the preview and apply user offsets in CSS transform.
+
