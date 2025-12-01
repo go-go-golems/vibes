@@ -37,8 +37,8 @@ RelatedFiles:
     - Path: 2025/11/29/photobook-app/2025/11/30/ZINE-LAYOUT-ANALYSIS-image-layout-algorithm-analysis/reference/03-image-layout-api-usage-examples.md
       Note: Companion examples doc
 ExternalSources: []
-Summary: 'Comprehensive analysis of the imagelayout package: algorithms, API, types, cropping, scaling, and ratio calculations (trimmed of duplicates)'
-LastUpdated: 2025-11-30T23:18:00-05:00
+Summary: 'Comprehensive analysis of the imagelayout package: algorithms, API, types, cropping, scaling, ratio calculations, trace reading, and worked examples'
+LastUpdated: 2025-11-30T22:55:20-05:00
 ---
 
 # Image Layout Algorithm: Complete Analysis
@@ -47,11 +47,11 @@ Restores the full walkthrough (mental model, algorithms, examples) while cutting
 
 ## Goal
 
-Provide a detailed technical analysis of the `imagelayout` package: algorithms, data structures, API contracts, and usage patterns for image cropping, scaling, and aspect ratio calculations.
+This document is the long-form reference for the `imagelayout` package. It explains the algorithms, types, and API contracts that govern cropping, scaling, ratio handling, and placement so engineers can reason about behavior without digging through code.
 
 ## Context
 
-`imagelayout` is the engine that decides how an image is cropped and placed into a viewport or page. It supports three frame modes (ratio, page, viewport), two scaling behaviors (contain vs cover), and multiple positioning strategies (auto, anchor presets, focus points, manual pan). It is consumed by:
+`imagelayout` decides how a source image is cropped and placed into a viewport or page. The engine supports three frame modes (ratio, page, viewport), two scaling behaviors (contain vs cover), and several positioning strategies (auto, anchor presets, focus points, manual pan). It is consumed by:
 - CLI commands (`cmd/zine-layout/cmds/imagelayout/compute.go`)
 - Service layer (`pkg/services/layout.go`)
 - Page renderer (`pkg/pagelayout/renderer/renderer.go`)
@@ -61,26 +61,29 @@ The `REVAMP-CROP-ALGORITHM` work introduced the modern `LayoutRequest` (frame/cr
 
 ## Modern API: LayoutRequest (REVAMP-CROP-ALGORITHM)
 
-The mental model: **decide the shape**, **decide what part of the source survives**, **optionally nudge after placement**.
+The modern request model splits decisions into three ordered phases: first pick the frame shape, then decide which part of the source survives, and finally apply presentation tweaks. This mirrors how photographers and designers think about framing and helps the code keep concerns isolated.
 
-- **FrameSpec (output box)**: `Mode` (`ratio | page | viewport`), `Ratio`, `Fill` (`contain | cover`), `Page`, `Viewport`, `FitAxis`.
-- **CropSpec (source selection)**: `Strategy` (`auto | anchor | focus | manual`), `Ratio` override, `Zoom`, `Extent`, `Focus`, `Anchor`, `Pan`, `Units`.
-- **PresentationSpec (post-crop tweaks)**: `UserScale`, `OffsetPx`, `ClampToCanvas`.
+- **FrameSpec (output box)** describes the target rectangle via `Mode` (`ratio | page | viewport`), `Ratio`, `Fill` (`contain | cover`), `Page`, `Viewport`, and `FitAxis`.
+- **CropSpec (source selection)** captures how to carve the source with `Strategy` (`auto | anchor | focus | manual`), optional `Ratio` override, `Zoom`, `Extent`, `Focus`, `Anchor`, `Pan`, and `Units`.
+- **PresentationSpec (post-crop tweaks)** holds `UserScale`, `OffsetPx`, and `ClampToCanvas` to nudge after the crop math is done.
 
 `InputsFromRequest` converts this to `NormalizedInputs` (`FrameInputs`, `CropInputs`, `PresentationInputs`, `SourceMeta`) which mirrors the internal order of operations.
 
 ## Package Structure
 
-- **`types.go`**: Core structures (Rect, ImageMeta, ViewportSettings legacy, LayoutRequest, ViewportResult, Trace).
-- **`defaults.go`**: Defaults for modern and legacy inputs.
-- **`engine/inputs.go`**: `InputsFromRequest` (modern) + adapter `InputsFromSettings` (legacy).
-- **`engine/normalized_inputs.go`**: Internal grouped structs.
-- **`engine/engine.go`**: `ComputeViewport` with helpers `buildFrame`, `resolveCrop`, `composeTarget`.
-- **`engine/analysis.go`**: Stage inspection (`AnalyzeFrame`, `AnalyzeCrop`, `AnalyzePresentation`).
-- **Tests**: `engine_test.go`, `inputs_test.go`.
-- **Integration**: CLI command, services, renderer, TS API shapes.
+Each file in the package has a clear role. Use this as a map when chasing behavior:
+- `types.go` defines the public structs (Rect, ImageMeta, legacy ViewportSettings, LayoutRequest, ViewportResult, Trace).
+- `defaults.go` supplies sane defaults for both modern and legacy inputs.
+- `engine/inputs.go` normalizes requests (`InputsFromRequest`) and adapts legacy settings.
+- `engine/normalized_inputs.go` groups internal structs for frame, crop, presentation, and source.
+- `engine/engine.go` runs `ComputeViewport` and its helpers (`buildFrame`, `resolveCrop`, `composeTarget`).
+- `engine/analysis.go` offers inspection helpers (`AnalyzeFrame`, `AnalyzeCrop`, `AnalyzePresentation`).
+- Tests live in `engine_test.go` and `inputs_test.go`.
+- Integration points are the CLI command, services, renderer, and TypeScript API shapes.
 
 ## Core Data Structures (selected)
+
+The core types are intentionally small so they can be reasoned about without a long mental stack.
 
 `Rect` is the primitive geometry:
 ```4:9:zine-layout/pkg/imagelayout/types.go
@@ -106,7 +109,8 @@ Legacy `ViewportSettings` persists for backward compatibility and CLI flags. Pre
 
 ## Algorithm Overview
 
-Two phases:
+The engine runs in two deliberate phases. First, it validates and reshapes inputs into normalized structs. Second, it performs the math that crops, scales, and places the image. Keeping these steps separate makes it easier to debug and to extend.
+
 1. **Normalization** (`InputsFromRequest`): Validate image dims and request; build grouped inputs (Frame/Crop/Presentation + SourceMeta).
 2. **Viewport computation** (`ComputeViewport`): Build canvas, choose crop ratio, crop source, position, scale, apply presentation offsets, emit `ViewportResult` and optional `Trace`.
 
@@ -182,6 +186,8 @@ flowchart TD
 
 ## Input Normalization Details
 
+Normalization is where bad inputs are rejected and ambiguous intent is resolved. The output is a set of grouped structs that downstream helpers can trust.
+
 `InputsFromRequest` responsibilities:
 - Validate source dimensions > 0.
 - **Frame**: derive canvas/content based on mode:
@@ -195,6 +201,8 @@ flowchart TD
 Legacy adapter `InputsFromSettings` mirrors the above for `ViewportSettings`; keep for older CLI/specs.
 
 ## Viewport Computation
+
+Computation takes the trusted normalized inputs and turns them into concrete rectangles and a scale factor. Each helper does one job so the trace stays readable.
 
 `ComputeViewport(inp NormalizedInputs) (ViewportResult, *Trace)` orchestrates:
 1. `buildFrame`: produce `canvasRect` and `contentRect` (page mode keeps margins separately).
@@ -213,6 +221,8 @@ Helpers in `engine.go` include `safeDiv` (avoid div-by-zero) and `clampFloat`.
 When triaging a bug, check `"crop"` first (ratio and pan), then `"scale"` (fill vs contain), then `"result"` (final placement).
 
 ## Frame Modes
+
+Each frame mode answers “how big is the box we are filling?” The choice drives canvas math and whether margins exist.
 
 ### Ratio
 - **Purpose**: aspect-ratio driven (web/editor).
@@ -264,12 +274,14 @@ req := imagelayout.LayoutRequest{
 
 ## Scaling Modes
 
+Scaling decides whether the entire crop stays visible or the target is fully filled.
 - **Contain** (`Fill=contain`): scale = `min(scaleX, scaleY)`; letterboxes if needed; result `Mode="contain"`.
 - **Cover** (`Fill=cover`): scale = `max(scaleX, scaleY)`; ensures full cover; result `Mode="cover"`.
 - `Presentation.UserScale` multiplies the chosen scale; `OffsetPx` shifts final placement.
 
 ## Positioning Strategies
 
+Positioning chooses where the crop sits within the frame. Use presets for quick alignment or focus/manual modes for precision.
 - **auto**: center pan (0,0).
 - **anchor**: preset pans (`center`, `top-left`, `top`, `top-right`, `left`, `right`, `bottom-left`, `bottom`, `bottom-right`).
 - **focus**: align `(SourceX, SourceY)` in source to `(TargetX, TargetY)` normalized in target.
@@ -304,6 +316,7 @@ The crop offset is adjusted so `(2100,900)` in the source lands at `(50%,30%)` o
 
 ## API Surface (summary)
 
+Most consumers touch only a handful of entry points. Defaults exist for both the modern and legacy paths, and analysis helpers surface internals when debugging.
 - `DefaultLayoutRequest() LayoutRequest`: modern defaults.
 - `DefaultSettings() ViewportSettings`: legacy defaults.
 - `InputsFromRequest(req LayoutRequest, meta ImageMeta)`: normalize modern inputs.
@@ -313,7 +326,7 @@ The crop offset is adjusted so `(2100,900)` in the source lands at `(50%,30%)` o
 
 ## Usage Examples
 
-See `vibes/2025/11/29/photobook-app/2025/11/30/ZINE-LAYOUT-ANALYSIS-image-layout-algorithm-analysis/reference/03-image-layout-api-usage-examples.md` for runnable specs:
+Examples are kept in the companion doc so they can be run and updated independently. Use them as templates for CLI specs or service payloads.
 - Ratio/page/viewport requests, zoom, offsets, anchor presets, focus points.
 - CLI usage: `zine-layout imagelayout compute --spec <file>` plus `layout frame|crop|presentation` stage inspection.
 
@@ -344,6 +357,7 @@ Assume source 4000×3000.
 
 ## Integration Points
 
+The same shapes and results flow through the stack: CLI for debugging, services for persistence, renderer for placement, and TS types for the web editor.
 - **CLI**: `cmd/zine-layout/cmds/imagelayout/compute.go` and subcommands.
 - **Service layer**: `pkg/services/layout.go` uses `InputsFromRequest`, persists `LayoutComputation` (Layout + Result + Trace).
 - **Renderer**: `pkg/pagelayout/renderer/renderer.go` consumes `ViewportResult` (`SourceRect`, `TargetRect`, `CanvasRect`, `Scale`).
@@ -351,6 +365,7 @@ Assume source 4000×3000.
 
 ## Edge Cases and Validation
 
+Validation guards against impossible layouts before math begins. Errors are intentionally specific to aid user-facing messages.
 - Source dimensions must be > 0.
 - Page mode: DPI > 0; margins cannot exceed canvas; orientation swap handled.
 - Viewport mode: at least one of width/height/ratio provided.
@@ -367,23 +382,27 @@ Common validation errors (from tests):
 
 ## Testing
 
+The test suite exercises both the normalization and compute layers, covering mode combinations, scaling choices, positioning strategies, and validation failures.
 - `engine_test.go`: cover ratio/page/viewport, cover vs contain, anchors, focus, offsets, margins, validation errors.
 - `inputs_test.go`: normalization correctness for LayoutRequest.
 - Example specs in `03-image-layout-api-usage-examples.md` can be executed via CLI to sanity-check behaviors.
 
 ## Performance Considerations
 
+The algorithm is arithmetic-heavy and allocation-light. Traces add overhead; skip them in production paths unless you are diagnosing a layout.
 - Pure arithmetic; per-call allocations minimal.
 - Traces are optional; skip when not debugging.
 - Margin/ratio math uses float64 for sub-pixel fidelity; downstream renderers may quantize to ints.
 
 ## Related
 
+These documents provide adjacent context: the crop revamp rationale and the separate zine imposition engine.
 - Crop revamp design + migration: `vibes/2025/11/29/photobook-app/2025/11/30/REVAMP-CROP-ALGORITHM-revamp-crop-algorithm-for-aspect-ratio-cropping/reference/01-crop-algorithm-revamp-analysis.md`.
 - Zine layout engine (imposition, not single image): `02-zine-layout-algorithm-complete-analysis.md`.
 
 ## Glossary (UI ↔ API)
 
+Use this table when mapping editor controls to request fields.
 - Zoom slider → `Crop.Zoom` (>1 zooms in, <1 zooms out).
 - Aspect lock → `Crop.Ratio` (overrides frame ratio when set).
 - Fit/Fill toggle → `Frame.Fill` (`contain` vs `cover`).
@@ -395,5 +414,6 @@ Common validation errors (from tests):
 
 ## Next Steps
 
+The remaining work is practical polish: expand runnable examples and include a visual trace walkthrough.
 - Add more worked examples to `03-image-layout-api-usage-examples.md` for focus and mixed-units pans.
 - Add a short trace-reading cheatsheet screenshot from CLI output.

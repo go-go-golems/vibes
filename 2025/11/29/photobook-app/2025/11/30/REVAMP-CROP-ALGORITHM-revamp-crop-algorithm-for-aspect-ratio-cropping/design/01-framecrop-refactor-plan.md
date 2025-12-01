@@ -9,11 +9,14 @@ Topics:
 DocType: design
 Intent: long-term
 Owners: []
-RelatedFiles: []
+RelatedFiles:
+    - Path: ../../../../../../../../../../zine-layout/web/src/views/tabs/ImageLayoutsTab.tsx
+      Note: Form now builds LayoutRequest and supports new frame/crop/presentation controls
 ExternalSources: []
 Summary: ""
 LastUpdated: 2025-11-30T20:45:05.992365766-05:00
 ---
+
 
 # FrameCrop Refactor Plan
 

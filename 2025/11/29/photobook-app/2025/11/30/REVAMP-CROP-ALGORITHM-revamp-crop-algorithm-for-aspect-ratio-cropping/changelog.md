@@ -4,6 +4,13 @@
 
 - Initial workspace created
 
+## 2025-12-01
+
+- Added modern `LayoutRequest`-aligned TypeScript types (Frame/Crop/Presentation) alongside legacy settings to begin frontend migration toward the new API shapes.
+- Updated ImageLayoutsTab to build/send `LayoutRequest` (frame/crop/presentation) and load both legacy and new shapes; began UI copy updates toward the new model.
+- Added CLI smoke-test playbook (`playbook/02-imagelayout-cli-smoke-test.md`) documenting compute/frame/crop/presentation commands for LayoutRequest specs.
+- Ran imagelayout CLI smoke test with sample LayoutRequest (/tmp/layout.yaml, 4000×3000 source) across `compute`, `layout frame`, `layout crop`, and `layout presentation` commands; all returned expected geometry and modes.
+
 
 ## 2025-11-30
 
@@ -85,3 +92,11 @@ Scoped imagelayout CLI verbs to relevant flags, added analysis helpers/playbook
 - /home/manuel/workspaces/2025-11-30/photobook-app-go/zine-layout/cmd/zine-layout/cmds/imagelayout/layout_params.go — Per-mode flag definitions
 - /home/manuel/workspaces/2025-11-30/photobook-app-go/zine-layout/pkg/imagelayout/engine/analysis.go — Frame/Crop/Presentation analyzers used by CLI
 
+## 2025-11-30
+
+Frontend: ImageLayoutsTab now builds/sends LayoutRequest (frame/crop/presentation) and loads both legacy/new shapes; added fill/crop strategy controls, pan/offset inputs. Added CLI smoke-test playbook for imagelayout compute/frame/crop/presentation commands.
+
+
+## 2025-11-30
+
+CLI+Frontend migration: ImageLayoutsTab now builds/sends LayoutRequest (frame/crop/presentation) with fill mode, crop strategy, pan, offsets; template cards display LayoutRequest page info; updated LayoutTemplateManager copy to reference LayoutRequest. API types accept LayoutRequest for templates/overrides; LaidOutImage overrides typed for new shape. Added imagelayout CLI smoke-test playbook covering compute/frame/crop/presentation commands with sample spec. CLI verbs already scoped per mode via layout frame/crop/presentation commands.

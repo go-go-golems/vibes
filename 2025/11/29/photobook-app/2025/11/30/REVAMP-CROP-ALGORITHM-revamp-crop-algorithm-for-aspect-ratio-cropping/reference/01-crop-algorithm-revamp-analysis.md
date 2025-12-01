@@ -12,12 +12,15 @@ Owners: []
 RelatedFiles:
     - Path: ../../../../../../../../../../zine-layout/pkg/imagelayout/engine/engine.go
       Note: Current InputsFromSettings + ComputeViewport implementation
+    - Path: ../../../../../../../../../../zine-layout/web/src/api.ts
+      Note: TS layout types now include LayoutRequest; frontend migration in progress
     - Path: ../../../../../../../../../../zine-layout/web/src/views/v2/components/SequenceSlideshow.tsx
       Note: UI currently exposing the complex set of layout knobs
 ExternalSources: []
-Summary: "Explains why the existing ViewportSettings inputs are confusing and proposes a two-layer FrameSpec + CropSpec design to simplify both UI and engine."
+Summary: Explains why the existing ViewportSettings inputs are confusing and proposes a two-layer FrameSpec + CropSpec design to simplify both UI and engine.
 LastUpdated: 2025-11-30T20:30:41.037405182-05:00
 ---
+
 
 # Crop Algorithm Revamp Analysis
 

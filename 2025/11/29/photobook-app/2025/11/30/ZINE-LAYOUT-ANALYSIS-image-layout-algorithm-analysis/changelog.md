@@ -2,6 +2,10 @@
 
 ## 2025-11-30
 
+- Trimmed duplicate prose in the imagelayout analysis and added high-value aids (trace interpretation, anchor preset table, validation error table, worked examples, UI↔API glossary).
+
+## 2025-11-30
+
 - Initial workspace created
 
 
@@ -38,4 +42,3 @@ Updated algorithm analysis to reflect modern LayoutRequest/NormalizedInputs arch
 
 - /home/manuel/workspaces/2025-11-30/photobook-app-go/vibes/2025/11/29/photobook-app/2025/11/30/ZINE-LAYOUT-ANALYSIS-image-layout-algorithm-analysis/reference/01-image-layout-algorithm-complete-analysis.md — Reflects grouped inputs and modern API
 - /home/manuel/workspaces/2025-11-30/photobook-app-go/vibes/2025/11/29/photobook-app/2025/11/30/ZINE-LAYOUT-ANALYSIS-image-layout-algorithm-analysis/reference/03-image-layout-api-usage-examples.md — New examples doc with modern and legacy patterns
-
