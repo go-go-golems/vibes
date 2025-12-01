@@ -55,10 +55,36 @@ RelatedFiles:
       Note: Debate round covering PDF generation library choice
     - Path: 2025/11/29/photobook-backend-go
       Note: Go backend project root - moved next to photobook-app for git check-in
+    - Path: 2025/11/29/photobook-backend-go/cmd/photobook-cli/cmds/auth/auth.go
+      Note: CLI commands for authentication (register
+    - Path: 2025/11/29/photobook-backend-go/cmd/photobook-cli/cmds/pdfjobs/pdfjobs.go
+      Note: CLI verbs for PDF job management (create
+    - Path: 2025/11/29/photobook-backend-go/internal/auth/adapter.go
+      Note: Auth adapter interface for pluggable authentication methods
+    - Path: 2025/11/29/photobook-backend-go/internal/auth/jwt.go
+      Note: JWT service for session token creation and verification
+    - Path: 2025/11/29/photobook-backend-go/internal/auth/password.go
+      Note: Email/password authentication adapter with bcrypt hashing
+    - Path: 2025/11/29/photobook-backend-go/internal/auth/repository.go
+      Note: User repository for database operations
+    - Path: 2025/11/29/photobook-backend-go/internal/auth/service.go
+      Note: Core authentication service coordinating adapters and JWT
+    - Path: 2025/11/29/photobook-backend-go/internal/db/migrations/004_add_password_hash.sql
+      Note: Migration adding password_hash column to users table
+    - Path: 2025/11/29/photobook-backend-go/internal/pdfjobs/generator.go
+      Note: PDF generation with gofpdf (A4 portrait
+    - Path: 2025/11/29/photobook-backend-go/internal/pdfjobs/repository.go
+      Note: PDF job repository with atomic ClaimPendingJobs method
+    - Path: 2025/11/29/photobook-backend-go/internal/pdfjobs/worker.go
+      Note: PDF worker with polling loop (10s interval) and job processing
+    - Path: 2025/11/29/photobook-backend-go/internal/photos/repository.go
+      Note: Photo repository for fetching photos by user ID and IDs
 ExternalSources: []
 Summary: Comprehensive documentation of Node/tRPC + MySQL/storage architecture, frontend-backend integration, PDF worker implementation, and identified gaps for Go port
 LastUpdated: 2025-11-29T20:20:00-05:00
 ---
+
+
 
 
 

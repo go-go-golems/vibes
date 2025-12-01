@@ -77,3 +77,31 @@ Created comprehensive implementation guide for interns with project context, des
 
 Completed Phase 1: Set up Go project structure, configuration system, SQLite database with migrations, storage interface with disk implementation, and CLI verbs to exercise all components
 
+
+## 2025-11-30
+
+Completed Phase 2: Implemented email/password authentication with bcrypt hashing, JWT session management (HS256, app_session_id cookie format), auth adapter interface, and CLI verbs (register, login, me)
+
+
+## 2025-11-30
+
+Created comprehensive JS-to-Go porting playbook documenting process, decisions, patterns, pitfalls, and lessons learned for future similar ports
+
+
+## 2025-11-30
+
+Completed Phase 4: Implemented PDF job repository with atomic claiming, PDF worker with polling loop (10s interval), PDF generation with gofpdf (A4 portrait, 10mm margins, aspect-fit images), and CLI verbs (pdf create, pdf list, pdf process) to exercise all functionality
+
+### Related Files
+
+- vibes/2025/11/29/photobook-backend-go/cmd/photobook-cli/cmds/pdfjobs/pdfjobs.go — CLI verbs for PDF job management
+- vibes/2025/11/29/photobook-backend-go/internal/db/migrations/003_create_pdf_jobs.sql — Updated migration to include photo_ids column
+- vibes/2025/11/29/photobook-backend-go/internal/pdfjobs/generator.go — PDF generation with gofpdf matching current algorithm
+- vibes/2025/11/29/photobook-backend-go/internal/pdfjobs/repository.go — PDF job repository with atomic ClaimPendingJobs
+- vibes/2025/11/29/photobook-backend-go/internal/pdfjobs/worker.go — PDF worker with polling loop and job processing
+
+
+## 2025-11-30
+
+Created debate round exploring zine app design integration: how sequencing-first workflow affects Go backend architecture, incorporating personas from ZINE-APP-DESIGN documents
+
