@@ -130,9 +130,10 @@ Provide a unified UI for template editing and laid-out image creation that:
 - Geometry preview (existing):
   - Frontend hook: `usePreviewLayoutRequestMutation` in `zine-layout/web/src/api.ts`
   - Backend: `POST /api/projects/{projectId}/image-layout/preview` in `zine-layout/pkg/serve/layout_preview_routes.go` → `LayoutService.PreviewLayout` (`zine-layout/pkg/services/layout.go`)
-- Render (new, to add):
-  - Suggested route: `POST /api/projects/{projectId}/image-layout/render` with `layout`, `asset_id|image`, returns rendered image (png/jpeg) + maybe geometry.
-  - Handlers should reuse layout pipeline + renderer (see `zine-layout/pkg/imagelayout/engine`, `pkg/export` if available) and stream bytes.
+- Render (implemented):
+  - Route: `POST /api/projects/{projectId}/image-layout/render` with `layout`, `asset_id` (PNG response), in `zine-layout/pkg/serve/layout_render_routes.go`.
+  - Frontend hook: `useRenderLayoutRequestMutation` in `zine-layout/web/src/api.ts`.
+  - Uses `LayoutService.PreviewLayout` for geometry and a simple PNG render (nearest-neighbor) for the target rect.
 - Compare modal data flow:
   - Preview side: reuse `ViewportResult` from preview call.
   - Render side: use response from render endpoint (URL/blob).

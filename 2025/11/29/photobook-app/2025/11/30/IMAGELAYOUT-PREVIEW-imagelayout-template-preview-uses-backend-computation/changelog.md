@@ -19,3 +19,13 @@ Added POST /api/projects/{id}/image-layout/preview using LayoutService.PreviewLa
 
 Hooked ImageLayoutsTab preview to backend RTK mutation with debounce + inline errors; overlay now renders backend canvas/target rectangles; documented curl/UI steps in playbook/01-preview-backend-geometry.md and refreshed analysis doc.
 
+
+## 2025-11-30
+
+Added POST /api/projects/{id}/image-layout/render returning PNG render of LayoutRequest+asset; frontend RTK mutation and ImageLayoutsTab controls to trigger render and open compare modal vs backend geometry.
+
+
+## 2025-12-01
+
+Refactored crop controls into shared ImageLayoutCropControls and wired template preview to use it; added clamp/zoom UI for consistent state mapping.
+

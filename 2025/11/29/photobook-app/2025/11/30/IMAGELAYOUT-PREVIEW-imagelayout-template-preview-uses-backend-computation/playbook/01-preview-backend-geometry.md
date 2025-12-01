@@ -15,11 +15,11 @@ Summary: "Quick smoke test for the image layout preview endpoint and UI wiring"
 LastUpdated: 2025-11-30T23:42:44.140037847-05:00
 ---
 
-# Preview backend geometry
+# Preview backend geometry + render compare
 
 ## Purpose
 
-Exercise the new backend preview path that computes layout geometry without persisting and confirm the ImageLayoutsTab uses the backend response for its live preview.
+Exercise the backend preview path (geometry only) and the render endpoint, then compare UI preview vs rendered output.
 
 ## Environment Assumptions
 
@@ -63,20 +63,31 @@ curl -s -X POST "http://localhost:3030/api/projects/${PROJECT_ID}/image-layout/p
   -H "Content-Type: application/json" \
   --data @/tmp/imagelayout-preview.json | jq .
 
-# 4) Verify the UI uses the same endpoint:
+# 4) Call the backend render endpoint (returns PNG bytes)
+curl -s -X POST "http://localhost:3030/api/projects/${PROJECT_ID}/image-layout/render" \
+  -H "Content-Type: application/json" \
+  --data @/tmp/imagelayout-preview.json > /tmp/imagelayout-render.png
+ls -lh /tmp/imagelayout-render.png
+
+# 5) Verify the UI uses the same endpoints:
 #    - Open the web app, navigate to Image Layouts, start creating/editing a template.
 #    - Pick the same asset for preview.
-#    - Tweak frame/crop settings and confirm network calls hit /image-layout/preview.
+#    - Tweak frame/crop settings and confirm network calls hit /image-layout/preview (debounced).
+#    - Click “Render backend image” to hit /image-layout/render and view the thumbnail.
+#    - Use “Open Compare” to see preview overlay vs rendered image side by side.
 #    - The overlay should match the target_rect/canvas_rect from the curl response.
 ```
 
 ## Exit Criteria
 
 - `POST /api/projects/{projectId}/image-layout/preview` returns HTTP 200 with `result.target_rect`, `result.source_rect`, and `result.scale`.
+- `POST /api/projects/{projectId}/image-layout/render` returns HTTP 200 PNG matching the preview geometry.
 - Errors for invalid input (bad DPI, missing asset) surface as JSON `error` messages.
 - In the UI, changing frame/crop values triggers the preview request and updates the overlay; no client-side only transforms remain.
+- In the UI, “Render backend image” produces a thumbnail; “Open Compare” shows preview vs render side by side without obvious drift.
 
 ## Notes
 
 - The endpoint accepts either `asset_id` or explicit `image.width`/`image.height` in the body; asset lookup enforces project ownership.
-- No layout or preview image is persisted—this path only returns geometry.
+- No layout or preview image is persisted—these paths only compute geometry or render on demand.
+- Render uses nearest-neighbor scaling on the backend for now; quality upgrades can replace the scaler without API changes.

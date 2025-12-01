@@ -18,7 +18,7 @@
 - [x] Debounce preview requests and add form validation before sending (ratio, DPI, required fields).
 - [x] Add playbook entry: CLI curl/go run preview endpoint with sample LayoutRequest to sanity-check responses.
 - [x] Update docs/changelog after implementation; include backend endpoint, UI wiring, and preview behavior.
-- [ ] Implement render endpoint: POST /api/projects/{id}/image-layout/render returning rendered image bytes for given layout + asset/meta.
-- [ ] Refactor shared crop widget component so template preview and laid-out image creation use the same controls + state mapping.
-- [ ] Wire render action + compare modal in ImageLayoutsTab: trigger render, show thumbnail, open side-by-side compare (preview vs render).
-- [ ] Update docs/playbook to cover render/compare flow and validation steps.
+- [x] Implement render endpoint: POST /api/projects/{id}/image-layout/render returning rendered image bytes for given layout + asset/meta.
+- [x] Refactor shared crop widget component so template preview and laid-out image creation use the same controls + state mapping.
+- [x] Wire render action + compare modal in ImageLayoutsTab: trigger render, show thumbnail, open side-by-side compare (preview vs render).
+- [x] Update docs/playbook to cover render/compare flow and validation steps.

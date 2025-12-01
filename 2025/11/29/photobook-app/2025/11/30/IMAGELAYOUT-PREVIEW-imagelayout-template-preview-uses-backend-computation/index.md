@@ -12,18 +12,32 @@ Owners: []
 RelatedFiles:
     - Path: ../../../../../../../../../zine-layout/pkg/serve/layout_preview_routes.go
       Note: POST /projects/{id}/image-layout/preview handler
+    - Path: ../../../../../../../../../zine-layout/pkg/serve/layout_render_routes.go
+      Note: POST /projects/{id}/image-layout/render PNG render
     - Path: ../../../../../../../../../zine-layout/pkg/services/layout.go
       Note: PreviewLayout helper reusing InputsFromRequest
     - Path: ../../../../../../../../../zine-layout/web/src/api.ts
-      Note: RTK mutation previewLayoutRequest
+      Note: |-
+        RTK mutation previewLayoutRequest
+        renderLayoutRequest mutation
+    - Path: ../../../../../../../../../zine-layout/web/src/components/ImageLayoutCropControls.tsx
+      Note: Shared crop/placement widget used by template preview (ready for laid-out flow).
     - Path: ../../../../../../../../../zine-layout/web/src/views/tabs/ImageLayoutsTab.tsx
-      Note: Preview overlay renders backend canvas/target rects
+      Note: |-
+        Preview overlay renders backend canvas/target rects
+        Render button + compare modal
+    - Path: 2025/11/29/photobook-app/2025/11/30/IMAGELAYOUT-PREVIEW-imagelayout-template-preview-uses-backend-computation/design/01-image-layout-preview-render-ui-spec.md
+      Note: Spec for preview/render/compare
     - Path: 2025/11/29/photobook-app/2025/11/30/IMAGELAYOUT-PREVIEW-imagelayout-template-preview-uses-backend-computation/playbook/01-preview-backend-geometry.md
-      Note: Playbook covering curl + UI steps
+      Note: |-
+        Playbook covering curl + UI steps
+        Playbook updated with render call
 ExternalSources: []
 Summary: ""
 LastUpdated: 2025-12-01T00:20:00-05:00
 ---
+
+
 
 
 # Imagelayout template preview uses backend computation
