@@ -32,6 +32,7 @@ type PdfJob struct {
 	ID        int64     `json:"id"`
 	UserID    int64     `json:"userId"`
 	Status    string    `json:"status"` // "pending", "processing", "completed", "failed"
+	PhotoIDs  []int64   `json:"photoIds"` // JSON array of photo IDs
 	FileKey   string    `json:"fileKey,omitempty"`
 	URL       string    `json:"url,omitempty"`
 	Error     string    `json:"error,omitempty"`

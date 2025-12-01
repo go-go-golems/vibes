@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS pdf_jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     status TEXT NOT NULL CHECK(status IN ('pending', 'processing', 'completed', 'failed')) DEFAULT 'pending',
+    photo_ids TEXT NOT NULL,
     file_key TEXT,
     url TEXT,
     error TEXT,

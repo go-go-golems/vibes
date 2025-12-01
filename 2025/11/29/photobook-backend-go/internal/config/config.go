@@ -13,6 +13,8 @@ type Config struct {
 	StoragePath string
 	Port        int
 	BaseURL     string
+	AppID       string
+	OwnerOpenID string
 }
 
 // LoadConfig loads configuration from environment variables
@@ -23,6 +25,8 @@ func LoadConfig() (*Config, error) {
 		StoragePath: getEnvOrDefault("STORAGE_PATH", "./data/storage"),
 		Port:        getEnvIntOrDefault("PORT", 8080),
 		BaseURL:     getEnvOrDefault("BASE_URL", "http://localhost:8080"),
+		AppID:       getEnvOrDefault("APP_ID", "photobook-app"),
+		OwnerOpenID: os.Getenv("OWNER_OPEN_ID"),
 	}
 
 	// Validate required fields
