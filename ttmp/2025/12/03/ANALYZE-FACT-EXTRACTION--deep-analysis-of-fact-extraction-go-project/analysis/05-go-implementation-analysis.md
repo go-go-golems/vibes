@@ -9,11 +9,36 @@ Topics:
 DocType: analysis
 Intent: long-term
 Owners: []
-RelatedFiles: []
+RelatedFiles:
+    - Path: 2025/11/25/fact-extraction-go/DIARY_GO_GEPPETTO.md
+      Note: Implementation diary documenting geppetto challenges
+    - Path: 2025/11/25/fact-extraction-go/GO_EXTRACTOR_DESIGN.md
+      Note: Design document for Go implementation
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/cmd/go-extractor/main.go
+      Note: Go CLI entry point using Cobra
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/extractor/document.go
+      Note: Document loader component
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/extractor/geppetto.go
+      Note: Geppetto integration attempt
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/extractor/openai.go
+      Note: OpenAI extractor implementation (direct client)
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/extractor/parser.go
+      Note: Result parser component
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/extractor/prompt.go
+      Note: Prompt builder component
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/storage/sqlite.go
+      Note: SQLite storage implementation
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/types/types.go
+      Note: Core data structures for Go implementation
+    - Path: 2025/11/25/fact-extraction-go/test-geppetto/main.go
+      Note: Geppetto framework testing
+    - Path: 2025/11/25/fact-extraction-go/test-geppetto/main_direct.go
+      Note: Direct OpenAI client testing
 ExternalSources: []
 Summary: 'Analysis of Go implementation: architecture, geppetto integration challenges, performance characteristics, and comparison with Python'
 LastUpdated: 2025-12-03T09:42:19.364579584-05:00
 ---
+
 
 
 # Go Implementation Analysis

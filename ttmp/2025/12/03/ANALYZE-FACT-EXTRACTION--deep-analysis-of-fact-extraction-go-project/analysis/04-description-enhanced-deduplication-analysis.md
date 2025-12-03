@@ -9,11 +9,22 @@ Topics:
 DocType: analysis
 Intent: long-term
 Owners: []
-RelatedFiles: []
+RelatedFiles:
+    - Path: 2025/11/25/fact-extraction-go/entity_resolution_embeddings.py
+      Note: Embedding-based entity resolution using descriptions
+    - Path: 2025/11/25/fact-extraction-go/extract_facts_full_enhanced.py
+      Note: Extraction with entity/relation descriptions
+    - Path: 2025/11/25/fact-extraction-go/fact_extraction_full.db
+      Note: Database with entity descriptions table
+    - Path: 2025/11/25/fact-extraction-go/refined_dedup_complete.json
+      Note: Deduplication results showing description impact
+    - Path: 2025/11/25/fact-extraction-go/refined_deduplication.py
+      Note: Uses descriptions for deduplication
 ExternalSources: []
 Summary: Analysis of how entity and relation descriptions improve deduplication accuracy compared to name-only matching
 LastUpdated: 2025-12-03T09:42:19.287843425-05:00
 ---
+
 
 
 # Description-Enhanced Deduplication Analysis
