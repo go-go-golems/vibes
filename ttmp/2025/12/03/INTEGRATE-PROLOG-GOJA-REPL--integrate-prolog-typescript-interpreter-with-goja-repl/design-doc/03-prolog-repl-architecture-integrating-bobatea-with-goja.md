@@ -495,31 +495,34 @@ func main() {
 - [ ] Create `PrologEvaluator` struct
 - [ ] Implement `NewPrologEvaluator()` with Goja setup
 - [ ] Implement basic `EvaluateStream()` (clause handling only)
-- [ ] Test adding facts
+- [ ] Test adding facts using tmux (send keys, capture output, verify)
 
 ### Phase 2: Query Support
 - [ ] Implement query parsing and execution
 - [ ] Format solutions as markdown
 - [ ] Handle empty solutions
-- [ ] Test queries with variables
+- [ ] Test queries with variables using tmux (verify solutions displayed correctly)
 
 ### Phase 3: Output Formatting
 - [ ] Format bindings as tables
 - [ ] Pretty-print Prolog terms
 - [ ] Add structured log events
 - [ ] Improve error messages
+- [ ] Test formatting using tmux screenshots (verify visual output)
 
 ### Phase 4: Advanced Features
 - [ ] Custom commands (`/clear`, `/list`, `/help`)
 - [ ] Multiline support for rules
 - [ ] External editor integration
 - [ ] History persistence
+- [ ] Test all features using tmux (keyboard shortcuts, multiline, history navigation)
 
 ### Phase 5: Polish
 - [ ] Performance optimization
 - [ ] Better error handling
 - [ ] Documentation
 - [ ] Examples
+- [ ] Create automated tmux test suite (script all test cases)
 
 ## Key Integration Patterns
 
@@ -572,6 +575,207 @@ result, _ := vm.RunString(fmt.Sprintf(`
 `, varName, value))
 ```
 
+## Testing TUI Applications with tmux
+
+Testing TUI (Terminal User Interface) applications requires special handling since they interact directly with the terminal. tmux provides a controlled environment for testing, allowing you to send key events programmatically, capture screenshots, and verify output.
+
+### Why Use tmux for Testing
+
+TUI applications like the Prolog REPL need:
+- **Controlled terminal environment**: Consistent terminal size and capabilities
+- **Programmatic input**: Send key events without manual interaction
+- **Screenshot capture**: Verify visual output and layout
+- **Isolation**: Test without affecting your main terminal session
+
+### Setting Up tmux for Testing
+
+**Basic tmux session setup:**
+
+```bash
+# Create a new tmux session for testing
+tmux new-session -d -s prolog-repl-test -x 120 -y 40
+
+# Attach to see what's happening (optional)
+tmux attach-session -t prolog-repl-test
+```
+
+**Run the application in tmux:**
+
+```bash
+# Send command to tmux session
+tmux send-keys -t prolog-repl-test "./bin/prolog-repl" Enter
+
+# Wait for application to start
+sleep 1
+```
+
+### Sending Key Events
+
+tmux allows you to send any key combination programmatically:
+
+```bash
+# Send text input
+tmux send-keys -t prolog-repl-test "(likes alice bob)" Enter
+
+# Send special keys
+tmux send-keys -t prolog-repl-test "Up"      # Up arrow (history)
+tmux send-keys -t prolog-repl-test "Down"   # Down arrow
+tmux send-keys -t prolog-repl-test "C-c"    # Ctrl+C (quit)
+tmux send-keys -t prolog-repl-test "C-e"    # Ctrl+E (external editor)
+tmux send-keys -t prolog-repl-test "Tab"    # Tab key
+tmux send-keys -t prolog-repl-test "Escape" # Escape key
+
+# Send multiple keys in sequence
+tmux send-keys -t prolog-repl-test "?- (likes alice ?x)" Enter
+```
+
+### Capturing Screenshots
+
+Capture the current state of the tmux pane:
+
+```bash
+# Capture screenshot to file
+tmux capture-pane -t prolog-repl-test -p > screenshot.txt
+
+# Capture with escape sequences (ANSI colors)
+tmux capture-pane -t prolog-repl-test -e -p > screenshot-ansi.txt
+
+# Capture last N lines
+tmux capture-pane -t prolog-repl-test -S -100 -p > last-100-lines.txt
+```
+
+### Complete Testing Workflow
+
+**Example test script:**
+
+```bash
+#!/bin/bash
+
+# Create test session
+tmux new-session -d -s prolog-test -x 120 -y 40
+
+# Start the REPL
+tmux send-keys -t prolog-test "./bin/prolog-repl" Enter
+sleep 2
+
+# Test 1: Add a fact
+echo "Test 1: Adding fact"
+tmux send-keys -t prolog-test "(likes alice bob)" Enter
+sleep 1
+tmux capture-pane -t prolog-test -p > test1-output.txt
+
+# Test 2: Query
+echo "Test 2: Querying"
+tmux send-keys -t prolog-test "?- (likes alice ?x)" Enter
+sleep 1
+tmux capture-pane -t prolog-test -p > test2-output.txt
+
+# Test 3: History navigation
+echo "Test 3: History"
+tmux send-keys -t prolog-test "Up" Enter  # Navigate to previous command
+sleep 1
+tmux capture-pane -t prolog-test -p > test3-output.txt
+
+# Test 4: Quit
+echo "Test 4: Quitting"
+tmux send-keys -t prolog-test "C-c"
+sleep 1
+
+# Cleanup
+tmux kill-session -t prolog-test
+
+# Verify outputs
+echo "Checking test outputs..."
+grep -q "Added" test1-output.txt && echo "✓ Test 1 passed" || echo "✗ Test 1 failed"
+grep -q "Solution" test2-output.txt && echo "✓ Test 2 passed" || echo "✗ Test 2 failed"
+```
+
+### Testing Specific Features
+
+**Test multiline input:**
+
+```bash
+tmux send-keys -t prolog-test "(parent alice bob) :- (likes alice bob)" Enter
+tmux send-keys -t prolog-test "C-j"  # Add line in multiline mode
+tmux send-keys -t prolog-test "(likes bob alice)" Enter
+tmux send-keys -t prolog-test "Enter"  # Execute multiline
+```
+
+**Test external editor:**
+
+```bash
+# Set EDITOR environment variable
+tmux send-keys -t prolog-test "export EDITOR=vim" Enter
+tmux send-keys -t prolog-test "C-e"  # Open external editor
+# Editor will open - test manually or script vim commands
+```
+
+**Test error handling:**
+
+```bash
+# Send invalid Prolog syntax
+tmux send-keys -t prolog-test "(invalid syntax here" Enter
+sleep 1
+tmux capture-pane -t prolog-test -p > error-test.txt
+# Verify error message appears
+```
+
+### Automated Testing Script Template
+
+```bash
+#!/bin/bash
+set -e
+
+SESSION="prolog-repl-test"
+BINARY="./bin/prolog-repl"
+
+# Cleanup function
+cleanup() {
+    tmux kill-session -t "$SESSION" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Create session
+tmux new-session -d -s "$SESSION" -x 120 -y 40
+
+# Start application
+tmux send-keys -t "$SESSION" "$BINARY" Enter
+sleep 2
+
+# Run tests
+test_add_fact() {
+    echo "Testing: Add fact"
+    tmux send-keys -t "$SESSION" "(likes alice bob)" Enter
+    sleep 1
+    output=$(tmux capture-pane -t "$SESSION" -p)
+    echo "$output" | grep -q "Added\|✓" && echo "✓ Pass" || echo "✗ Fail"
+}
+
+test_query() {
+    echo "Testing: Query"
+    tmux send-keys -t "$SESSION" "?- (likes alice ?x)" Enter
+    sleep 1
+    output=$(tmux capture-pane -t "$SESSION" -p)
+    echo "$output" | grep -q "Solution" && echo "✓ Pass" || echo "✗ Fail"
+}
+
+# Run all tests
+test_add_fact
+test_query
+
+# Quit
+tmux send-keys -t "$SESSION" "C-c"
+```
+
+### Best Practices
+
+1. **Always cleanup**: Use trap to ensure tmux sessions are killed even on error
+2. **Add delays**: Use `sleep` between commands to allow UI to update
+3. **Capture output**: Save screenshots for debugging and verification
+4. **Test edge cases**: Invalid input, empty input, special characters
+5. **Verify visually**: Review captured screenshots to ensure UI looks correct
+6. **Test keyboard shortcuts**: All shortcuts (Ctrl+C, Ctrl+E, arrows, etc.)
+
 ## Troubleshooting
 
 ### Issue: PrologDB loses state between evaluations
@@ -597,6 +801,16 @@ result, _ := vm.RunString(fmt.Sprintf(`
 **Cause**: `SupportsMultiline()` returns false
 
 **Solution**: Return `true` for Prolog (rules need multiple lines)
+
+### Issue: tmux testing fails
+
+**Cause**: Application not receiving input or terminal size issues
+
+**Solution**: 
+- Verify tmux session exists: `tmux list-sessions`
+- Check terminal size: `tmux display-message -t session -p '#{window_width}x#{window_height}'`
+- Increase sleep delays between commands
+- Verify application is running: `tmux capture-pane -t session -p`
 
 ## References
 

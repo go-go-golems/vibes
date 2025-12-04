@@ -43,3 +43,13 @@ Created comprehensive playbook for building TypeScript + Goja applications in pk
 
 Created comprehensive architecture guide for integrating bobatea REPL with Goja Prolog interpreter, explaining evaluator interface, event streaming, and implementation patterns
 
+
+## 2025-12-04
+
+Created implementation tasks for Prolog REPL - 25 tasks organized into 5 phases covering evaluator setup, query support, formatting, advanced features, and polish
+
+
+## 2025-12-04
+
+Updated architecture guide and testing tasks to explicitly use tmux for TUI testing - added comprehensive tmux testing section with examples for sending keys, capturing screenshots, and automated testing
+
