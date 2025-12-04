@@ -313,9 +313,52 @@ LastUpdated: 2025-12-04T09:50:00-05:00
 ### Current Status
 
 ✅ **Documentation Complete**: REPL section added to guide  
+✅ **Guide Enhanced**: Added context paragraphs and technical sections  
+✅ **Tasks Updated**: Marked completed tasks appropriately  
 ✅ **Committed**: Changes committed to git  
 ✅ **Comprehensive**: Guide covers all aspects of REPL integration  
 ⏳ **Next**: Continue with Phase 3 features, or review guide for improvements
+
+## 2025-12-04 - Guide Enhancement: Context + Technical Sections
+
+### What I Did
+
+1. **Enhanced building-typescript-goja-applications.md**:
+   - Added full context paragraphs explaining "why" for each major section
+   - Added concise technical sections with tables and symbols for quick scanning
+   - Used emoji symbols (📁, 🔧, ✅, ⚡, etc.) for visual scanning
+   - Converted bullet lists to tables where appropriate
+   - Made troubleshooting sections scannable with diagnosis tables
+
+2. **Updated tasks.md**:
+   - Marked Phase 1 tasks as complete (15-19)
+   - Updated Phase 3 tasks to reflect actual implementation (formatVariableBindings)
+   - Marked Phase 5 tasks as complete (37-38: wiring up app, console integration)
+   - Updated Phase 4 multiline support (already implemented)
+
+### What Worked
+
+✅ **Context paragraphs**: Help new developers understand "why" before "how"  
+✅ **Technical tables**: Quick reference format for scanning  
+✅ **Visual symbols**: Emoji make sections scannable  
+✅ **Dual format**: Readable narrative + scannable technical details  
+
+### What I Learned
+
+1. **Documentation structure**:
+   - Context paragraph → explains the concept and why it matters
+   - Technical section → quick reference with tables/symbols
+   - This dual format serves both learning and reference needs
+
+2. **Visual scanning**:
+   - Tables are better than bullet lists for technical reference
+   - Symbols help categorize information (✅ success, ⚠️ warning, ⚡ performance)
+   - Consistent formatting makes scanning easier
+
+3. **Task tracking**:
+   - Need to regularly update tasks as work progresses
+   - Some tasks were completed but not marked
+   - Clear task descriptions help track what's actually done
 
 ### Files Created/Modified
 

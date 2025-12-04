@@ -39,3 +39,6 @@
 - [ ] Phase 5: Create automated tmux test suite (script all test cases with key events and screenshot verification)
 - [ ] Phase 3: Test formatting using tmux screenshots (verify visual output and layout)
 - [x] BUG FIX: Query bindings not displaying variable values - see bug report 05
+- [ ] Documentation: Create getting-started guide for Prolog REPL
+- [ ] Documentation: Create prolog-reference guide (syntax, examples, common patterns)
+- [ ] Documentation: Create prolog-implementation guide (detailed explanation with links to PAIP and original project)
