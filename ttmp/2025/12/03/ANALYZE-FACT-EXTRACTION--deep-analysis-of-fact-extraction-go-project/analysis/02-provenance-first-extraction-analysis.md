@@ -10,8 +10,14 @@ DocType: analysis
 Intent: long-term
 Owners: []
 RelatedFiles:
+    - Path: 2025/11/25/fact-extraction-go/DIARY_ADVANCED_FEATURES.md
+      Note: Diary documenting advanced features including provenance
     - Path: 2025/11/25/fact-extraction-go/DIARY_ENHANCED_EXTRACTION.md
       Note: Implementation diary for enhanced extraction
+    - Path: 2025/11/25/fact-extraction-go/DIARY_EXTRACTION.md
+      Note: Extraction implementation diary
+    - Path: 2025/11/25/fact-extraction-go/extract_facts.py
+      Note: Basic extraction without provenance for comparison
     - Path: 2025/11/25/fact-extraction-go/extract_facts_enhanced.py
       Note: Enhanced extraction with reasoning chains and citations
     - Path: 2025/11/25/fact-extraction-go/extract_facts_full_enhanced.py
@@ -26,6 +32,7 @@ ExternalSources: []
 Summary: 'Analysis of provenance-first extraction: reasoning chains, citations, and how they reduce hallucinations in LLM-powered fact extraction'
 LastUpdated: 2025-12-03T09:42:19.157053271-05:00
 ---
+
 
 
 

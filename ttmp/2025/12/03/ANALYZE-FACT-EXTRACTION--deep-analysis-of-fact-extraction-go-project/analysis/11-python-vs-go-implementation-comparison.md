@@ -9,11 +9,24 @@ Topics:
 DocType: analysis
 Intent: long-term
 Owners: []
-RelatedFiles: []
+RelatedFiles:
+    - Path: 2025/11/25/fact-extraction-go/extract_facts.py
+      Note: Basic Python implementation
+    - Path: 2025/11/25/fact-extraction-go/extract_facts_full_enhanced.py
+      Note: Full Python implementation with all features
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/cmd/go-extractor/main.go
+      Note: Go CLI implementation
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/extractor
+      Note: Go extractor package components
+    - Path: 2025/11/25/fact-extraction-go/go-extractor/pkg/storage/sqlite.go
+      Note: Go storage implementation
+    - Path: 2025/11/25/fact-extraction-go/main.go
+      Note: Go main implementation
 ExternalSources: []
 Summary: 'Comparison of Python and Go implementations: architecture, performance, features, code quality, and trade-offs'
 LastUpdated: 2025-12-03T09:42:22.141472015-05:00
 ---
+
 
 
 # Python vs Go Implementation Comparison
