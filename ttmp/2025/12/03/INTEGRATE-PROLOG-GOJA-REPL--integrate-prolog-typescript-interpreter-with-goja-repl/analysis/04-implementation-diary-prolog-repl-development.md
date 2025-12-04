@@ -257,11 +257,65 @@ LastUpdated: 2025-12-04T09:50:00-05:00
 ### Documentation Updates Needed
 
 - Update building-typescript-goja-applications.md guide with:
-  - REPL integration section
-  - bobatea evaluator pattern
-  - Event-based output handling
-  - Console integration for REPL
-  - Testing TUI applications with tmux
+  - REPL integration section ✅
+  - bobatea evaluator pattern ✅
+  - Event-based output handling ✅
+  - Console integration for REPL ✅
+  - Testing TUI applications with tmux ✅
+
+## 2025-12-04 - Documentation Update: REPL Integration Guide
+
+### What I Did
+
+1. **Updated building-typescript-goja-applications.md**:
+   - Added comprehensive "Adding bobatea REPL Support" section
+   - Included complete evaluator implementation example
+   - Documented event types and usage patterns
+   - Added tmux testing guide (full pane capture)
+   - Included troubleshooting section for REPL-specific issues
+   - Added common patterns (persistent state, function caching, error handling)
+   - Documented query handling with variables pattern
+
+2. **Used implementation experience**:
+   - Based guide on actual Prolog REPL implementation
+   - Included real patterns from evaluator.go
+   - Documented lessons learned (function caching, console setup, etc.)
+   - Added tmux testing best practices (no tail/head)
+
+### What Worked
+
+✅ **Comprehensive guide**: Covers all aspects of REPL integration  
+✅ **Real examples**: Based on actual working code  
+✅ **Practical patterns**: Function caching, persistent state, event handling  
+✅ **Testing guidance**: tmux testing with full pane capture  
+✅ **Troubleshooting**: Common issues and solutions documented  
+
+### What I Learned
+
+1. **Documentation structure**:
+   - Start with overview and project structure
+   - Show complete working examples
+   - Include troubleshooting for common issues
+   - Add best practices based on experience
+
+2. **REPL-specific patterns**:
+   - Console integration must be in `EvaluateStream()`
+   - Event-based output is key to rich formatting
+   - Function caching significantly improves performance
+   - Persistent state belongs in `NewEvaluator()`
+
+3. **Testing TUI**:
+   - Always capture full pane (no tail/head)
+   - Save captures to files for analysis
+   - Use appropriate delays
+   - Test keyboard shortcuts
+
+### Current Status
+
+✅ **Documentation Complete**: REPL section added to guide  
+✅ **Committed**: Changes committed to git  
+✅ **Comprehensive**: Guide covers all aspects of REPL integration  
+⏳ **Next**: Continue with Phase 3 features, or review guide for improvements
 
 ### Files Created/Modified
 

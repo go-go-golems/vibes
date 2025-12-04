@@ -24,7 +24,9 @@ This playbook walks through the complete process of setting up a TypeScript + Go
 
 ## Project Structure
 
-A well-organized project structure separates TypeScript source code, build artifacts, and Go application code. This separation keeps concerns clear and makes the build pipeline straightforward.
+When integrating TypeScript with Goja, you need to carefully organize your project to accommodate both the TypeScript build process and Go's embedding requirements. The structure must support a workflow where TypeScript code is compiled, bundled, and then embedded into the Go binary at compile time. This means separating concerns: TypeScript source lives in one directory, build artifacts are staged in another, and the final embedded bundle must be in a location that Go's `go:embed` directive can access (which has strict path requirements). Understanding this structure upfront prevents common issues with module loading, embedding paths, and build pipeline configuration.
+
+**📁 Directory Layout:**
 
 ```
 your-project/
@@ -43,15 +45,20 @@ your-project/
 └── go.mod
 ```
 
-**Key directories:**
-- `web/` contains all TypeScript source files
-- `cmd/your-app/assets/` holds the embedded JavaScript bundle (must be relative to main.go for go:embed)
-- `build/` contains the build pipeline configuration
-- `assets/` is a temporary staging area for the bundle before copying
+**🔑 Key Directories:**
+
+| Directory | Purpose | Notes |
+|-----------|---------|-------|
+| `web/` | TypeScript source | All `.ts` files, configs, and `node_modules` |
+| `cmd/your-app/assets/` | Embedded bundle | Must be relative to `main.go` for `go:embed` |
+| `build/` | Build pipeline | `generate.go` orchestrates TypeScript → bundle → copy |
+| `assets/` | Staging area | Temporary output before copying to embed location |
 
 ## Setting Up TypeScript
 
-TypeScript configuration must target CommonJS module format, which is required by goja_nodejs's module loader. The configuration balances modern TypeScript features with compatibility requirements.
+The TypeScript compiler configuration is critical because Goja's module system expects CommonJS format, not ES modules. This means your `tsconfig.json` must explicitly set `"module": "CommonJS"` even though modern TypeScript projects often default to ES modules. Additionally, you need to balance modern TypeScript features (like strict type checking) with Goja's JavaScript runtime capabilities, which don't support the absolute latest ECMAScript features. The target version (`ES2019`) is chosen specifically because it provides a good balance: modern enough for most use cases, but compatible with Goja's runtime. Getting this configuration wrong will result in modules that can't be loaded by Goja's `require()` system.
+
+**⚙️ Configuration Requirements:**
 
 Create `web/tsconfig.json`:
 
@@ -72,10 +79,15 @@ Create `web/tsconfig.json`:
 }
 ```
 
-**Critical settings:**
-- `"module": "CommonJS"` - Required for goja_nodejs compatibility
-- `"target": "ES2019"` - Balances modern features with Goja support
-- `"strict": true` - Enables full type checking
+**🔧 Critical Settings:**
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| `module` | `"CommonJS"` | ✅ Required for `goja_nodejs` module loader |
+| `target` | `"ES2019"` | ✅ Balances modern features with Goja compatibility |
+| `strict` | `true` | ✅ Enables full type checking (catch errors early) |
+| `esModuleInterop` | `true` | ✅ Allows importing CommonJS modules |
+| `skipLibCheck` | `true` | ⚡ Faster compilation (skips `.d.ts` checking) |
 
 Create `web/package.json`:
 
@@ -98,7 +110,9 @@ cd web && npm install
 
 ## Creating the TypeScript Entry Point
 
-The entry point wrapper imports your TypeScript modules and re-exports them in a way that Goja can easily access. This pattern provides a clean interface between Go and TypeScript code.
+The entry point file (`app.ts`) serves as a bridge between your TypeScript code and Goja's module system. While you could directly export classes and functions from your modules, Goja has limitations when it comes to instantiating ES6 classes directly from Go code. The factory function pattern solves this by providing a simple function that Goja can call to create instances. Additionally, re-exporting everything from a single entry point makes it clear what's available to Go code and simplifies module loading. This wrapper doesn't change your core TypeScript logic—it just provides a Go-friendly interface layer that makes integration seamless.
+
+**🔌 Entry Point Pattern:**
 
 Create `web/app.ts`:
 
@@ -116,14 +130,17 @@ export function createYourClass(): YourClass {
 }
 ```
 
-**Why this pattern:**
-- Factory functions provide a clean way to create instances from Go
-- Re-exports make all functionality accessible via a single module
-- Keeps your original TypeScript code unchanged and reusable
+**💡 Why This Pattern:**
+
+- ✅ **Factory functions**: Goja can't directly instantiate ES6 classes → factory functions solve this
+- ✅ **Single entry point**: All exports accessible via one module (`require("app.js")`)
+- ✅ **Separation of concerns**: Core logic unchanged, wrapper provides Go integration layer
 
 ## Building the JavaScript Bundle
 
-The build pipeline compiles TypeScript, bundles it into a single CommonJS file, and copies it to an embeddable location. This process ensures type safety while producing a bundle that Goja can load.
+The build pipeline is a multi-step process that transforms TypeScript source code into a single JavaScript bundle that can be embedded in your Go binary. First, TypeScript type-checks your code (without emitting JavaScript) to catch errors early. Then esbuild bundles all your TypeScript files and their dependencies into a single CommonJS file, resolving imports and inlining code. Finally, the bundle is copied to a location where Go's `go:embed` can access it—this must be a subdirectory relative to your `main.go` file, as `go:embed` doesn't support parent directory paths (`../`). This pipeline is typically automated using `go:generate` directives, which run shell commands as part of the build process.
+
+**🔨 Build Pipeline Steps:**
 
 Create `build/generate.go`:
 
@@ -160,10 +177,13 @@ func main() {
 }
 ```
 
-**Build steps explained:**
-1. **Type-check**: Validates TypeScript without emitting JavaScript
-2. **Bundle**: esbuild compiles and bundles into single CommonJS file
-3. **Copy**: Moves bundle to location where go:embed can access it
+**📋 Build Steps:**
+
+| Step | Command | Purpose |
+|------|---------|---------|
+| 1️⃣ **Type-check** | `tsc --noEmit` | ✅ Validates TypeScript (catches errors before bundling) |
+| 2️⃣ **Bundle** | `esbuild --bundle --format=cjs` | ✅ Compiles TS → JS, bundles dependencies, outputs CommonJS |
+| 3️⃣ **Copy** | `cp assets/app.js cmd/app/assets/` | ✅ Moves bundle to `go:embed`-accessible location |
 
 Run the build:
 
@@ -183,7 +203,9 @@ cp ../assets/app.js ../cmd/your-app/assets/app.js
 
 ## Implementing the Go Application
 
-The Go application creates a Goja runtime, sets up module loading, and executes your TypeScript code. The custom module loader intercepts `require()` calls and resolves them to your embedded bundle.
+The Go application is where everything comes together: it creates a Goja JavaScript runtime, configures a custom module loader that intercepts `require()` calls and resolves them to your embedded bundle, and then executes your TypeScript code. The custom loader is crucial because Goja's default module system doesn't know about your embedded files—it needs a function that maps module paths (like `"app.js"`) to the actual embedded file data. Once the module is loaded, you access its exports using Goja's object model: `ToObject()` converts the module to an object, `Get()` retrieves exported values, and `AssertFunction()` converts values to callable functions. This pattern allows you to call TypeScript functions, create instances via factory functions, and interact with your TypeScript code as if it were native Go code.
+
+**🚀 Go Application Components:**
 
 Create `cmd/your-app/main.go`:
 
@@ -295,11 +317,14 @@ func setupConsole(vm *goja.Runtime) {
 }
 ```
 
-**Key components:**
-- **go:embed**: Embeds the JavaScript bundle at compile time
-- **Custom loader**: Resolves `require()` calls to embedded files
-- **Module access**: Uses `ToObject()` and `Get()` to access exports
-- **Function calls**: Uses `AssertFunction()` and `Call()` to invoke methods
+**🔑 Key Components:**
+
+| Component | Purpose | Example |
+|-----------|--------|---------|
+| **`go:embed`** | Embeds JS bundle at compile time | `//go:embed assets/app.js` |
+| **Custom loader** | Maps `require()` paths → embedded files | `require.WithLoader(func(path) ([]byte, error))` |
+| **Module access** | Gets exports from loaded module | `module.ToObject(vm).Get("exportName")` |
+| **Function calls** | Invokes TypeScript functions | `func.Call(receiver, args...)` |
 
 ## Installing Dependencies
 
@@ -328,7 +353,13 @@ go build -o bin/your-app ./cmd/your-app
 
 ## Common Patterns
 
+These patterns represent the most common ways you'll interact with TypeScript code from Go. Understanding these will cover 90% of integration scenarios.
+
 ### Calling TypeScript Functions from Go
+
+When you export a function from TypeScript, accessing it from Go follows a consistent pattern: get the module exports, retrieve the function value, assert it's a function, then call it with arguments. Goja automatically converts Go values to JavaScript values using `ToValue()`, and converts JavaScript return values back to Go using `Export()` or type-specific methods like `ToString()`.
+
+**📞 Function Call Pattern:**
 
 Access exported functions directly from module exports:
 
@@ -341,7 +372,9 @@ result, _ := func(goja.Undefined(), vm.ToValue("arg1"), vm.ToValue("arg2"))
 
 ### Creating and Using Class Instances
 
-Use factory functions to create instances, then call methods:
+Since Goja can't directly instantiate ES6 classes, you use factory functions exported from your TypeScript entry point. The factory function creates and returns an instance, which you then use to call methods. Methods are accessed via `Get()` on the instance object, and called with the instance as the first argument (the `this` context in JavaScript).
+
+**🏭 Instance Creation Pattern:**
 
 ```go
 // Create instance
@@ -356,7 +389,9 @@ result, _ := method(instance, vm.ToValue("argument"))
 
 ### Passing Data Between Go and TypeScript
 
-Goja automatically converts between Go and JavaScript types:
+Goja provides automatic type conversion between Go and JavaScript, but understanding the conversion rules helps avoid surprises. Go maps become JavaScript objects, Go slices become JavaScript arrays, and Go structs become JavaScript objects with matching properties. When returning values from JavaScript, `Export()` converts to `interface{}`, while type-specific methods like `ToInteger()` or `ToString()` provide direct conversions.
+
+**🔄 Type Conversion:**
 
 ```go
 // Go → TypeScript
@@ -371,7 +406,9 @@ jsValue.ToString()
 
 ### Error Handling
 
-Handle JavaScript errors and Goja panics:
+JavaScript errors in Goja can manifest as returned errors from function calls or as panics if unhandled. Wrapping Goja operations in recover blocks prevents panics from crashing your Go application. Additionally, JavaScript `throw` statements become Go errors that you can check and handle appropriately.
+
+**⚠️ Error Handling Pattern:**
 
 ```go
 func() {
@@ -390,54 +427,77 @@ func() {
 
 ## Troubleshooting
 
+Common issues and their solutions based on real-world integration experience.
+
 ### Module Not Found Errors
 
 **Problem**: `require()` fails to find your module
 
-**Solutions**:
-- Verify the bundle exists at `cmd/your-app/assets/app.js`
-- Check the module loader path resolution logic
-- Ensure `go:embed` path matches actual file location (must be relative to source file)
+**🔍 Diagnosis & Solutions:**
+
+| Issue | Check | Fix |
+|-------|-------|-----|
+| Bundle missing | Verify `cmd/your-app/assets/app.js` exists | Run build pipeline |
+| Path mismatch | Check loader resolves `"app.js"` → `"assets/app.js"` | Update loader logic |
+| `go:embed` path | Must be relative to source file (no `../`) | Copy bundle to subdirectory |
 
 ### Type Errors in TypeScript
 
 **Problem**: TypeScript compilation fails
 
-**Solutions**:
-- Run `npx tsc --project web/tsconfig.json --noEmit` to see detailed errors
-- Check that all imports resolve correctly
-- Verify `tsconfig.json` includes all necessary files
+**🔍 Diagnosis & Solutions:**
+
+| Issue | Check | Fix |
+|-------|-------|-----|
+| Type errors | Run `tsc --noEmit` for details | Fix type issues in source |
+| Import resolution | Verify all imports resolve | Check `include` in `tsconfig.json` |
+| Missing types | Check `node_modules/@types` | Install missing type definitions |
 
 ### Runtime Errors in Goja
 
 **Problem**: JavaScript code executes but throws errors
 
-**Solutions**:
-- Enable sourcemaps (`--sourcemap=inline`) for better error messages
-- Check console output (ensure `setupConsole()` is called)
-- Verify all required functions are exported from `app.ts`
+**🔍 Diagnosis & Solutions:**
+
+| Issue | Check | Fix |
+|-------|-------|-----|
+| Unclear errors | Enable `--sourcemap=inline` | Better stack traces |
+| No console output | Call `setupConsole()` | Console logs visible |
+| Missing exports | Verify `app.ts` exports functions | Add missing exports |
+| Nil values | Check `ToObject()` returns non-nil | Add null checks |
 
 ### go:embed Path Issues
 
 **Problem**: `go:embed` cannot find files
 
-**Solutions**:
-- Files must be in subdirectories relative to the source file (no `../`)
-- Copy bundle to `cmd/your-app/assets/` before building
-- Verify file exists at build time (go:embed requires files at compile time)
+**🔍 Diagnosis & Solutions:**
+
+| Issue | Check | Fix |
+|-------|-------|-----|
+| Invalid path | No `../` in embed path | Use subdirectory relative to source |
+| File missing | Bundle exists at build time? | Run build pipeline before `go build` |
+| Wrong location | Path relative to `main.go`? | Copy to `cmd/app/assets/` |
 
 ## Best Practices
 
-- **Keep bundles small**: Only include code you actually use
-- **Use factory functions**: They provide cleaner APIs than direct class instantiation
-- **Enable sourcemaps**: They make debugging much easier
-- **Type-check first**: Catch errors before bundling
-- **Test incrementally**: Verify each step (type-check, bundle, embed, run)
-- **Document exports**: Make it clear what's available to Go code
+These practices come from real-world experience building TypeScript + Goja integrations. Following them will save you significant debugging time.
+
+**✅ Essential Practices:**
+
+| Practice | Why | Impact |
+|----------|-----|--------|
+| **Keep bundles small** | Faster load times, smaller binaries | ⚡ Performance |
+| **Use factory functions** | Goja can't instantiate ES6 classes directly | 🔧 Compatibility |
+| **Enable sourcemaps** | Better error messages and debugging | 🐛 Debugging |
+| **Type-check first** | Catch errors before bundling | ⚠️ Error prevention |
+| **Test incrementally** | Verify each build step works | 🔍 Early detection |
+| **Document exports** | Clear API for Go code | 📚 Maintainability |
+| **Cache function references** | Avoid repeated `Get()`/`AssertFunction()` calls | ⚡ Performance |
+| **Add null checks** | Prevent nil pointer panics | 🛡️ Robustness |
 
 ## Adding bobatea REPL Support
 
-The [bobatea](https://github.com/go-go-golems/bobatea) framework provides a powerful REPL (Read-Eval-Print Loop) component that can be integrated with your Goja-based TypeScript interpreter. This enables building interactive terminal applications with rich formatting, history, and event-based output.
+The [bobatea](https://github.com/go-go-golems/bobatea) framework provides a powerful REPL (Read-Eval-Print Loop) component that transforms your Goja-based interpreter into an interactive terminal application. Unlike simple command-line tools, a REPL provides a persistent session where users can enter code, see results, and build up state incrementally. bobatea's REPL adds professional features like syntax highlighting, command history, multiline input support, external editor integration, and rich output formatting (markdown, tables, structured logs). The key architectural pattern is the `Evaluator` interface: you implement this interface to provide language-specific evaluation logic, while bobatea handles all the UI, input management, and event routing. This separation means you focus on executing code and emitting results, while bobatea handles the complex terminal UI interactions.
 
 ### Overview
 
