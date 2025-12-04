@@ -103,3 +103,8 @@ Updated tasks.md to reflect completed work - Phase 1, Phase 2, Phase 3 (partial)
 
 Created three new documentation files: getting-started.md, prolog-reference.md, and prolog-implementation.md following glazed documentation guidelines
 
+
+## 2025-12-04
+
+Implemented custom commands /clear, /list, and /help. /clear clears the Prolog database, /list shows all facts and rules, /help displays help information.
+

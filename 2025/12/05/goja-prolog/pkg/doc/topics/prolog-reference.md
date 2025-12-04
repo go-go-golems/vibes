@@ -378,3 +378,4 @@ Solution 3: (path a d) Bindings:
 - Implementation details: `glaze help prolog-implementation`
 - Building TypeScript + Goja apps: `glaze help building-typescript-goja-applications`
 
+

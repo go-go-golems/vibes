@@ -21,14 +21,16 @@ type PrologEvaluator struct {
 	db     goja.Value // PrologDB instance (persistent)
 
 	// Goja function references (cached for performance)
-	createDBFunc     goja.Callable
-	parseClauseFunc  goja.Callable
-	parseTermFunc    goja.Callable
-	formatTermFunc   goja.Callable
-	addClauseFunc    goja.Callable
-	proveFunc        goja.Callable
+	createDBFunc      goja.Callable
+	parseClauseFunc   goja.Callable
+	parseTermFunc     goja.Callable
+	formatTermFunc    goja.Callable
+	addClauseFunc     goja.Callable
+	proveFunc         goja.Callable
 	substBindingsFunc goja.Callable
 	variablesInFunc   goja.Callable
+	clearFunc         goja.Callable
+	getAllClausesFunc goja.Callable
 }
 
 // NewPrologEvaluator creates a new Prolog evaluator with Goja runtime
@@ -134,6 +136,18 @@ func NewPrologEvaluator() (*PrologEvaluator, error) {
 		return nil, fmt.Errorf("prove is not a function")
 	}
 
+	clearValue := dbObj.Get("clear")
+	clearFunc, ok := goja.AssertFunction(clearValue)
+	if !ok {
+		return nil, fmt.Errorf("clear is not a function")
+	}
+
+	getAllClausesValue := dbObj.Get("getAllClauses")
+	getAllClausesFunc, ok := goja.AssertFunction(getAllClausesValue)
+	if !ok {
+		return nil, fmt.Errorf("getAllClauses is not a function")
+	}
+
 	return &PrologEvaluator{
 		vm:                vm,
 		module:            module,
@@ -146,6 +160,8 @@ func NewPrologEvaluator() (*PrologEvaluator, error) {
 		proveFunc:         proveFunc,
 		substBindingsFunc: substBindingsFunc,
 		variablesInFunc:   variablesInFunc,
+		clearFunc:         clearFunc,
+		getAllClausesFunc: getAllClausesFunc,
 	}, nil
 }
 
@@ -453,8 +469,181 @@ func (e *PrologEvaluator) setupConsole(emit func(repl.Event)) {
 
 // handleCommand processes custom slash commands
 func (e *PrologEvaluator) handleCommand(code string, emit func(repl.Event)) error {
-	// For now, let REPL handle built-in commands
-	// Custom commands can be added here later
+	parts := strings.Fields(code)
+	if len(parts) == 0 {
+		return nil
+	}
+
+	command := strings.ToLower(parts[0])
+
+	switch command {
+	case "/clear":
+		return e.handleClear(emit)
+	case "/list":
+		return e.handleList(emit)
+	case "/help":
+		return e.handleHelp(emit)
+	default:
+		emit(repl.Event{
+			Kind: repl.EventStderr,
+			Props: map[string]any{
+				"text":     fmt.Sprintf("Unknown command: %s. Type /help for available commands.", command),
+				"is_error": true,
+			},
+		})
+		return nil
+	}
+}
+
+// handleClear clears the Prolog database
+func (e *PrologEvaluator) handleClear(emit func(repl.Event)) error {
+	_, err := e.clearFunc(e.db)
+	if err != nil {
+		emit(repl.Event{
+			Kind: repl.EventStderr,
+			Props: map[string]any{
+				"text":     fmt.Sprintf("Error clearing database: %v", err),
+				"is_error": true,
+			},
+		})
+		return nil
+	}
+
+	emit(repl.Event{
+		Kind: repl.EventResultMarkdown,
+		Props: map[string]any{
+			"markdown": "✓ Database cleared",
+		},
+	})
+	return nil
+}
+
+// handleList lists all facts and rules in the database
+func (e *PrologEvaluator) handleList(emit func(repl.Event)) error {
+	clausesValue, err := e.getAllClausesFunc(e.db)
+	if err != nil {
+		emit(repl.Event{
+			Kind: repl.EventStderr,
+			Props: map[string]any{
+				"text":     fmt.Sprintf("Error listing clauses: %v", err),
+				"is_error": true,
+			},
+		})
+		return nil
+	}
+
+	clausesArray := clausesValue.ToObject(e.vm)
+	if clausesArray == nil {
+		emit(repl.Event{
+			Kind: repl.EventResultMarkdown,
+			Props: map[string]any{
+				"markdown": "**Database is empty.**",
+			},
+		})
+		return nil
+	}
+
+	length := clausesArray.Get("length").ToInteger()
+	if length == 0 {
+		emit(repl.Event{
+			Kind: repl.EventResultMarkdown,
+			Props: map[string]any{
+				"markdown": "**Database is empty.**",
+			},
+		})
+		return nil
+	}
+
+	var clauseStrs []string
+	for i := int64(0); i < length; i++ {
+		clauseValue := clausesArray.Get(fmt.Sprintf("%d", i))
+		if clauseValue == nil {
+			continue
+		}
+
+		clauseObj := clauseValue.ToObject(e.vm)
+		if clauseObj == nil {
+			continue
+		}
+
+		head := clauseObj.Get("head")
+		body := clauseObj.Get("body")
+
+		// Format head
+		headFormatted, err := e.formatTermFunc(goja.Undefined(), head)
+		if err != nil {
+			log.Error().Err(err).Int64("index", i).Msg("Failed to format clause head")
+			continue
+		}
+
+		// Check if it's a fact (empty body) or rule
+		bodyArray := body.ToObject(e.vm)
+		bodyLength := int64(0)
+		if bodyArray != nil {
+			bodyLength = bodyArray.Get("length").ToInteger()
+		}
+
+		if bodyLength == 0 {
+			// Fact
+			clauseStrs = append(clauseStrs, fmt.Sprintf("  %d. %s", i+1, headFormatted.String()))
+		} else {
+			// Rule - format body goals
+			var bodyGoals []string
+			for j := int64(0); j < bodyLength; j++ {
+				goalValue := bodyArray.Get(fmt.Sprintf("%d", j))
+				if goalValue == nil {
+					continue
+				}
+				goalFormatted, err := e.formatTermFunc(goja.Undefined(), goalValue)
+				if err != nil {
+					log.Error().Err(err).Int64("index", j).Msg("Failed to format goal")
+					continue
+				}
+				bodyGoals = append(bodyGoals, goalFormatted.String())
+			}
+			clauseStrs = append(clauseStrs, fmt.Sprintf("  %d. %s :- %s", i+1, headFormatted.String(), strings.Join(bodyGoals, ", ")))
+		}
+	}
+
+	markdown := fmt.Sprintf("**Database contents (%d clause(s)):**\n\n%s", length, strings.Join(clauseStrs, "\n"))
+	emit(repl.Event{
+		Kind: repl.EventResultMarkdown,
+		Props: map[string]any{
+			"markdown": markdown,
+		},
+	})
+	return nil
+}
+
+// handleHelp shows help information
+func (e *PrologEvaluator) handleHelp(emit func(repl.Event)) error {
+	helpText := "**Prolog REPL Commands:**\n\n" +
+		"**Custom Commands:**\n" +
+		"  /clear    - Clear the Prolog database\n" +
+		"  /list     - List all facts and rules in the database\n" +
+		"  /help     - Show this help message\n\n" +
+		"**Built-in REPL Commands:**\n" +
+		"  /quit     - Exit the REPL\n" +
+		"  /multiline - Toggle multiline mode\n" +
+		"  /edit     - Open external editor\n\n" +
+		"**Prolog Syntax:**\n" +
+		"  Facts:     (likes alice bob)\n" +
+		"  Rules:     (grandparent ?gp ?gc) :- (parent ?gp ?p) (parent ?p ?gc)\n" +
+		"  Queries:   ?- (likes alice ?x)\n\n" +
+		"**Keyboard Shortcuts:**\n" +
+		"  Enter     - Submit input\n" +
+		"  Up/Down   - Navigate history\n" +
+		"  Tab       - Switch focus\n" +
+		"  Ctrl+C    - Quit\n" +
+		"  Ctrl+E    - Open external editor\n\n" +
+		"For more information, see: 'glaze help getting-started' and 'glaze help prolog-reference'"
+
+	emit(repl.Event{
+		Kind: repl.EventResultMarkdown,
+		Props: map[string]any{
+			"markdown": helpText,
+		},
+	})
 	return nil
 }
 

@@ -210,3 +210,4 @@ prolog> ?- (member ?x (a b c))
 
 For more help, see `glaze help prolog-reference` for syntax details.
 
+
