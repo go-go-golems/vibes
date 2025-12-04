@@ -38,3 +38,8 @@ Fixed build pipeline - go:generate now includes copy step using shell command. U
 
 Created comprehensive playbook for building TypeScript + Goja applications in pkg/doc/topics/, following glazed documentation style guide
 
+
+## 2025-12-04
+
+Created comprehensive architecture guide for integrating bobatea REPL with Goja Prolog interpreter, explaining evaluator interface, event streaming, and implementation patterns
+
