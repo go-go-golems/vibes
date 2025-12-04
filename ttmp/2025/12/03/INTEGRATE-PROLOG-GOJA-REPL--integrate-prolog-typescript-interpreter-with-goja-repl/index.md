@@ -22,12 +22,15 @@ RelatedFiles:
         TypeScript Prolog interpreter - source implementation
     - Path: 2025/12/05/goja-prolog
       Note: New Go project implementing Prolog interpreter with Goja
+    - Path: 2025/12/05/goja-prolog/internal/prolog/evaluator.go
+      Note: PrologEvaluator implementation with Goja integration
     - Path: 2025/12/05/goja-prolog/pkg/doc/topics/building-typescript-goja-applications.md
       Note: Complete playbook for TypeScript + Goja integration
 ExternalSources: []
 Summary: Integrate TypeScript Prolog interpreter into Go binary using Goja VM, creating standalone REPL tool
 LastUpdated: 2025-12-03T19:16:15.432803496-05:00
 ---
+
 
 
 

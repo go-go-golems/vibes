@@ -17,14 +17,14 @@
 - [ ] Phase 1: Cache Goja function references (createDBFunc, parseClauseFunc, parseTermFunc, etc.)
 - [ ] Phase 1: Implement GetPrompt(), GetName(), SupportsMultiline(), GetFileExtension() methods
 - [ ] Phase 1: Implement basic EvaluateStream() with clause handling (parse and add facts)
-- [ ] Phase 1: Test adding Prolog facts through REPL using tmux (send keys, capture output, verify)
-- [ ] Phase 2: Implement query parsing (detect ?- or ? prefix)
-- [ ] Phase 2: Implement handleQuery() method with prove() execution
-- [ ] Phase 2: Format solutions as markdown events
-- [ ] Phase 2: Handle empty solutions case
-- [ ] Phase 2: Test queries with variables and multiple solutions using tmux (verify solutions displayed correctly)
-- [ ] Phase 3: Implement formatBindings() to extract and format variable bindings
-- [ ] Phase 3: Format bindings as tables using EventTable events
+- [x] Phase 1: Test adding Prolog facts through REPL using tmux (send keys, capture output, verify)
+- [x] Phase 2: Implement query parsing (detect ?- or ? prefix)
+- [x] Phase 2: Implement handleQuery() method with prove() execution
+- [x] Phase 2: Format solutions as markdown events
+- [x] Phase 2: Handle empty solutions case
+- [x] Phase 2: Test queries with variables and multiple solutions using tmux (verify solutions displayed correctly)
+- [x] Phase 3: Implement formatBindings() to extract and format variable bindings
+- [x] Phase 3: Format bindings as tables using EventTable events
 - [ ] Phase 3: Implement pretty-printing for Prolog terms
 - [ ] Phase 3: Add structured log events for debugging
 - [ ] Phase 3: Improve error messages with context

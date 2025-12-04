@@ -1,211 +1,86 @@
 package main
 
 import (
-	"embed"
-	"fmt"
-	"github.com/dop251/goja"
-	"github.com/dop251/goja_nodejs/require"
+	"context"
+	"flag"
+	"log"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/go-go-golems/bobatea/pkg/eventbus"
+	"github.com/go-go-golems/bobatea/pkg/logutil"
+	"github.com/go-go-golems/bobatea/pkg/repl"
+	"github.com/go-go-golems/bobatea/pkg/timeline"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"os"
+	"github.com/wesen/goja-prolog/internal/prolog"
 )
 
-//go:embed assets/prolog-ts.js
-var jsBundle embed.FS
+func parseLevel(s string) zerolog.Level {
+	switch s {
+	case "trace":
+		return zerolog.TraceLevel
+	case "debug":
+		return zerolog.DebugLevel
+	case "info":
+		return zerolog.InfoLevel
+	case "warn", "warning":
+		return zerolog.WarnLevel
+	case "error", "err":
+		return zerolog.ErrorLevel
+	default:
+		return zerolog.ErrorLevel
+	}
+}
 
 func main() {
-	setupLogger()
-	log.Info().Msg("Starting Prolog interpreter")
+	// CLI flags for logging
+	ll := flag.String("log-level", "error", "log level: trace, debug, info, warn, error")
+	lf := flag.String("log-file", "", "log file path (optional)")
+	flag.Parse()
 
-	// Create a new JavaScript VM
-	vm := goja.New()
-	log.Debug().Msg("JavaScript VM created")
-
-	// Set up module loader for embedded bundle
-	reg := require.NewRegistry(require.WithLoader(func(path string) ([]byte, error) {
-		log.Debug().Str("path", path).Msg("Loading module from embedded bundle")
-
-		// Handle different path requests
-		var fullPath string
-		if path == "prolog-ts.js" || path == "app.js" || path == "node_modules/prolog-ts.js" {
-			fullPath = "assets/prolog-ts.js"
-		} else {
-			return nil, fmt.Errorf("module not found: %s", path)
-		}
-
-		log.Debug().Str("path", path).Str("fullPath", fullPath).Msg("Resolving module path")
-
-		data, err := jsBundle.ReadFile(fullPath)
-		if err != nil {
-			log.Error().
-				Err(err).
-				Str("requestedPath", path).
-				Str("fullPath", fullPath).
-				Msg("Failed to load module from embedded bundle")
-			return nil, err
-		}
-		return data, nil
-	}))
-
-	// Hook Node polyfills (fs, path, etc.)
-	reg.Enable(vm)
-	log.Debug().Msg("Node.js polyfills enabled")
-
-	// Set up console
-	setupConsole(vm)
-
-	// Load the Prolog module
-	log.Info().Msg("Loading Prolog interpreter module")
-	prologModule := require.Require(vm, "prolog-ts.js")
-	if prologModule == nil {
-		log.Fatal().Msg("Failed to load Prolog module")
-	}
-
-	// Get the module exports
-	prologObj := prologModule.ToObject(vm)
-	if prologObj == nil {
-		log.Fatal().Msg("Failed to get Prolog module object")
-	}
-
-	// Get factory function
-	createDBValue := prologObj.Get("createPrologDB")
-	createDBFunc, ok := goja.AssertFunction(createDBValue)
-	if !ok {
-		log.Fatal().Msg("createPrologDB is not a function")
-	}
-
-	// Create PrologDB instance
-	log.Info().Msg("Creating PrologDB instance")
-	dbValue, err := createDBFunc(goja.Undefined())
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create PrologDB")
-	}
-	dbObj := dbValue.ToObject(vm)
-
-	// Get parseClause function
-	parseClauseValue := prologObj.Get("parseClause")
-	parseClauseFunc, ok := goja.AssertFunction(parseClauseValue)
-	if !ok {
-		log.Fatal().Msg("parseClause is not a function")
-	}
-
-	// Get parseTerm function
-	parseTermValue := prologObj.Get("parseTerm")
-	parseTermFunc, ok := goja.AssertFunction(parseTermValue)
-	if !ok {
-		log.Fatal().Msg("parseTerm is not a function")
-	}
-
-	// Get formatTerm function
-	formatTermValue := prologObj.Get("formatTerm")
-	formatTermFunc, ok := goja.AssertFunction(formatTermValue)
-	if !ok {
-		log.Fatal().Msg("formatTerm is not a function")
-	}
-
-	// Test: Add a fact
-	log.Info().Msg("Adding fact: (likes alice bob)")
-	factClauseValue, err := parseClauseFunc(goja.Undefined(), vm.ToValue("(likes alice bob)"))
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to parse clause")
-	}
-	factClause := factClauseValue.ToObject(vm)
-
-	headValue := factClause.Get("head")
-	bodyValue := factClause.Get("body")
-
-	// Call addClause method
-	addClauseValue := dbObj.Get("addClause")
-	addClauseFunc, ok := goja.AssertFunction(addClauseValue)
-	if !ok {
-		log.Fatal().Msg("addClause is not a function")
-	}
-
-	_, err = addClauseFunc(dbValue, headValue, bodyValue)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to add clause")
-	}
-	log.Info().Msg("Fact added successfully")
-
-	// Test: Query
-	log.Info().Msg("Querying: (likes alice ?x)")
-	queryValue, err := parseTermFunc(goja.Undefined(), vm.ToValue("(likes alice ?x)"))
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to parse query")
-	}
-
-	// Get prove method
-	proveValue := dbObj.Get("prove")
-	proveFunc, ok := goja.AssertFunction(proveValue)
-	if !ok {
-		log.Fatal().Msg("prove is not a function")
-	}
-
-	// Create empty bindings Map using JavaScript
-	bindingsValue, err := vm.RunString("new Map()")
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create Map")
-	}
-	bindings := bindingsValue
-
-	// Call prove
-	solutionsValue, err := proveFunc(dbValue, queryValue, bindings)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to prove query")
-	}
-
-	// Get solutions array
-	solutionsArray := solutionsValue.ToObject(vm)
-	solutionsLength := solutionsArray.Get("length").ToInteger()
-	log.Info().Int64("count", solutionsLength).Msg("Found solutions")
-
-	// Format and display solutions
-	if solutionsLength > 0 {
-		for i := int64(0); i < solutionsLength; i++ {
-			solutionValue := solutionsArray.Get(fmt.Sprintf("%d", i))
-			_ = solutionValue // Solution bindings (for future use)
-
-			// Format the query with bindings applied
-			formattedValue, err := formatTermFunc(goja.Undefined(), queryValue)
-			if err != nil {
-				log.Error().Err(err).Msg("Failed to format term")
-				continue
-			}
-			fmt.Printf("Solution %d: %s\n", i+1, formattedValue.String())
-		}
+	level := parseLevel(*ll)
+	if *lf != "" {
+		logutil.InitTUILoggingToFile(level, *lf)
 	} else {
-		fmt.Println("No solutions found")
+		logutil.InitTUILoggingToDiscard(level)
 	}
 
-	log.Info().Msg("Prolog interpreter test completed successfully")
-}
+	// Create the Prolog evaluator
+	evaluator, err := prolog.NewPrologEvaluator()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-func setupLogger() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr}).
-		With().
-		Caller().
-		Logger()
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-}
+	// Configure REPL
+	config := repl.DefaultConfig()
+	config.Title = "Prolog REPL"
+	config.Prompt = "prolog> "
+	config.Placeholder = "Enter Prolog facts, rules, or queries (use ?- for queries)"
+	config.EnableHistory = true
+	config.EnableExternalEditor = true
 
-func setupConsole(vm *goja.Runtime) {
-	console := vm.NewObject()
-	console.Set("log", func(call goja.FunctionCall) goja.Value {
-		args := make([]interface{}, len(call.Arguments))
-		for i, arg := range call.Arguments {
-			args[i] = arg.Export()
-		}
-		fmt.Println(args...)
-		return goja.Undefined()
-	})
-	console.Set("error", func(call goja.FunctionCall) goja.Value {
-		args := make([]interface{}, len(call.Arguments))
-		for i, arg := range call.Arguments {
-			args[i] = arg.Export()
-		}
-		fmt.Fprintln(os.Stderr, "ERROR:", args)
-		return goja.Undefined()
-	})
-	vm.Set("console", console)
-}
+	// Set up event bus (for timeline/structured output)
+	bus, err := eventbus.NewInMemoryBus()
+	if err != nil {
+		log.Fatal(err)
+	}
+	repl.RegisterReplToTimelineTransformer(bus)
 
+	// Create REPL model
+	model := repl.NewModel(evaluator, config, bus.Publisher)
+
+	// Create Bubble Tea program
+	p := tea.NewProgram(model, tea.WithAltScreen())
+	timeline.RegisterUIForwarder(bus, p)
+
+	// Run event bus and UI
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	errs := make(chan error, 2)
+	go func() { errs <- bus.Run(ctx) }()
+	go func() { _, e := p.Run(); cancel(); errs <- e }()
+
+	if e := <-errs; e != nil {
+		log.Fatal(e)
+	}
+}
