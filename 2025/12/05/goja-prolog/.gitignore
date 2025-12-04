@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+assets/
+cmd/prolog-repl/assets/
+
+# Node modules
+node_modules/
+web/node_modules/
+
+# TypeScript build output
+web/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
