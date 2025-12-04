@@ -78,3 +78,13 @@ Created bug report for query bindings not displaying variable values - formatBin
 
 Fixed query bindings display bug - now uses substBindings to substitute variables with their bound values. Added variablesIn and substBindings function caching. Query results now show substituted query terms and individual variable bindings.
 
+
+## 2025-12-04
+
+Updated bug report and diary with detailed fix information - bug resolved, bindings now display correctly
+
+
+## 2025-12-04
+
+Updated building-typescript-goja-applications.md guide with comprehensive bobatea REPL integration section - includes evaluator pattern, event handling, console integration, tmux testing, and troubleshooting
+

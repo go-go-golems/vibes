@@ -435,6 +435,536 @@ func() {
 - **Test incrementally**: Verify each step (type-check, bundle, embed, run)
 - **Document exports**: Make it clear what's available to Go code
 
+## Adding bobatea REPL Support
+
+The [bobatea](https://github.com/go-go-golems/bobatea) framework provides a powerful REPL (Read-Eval-Print Loop) component that can be integrated with your Goja-based TypeScript interpreter. This enables building interactive terminal applications with rich formatting, history, and event-based output.
+
+### Overview
+
+bobatea's REPL uses an `Evaluator` interface that you implement to provide language evaluation logic. For a Goja-based interpreter, you'll:
+
+1. Create an evaluator struct that wraps your Goja runtime
+2. Implement the `EvaluateStream` method to execute code and emit events
+3. Wire up the REPL with event bus and Bubble Tea UI
+4. Handle console integration for TypeScript `console.log`/`console.error`
+
+### Project Structure for REPL
+
+Add these components to your existing project:
+
+```
+your-project/
+├── cmd/
+│   └── your-app/
+│       ├── assets/
+│       └── main.go          # REPL main application
+├── internal/
+│   └── evaluator/
+│       └── evaluator.go    # Evaluator implementation
+└── web/
+    └── app.ts              # TypeScript entry point
+```
+
+### Installing bobatea Dependencies
+
+Add bobatea and Bubble Tea to your project:
+
+```bash
+go get github.com/go-go-golems/bobatea/pkg/repl@latest
+go get github.com/go-go-golems/bobatea/pkg/eventbus@latest
+go get github.com/charmbracelet/bubbletea@latest
+```
+
+### Creating the Evaluator
+
+The evaluator implements the `repl.Evaluator` interface and manages your Goja runtime:
+
+Create `internal/evaluator/evaluator.go`:
+
+```go
+package evaluator
+
+import (
+	"context"
+	"embed"
+	"fmt"
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/require"
+	"github.com/go-go-golems/bobatea/pkg/repl"
+	"github.com/rs/zerolog/log"
+	"strings"
+)
+
+//go:embed ../../cmd/your-app/assets/app.js
+var jsBundle embed.FS
+
+// YourEvaluator implements the bobatea Evaluator interface
+type YourEvaluator struct {
+	vm     *goja.Runtime
+	module goja.Value // Module exports
+	db     goja.Value // Persistent state (if needed)
+
+	// Cached function references for performance
+	createDBFunc     goja.Callable
+	parseFunc        goja.Callable
+	formatFunc       goja.Callable
+	evaluateFunc     goja.Callable
+}
+
+// NewYourEvaluator creates a new evaluator with Goja runtime
+func NewYourEvaluator() (*YourEvaluator, error) {
+	vm := goja.New()
+
+	// Set up module loader (same as main.go example)
+	reg := require.NewRegistry(require.WithLoader(func(path string) ([]byte, error) {
+		var fullPath string
+		if path == "app.js" || path == "node_modules/app.js" {
+			fullPath = "../../cmd/your-app/assets/app.js"
+		} else {
+			return nil, fmt.Errorf("module not found: %s", path)
+		}
+		return jsBundle.ReadFile(fullPath)
+	}))
+
+	reg.Enable(vm)
+
+	// Load module
+	module := require.Require(vm, "app.js")
+	if module == nil {
+		return nil, fmt.Errorf("failed to load module")
+	}
+
+	exports := module.ToObject(vm)
+
+	// Cache function references
+	createDBValue := exports.Get("createDB")
+	createDBFunc, ok := goja.AssertFunction(createDBValue)
+	if !ok {
+		return nil, fmt.Errorf("createDB is not a function")
+	}
+
+	db, err := createDBFunc(goja.Undefined())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create DB: %w", err)
+	}
+
+	// Cache other functions...
+	parseValue := exports.Get("parse")
+	parseFunc, _ := goja.AssertFunction(parseValue)
+
+	formatValue := exports.Get("format")
+	formatFunc, _ := goja.AssertFunction(formatValue)
+
+	return &YourEvaluator{
+		vm:          vm,
+		module:      module,
+		db:          db,
+		createDBFunc: createDBFunc,
+		parseFunc:   parseFunc,
+		formatFunc:  formatFunc,
+	}, nil
+}
+
+// EvaluateStream implements the Evaluator interface
+func (e *YourEvaluator) EvaluateStream(ctx context.Context, code string, emit func(repl.Event)) error {
+	code = strings.TrimSpace(code)
+
+	// Handle empty input
+	if code == "" {
+		return nil
+	}
+
+	// Set up console to emit events
+	e.setupConsole(emit)
+
+	// Handle slash commands
+	if strings.HasPrefix(code, "/") {
+		return e.handleCommand(code, emit)
+	}
+
+	// Execute code and emit results
+	return e.executeCode(code, emit)
+}
+
+// executeCode runs the code and emits results as events
+func (e *YourEvaluator) executeCode(code string, emit func(repl.Event)) error {
+	// Parse input
+	parsedValue, err := e.parseFunc(goja.Undefined(), e.vm.ToValue(code))
+	if err != nil {
+		emit(repl.Event{
+			Kind: repl.EventStderr,
+			Props: map[string]any{
+				"text":     fmt.Sprintf("Parse error: %v", err),
+				"is_error": true,
+			},
+		})
+		return nil
+	}
+
+	// Execute (example - adjust to your needs)
+	resultValue, err := e.evaluateFunc(e.db, parsedValue)
+	if err != nil {
+		emit(repl.Event{
+			Kind: repl.EventStderr,
+			Props: map[string]any{
+				"text":     fmt.Sprintf("Execution error: %v", err),
+				"is_error": true,
+			},
+		})
+		return nil
+	}
+
+	// Format and emit result
+	formattedValue, err := e.formatFunc(goja.Undefined(), resultValue)
+	if err != nil {
+		emit(repl.Event{
+			Kind: repl.EventResultMarkdown,
+			Props: map[string]any{
+				"markdown": fmt.Sprintf("Result: %v", resultValue.Export()),
+			},
+		})
+		return nil
+	}
+
+	emit(repl.Event{
+		Kind: repl.EventResultMarkdown,
+		Props: map[string]any{
+			"markdown": formattedValue.String(),
+		},
+	})
+
+	return nil
+}
+
+// setupConsole configures console.log/error to emit events
+func (e *YourEvaluator) setupConsole(emit func(repl.Event)) {
+	consoleObj := e.vm.NewObject()
+
+	consoleObj.Set("log", func(call goja.FunctionCall) goja.Value {
+		parts := make([]string, 0, len(call.Arguments))
+		for _, arg := range call.Arguments {
+			parts = append(parts, fmt.Sprint(arg.Export()))
+		}
+		message := strings.Join(parts, " ")
+
+		emit(repl.Event{
+			Kind: repl.EventLog,
+			Props: map[string]any{
+				"level":   "info",
+				"message": message,
+			},
+		})
+		return goja.Undefined()
+	})
+
+	consoleObj.Set("error", func(call goja.FunctionCall) goja.Value {
+		parts := make([]string, 0, len(call.Arguments))
+		for _, arg := range call.Arguments {
+			parts = append(parts, fmt.Sprint(arg.Export()))
+		}
+		message := strings.Join(parts, " ")
+
+		emit(repl.Event{
+			Kind: repl.EventStderr,
+			Props: map[string]any{
+				"text":     message,
+				"is_error": true,
+			},
+		})
+		return goja.Undefined()
+	})
+
+	e.vm.Set("console", consoleObj)
+}
+
+// handleCommand processes custom slash commands
+func (e *YourEvaluator) handleCommand(code string, emit func(repl.Event)) error {
+	// Custom commands like /clear, /help, etc.
+	switch code {
+	case "/clear":
+		// Clear state
+		return nil
+	case "/help":
+		emit(repl.Event{
+			Kind: repl.EventResultMarkdown,
+			Props: map[string]any{
+				"markdown": "**Available commands:**\n- `/clear` - Clear state\n- `/help` - Show this help",
+			},
+		})
+		return nil
+	}
+	return nil
+}
+
+// GetPrompt returns the prompt string
+func (e *YourEvaluator) GetPrompt() string {
+	return "your-lang> "
+}
+
+// GetName returns the evaluator name
+func (e *YourEvaluator) GetName() string {
+	return "YourLanguage"
+}
+
+// SupportsMultiline returns whether multiline input is supported
+func (e *YourEvaluator) SupportsMultiline() bool {
+	return true
+}
+
+// GetFileExtension returns the file extension for external editor
+func (e *YourEvaluator) GetFileExtension() string {
+	return ".yourlang"
+}
+```
+
+### Wiring Up the Main Application
+
+Create `cmd/your-app/main.go`:
+
+```go
+package main
+
+import (
+	"context"
+	"flag"
+	"log"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/go-go-golems/bobatea/pkg/eventbus"
+	"github.com/go-go-golems/bobatea/pkg/logutil"
+	"github.com/go-go-golems/bobatea/pkg/repl"
+	"github.com/go-go-golems/bobatea/pkg/timeline"
+	"github.com/rs/zerolog"
+	"github.com/your-org/your-project/internal/evaluator"
+)
+
+func parseLevel(s string) zerolog.Level {
+	switch s {
+	case "trace": return zerolog.TraceLevel
+	case "debug": return zerolog.DebugLevel
+	case "info": return zerolog.InfoLevel
+	case "warn", "warning": return zerolog.WarnLevel
+	case "error", "err": return zerolog.ErrorLevel
+	default: return zerolog.ErrorLevel
+	}
+}
+
+func main() {
+	// CLI flags for logging
+	ll := flag.String("log-level", "error", "log level: trace, debug, info, warn, error")
+	lf := flag.String("log-file", "", "log file path (optional)")
+	flag.Parse()
+
+	level := parseLevel(*ll)
+	if *lf != "" {
+		logutil.InitTUILoggingToFile(level, *lf)
+	} else {
+		logutil.InitTUILoggingToDiscard(level)
+	}
+
+	// Create evaluator
+	eval, err := evaluator.NewYourEvaluator()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Configure REPL
+	config := repl.DefaultConfig()
+	config.Title = "Your Language REPL"
+	config.Prompt = "your-lang> "
+	config.Placeholder = "Enter code here..."
+	config.EnableHistory = true
+	config.EnableExternalEditor = true
+
+	// Set up event bus
+	bus, err := eventbus.NewInMemoryBus()
+	if err != nil {
+		log.Fatal(err)
+	}
+	repl.RegisterReplToTimelineTransformer(bus)
+
+	// Create REPL model
+	model := repl.NewModel(eval, config, bus.Publisher)
+
+	// Create Bubble Tea program
+	p := tea.NewProgram(model, tea.WithAltScreen())
+	timeline.RegisterUIForwarder(bus, p)
+
+	// Run event bus and UI
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	errs := make(chan error, 2)
+	go func() { errs <- bus.Run(ctx) }()
+	go func() { _, e := p.Run(); cancel(); errs <- e }()
+
+	if e := <-errs; e != nil {
+		log.Fatal(e)
+	}
+}
+```
+
+### Event Types
+
+bobatea REPL uses structured events for output:
+
+- **`EventResultMarkdown`**: Formatted markdown output
+- **`EventStderr`**: Error messages
+- **`EventLog`**: Log messages
+- **`EventStructuredLog`**: Structured data (YAML/JSON)
+- **`EventTable`**: Tabular data
+
+Example event emission:
+
+```go
+emit(repl.Event{
+	Kind: repl.EventResultMarkdown,
+	Props: map[string]any{
+		"markdown": "**Result:**\n```\nvalue\n```",
+	},
+})
+```
+
+### Handling Queries with Variables
+
+For languages like Prolog that support queries with variables, use `substBindings` pattern:
+
+```go
+// Get variables in query
+queryVarsValue, _ := e.variablesInFunc(goja.Undefined(), queryValue)
+
+// For each solution
+for i := int64(0); i < length; i++ {
+	solutionValue := solutionsArray.Get(fmt.Sprintf("%d", i))
+	
+	// Substitute bindings in query
+	substitutedValue, _ := e.substBindingsFunc(goja.Undefined(), queryValue, solutionValue)
+	formattedResult, _ := e.formatTermFunc(goja.Undefined(), substitutedValue)
+	
+	// Format individual bindings
+	bindingsStr := e.formatVariableBindings(queryVarsValue, solutionValue)
+	
+	emit(repl.Event{
+		Kind: repl.EventResultMarkdown,
+		Props: map[string]any{
+			"markdown": fmt.Sprintf("**Solution %d:**\n%s\n%s", i+1, formattedResult.String(), bindingsStr),
+		},
+	})
+}
+```
+
+### Testing TUI Applications with tmux
+
+TUI applications require a terminal environment. Use tmux for automated testing:
+
+**Basic setup:**
+
+```bash
+# Create test session
+tmux new-session -d -s test-repl -x 120 -y 40
+
+# Start application
+tmux send-keys -t test-repl "./bin/your-app" Enter
+sleep 2
+
+# Send input
+tmux send-keys -t test-repl "your code here" Enter
+sleep 1
+
+# Capture output (full pane, no tail/head)
+tmux capture-pane -t test-repl -p > output.txt
+
+# Cleanup
+tmux send-keys -t test-repl "C-c"
+tmux kill-session -t test-repl
+```
+
+**Key points:**
+- Always capture full pane (don't use `tail`/`head`) to see complete UI state
+- Use appropriate delays between commands
+- Save captures to files for analysis
+- Test keyboard shortcuts: `Up`/`Down` (history), `Tab` (focus), `C-c` (quit)
+
+### Common Patterns
+
+**Persistent State:**
+
+```go
+// Create state once in NewEvaluator
+db, _ := createDBFunc(goja.Undefined())
+
+// Reuse across evaluations
+e.db = db
+```
+
+**Function Caching:**
+
+```go
+// Cache in NewEvaluator for performance
+parseFunc, _ := goja.AssertFunction(exports.Get("parse"))
+formatFunc, _ := goja.AssertFunction(exports.Get("format"))
+
+// Reuse in EvaluateStream
+result, _ := e.parseFunc(goja.Undefined(), e.vm.ToValue(code))
+```
+
+**Error Handling:**
+
+```go
+if err != nil {
+	emit(repl.Event{
+		Kind: repl.EventStderr,
+		Props: map[string]any{
+			"text":     fmt.Sprintf("Error: %v", err),
+			"is_error": true,
+		},
+	})
+	return nil // Don't return error, emit event instead
+}
+```
+
+### Troubleshooting REPL Integration
+
+**Issue**: REPL doesn't start or crashes immediately
+
+**Solutions**:
+- Check that evaluator is created successfully
+- Verify event bus is set up correctly
+- Ensure Bubble Tea program is created with `tea.WithAltScreen()`
+- Check for nil pointer panics in evaluator
+
+**Issue**: Events not displaying
+
+**Solutions**:
+- Verify `bus.Publisher` is passed to `NewModel()`
+- Check that `emit()` is being called
+- Ensure `repl.RegisterReplToTimelineTransformer(bus)` is called
+- Verify event bus is running (`bus.Run(ctx)`)
+
+**Issue**: Console.log not working
+
+**Solutions**:
+- Call `setupConsole(emit)` at the start of `EvaluateStream()`
+- Verify console object is set on VM: `e.vm.Set("console", consoleObj)`
+- Check that emit function is capturing events
+
+**Issue**: Multiline input not working
+
+**Solutions**:
+- Return `true` from `SupportsMultiline()`
+- Verify REPL config has multiline enabled (default: true)
+- Test with external editor integration (`C-e`)
+
+### Best Practices for REPL Integration
+
+- **Cache function references**: Store Goja functions in evaluator struct for performance
+- **Persistent state**: Create stateful objects (like databases) once in `NewEvaluator()`
+- **Event-based output**: Always use `emit()` instead of returning strings
+- **Console integration**: Set up console in `EvaluateStream()` to capture TypeScript logs
+- **Error handling**: Emit error events, don't return errors from `EvaluateStream()`
+- **Full pane capture**: When testing with tmux, capture entire pane to see complete UI state
+- **Null checks**: Always check for nil values when accessing Goja objects
+- **Function caching**: Cache all utility functions (`substBindings`, `formatTerm`, etc.) upfront
+
 ## Next Steps
 
 Once you have a working integration, consider:
@@ -444,4 +974,8 @@ Once you have a working integration, consider:
 - Creating helper utilities for common patterns
 - Adding comprehensive error handling
 - Performance profiling and optimization
+- Adding REPL support with bobatea (see section above)
+- Implementing custom commands (`/clear`, `/help`, etc.)
+- Adding syntax highlighting
+- Implementing history persistence
 

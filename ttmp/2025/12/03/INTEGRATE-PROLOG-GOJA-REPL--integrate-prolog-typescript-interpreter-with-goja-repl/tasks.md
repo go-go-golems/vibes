@@ -38,4 +38,4 @@
 - [ ] Phase 5: Add console integration (setupConsole with event emission)
 - [ ] Phase 5: Create automated tmux test suite (script all test cases with key events and screenshot verification)
 - [ ] Phase 3: Test formatting using tmux screenshots (verify visual output and layout)
-- [ ] BUG FIX: Query bindings not displaying variable values - see bug report 05
+- [x] BUG FIX: Query bindings not displaying variable values - see bug report 05
