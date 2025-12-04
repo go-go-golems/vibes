@@ -26,10 +26,13 @@ RelatedFiles:
       Note: PrologEvaluator implementation with Goja integration
     - Path: 2025/12/05/goja-prolog/pkg/doc/topics/building-typescript-goja-applications.md
       Note: Complete playbook for TypeScript + Goja integration
+    - Path: ttmp/2025/12/03/INTEGRATE-PROLOG-GOJA-REPL--integrate-prolog-typescript-interpreter-with-goja-repl/analysis/05-bug-report-query-bindings-not-displaying-variable-values.md
+      Note: Bug report for bindings display issue
 ExternalSources: []
 Summary: Integrate TypeScript Prolog interpreter into Go binary using Goja VM, creating standalone REPL tool
 LastUpdated: 2025-12-03T19:16:15.432803496-05:00
 ---
+
 
 
 

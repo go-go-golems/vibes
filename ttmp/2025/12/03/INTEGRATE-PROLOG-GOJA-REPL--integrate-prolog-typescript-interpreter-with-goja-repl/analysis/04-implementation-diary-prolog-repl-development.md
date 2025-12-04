@@ -162,10 +162,94 @@ LastUpdated: 2025-12-04T09:50:00-05:00
 
 1. **Test with tmux immediately**: Don't wait to test TUI - use tmux from start ✅
 2. **Extract bindings properly**: Need to iterate Map entries in Goja ✅
-3. **Add console integration**: Override console.log/error to emit events (like js-repl example)
+3. **Add console integration**: Override console.log/error to emit events ✅
 4. **Better error handling**: More context in error messages
 5. **Test incrementally**: Test each feature as implemented ✅
 6. **Improve binding display**: Consider table format for multiple bindings
+7. **Use substBindings from the start**: Should have used this approach initially instead of trying to extract Map entries manually ✅
+
+## 2025-12-04 - Bug Fix: Query Bindings Display
+
+### What I Did
+
+1. **Created bug report** (`05-bug-report-query-bindings-not-displaying-variable-values.md`)
+   - Documented the issue: queries showing unsubstituted variables
+   - Analyzed root cause: `formatBindings()` was returning function instead of calling it
+   - Proposed two solutions: Option A (fix function call) vs Option B (use substBindings)
+
+2. **Implemented Option B** (using `substBindings`)
+   - Added `substBindingsFunc` and `variablesInFunc` to evaluator struct
+   - Cached these functions from module exports in `NewPrologEvaluator()`
+   - Replaced `formatBindings()` with `formatVariableBindings()`:
+     - Uses `variablesIn()` to get query variables
+     - Uses `substBindings()` to substitute each variable
+     - Formats bindings using `formatTerm()`
+   - Updated `handleQuery()` to:
+     - Substitute entire query term with bindings
+     - Format substituted query (shows bound values)
+     - Display individual variable bindings separately
+
+3. **Fixed nil pointer issues**
+   - Added null checks throughout `formatVariableBindings()`
+   - Added error handling for function calls
+
+4. **Tested with tmux** (full capture, no tail/head)
+   - Verified fact addition works
+   - Verified query shows substituted query: `(likes alice bob)`
+   - Verified bindings display: `?x = bob`
+
+### What Worked
+
+✅ **substBindings approach**: Much cleaner than manual Map extraction  
+✅ **Function caching**: Caching `substBindings` and `variablesIn` works perfectly  
+✅ **Dual display**: Showing both substituted query AND individual bindings is clear  
+✅ **Full tmux capture**: Capturing entire pane shows complete UI state  
+✅ **Bug report process**: Documenting bugs before fixing helps clarify approach  
+
+### What Didn't Work / Challenges
+
+❌ **Initial approach**: Tried to manually extract Map entries - complex and error-prone  
+❌ **Function passing**: Can't pass Goja Callable to JavaScript - must call from Go  
+✅ **Fixed**: Used `substBindings` which is the correct Prolog approach  
+
+### What I Learned
+
+1. **substBindings is the right tool**: 
+   - Matches original TypeScript implementation pattern
+   - Handles all edge cases (compound terms, lists, nested variables)
+   - Cleaner than manual Map iteration
+
+2. **Always cache utility functions**:
+   - `substBindings`, `variablesIn`, `formatTerm` all needed
+   - Cache them all upfront in `NewPrologEvaluator()`
+
+3. **Display both views**:
+   - Substituted query shows the "answer" clearly
+   - Individual bindings show variable assignments explicitly
+   - Both are useful for different use cases
+
+4. **Full pane capture**:
+   - Don't use `tail`/`head` on tmux capture
+   - Need to see complete UI state
+   - Save to file for analysis
+
+5. **Bug report process**:
+   - Document bug before fixing
+   - Analyze root cause
+   - Propose solutions
+   - Document resolution
+
+### Current Status
+
+✅ **Bug Fixed**: Query bindings now display correctly  
+✅ **Tested**: Verified with tmux full capture  
+✅ **Documented**: Bug report updated with resolution  
+⏳ **Next**: Continue with Phase 3 features (table formatting, better error messages)  
+
+### Files Modified
+
+- `internal/prolog/evaluator.go` - Added substBindings/variablesIn caching, replaced formatBindings with formatVariableBindings
+- `analysis/05-bug-report-*.md` - Created bug report, updated with resolution
 
 ### Files Created/Modified
 

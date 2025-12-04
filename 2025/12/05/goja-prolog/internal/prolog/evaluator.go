@@ -21,12 +21,14 @@ type PrologEvaluator struct {
 	db     goja.Value // PrologDB instance (persistent)
 
 	// Goja function references (cached for performance)
-	createDBFunc    goja.Callable
-	parseClauseFunc goja.Callable
-	parseTermFunc   goja.Callable
-	formatTermFunc  goja.Callable
-	addClauseFunc   goja.Callable
-	proveFunc       goja.Callable
+	createDBFunc     goja.Callable
+	parseClauseFunc  goja.Callable
+	parseTermFunc    goja.Callable
+	formatTermFunc   goja.Callable
+	addClauseFunc    goja.Callable
+	proveFunc        goja.Callable
+	substBindingsFunc goja.Callable
+	variablesInFunc   goja.Callable
 }
 
 // NewPrologEvaluator creates a new Prolog evaluator with Goja runtime
@@ -102,6 +104,18 @@ func NewPrologEvaluator() (*PrologEvaluator, error) {
 		return nil, fmt.Errorf("formatTerm is not a function")
 	}
 
+	substBindingsValue := exports.Get("substBindings")
+	substBindingsFunc, ok := goja.AssertFunction(substBindingsValue)
+	if !ok {
+		return nil, fmt.Errorf("substBindings is not a function")
+	}
+
+	variablesInValue := exports.Get("variablesIn")
+	variablesInFunc, ok := goja.AssertFunction(variablesInValue)
+	if !ok {
+		return nil, fmt.Errorf("variablesIn is not a function")
+	}
+
 	// Get methods from PrologDB instance
 	dbObj := db.ToObject(vm)
 	if dbObj == nil {
@@ -121,15 +135,17 @@ func NewPrologEvaluator() (*PrologEvaluator, error) {
 	}
 
 	return &PrologEvaluator{
-		vm:              vm,
-		module:          module,
-		db:              db,
-		createDBFunc:    createDBFunc,
-		parseClauseFunc: parseClauseFunc,
-		parseTermFunc:   parseTermFunc,
-		formatTermFunc:  formatTermFunc,
-		addClauseFunc:   addClauseFunc,
-		proveFunc:       proveFunc,
+		vm:                vm,
+		module:            module,
+		db:                db,
+		createDBFunc:      createDBFunc,
+		parseClauseFunc:   parseClauseFunc,
+		parseTermFunc:     parseTermFunc,
+		formatTermFunc:    formatTermFunc,
+		addClauseFunc:     addClauseFunc,
+		proveFunc:         proveFunc,
+		substBindingsFunc: substBindingsFunc,
+		variablesInFunc:   variablesInFunc,
 	}, nil
 }
 
@@ -282,6 +298,12 @@ func (e *PrologEvaluator) handleQuery(ctx context.Context, code string, emit fun
 		return nil
 	}
 
+	// Get variables in the query for binding display
+	queryVarsValue, err := e.variablesInFunc(goja.Undefined(), queryValue)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get query variables")
+	}
+
 	// Format solutions
 	var solutionStrs []string
 	for i := int64(0); i < length; i++ {
@@ -291,32 +313,33 @@ func (e *PrologEvaluator) handleQuery(ctx context.Context, code string, emit fun
 			continue
 		}
 
-		solutionBindings := solutionValue.ToObject(e.vm)
-		if solutionBindings == nil {
-			log.Error().Int64("index", i).Msg("Solution bindings object is nil")
-			continue
-		}
-
-		// Extract bindings from Map
-		bindingsStr := e.formatBindings(solutionBindings, queryValue)
-
-		// Format the query term
-		queryFormatted, err := e.formatTermFunc(goja.Undefined(), queryValue)
+		// Substitute bindings in query to get the result with bound values
+		substitutedValue, err := e.substBindingsFunc(goja.Undefined(), queryValue, solutionValue)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to format term")
-			if bindingsStr != "" {
-				solutionStrs = append(solutionStrs, fmt.Sprintf("**Solution %d:**\n%s", i+1, bindingsStr))
-			} else {
-				solutionStrs = append(solutionStrs, fmt.Sprintf("**Solution %d:**\n(Query formatting failed)", i+1))
-			}
+			log.Error().Err(err).Int64("index", i).Msg("Failed to substitute bindings")
 			continue
 		}
 
-		if bindingsStr != "" {
-			solutionStrs = append(solutionStrs, fmt.Sprintf("**Solution %d:**\nQuery: %s\n%s", i+1, queryFormatted.String(), bindingsStr))
-		} else {
-			solutionStrs = append(solutionStrs, fmt.Sprintf("**Solution %d:**\n%s", i+1, queryFormatted.String()))
+		// Format the substituted query
+		formattedResult, err := e.formatTermFunc(goja.Undefined(), substitutedValue)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to format substituted term")
+			continue
 		}
+
+		// Build solution output
+		var solutionParts []string
+		solutionParts = append(solutionParts, formattedResult.String())
+
+		// Extract individual variable bindings for display
+		if queryVarsValue != nil {
+			bindingsStr := e.formatVariableBindings(queryVarsValue, solutionValue)
+			if bindingsStr != "" {
+				solutionParts = append(solutionParts, bindingsStr)
+			}
+		}
+
+		solutionStrs = append(solutionStrs, fmt.Sprintf("**Solution %d:**\n%s", i+1, strings.Join(solutionParts, "\n")))
 	}
 
 	emit(repl.Event{
@@ -329,83 +352,55 @@ func (e *PrologEvaluator) handleQuery(ctx context.Context, code string, emit fun
 	return nil
 }
 
-// formatBindings extracts and formats variable bindings from a solution Map
-func (e *PrologEvaluator) formatBindings(bindingsObj *goja.Object, queryValue goja.Value) string {
-	if bindingsObj == nil {
+// formatVariableBindings formats the variable bindings from query variables and solution bindings
+func (e *PrologEvaluator) formatVariableBindings(varsValue goja.Value, bindingsValue goja.Value) string {
+	if varsValue == nil || bindingsValue == nil {
 		return ""
 	}
 
-	// Use JavaScript to get Map entries as array
-	// Then format each value using Goja formatTerm function
-	result, err := e.vm.RunString(`
-		(function(bindings) {
-			if (!bindings || typeof bindings !== 'object') return [];
-			var entries = [];
-			if (bindings instanceof Map) {
-				for (var [key, value] of bindings.entries()) {
-					entries.push({key: key, value: value});
-				}
-			} else {
-				for (var key in bindings) {
-					if (bindings.hasOwnProperty(key)) {
-						entries.push({key: key, value: bindings[key]});
-					}
-				}
-			}
-			return entries;
-		})
-	`)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to extract bindings")
+	varsArray := varsValue.ToObject(e.vm)
+	if varsArray == nil {
 		return ""
 	}
 
-	entriesArray := result.ToObject(e.vm)
-	if entriesArray == nil {
-		return ""
-	}
-
-	length := entriesArray.Get("length").ToInteger()
+	length := varsArray.Get("length").ToInteger()
 	if length == 0 {
 		return ""
 	}
 
-	// Format each binding
 	var formattedLines []string
 	for i := int64(0); i < length; i++ {
-		entryValue := entriesArray.Get(fmt.Sprintf("%d", i))
-		if entryValue == nil {
+		varValue := varsArray.Get(fmt.Sprintf("%d", i))
+		if varValue == nil {
 			continue
 		}
 
-		entryObj := entryValue.ToObject(e.vm)
-		if entryObj == nil {
+		// Variable is a Term with type='variable' and name='?x'
+		varObj := varValue.ToObject(e.vm)
+		if varObj == nil {
 			continue
 		}
 
-		keyValue := entryObj.Get("key")
-		valueValue := entryObj.Get("value")
-		
-		if keyValue == nil || valueValue == nil {
+		varName := varObj.Get("name")
+		if varName == nil {
 			continue
 		}
 
-		// Format the value using formatTerm
-		formattedValue, err := e.formatTermFunc(goja.Undefined(), valueValue)
+		// Use substBindings to get the value for this variable
+		substitutedVar, err := e.substBindingsFunc(goja.Undefined(), varValue, bindingsValue)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to format binding value")
-			// Fallback to string representation
-			formattedLines = append(formattedLines, fmt.Sprintf("  - %s = %s", keyValue.String(), valueValue.String()))
-			continue
-		}
-		
-		if formattedValue == nil {
+			log.Error().Err(err).Str("var", varName.String()).Msg("Failed to substitute variable")
 			continue
 		}
 
-		keyStr := keyValue.String()
-		valueStr := formattedValue.String()
-		formattedLines = append(formattedLines, fmt.Sprintf("  - %s = %s", keyStr, valueStr))
+		// Format the substituted value
+		formattedValue, err := e.formatTermFunc(goja.Undefined(), substitutedVar)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to format substituted variable")
+			continue
+		}
+
+		formattedLines = append(formattedLines, fmt.Sprintf("  - %s = %s", varName.String(), formattedValue.String()))
 	}
 
 	if len(formattedLines) > 0 {

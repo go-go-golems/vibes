@@ -68,3 +68,13 @@ Phase 2 progress: Implemented binding extraction and formatting - bindings now d
 
 Updated implementation diary with Phase 2 progress - binding extraction working, tested successfully with tmux
 
+
+## 2025-12-04
+
+Created bug report for query bindings not displaying variable values - formatBindings() returns function instead of calling it
+
+
+## 2025-12-04
+
+Fixed query bindings display bug - now uses substBindings to substitute variables with their bound values. Added variablesIn and substBindings function caching. Query results now show substituted query terms and individual variable bindings.
+
