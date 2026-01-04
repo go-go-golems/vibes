@@ -1,0 +1,30 @@
+   Neovim Bubble Tea Plugin Demo
+
+  > 1. 🎯 Interactive Demo
+    2. 📝 Text Input Example
+    3. 📊 Progress Bar Demo
+    4. 🎨 Style Showcase
+    5. ❌ Quit
+
+
+
+
+
+    ↑/k up • ↓/j down • q quit • ? more
+
+<ome/ubuntu/.local/share/nvim/bubbletea-tui/bubbletea-tui --width=100 --height=14 14,0-1         All
+
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+[No Name]                                                                         0,0-1          All
+-- TERMINAL --

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpCodeSniffer">
+    <phpcs_settings>
+      <phpcs_by_interpreter asDefaultInterpreter="true" interpreter_id="bdb398bb-fe27-4ea8-8a7e-17f44c83ab5c" timeout="30000" />
+    </phpcs_settings>
+  </component>
+  <component name="Psalm">
+    <Psalm_settings>
+      <psalm_fixer_by_interpreter asDefaultInterpreter="true" interpreter_id="bdb398bb-fe27-4ea8-8a7e-17f44c83ab5c" timeout="60000" />
+    </Psalm_settings>
+  </component>
+</project>

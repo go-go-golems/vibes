@@ -1,0 +1,52 @@
+📝 Logging to: analysis_results/logs/analysis_tui.log
+[90m21:37:08[0m [32mINF[0m [1mpkg/gemini/client.go:53[0m[36m >[0m [1m🤖 Initialized Gemini client with model: gemini-2.5-flash[0m [36msession=[0mtui
+[?25l[?1049h[2J[H[?25l[?2004h[H  🎬 YouTube Analyzer                                                   
+                                                                        
+                                                                          
+                                                                          
+                                                                          
+                                                                          
+  ┌────────────────────────────────────────────────────────────────────┐  
+  │                                                                    │  
+  │   Enter YouTube URL or Text Prompt                                 │  
+  │                                                                    │  
+  │  Paste a YouTube URL to analyze video content, or enter a simple   │  
+  │  text prompt                                                       │  
+  │  for AI text generation with streaming output.                     │  
+  │                                                                    │  
+  │  Input:                                                            │  
+  │  ┌──────────────────────────────────────────────────┐              │  
+  │  │ > Enter YouTube URL or simple text prompt...     │              │  
+  │  └──────────────────────────────────────────────────┘              │  
+  │                                                                    │  
+  │                                                                    │  
+  │                                                                    │  
+  │    Press Enter to analyze • Esc to quit • Ctrl+L to clear          │  
+  │                                                                    │  
+  │                                                                    │  
+  │  enter submit • esc cancel • q quit                                │  
+  │                                                                    │  
+  └────────────────────────────────────────────────────────────────────┘  
+                                                                          
+                                                                          
+                                                                        
+  YouTube Analyzer v1.0                                                 [31;H[H 🎬 YouTube Video Analysis - Streaming                                                     
+📺 Video: https://www.youtube.com/watch?v=B580NvdXtjs                                      
+📊 Status: Initializing...                                                                 
+╭──────────────────────────────────────────────────────────────────────────╮               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+│                                                                          │               
+╰──────────────────────────────────────────────────────────────────────────╯               
+p/space pause/resume • s stop streaming • esc/b back to input • ? toggle help • ctrl+c quit[J[20;H

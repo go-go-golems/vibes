@@ -1,0 +1,158 @@
+{{define "content"}}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="bi bi-list"></i> Pelican Management</h1>
+                <a href="/pelicans/new" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add New Pelican
+                </a>
+            </div>
+            
+            <!-- Search and Filter Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{.Search}}" placeholder="Search by name or ID...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="healthy" {{if eq .StatusFilter "healthy"}}selected{{end}}>Healthy</option>
+                                <option value="sick" {{if eq .StatusFilter "sick"}}selected{{end}}>Sick</option>
+                                <option value="injured" {{if eq .StatusFilter "injured"}}selected{{end}}>Injured</option>
+                                <option value="quarantine" {{if eq .StatusFilter "quarantine"}}selected{{end}}>Quarantine</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="species" class="form-label">Species</label>
+                            <select class="form-select" id="species" name="species">
+                                <option value="">All Species</option>
+                                {{range .Species}}
+                                <option value="{{.}}" {{if eq $.SpeciesFilter .}}selected{{end}}>{{.}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <a href="/pelicans" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pelican Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Species</th>
+                                    <th>Status</th>
+                                    <th>Age</th>
+                                    <th>Location</th>
+                                    <th>Last Fed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .Pelicans}}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{.ID}}</span></td>
+                                    <td>
+                                        <strong>{{.Name}}</strong>
+                                        {{if .Notes}}<br><small class="text-muted">{{.Notes}}</small>{{end}}
+                                    </td>
+                                    <td>{{.Species}}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {{if eq .Status "healthy"}}bg-success
+                                            {{else if eq .Status "sick"}}bg-danger
+                                            {{else if eq .Status "injured"}}bg-warning
+                                            {{else if eq .Status "quarantine"}}bg-info
+                                            {{else}}bg-secondary{{end}}">
+                                            {{.Status}}
+                                        </span>
+                                    </td>
+                                    <td>{{.Age}} months</td>
+                                    <td>{{.Location}}</td>
+                                    <td>
+                                        {{if .LastFed}}
+                                            {{.LastFed.Format "Jan 2, 15:04"}}
+                                        {{else}}
+                                            <span class="text-warning">Never</span>
+                                        {{end}}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/pelicans/{{.ID}}" class="btn btn-outline-primary" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="/pelicans/{{.ID}}/edit" class="btn btn-outline-secondary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="/feeding/new?pelican_id={{.ID}}" class="btn btn-outline-success" title="Feed">
+                                                <i class="bi bi-cup-straw"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox display-4"></i>
+                                        <p class="mt-2">No pelicans found</p>
+                                        <a href="/pelicans/new" class="btn btn-primary">Add Your First Pelican</a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {{if gt .TotalPages 1}}
+                    <nav aria-label="Pelican pagination">
+                        <ul class="pagination justify-content-center mt-3">
+                            {{if gt .CurrentPage 1}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{sub .CurrentPage 1}}{{if .Search}}&search={{.Search}}{{end}}{{if .StatusFilter}}&status={{.StatusFilter}}{{end}}{{if .SpeciesFilter}}&species={{.SpeciesFilter}}{{end}}">Previous</a>
+                            </li>
+                            {{end}}
+                            
+                            {{range .PageNumbers}}
+                            <li class="page-item {{if eq . $.CurrentPage}}active{{end}}">
+                                <a class="page-link" href="?page={{.}}{{if $.Search}}&search={{$.Search}}{{end}}{{if $.StatusFilter}}&status={{$.StatusFilter}}{{end}}{{if $.SpeciesFilter}}&species={{$.SpeciesFilter}}{{end}}">{{.}}</a>
+                            </li>
+                            {{end}}
+                            
+                            {{if lt .CurrentPage .TotalPages}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{add .CurrentPage 1}}{{if .Search}}&search={{.Search}}{{end}}{{if .StatusFilter}}&status={{.StatusFilter}}{{end}}{{if .SpeciesFilter}}&species={{.SpeciesFilter}}{{end}}">Next</a>
+                            </li>
+                            {{end}}
+                        </ul>
+                    </nav>
+                    {{end}}
+                    
+                    <!-- Summary Info -->
+                    <div class="text-center text-muted mt-3">
+                        Showing {{len .Pelicans}} of {{.TotalCount}} pelicans
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

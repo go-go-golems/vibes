@@ -1,0 +1,376 @@
+/* Pelican Farm Management - Custom Styles */
+
+/* Custom Variables */
+:root {
+  --primary-color: #0d6efd;
+  --success-color: #198754;
+  --info-color: #0dcaf0;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --dark-color: #212529;
+  --light-color: #f8f9fa;
+  --pelican-orange: #ff7b00;
+  --farm-green: #228b22;
+  --water-blue: #4682b4;
+  --shadow-light: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-medium: 0 4px 8px rgba(0,0,0,0.15);
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+}
+
+/* Global Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: var(--dark-color);
+}
+
+/* Enhanced Navigation */
+.navbar {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue)) !important;
+  box-shadow: var(--shadow-medium);
+  padding: 0.75rem 0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.navbar-brand:hover {
+  transform: scale(1.05);
+}
+
+.navbar-brand i {
+  font-size: 1.8rem;
+  color: var(--pelican-orange);
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.nav-link {
+  transition: var(--transition);
+  border-radius: var(--border-radius);
+  margin: 0 0.25rem;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+}
+
+/* Enhanced Cards */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  border-bottom: 2px solid #e9ecef;
+  font-weight: 600;
+}
+
+/* Dashboard Stats Cards */
+.stats-card {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue));
+  color: white;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(50%, -50%);
+}
+
+.stats-card.success {
+  background: linear-gradient(135deg, var(--success-color), var(--farm-green));
+}
+
+.stats-card.info {
+  background: linear-gradient(135deg, var(--info-color), var(--water-blue));
+}
+
+.stats-card .fs-1 {
+  opacity: 0.8;
+  transition: var(--transition);
+}
+
+.stats-card:hover .fs-1 {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Farm Cards */
+.farm-card {
+  position: relative;
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+}
+
+.farm-card .card-header {
+  background: linear-gradient(135deg, var(--farm-green), var(--success-color));
+  color: white;
+}
+
+.farm-card .stats-row {
+  background: rgba(var(--farm-green), 0.05);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+/* Pelican Table Enhancements */
+.table {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+}
+
+.table thead {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue));
+  color: white;
+}
+
+.table tbody tr {
+  transition: var(--transition);
+}
+
+.table tbody tr:hover {
+  background-color: rgba(var(--primary-color), 0.05);
+  transform: scale(1.01);
+}
+
+/* Status Badges */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  position: relative;
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, var(--success-color), var(--farm-green)) !important;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.badge.bg-danger {
+  background: linear-gradient(135deg, var(--danger-color), #b71c1c) !important;
+  animation: pulse-red 2s ease-in-out infinite;
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, var(--warning-color), #ff8f00) !important;
+  color: var(--dark-color) !important;
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+}
+
+/* Button Enhancements */
+.btn {
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue));
+  border: none;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success-color), var(--farm-green));
+  border: none;
+}
+
+.btn-outline-primary:hover {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue));
+}
+
+/* Modal Enhancements */
+.modal-content {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue));
+  color: white;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+/* Form Enhancements */
+.form-control, .form-select {
+  border-radius: var(--border-radius);
+  border: 2px solid #e9ecef;
+  transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  transform: scale(1.02);
+}
+
+/* Alert Enhancements */
+.alert {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.alert::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 4px;
+  background: var(--primary-color);
+}
+
+.alert-success::before {
+  background: var(--success-color);
+}
+
+.alert-danger::before {
+  background: var(--danger-color);
+}
+
+/* Empty State Styling */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: linear-gradient(135deg, #fff, #f8f9fa);
+  border-radius: var(--border-radius);
+}
+
+.empty-state i {
+  color: #bbb;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Loading Animation */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Custom Utilities */
+.pelican-icon {
+  color: var(--pelican-orange);
+}
+
+.farm-icon {
+  color: var(--farm-green);
+}
+
+.water-icon {
+  color: var(--water-blue);
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-color), var(--water-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+/* Print Styles */
+@media print {
+  .navbar, .modal, .btn, .dropdown { display: none !important; }
+  .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+  body { background: white !important; color: black !important; }
+}

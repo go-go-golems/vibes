@@ -1,0 +1,225 @@
+{{define "content"}}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2"><i class="bi bi-house"></i> Dashboard</h1>
+            <p class="text-muted">Welcome to the Pelican Farm Management System</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Pelicans
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{if .Stats.TotalPelicans}}{{.Stats.TotalPelicans}}{{else}}0{{end}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-emoji-sunglasses fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Healthy Pelicans
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{if .Stats.HealthyPelicans}}{{.Stats.HealthyPelicans}}{{else}}0{{end}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-heart-pulse fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Today's Feedings
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{if .Stats.TodaysFeedings}}{{.Stats.TodaysFeedings}}{{else}}0{{end}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cup-straw fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Health Checks
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{if .Stats.PendingHealthChecks}}{{.Stats.PendingHealthChecks}}{{else}}0{{end}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-lightning"></i> Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="/pelicans/new" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-plus-circle"></i><br>
+                                Add New Pelican
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="/feeding/schedule" class="btn btn-success btn-lg w-100">
+                                <i class="bi bi-calendar-plus"></i><br>
+                                Schedule Feeding
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="/health/checkup" class="btn btn-info btn-lg w-100">
+                                <i class="bi bi-clipboard2-pulse"></i><br>
+                                Health Checkup
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <a href="/reports" class="btn btn-warning btn-lg w-100">
+                                <i class="bi bi-graph-up"></i><br>
+                                View Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities & Alerts -->
+    <div class="row">
+        <!-- Recent Activities -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-clock-history"></i> Recent Activities
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {{if .RecentActivities}}
+                    <div class="list-group list-group-flush">
+                        {{range .RecentActivities}}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{.Title}}</h6>
+                                <small class="text-muted">{{.Time}}</small>
+                            </div>
+                            <p class="mb-1">{{.Description}}</p>
+                            <small class="text-muted">{{.User}}</small>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <p class="text-muted text-center py-3">No recent activities to display.</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts & Notifications -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="bi bi-bell"></i> Alerts & Notifications
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {{if .Alerts}}
+                    <div class="list-group list-group-flush">
+                        {{range .Alerts}}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    {{if eq .Priority "high"}}
+                                    <span class="badge bg-danger">High</span>
+                                    {{else if eq .Priority "medium"}}
+                                    <span class="badge bg-warning">Medium</span>
+                                    {{else}}
+                                    <span class="badge bg-info">Low</span>
+                                    {{end}}
+                                    {{.Title}}
+                                </h6>
+                                <small class="text-muted">{{.Time}}</small>
+                            </div>
+                            <p class="mb-1">{{.Message}}</p>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <p class="text-muted text-center py-3">No alerts at this time.</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #007bff !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #28a745 !important;
+}
+.border-left-info {
+    border-left: 0.25rem solid #17a2b8 !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #ffc107 !important;
+}
+.text-gray-800 {
+    color: #343a40 !important;
+}
+.text-gray-300 {
+    color: #6c757d !important;
+}
+</style>
+{{end}}

@@ -1,0 +1,452 @@
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]cd ~/ink-goja-project/go-app && go run input-test.go
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]cd ~/ink-goja-project/go-app && go run input-test.go
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]cd ~/ink-goja-project/go-app && go run input-test.go
+Testing input handling...
+
+Step 1: Sending input '+'
+Rendered output:
+================
+🚀 Enhanced TUI + Goja Demo
+
+┌──────────────────────────────────────┐
+│           Counter Display            │
+├──────────────────────────────────────┤
+│ Value: 1                             │
+│ Last action: Increment               │
+└──────────────────────────────────────┘
+
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+
+┌────────────────────────────────────────────────┐
+│                    Commands                    │
+├────────────────────────────────────────────────┤
+│ + : Increment counter                          │
+│ - : Decrement counter                          │
+│ r : Reset counter                              │
+│ p : Increase progress                          │
+└────────────────────────────────────────────────┘
+
+Counter incremented to 1
+
+================
+
+Step 2: Sending input '+'
+Rendered output:
+================
+🚀 Enhanced TUI + Goja Demo
+
+┌──────────────────────────────────────┐
+│           Counter Display            │
+├──────────────────────────────────────┤
+│ Value: 2                             │
+│ Last action: Increment               │
+└──────────────────────────────────────┘
+
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+
+┌────────────────────────────────────────────────┐
+│                    Commands                    │
+├────────────────────────────────────────────────┤
+│ + : Increment counter                          │
+│ - : Decrement counter                          │
+│ r : Reset counter                              │
+│ p : Increase progress                          │
+└────────────────────────────────────────────────┘
+
+Counter incremented to 2
+────────────────────────────────────────────────────────────────────────────────
+[CMD_BEGIN]
+ubuntu@c168ca4694ff:~/ink-goja-project/vhs-recordings
+[CMD_END]cd ~/ink-goja-project/go-app && go run input-test.go
+Testing input handling...
+
+Step 1: Sending input '+'
+Rendered output:
+================
+🚀 Enhanced TUI + Goja Demo
+
+┌──────────────────────────────────────┐
+│           Counter Display            │
+├──────────────────────────────────────┤
+│ Value: 1                             │
+│ Last action: Increment               │
+└──────────────────────────────────────┘
+
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+
+┌────────────────────────────────────────────────┐
+│                    Commands                    │
+├────────────────────────────────────────────────┤
+│ + : Increment counter                          │
+│ - : Decrement counter                          │
+│ r : Reset counter                              │
+│ p : Increase progress                          │
+└────────────────────────────────────────────────┘
+
+Counter incremented to 1
+
+================
+
+Step 2: Sending input '+'
+Rendered output:
+================
+🚀 Enhanced TUI + Goja Demo
+
+┌──────────────────────────────────────┐
+│           Counter Display            │
+├──────────────────────────────────────┤
+│ Value: 2                             │
+│ Last action: Increment               │
+└──────────────────────────────────────┘
+
+Progress: [░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
+
+┌────────────────────────────────────────────────┐
+│                    Commands                    │
+├────────────────────────────────────────────────┤
+│ + : Increment counter                          │
+│ - : Decrement counter                          │
+│ r : Reset counter                              │
+│ p : Increase progress                          │
+└────────────────────────────────────────────────┘
+
+Counter incremented to 2
+────────────────────────────────────────────────────────────────────────────────

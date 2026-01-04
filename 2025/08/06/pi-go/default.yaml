@@ -1,0 +1,206 @@
+# Pi-Go Configuration File
+# This is an example configuration file showing all available options
+
+global:
+  # Default storage path for HuggingFace models
+  default_storage_path: "~/.cache/huggingface"
+  
+  # Default user for SSH connections
+  default_user: "root"
+  
+  # Default GPU memory allocation (0.0-1.0)
+  default_gpu_memory: 0.8
+  
+  # Default timeout for operations
+  default_timeout: "30s"
+  
+  # Enable automatic cleanup of stopped models
+  auto_cleanup: true
+  
+  # Interval for health checks
+  check_interval: "30s"
+  
+  # Maximum number of retries for failed operations
+  max_retries: 3
+  
+  # Delay between retries
+  retry_delay: "5s"
+
+ssh:
+  # Default SSH port
+  default_port: 22
+  
+  # Connection timeout
+  connect_timeout: "30s"
+  
+  # Keep-alive interval
+  keep_alive: "30s"
+  
+  # Maximum number of concurrent SSH connections
+  max_connections: 10
+  
+  # Port range for SSH tunnels
+  tunnel_port_range:
+    start: 8001
+    end: 8100
+  
+  # Preferred SSH key types (in order of preference)
+  preferred_key_types:
+    - "ed25519"
+    - "ecdsa"
+    - "rsa"
+  
+  # Strict host key checking
+  strict_host_key_check: false
+  
+  # Known hosts file location
+  user_known_hosts_file: "~/.ssh/known_hosts"
+
+tui:
+  # Theme name (default, dark, light)
+  theme: "default"
+  
+  # Refresh interval for TUI updates
+  refresh_interval: "2s"
+  
+  # Show help panel
+  show_help: true
+  
+  # Enable mouse support
+  enable_mouse: true
+  
+  # Panel layout configuration
+  panel_layout:
+    overview:
+      enabled: true
+      width: 50
+      height: 10
+      x: 0
+      y: 0
+    pods:
+      enabled: true
+      width: 50
+      height: 15
+      x: 0
+      y: 10
+    models:
+      enabled: true
+      width: 50
+      height: 15
+      x: 50
+      y: 0
+    logs:
+      enabled: true
+      width: 100
+      height: 10
+      x: 0
+      y: 25
+  
+  # Color scheme
+  colors:
+    primary: "#00ff00"
+    secondary: "#0080ff"
+    success: "#00ff00"
+    warning: "#ffff00"
+    error: "#ff0000"
+    background: "#000000"
+    foreground: "#ffffff"
+    border: "#808080"
+    highlight: "#ffff00"
+
+logging:
+  # Log level (debug, info, warn, error)
+  level: "info"
+  
+  # Log format (text, json)
+  format: "text"
+  
+  # Log output (stdout, stderr, file)
+  output: "stdout"
+  
+  # Log file path (when output is "file")
+  # file: "/var/log/pi-go.log"
+  
+  # Maximum log file size in MB
+  max_size: 100
+  
+  # Maximum number of log file backups
+  max_backups: 3
+  
+  # Maximum age of log files in days
+  max_age: 28
+  
+  # Compress old log files
+  compress: true
+
+# Pod configurations
+pods:
+  # Currently active pod
+  active: ""
+  
+  # Pod definitions (populated by 'pi pod add' commands)
+  pods: {}
+
+# Model configurations
+models:
+  # Running models (populated by 'pi model start' commands)
+  models: {}
+  
+  # Model templates for reuse
+  templates:
+    # Example template for Phi-3 Mini
+    phi3-mini:
+      name: "phi3-mini"
+      description: "Microsoft Phi-3 Mini 128K Instruct model"
+      model_id: "microsoft/Phi-3-mini-128k-instruct"
+      gpu_memory: 0.2
+      all_gpus: false
+      vllm_args:
+        - "--disable-log-requests"
+        - "--disable-log-stats"
+      tool_parser: ""
+      tags:
+        - "small"
+        - "instruct"
+        - "microsoft"
+    
+    # Example template for Qwen2.5
+    qwen2-7b:
+      name: "qwen2-7b"
+      description: "Qwen2.5 7B Instruct model"
+      model_id: "Qwen/Qwen2.5-7B-Instruct"
+      gpu_memory: 0.3
+      all_gpus: false
+      vllm_args:
+        - "--disable-log-requests"
+        - "--disable-log-stats"
+      tool_parser: "hermes"
+      tags:
+        - "medium"
+        - "instruct"
+        - "qwen"
+    
+    # Example template for large model with tensor parallelism
+    llama3-70b:
+      name: "llama3-70b"
+      description: "Llama 3 70B Instruct with tensor parallelism"
+      model_id: "meta-llama/Meta-Llama-3-70B-Instruct"
+      gpu_memory: 0.9
+      all_gpus: true
+      vllm_args:
+        - "--disable-log-requests"
+        - "--disable-log-stats"
+        - "--tensor-parallel-size"
+        - "4"
+      tool_parser: "llama3_json"
+      tags:
+        - "large"
+        - "instruct"
+        - "llama"
+        - "tensor-parallel"
+
+# Configuration version and metadata
+version: "1.0.0"
+updated_at: "2025-01-01T00:00:00Z"
+
+

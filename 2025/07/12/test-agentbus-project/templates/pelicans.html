@@ -1,0 +1,235 @@
+{{define "content"}}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-egg me-2"></i>
+                Pelican Management
+            </h1>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPelicanModal">
+                <i class="bi bi-plus-circle me-1"></i>Add Pelican
+            </button>
+        </div>
+    </div>
+</div>
+
+{{if .Pelicans}}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Species</th>
+                                <th>Farm</th>
+                                <th>Status</th>
+                                <th>Age</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Pelicans}}
+                            <tr>
+                                <td>
+                                    <strong>{{.Name}}</strong>
+                                    {{if .Description}}
+                                    <br><small class="text-muted">{{.Description}}</small>
+                                    {{end}}
+                                </td>
+                                <td>{{.Species}}</td>
+                                <td>{{.Farm.Name}}</td>
+                                <td>
+                                    <span class="badge {{if eq .Status "healthy"}}bg-success{{else if eq .Status "sick"}}bg-danger{{else}}bg-warning{{end}}">
+                                        {{.Status}}
+                                    </span>
+                                </td>
+                                <td>{{.Age}} months</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editPelican({{.ID}}, '{{.Name}}', '{{.Species}}', {{.FarmID}}, '{{.Status}}', {{.Age}}, '{{.Description}}')" data-bs-toggle="modal" data-bs-target="#editPelicanModal">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePelican({{.ID}}, '{{.Name}}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{else}}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body empty-state">
+                <i class="bi bi-egg-fried fs-1"></i>
+                <h4 class="text-muted">No pelicans yet</h4>
+                <p class="text-muted">Add your first pelican to get started with farm management.</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPelicanModal">
+                    <i class="bi bi-plus-circle me-1"></i>Add First Pelican
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+<!-- Add Pelican Modal -->
+<div class="modal fade" id="addPelicanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/pelicans" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Pelican
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="species" class="form-label">Species *</label>
+                        <select class="form-select" id="species" name="species" required>
+                            <option value="">Select species...</option>
+                            <option value="American White Pelican">American White Pelican</option>
+                            <option value="Brown Pelican">Brown Pelican</option>
+                            <option value="Great White Pelican">Great White Pelican</option>
+                            <option value="Australian Pelican">Australian Pelican</option>
+                            <option value="Dalmatian Pelican">Dalmatian Pelican</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="farm_id" class="form-label">Farm *</label>
+                        <select class="form-select" id="farm_id" name="farm_id" required>
+                            <option value="">Select farm...</option>
+                            {{range .Farms}}
+                            <option value="{{.ID}}">{{.Name}} - {{.Location}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="healthy">Healthy</option>
+                            <option value="sick">Sick</option>
+                            <option value="recovering">Recovering</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age (months)</label>
+                        <input type="number" class="form-control" id="age" name="age" min="0" max="360">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Pelican</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Pelican Modal -->
+<div class="modal fade" id="editPelicanModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editPelicanForm" method="POST">
+                <input type="hidden" id="editMethod" name="_method" value="PUT">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil me-2"></i>Edit Pelican
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Name *</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editSpecies" class="form-label">Species *</label>
+                        <select class="form-select" id="editSpecies" name="species" required>
+                            <option value="American White Pelican">American White Pelican</option>
+                            <option value="Brown Pelican">Brown Pelican</option>
+                            <option value="Great White Pelican">Great White Pelican</option>
+                            <option value="Australian Pelican">Australian Pelican</option>
+                            <option value="Dalmatian Pelican">Dalmatian Pelican</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFarmId" class="form-label">Farm *</label>
+                        <select class="form-select" id="editFarmId" name="farm_id" required>
+                            {{range .Farms}}
+                            <option value="{{.ID}}">{{.Name}} - {{.Location}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editStatus" class="form-label">Status</label>
+                        <select class="form-select" id="editStatus" name="status">
+                            <option value="healthy">Healthy</option>
+                            <option value="sick">Sick</option>
+                            <option value="recovering">Recovering</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editAge" class="form-label">Age (months)</label>
+                        <input type="number" class="form-control" id="editAge" name="age" min="0" max="360">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Pelican</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editPelican(id, name, species, farmId, status, age, description) {
+    document.getElementById('editPelicanForm').action = '/pelicans/' + id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editSpecies').value = species;
+    document.getElementById('editFarmId').value = farmId;
+    document.getElementById('editStatus').value = status;
+    document.getElementById('editAge').value = age;
+    document.getElementById('editDescription').value = description;
+}
+
+function deletePelican(id, name) {
+    if (confirm('Are you sure you want to delete pelican "' + name + '"?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/pelicans/' + id;
+        
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        form.appendChild(methodInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{{end}}

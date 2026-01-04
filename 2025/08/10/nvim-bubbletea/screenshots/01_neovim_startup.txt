@@ -1,0 +1,30 @@
+
+~
+~
+~
+~
+~
+~
+~
+~
+~                                           NVIM v0.6.1
+~
+~                           Nvim is open source and freely distributable
+~                                     https://neovim.io/#chat
+~
+~                          type  :help nvim<Enter>       if you are new!
+~                          type  :checkhealth<Enter>     to optimize Nvim
+~                          type  :q<Enter>               to exit
+~                          type  :help<Enter>            for help
+~
+~                                  Help poor children in Uganda!
+~                          type  :help iccf<Enter>       for information
+~
+~
+~
+~
+~
+~
+~
+[No Name]                                                                         0,0-1          All
+

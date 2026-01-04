@@ -1,0 +1,30 @@
+
+Restoring terminal...
+
+goroutine 1 [running]:
+runtime/debug.Stack()
+        /home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.6.linux-amd64/src/runtime/debug/stack.go:26 +0x5e
+runtime/debug.PrintStack()
+        /home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.6.linux-amd64/src/runtime/debug/stack.go:18 +0x13
+github.com/charmbracelet/bubbletea.(*Program).recoverFromPanic(0xc0001243c0, {0x53ad60, 0x5a9f70})
+        /home/ubuntu/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:810 +0xac
+github.com/charmbracelet/bubbletea.(*Program).Run.func2()
+        /home/ubuntu/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:601 +0xe8
+panic({0x53ad60?, 0x5a9f70?})
+        /home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.6.linux-amd64/src/runtime/panic.go:792 +0x132
+strings.Repeat({0x56c8fb?, 0x3?}, 0xc000091838?)
+        /home/ubuntu/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.6.linux-amd64/src/strings/strings.go:624 +0x585
+cyberpunk-tui/components/sidebar.(*SystemMetrics).Render(0x0?, 0x78?)
+        /home/ubuntu/cyberpunk-tui/components/sidebar/right_sidebar.go:200 +0x38e
+cyberpunk-tui/components/sidebar.(*RightSidebar).View(0xc0001222d0)
+        /home/ubuntu/cyberpunk-tui/components/sidebar/right_sidebar.go:73 +0xd1
+main.(*App).View(0xc0000642a0)
+        /home/ubuntu/cyberpunk-tui/main.go:185 +0x86
+github.com/charmbracelet/bubbletea.(*Program).eventLoop(0xc0001243c0, {0x5ab4a0?, 0xc0000642a0?}, 0xc000070150)
+        /home/ubuntu/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:533 +0x892
+github.com/charmbracelet/bubbletea.(*Program).Run(0xc0001243c0)
+        /home/ubuntu/go/pkg/mod/github.com/charmbracelet/bubbletea@v1.3.6/tea.go:679 +0xb56
+main.main()
+        /home/ubuntu/cyberpunk-tui/main.go:292 +0x33e
+2025/08/29 18:37:55 program was killed: program experienced a panic
+ubuntu@be9141a21a5f:~/cyberpunk-tui$

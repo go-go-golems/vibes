@@ -1,0 +1,153 @@
+{{define "content"}}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="text-center">
+                <!-- Error Icon -->
+                <div class="error-icon mb-4">
+                    {{if eq .ErrorCode "404"}}
+                    <i class="bi bi-exclamation-circle display-1 text-warning"></i>
+                    {{else if eq .ErrorCode "500"}}
+                    <i class="bi bi-bug display-1 text-danger"></i>
+                    {{else if eq .ErrorCode "403"}}
+                    <i class="bi bi-shield-exclamation display-1 text-danger"></i>
+                    {{else}}
+                    <i class="bi bi-exclamation-triangle display-1 text-danger"></i>
+                    {{end}}
+                </div>
+
+                <!-- Error Code -->
+                <h1 class="display-2 fw-bold text-primary mb-3">
+                    {{if .ErrorCode}}{{.ErrorCode}}{{else}}Error{{end}}
+                </h1>
+
+                <!-- Error Title -->
+                <h2 class="h3 mb-3">
+                    {{if .ErrorTitle}}
+                        {{.ErrorTitle}}
+                    {{else if eq .ErrorCode "404"}}
+                        Page Not Found
+                    {{else if eq .ErrorCode "500"}}
+                        Internal Server Error
+                    {{else if eq .ErrorCode "403"}}
+                        Access Forbidden
+                    {{else}}
+                        Something Went Wrong
+                    {{end}}
+                </h2>
+
+                <!-- Error Message -->
+                <p class="lead text-muted mb-4">
+                    {{if .ErrorMessage}}
+                        {{.ErrorMessage}}
+                    {{else if eq .ErrorCode "404"}}
+                        The page you're looking for doesn't exist. The pelican might have flown away!
+                    {{else if eq .ErrorCode "500"}}
+                        We're experiencing some technical difficulties. Our pelicans are working on it!
+                    {{else if eq .ErrorCode "403"}}
+                        You don't have permission to access this resource. Please check with your administrator.
+                    {{else}}
+                        An unexpected error occurred. Please try again later or contact support.
+                    {{end}}
+                </p>
+
+                <!-- Error Details (for development) -->
+                {{if .ErrorDetails}}
+                <div class="alert alert-secondary text-start mb-4">
+                    <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Technical Details:</h6>
+                    <pre class="mb-0"><small>{{.ErrorDetails}}</small></pre>
+                </div>
+                {{end}}
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="/" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house"></i> Go Home
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Go Back
+                    </button>
+                    {{if eq .ErrorCode "500"}}
+                    <button onclick="location.reload()" class="btn btn-outline-info btn-lg">
+                        <i class="bi bi-arrow-clockwise"></i> Try Again
+                    </button>
+                    {{end}}
+                </div>
+
+                <!-- Help Section -->
+                <div class="mt-5">
+                    <h5 class="mb-3">Need Help?</h5>
+                    <div class="row text-start">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-question-circle text-info"></i> Get Support
+                                    </h6>
+                                    <p class="card-text">Contact our support team for assistance with any issues.</p>
+                                    <a href="/support" class="btn btn-outline-info btn-sm">Contact Support</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-book text-success"></i> Documentation
+                                    </h6>
+                                    <p class="card-text">Check our documentation for guides and troubleshooting tips.</p>
+                                    <a href="/docs" class="btn btn-outline-success btn-sm">View Docs</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error ID (for tracking) -->
+                {{if .ErrorID}}
+                <div class="mt-4">
+                    <small class="text-muted">
+                        Error ID: <code>{{.ErrorID}}</code>
+                    </small>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-icon {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .display-2 {
+        font-size: 3rem;
+    }
+    .display-1 {
+        font-size: 4rem;
+    }
+}
+</style>
+{{end}}

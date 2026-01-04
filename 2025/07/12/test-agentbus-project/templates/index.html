@@ -1,0 +1,141 @@
+{{define "content"}}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-speedometer2 me-2"></i>
+            Farm Overview
+        </h1>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stats-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title">{{.Stats.TotalPelicans}}</h4>
+                        <p class="card-text">Total Pelicans</p>
+                    </div>
+                    <i class="bi bi-egg fs-1 pelican-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title">{{.Stats.TotalFarms}}</h4>
+                        <p class="card-text">Active Farms</p>
+                    </div>
+                    <i class="bi bi-house fs-1 farm-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stats-card info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="card-title">{{.Stats.AvgPelicansPerFarm}}</h4>
+                        <p class="card-text">Avg Pelicans/Farm</p>
+                    </div>
+                    <i class="bi bi-bar-chart fs-1 water-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-egg me-2"></i>
+                    Recent Pelicans
+                </h5>
+                <a href="/pelicans" class="btn btn-sm btn-outline-primary">
+                    View All <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="card-body">
+                {{if .RecentPelicans}}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Species</th>
+                                <th>Farm</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .RecentPelicans}}
+                            <tr>
+                                <td>
+                                    <strong>{{.Name}}</strong>
+                                    {{if .Description}}
+                                    <br><small class="text-muted">{{.Description}}</small>
+                                    {{end}}
+                                </td>
+                                <td>{{.Species}}</td>
+                                <td>{{.Farm.Name}}</td>
+                                <td>
+                                    <span class="badge {{if eq .Status "healthy"}}bg-success{{else if eq .Status "sick"}}bg-danger{{else}}bg-warning{{end}}">
+                                        {{.Status}}
+                                    </span>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <div class="empty-state">
+                    <i class="bi bi-egg-fried fs-1"></i>
+                    <p class="text-muted">No pelicans yet. <a href="/pelicans" class="btn btn-primary btn-sm">Add your first pelican</a>!</p>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-house me-2"></i>
+                    Farm Status
+                </h5>
+                <a href="/farms" class="btn btn-sm btn-outline-success">
+                    Manage <i class="bi bi-gear"></i>
+                </a>
+            </div>
+            <div class="card-body">
+                {{if .Farms}}
+                {{range .Farms}}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <strong>{{.Name}}</strong>
+                        <br><small class="text-muted">{{.Location}}</small>
+                    </div>
+                    <span class="badge bg-primary">{{.PelicanCount}} pelicans</span>
+                </div>
+                {{end}}
+                {{else}}
+                <div class="empty-state">
+                    <i class="bi bi-house-add fs-1"></i>
+                    <p class="text-muted mb-0">No farms configured.</p>
+                    <a href="/farms" class="btn btn-sm btn-success mt-2">Create Farm</a>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,304 @@
+{{define "content"}}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center">
+                    <a href="/pelicans" class="btn btn-outline-secondary me-3">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                    <h1>
+                        <i class="bi bi-eye"></i> {{.Pelican.Name}}
+                        <span class="badge {{if eq .Pelican.Status "healthy"}}bg-success{{else if eq .Pelican.Status "sick"}}bg-danger{{else if eq .Pelican.Status "injured"}}bg-warning{{else if eq .Pelican.Status "quarantine"}}bg-info{{else}}bg-secondary{{end}} ms-2">
+                            {{.Pelican.Status}}
+                        </span>
+                    </h1>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="/pelicans/{{.Pelican.ID}}/edit" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a href="/feeding/new?pelican_id={{.Pelican.ID}}" class="btn btn-success">
+                        <i class="bi bi-cup-straw"></i> Record Feeding
+                    </a>
+                    <a href="/health/new?pelican_id={{.Pelican.ID}}" class="btn btn-info">
+                        <i class="bi bi-heart-pulse"></i> Health Check
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Basic Information Card -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">ID:</dt>
+                        <dd class="col-sm-8"><span class="badge bg-secondary">{{.Pelican.ID}}</span></dd>
+                        
+                        <dt class="col-sm-4">Species:</dt>
+                        <dd class="col-sm-8">{{.Pelican.Species}}</dd>
+                        
+                        <dt class="col-sm-4">Age:</dt>
+                        <dd class="col-sm-8">{{.Pelican.Age}} months</dd>
+                        
+                        <dt class="col-sm-4">Weight:</dt>
+                        <dd class="col-sm-8">
+                            {{if .Pelican.Weight}}{{printf "%.1f" .Pelican.Weight}} kg{{else}}Not recorded{{end}}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Gender:</dt>
+                        <dd class="col-sm-8">
+                            {{if .Pelican.Gender}}
+                                {{if eq .Pelican.Gender "male"}}<i class="bi bi-gender-male text-primary"></i> Male
+                                {{else if eq .Pelican.Gender "female"}}<i class="bi bi-gender-female text-danger"></i> Female
+                                {{else}}{{.Pelican.Gender}}{{end}}
+                            {{else}}Unknown{{end}}
+                        </dd>
+                        
+                        <dt class="col-sm-4">Location:</dt>
+                        <dd class="col-sm-8">
+                            <i class="bi bi-geo-alt"></i> {{.Pelican.Location}}
+                        </dd>
+                        
+                        {{if .Pelican.BandNumber}}
+                        <dt class="col-sm-4">Band:</dt>
+                        <dd class="col-sm-8"><code>{{.Pelican.BandNumber}}</code></dd>
+                        {{end}}
+                        
+                        {{if .Pelican.ArrivalDate}}
+                        <dt class="col-sm-4">Arrived:</dt>
+                        <dd class="col-sm-8">{{.Pelican.ArrivalDate.Format "Jan 2, 2006"}}</dd>
+                        {{end}}
+                    </dl>
+                    
+                    {{if .Pelican.Notes}}
+                    <div class="mt-3">
+                        <strong>Notes:</strong>
+                        <p class="text-muted mt-1">{{.Pelican.Notes}}</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats Card -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border-end">
+                                <h3 class="text-primary">{{.Stats.TotalFeedings}}</h3>
+                                <small class="text-muted">Total Feedings</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h3 class="text-success">{{.Stats.HealthChecks}}</h3>
+                            <small class="text-muted">Health Checks</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h3 class="text-info">{{.Stats.DaysInCare}}</h3>
+                                <small class="text-muted">Days in Care</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="{{if .Stats.LastFedHours}}{{if lt .Stats.LastFedHours 12}}text-success{{else if lt .Stats.LastFedHours 24}}text-warning{{else}}text-danger{{end}}{{else}}text-muted{{end}}">
+                                {{if .Stats.LastFedHours}}{{.Stats.LastFedHours}}h{{else}}N/A{{end}}
+                            </h3>
+                            <small class="text-muted">Last Fed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {{if .RecentActivity}}
+                    <div class="timeline">
+                        {{range .RecentActivity}}
+                        <div class="timeline-item mb-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <span class="badge {{if eq .Type "feeding"}}bg-success{{else if eq .Type "health"}}bg-info{{else}}bg-secondary{{end}} rounded-pill">
+                                        {{if eq .Type "feeding"}}<i class="bi bi-cup-straw"></i>
+                                        {{else if eq .Type "health"}}<i class="bi bi-heart-pulse"></i>
+                                        {{else}}<i class="bi bi-circle"></i>{{end}}
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1 ms-2">
+                                    <div class="fw-bold">{{.Title}}</div>
+                                    <div class="text-muted small">{{.Description}}</div>
+                                    <div class="text-muted small">{{.Timestamp.Format "Jan 2, 15:04"}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {{end}}
+                    </div>
+                    {{else}}
+                    <div class="text-center text-muted py-3">
+                        <i class="bi bi-clock display-4"></i>
+                        <p class="mt-2">No recent activity</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feeding History Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-cup-straw"></i> Feeding History</h5>
+                    <a href="/feeding/new?pelican_id={{.Pelican.ID}}" class="btn btn-sm btn-success">
+                        <i class="bi bi-plus"></i> Record Feeding
+                    </a>
+                </div>
+                <div class="card-body">
+                    {{if .FeedingHistory}}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Food Type</th>
+                                    <th>Amount</th>
+                                    <th>Notes</th>
+                                    <th>Fed By</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .FeedingHistory}}
+                                <tr>
+                                    <td>{{.FeedingTime.Format "Jan 2, 15:04"}}</td>
+                                    <td>{{.FoodType}}</td>
+                                    <td>{{.Amount}} {{.Unit}}</td>
+                                    <td>{{if .Notes}}{{.Notes}}{{else}}<span class="text-muted">-</span>{{end}}</td>
+                                    <td>{{.FedBy}}</td>
+                                    <td>
+                                        <a href="/feeding/{{.ID}}/edit" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2">
+                        <a href="/feeding?pelican_id={{.Pelican.ID}}" class="btn btn-outline-primary btn-sm">
+                            View All Feeding Records <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                    {{else}}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-cup-straw display-4"></i>
+                        <p class="mt-2">No feeding records yet</p>
+                        <a href="/feeding/new?pelican_id={{.Pelican.ID}}" class="btn btn-success">Record First Feeding</a>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Health Records Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-heart-pulse"></i> Health Records</h5>
+                    <a href="/health/new?pelican_id={{.Pelican.ID}}" class="btn btn-sm btn-info">
+                        <i class="bi bi-plus"></i> New Health Check
+                    </a>
+                </div>
+                <div class="card-body">
+                    {{if .HealthRecords}}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Check Type</th>
+                                    <th>Status</th>
+                                    <th>Weight</th>
+                                    <th>Temperature</th>
+                                    <th>Veterinarian</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .HealthRecords}}
+                                <tr>
+                                    <td>{{.CheckDate.Format "Jan 2, 2006"}}</td>
+                                    <td>{{.CheckType}}</td>
+                                    <td>
+                                        <span class="badge {{if eq .Status "normal"}}bg-success{{else if eq .Status "abnormal"}}bg-danger{{else}}bg-warning{{end}}">
+                                            {{.Status}}
+                                        </span>
+                                    </td>
+                                    <td>{{if .Weight}}{{printf "%.1f" .Weight}} kg{{else}}-{{end}}</td>
+                                    <td>{{if .Temperature}}{{printf "%.1f" .Temperature}}°C{{else}}-{{end}}</td>
+                                    <td>{{.Veterinarian}}</td>
+                                    <td>
+                                        <a href="/health/{{.ID}}" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2">
+                        <a href="/health?pelican_id={{.Pelican.ID}}" class="btn btn-outline-primary btn-sm">
+                            View All Health Records <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                    {{else}}
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-heart-pulse display-4"></i>
+                        <p class="mt-2">No health records yet</p>
+                        <a href="/health/new?pelican_id={{.Pelican.ID}}" class="btn btn-info">Record First Health Check</a>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-item {
+    position: relative;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 30px;
+    width: 2px;
+    height: calc(100% + 12px);
+    background-color: #dee2e6;
+}
+</style>
+{{end}}

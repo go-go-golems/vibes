@@ -1,0 +1,8 @@
+[0;34m📊 Migration Status:[0m
+[0;34m📋 Creating migrations tracking table...[0m
+[0;32m✅ Migrations table ready[0m
+[0;34mApplied migrations:[0m
+  [1;33mNo migrations applied yet[0m
+
+[0;34mAvailable migrations:[0m
+  [1;33m⏳ 001_initial_schema[0m (pending)

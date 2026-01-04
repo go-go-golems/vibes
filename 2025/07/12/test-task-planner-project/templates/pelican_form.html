@@ -1,0 +1,236 @@
+{{define "content"}}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="d-flex align-items-center mb-4">
+                <a href="/pelicans" class="btn btn-outline-secondary me-3">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+                <h1>
+                    {{if .Pelican.ID}}
+                        <i class="bi bi-pencil"></i> Edit Pelican
+                    {{else}}
+                        <i class="bi bi-plus-circle"></i> Add New Pelican
+                    {{end}}
+                </h1>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form action="{{if .Pelican.ID}}/pelicans/{{.Pelican.ID}}{{else}}/pelicans{{end}}" method="POST" novalidate>
+                        {{if .Pelican.ID}}
+                            <input type="hidden" name="_method" value="PUT">
+                        {{end}}
+                        
+                        <!-- Basic Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Basic Information</h5>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">
+                                    Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control {{if .Errors.Name}}is-invalid{{end}}" 
+                                       id="name" name="name" value="{{.Pelican.Name}}" required>
+                                {{if .Errors.Name}}
+                                <div class="invalid-feedback">{{.Errors.Name}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="species" class="form-label">
+                                    Species <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select {{if .Errors.Species}}is-invalid{{end}}" 
+                                        id="species" name="species" required>
+                                    <option value="">Select species...</option>
+                                    <option value="Brown Pelican" {{if eq .Pelican.Species "Brown Pelican"}}selected{{end}}>Brown Pelican</option>
+                                    <option value="American White Pelican" {{if eq .Pelican.Species "American White Pelican"}}selected{{end}}>American White Pelican</option>
+                                    <option value="Australian Pelican" {{if eq .Pelican.Species "Australian Pelican"}}selected{{end}}>Australian Pelican</option>
+                                    <option value="Great White Pelican" {{if eq .Pelican.Species "Great White Pelican"}}selected{{end}}>Great White Pelican</option>
+                                    <option value="Pink-backed Pelican" {{if eq .Pelican.Species "Pink-backed Pelican"}}selected{{end}}>Pink-backed Pelican</option>
+                                    <option value="Dalmatian Pelican" {{if eq .Pelican.Species "Dalmatian Pelican"}}selected{{end}}>Dalmatian Pelican</option>
+                                    <option value="Spot-billed Pelican" {{if eq .Pelican.Species "Spot-billed Pelican"}}selected{{end}}>Spot-billed Pelican</option>
+                                    <option value="Peruvian Pelican" {{if eq .Pelican.Species "Peruvian Pelican"}}selected{{end}}>Peruvian Pelican</option>
+                                </select>
+                                {{if .Errors.Species}}
+                                <div class="invalid-feedback">{{.Errors.Species}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="age" class="form-label">
+                                    Age (months) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control {{if .Errors.Age}}is-invalid{{end}}" 
+                                       id="age" name="age" value="{{.Pelican.Age}}" min="0" max="600" required>
+                                {{if .Errors.Age}}
+                                <div class="invalid-feedback">{{.Errors.Age}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control {{if .Errors.Weight}}is-invalid{{end}}" 
+                                       id="weight" name="weight" value="{{.Pelican.Weight}}" min="0" step="0.1">
+                                {{if .Errors.Weight}}
+                                <div class="invalid-feedback">{{.Errors.Weight}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select {{if .Errors.Gender}}is-invalid{{end}}" 
+                                        id="gender" name="gender">
+                                    <option value="">Unknown</option>
+                                    <option value="male" {{if eq .Pelican.Gender "male"}}selected{{end}}>Male</option>
+                                    <option value="female" {{if eq .Pelican.Gender "female"}}selected{{end}}>Female</option>
+                                </select>
+                                {{if .Errors.Gender}}
+                                <div class="invalid-feedback">{{.Errors.Gender}}</div>
+                                {{end}}
+                            </div>
+                        </div>
+                        
+                        <!-- Location and Status -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Location & Status</h5>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="location" class="form-label">
+                                    Location <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control {{if .Errors.Location}}is-invalid{{end}}" 
+                                       id="location" name="location" value="{{.Pelican.Location}}" required>
+                                {{if .Errors.Location}}
+                                <div class="invalid-feedback">{{.Errors.Location}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">
+                                    Health Status <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select {{if .Errors.Status}}is-invalid{{end}}" 
+                                        id="status" name="status" required>
+                                    <option value="">Select status...</option>
+                                    <option value="healthy" {{if eq .Pelican.Status "healthy"}}selected{{end}}>Healthy</option>
+                                    <option value="sick" {{if eq .Pelican.Status "sick"}}selected{{end}}>Sick</option>
+                                    <option value="injured" {{if eq .Pelican.Status "injured"}}selected{{end}}>Injured</option>
+                                    <option value="quarantine" {{if eq .Pelican.Status "quarantine"}}selected{{end}}>Quarantine</option>
+                                </select>
+                                {{if .Errors.Status}}
+                                <div class="invalid-feedback">{{.Errors.Status}}</div>
+                                {{end}}
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary border-bottom pb-2">Additional Information</h5>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control {{if .Errors.Notes}}is-invalid{{end}}" 
+                                          id="notes" name="notes" rows="3" 
+                                          placeholder="Additional notes about this pelican...">{{.Pelican.Notes}}</textarea>
+                                {{if .Errors.Notes}}
+                                <div class="invalid-feedback">{{.Errors.Notes}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="arrival_date" class="form-label">Arrival Date</label>
+                                <input type="date" class="form-control {{if .Errors.ArrivalDate}}is-invalid{{end}}" 
+                                       id="arrival_date" name="arrival_date" 
+                                       value="{{if .Pelican.ArrivalDate}}{{.Pelican.ArrivalDate.Format "2006-01-02"}}{{end}}">
+                                {{if .Errors.ArrivalDate}}
+                                <div class="invalid-feedback">{{.Errors.ArrivalDate}}</div>
+                                {{end}}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="band_number" class="form-label">Band Number</label>
+                                <input type="text" class="form-control {{if .Errors.BandNumber}}is-invalid{{end}}" 
+                                       id="band_number" name="band_number" value="{{.Pelican.BandNumber}}"
+                                       placeholder="e.g., PEL-2025-001">
+                                {{if .Errors.BandNumber}}
+                                <div class="invalid-feedback">{{.Errors.BandNumber}}</div>
+                                {{end}}
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                {{if .Pelican.ID}}
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash"></i> Delete Pelican
+                                </button>
+                                {{end}}
+                            </div>
+                            <div>
+                                <a href="/pelicans" class="btn btn-secondary me-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i>
+                                    {{if .Pelican.ID}}Update Pelican{{else}}Add Pelican{{end}}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+{{if .Pelican.ID}}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{.Pelican.Name}}</strong>?</p>
+                <p class="text-danger">This action cannot be undone and will also delete all associated feeding and health records.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="/pelicans/{{.Pelican.ID}}" method="POST" style="display: inline;">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">Delete Pelican</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{{end}}

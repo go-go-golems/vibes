@@ -1,0 +1,92 @@
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:35","message":"=== PTY TUI Debug Session Started ==="}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:503","message":"Application starting"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:237","message":"Initializing model"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:315","message":"Bubble Tea Init called"}
+{"level":"info","component":"pty-tui","width":60,"height":20,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:82","message":"Creating PTY manager"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:98","message":"Starting PTY"}
+{"level":"info","component":"pty-tui","shell":"/bin/bash","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:105","message":"Shell detected"}
+{"level":"debug","component":"pty-tui","msgType":"tea.WindowSizeMsg","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","width":117,"height":41,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:353","message":"Window size changed"}
+{"level":"info","component":"pty-tui","pid":23996,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:120","message":"PTY process started"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:124","message":"Terminal emulator created"}
+{"level":"info","component":"pty-tui","ready":true,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:130","message":"PTY manager initialization complete"}
+{"level":"debug","component":"pty-tui","msgType":"main.initCompleteMsg","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:335","message":"PTY initialization complete"}
+{"level":"info","component":"pty-tui","width":60,"height":20,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:82","message":"Creating PTY manager"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:98","message":"Starting PTY"}
+{"level":"info","component":"pty-tui","shell":"/bin/bash","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:105","message":"Shell detected"}
+{"level":"info","component":"pty-tui","pid":24022,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:120","message":"PTY process started"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:124","message":"Terminal emulator created"}
+{"level":"info","component":"pty-tui","ready":true,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:130","message":"PTY manager initialization complete"}
+{"level":"debug","component":"pty-tui","bytes":118,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":118,"time":"2025-06-22T13:40:45-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","msgType":"main.tickMsg","time":"2025-06-22T13:40:48-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","time":"2025-06-22T13:40:48-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:428","message":"Tick message received"}
+{"level":"debug","component":"pty-tui","msgType":"tea.KeyMsg","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","key":"a","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:359","message":"Key pressed"}
+{"level":"info","component":"pty-tui","autoDemo":true,"time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:373","message":"Auto demo toggled"}
+{"level":"info","component":"pty-tui","demoStep":0,"stepMod":0,"time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:268","message":"Auto demo step executing"}
+{"level":"debug","component":"pty-tui","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:272","message":"Demo step 0: Starting auto demo"}
+{"level":"debug","component":"pty-tui","msgType":"main.commandMsg","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","command":"echo 'Starting auto demo...'","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:418","message":"Command message received"}
+{"level":"debug","component":"pty-tui","command":"echo 'Starting auto demo...'","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:183","message":"Command send requested"}
+{"level":"info","component":"pty-tui","command":"echo 'Starting auto demo...'","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:196","message":"Command sent successfully"}
+{"level":"debug","component":"pty-tui","bytes":180,"time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":180,"time":"2025-06-22T13:40:49-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","msgType":"main.tickMsg","time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:428","message":"Tick message received"}
+{"level":"info","component":"pty-tui","demoStep":1,"stepMod":1,"time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:268","message":"Auto demo step executing"}
+{"level":"debug","component":"pty-tui","time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:278","message":"Demo step 1: Resize to 50x15"}
+{"level":"debug","component":"pty-tui","msgType":"main.resizeMsg","time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","width":50,"height":15,"time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:404","message":"Resize message received"}
+{"level":"info","component":"pty-tui","width":50,"height":15,"time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:152","message":"PTY resize requested"}
+{"level":"info","component":"pty-tui","oldSize":"60x20","newSize":"50x15","time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:177","message":"PTY resize successful"}
+{"level":"debug","component":"pty-tui","bytes":114,"time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":114,"time":"2025-06-22T13:40:51-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","msgType":"tea.KeyMsg","time":"2025-06-22T13:41:06-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","key":"a","time":"2025-06-22T13:41:06-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:359","message":"Key pressed"}
+{"level":"info","component":"pty-tui","autoDemo":false,"time":"2025-06-22T13:41:06-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:373","message":"Auto demo toggled"}
+{"level":"debug","component":"pty-tui","msgType":"tea.KeyMsg","time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","key":"r","time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:359","message":"Key pressed"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:381","message":"Manual resize requested"}
+{"level":"debug","component":"pty-tui","msgType":"main.resizeMsg","time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","width":60,"height":20,"time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:404","message":"Resize message received"}
+{"level":"info","component":"pty-tui","width":60,"height":20,"time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:152","message":"PTY resize requested"}
+{"level":"info","component":"pty-tui","oldSize":"50x15","newSize":"60x20","time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:177","message":"PTY resize successful"}
+{"level":"debug","component":"pty-tui","bytes":114,"time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":114,"time":"2025-06-22T13:41:07-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","msgType":"tea.KeyMsg","time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","key":"r","time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:359","message":"Key pressed"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:381","message":"Manual resize requested"}
+{"level":"debug","component":"pty-tui","msgType":"main.resizeMsg","time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","width":80,"height":25,"time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:404","message":"Resize message received"}
+{"level":"info","component":"pty-tui","width":80,"height":25,"time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:152","message":"PTY resize requested"}
+{"level":"info","component":"pty-tui","oldSize":"60x20","newSize":"80x25","time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:177","message":"PTY resize successful"}
+{"level":"debug","component":"pty-tui","bytes":114,"time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":114,"time":"2025-06-22T13:41:09-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","msgType":"tea.KeyMsg","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","key":"c","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:359","message":"Key pressed"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:388","message":"Demo command requested"}
+{"level":"debug","component":"pty-tui","msgType":"main.commandMsg","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"info","component":"pty-tui","command":"echo 'Hello from PTY TUI!'","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:418","message":"Command message received"}
+{"level":"debug","component":"pty-tui","command":"echo 'Hello from PTY TUI!'","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:183","message":"Command send requested"}
+{"level":"info","component":"pty-tui","command":"echo 'Hello from PTY TUI!'","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:196","message":"Command sent successfully"}
+{"level":"debug","component":"pty-tui","bytes":37,"time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":37,"time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","bytes":139,"time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:255","message":"PTY output received"}
+{"level":"debug","component":"pty-tui","msgType":"main.ptyOutputMsg","time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","bytes":139,"time":"2025-06-22T13:41:11-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:393","message":"PTY output processed"}
+{"level":"debug","component":"pty-tui","msgType":"tea.KeyMsg","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"debug","component":"pty-tui","key":"q","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:359","message":"Key pressed"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:367","message":"Quit requested"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:202","message":"Closing PTY manager"}
+{"level":"error","component":"pty-tui","error":"read /dev/ptmx: input/output error","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:252","message":"PTY read error"}
+{"level":"debug","component":"pty-tui","msgType":"*fs.PathError","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:331","message":"Update called"}
+{"level":"error","component":"pty-tui","error":"read /dev/ptmx: input/output error","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:435","message":"Error received in update"}
+{"level":"info","component":"pty-tui","time":"2025-06-22T13:41:15-04:00","caller":"/home/ubuntu/pty-tui-advanced/enhanced-main-fixed.go:513","message":"Application exited normally"}

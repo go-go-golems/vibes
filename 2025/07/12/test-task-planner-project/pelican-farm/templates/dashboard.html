@@ -1,0 +1,83 @@
+{{define "content"}}
+<div class="dashboard">
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <p class="page-subtitle">Overview of your pelican farm</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🦩</div>
+            <div class="stat-info">
+                <h3>{{.Stats.TotalPelicans}}</h3>
+                <p>Total Pelicans</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏥</div>
+            <div class="stat-info">
+                <h3>{{.Stats.HealthyPelicans}}</h3>
+                <p>Healthy Pelicans</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🍽️</div>
+            <div class="stat-info">
+                <h3>{{.Stats.TodayFeedings}}</h3>
+                <p>Today's Feedings</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <h3>{{.Stats.PendingSchedules}}</h3>
+                <p>Pending Schedules</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="dashboard-section">
+            <h2>Recent Activity</h2>
+            <div class="activity-list">
+                {{range .RecentActivity}}
+                <div class="activity-item">
+                    <div class="activity-icon">{{.Icon}}</div>
+                    <div class="activity-details">
+                        <p class="activity-text">{{.Description}}</p>
+                        <span class="activity-time">{{.TimeAgo}}</span>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Upcoming Schedules</h2>
+            <div class="schedule-list">
+                {{range .UpcomingSchedules}}
+                <div class="schedule-item">
+                    <div class="schedule-time">{{.Time}}</div>
+                    <div class="schedule-details">
+                        <p class="schedule-pelican">{{.PelicanName}}</p>
+                        <p class="schedule-task">{{.Task}}</p>
+                    </div>
+                    <div class="schedule-actions">
+                        <button class="btn btn-sm btn-primary" onclick="markCompleted({{.ID}})">Mark Done</button>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="action-buttons">
+            <a href="/pelicans/new" class="btn btn-primary">Add New Pelican</a>
+            <a href="/feeding/new" class="btn btn-success">Record Feeding</a>
+            <a href="/health/new" class="btn btn-info">Health Check</a>
+        </div>
+    </div>
+</div>
+{{end}}

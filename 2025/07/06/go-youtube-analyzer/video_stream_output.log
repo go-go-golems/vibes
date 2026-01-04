@@ -1,0 +1,20 @@
+Error: unknown flag: --api-key
+Usage:
+  youtube-analyzer video-stream [YouTube URL] [flags]
+
+Flags:
+  -h, --help           help for video-stream
+  -m, --model string   Gemini model to use (default "gemini-2.5-flash")
+  -s, --style string   Glamour style (dark, light, auto) (default "dark")
+
+Global Flags:
+      --config string      config file (default is $HOME/.youtube-analyzer.yaml)
+      --log-debug          enable debug logging
+      --log-file string    log file path (default: ./logs/youtube-analyzer.log)
+      --log-level string   log level (debug, info, warn, error) (default "info")
+      --no-color           disable colored output
+  -q, --quiet              quiet mode (minimal output)
+  -v, --verbose            verbose output
+
+Error: unknown flag: --api-key
+exit status 1

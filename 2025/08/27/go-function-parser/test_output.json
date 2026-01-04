@@ -1,0 +1,92 @@
+[
+  {
+    "function": {
+      "name": "NewPerson",
+      "file_path": "test/person.go",
+      "start_line": 11,
+      "end_line": 16,
+      "start_col": 0,
+      "parameters": "(name string, age int)",
+      "return_type": "*Person",
+      "is_method": false
+    },
+    "references": null
+  },
+  {
+    "function": {
+      "name": "Greet",
+      "file_path": "test/person.go",
+      "start_line": 19,
+      "end_line": 21,
+      "start_col": 0,
+      "parameters": "()",
+      "return_type": "string",
+      "is_method": true,
+      "receiver": "p *Person"
+    },
+    "references": null
+  },
+  {
+    "function": {
+      "name": "Birthday",
+      "file_path": "test/person.go",
+      "start_line": 24,
+      "end_line": 27,
+      "start_col": 0,
+      "parameters": "()",
+      "is_method": true,
+      "receiver": "p *Person"
+    },
+    "references": null
+  },
+  {
+    "function": {
+      "name": "UsePersonMethods",
+      "file_path": "test/person.go",
+      "start_line": 30,
+      "end_line": 34,
+      "start_col": 0,
+      "parameters": "()",
+      "is_method": false
+    },
+    "references": null
+  },
+  {
+    "function": {
+      "name": "SimpleFunction",
+      "file_path": "test/sample.go",
+      "start_line": 5,
+      "end_line": 7,
+      "start_col": 0,
+      "parameters": "(a int, b string)",
+      "return_type": "string",
+      "is_method": false
+    },
+    "references": null
+  },
+  {
+    "function": {
+      "name": "UsedFunction",
+      "file_path": "test/sample.go",
+      "start_line": 10,
+      "end_line": 12,
+      "start_col": 0,
+      "parameters": "(num int)",
+      "return_type": "string",
+      "is_method": false
+    },
+    "references": null
+  },
+  {
+    "function": {
+      "name": "UnusedFunction",
+      "file_path": "test/sample.go",
+      "start_line": 15,
+      "end_line": 17,
+      "start_col": 0,
+      "parameters": "()",
+      "is_method": false
+    },
+    "references": null
+  }
+]

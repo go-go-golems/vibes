@@ -1,0 +1,64 @@
+{{define "content"}}
+<div class="pelican-list">
+    <div class="page-header">
+        <h1>Pelicans</h1>
+        <div class="page-actions">
+            <a href="/pelicans/new" class="btn btn-primary">Add New Pelican</a>
+        </div>
+    </div>
+
+    <div class="filters">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search pelicans..." class="form-control">
+        </div>
+        <div class="filter-group">
+            <select id="speciesFilter" class="form-control">
+                <option value="">All Species</option>
+                {{range .Species}}
+                <option value="{{.}}">{{.}}</option>
+                {{end}}
+            </select>
+            <select id="healthFilter" class="form-control">
+                <option value="">All Health Status</option>
+                <option value="healthy">Healthy</option>
+                <option value="sick">Sick</option>
+                <option value="injured">Injured</option>
+                <option value="recovering">Recovering</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="pelican-grid" id="pelicanGrid">
+        {{range .Pelicans}}
+        <div class="pelican-card" data-species="{{.Species}}" data-health="{{.HealthStatus}}" data-name="{{.Name}}">
+            <div class="pelican-image">
+                <div class="pelican-avatar">🦩</div>
+                <div class="health-badge health-{{.HealthStatus}}">{{.HealthStatus}}</div>
+            </div>
+            <div class="pelican-info">
+                <h3 class="pelican-name">{{.Name}}</h3>
+                <p class="pelican-species">{{.Species}}</p>
+                <div class="pelican-details">
+                    <span class="detail-item">Age: {{.Age}} years</span>
+                    <span class="detail-item">Weight: {{.Weight}}kg</span>
+                </div>
+                <div class="pelican-actions">
+                    <a href="/pelicans/{{.ID}}" class="btn btn-sm btn-primary">View</a>
+                    <a href="/pelicans/{{.ID}}/edit" class="btn btn-sm btn-secondary">Edit</a>
+                    <button onclick="deletePelican({{.ID}})" class="btn btn-sm btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    {{if not .Pelicans}}
+    <div class="empty-state">
+        <div class="empty-icon">🦩</div>
+        <h2>No pelicans found</h2>
+        <p>Start by adding your first pelican to the farm.</p>
+        <a href="/pelicans/new" class="btn btn-primary">Add New Pelican</a>
+    </div>
+    {{end}}
+</div>
+{{end}}

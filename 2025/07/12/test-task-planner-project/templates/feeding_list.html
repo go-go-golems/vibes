@@ -1,0 +1,272 @@
+{{define "content"}}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="bi bi-cup-straw"></i> Feeding Records</h1>
+                <a href="/feeding/new" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Record New Feeding
+                </a>
+            </div>
+            
+            <!-- Search and Filter Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="pelican_id" class="form-label">Pelican</label>
+                            <select class="form-select" id="pelican_id" name="pelican_id">
+                                <option value="">All Pelicans</option>
+                                {{range .Pelicans}}
+                                <option value="{{.ID}}" {{if eq $.PelicanFilter .ID}}selected{{end}}>{{.Name}} ({{.ID}})</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="food_type" class="form-label">Food Type</label>
+                            <select class="form-select" id="food_type" name="food_type">
+                                <option value="">All Food Types</option>
+                                <option value="fish" {{if eq .FoodTypeFilter "fish"}}selected{{end}}>Fish</option>
+                                <option value="supplements" {{if eq .FoodTypeFilter "supplements"}}selected{{end}}>Supplements</option>
+                                <option value="medication" {{if eq .FoodTypeFilter "medication"}}selected{{end}}>Medication</option>
+                                <option value="formula" {{if eq .FoodTypeFilter "formula"}}selected{{end}}>Formula</option>
+                                <option value="other" {{if eq .FoodTypeFilter "other"}}selected{{end}}>Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{.DateFrom}}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{.DateTo}}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <div class="btn-group w-100">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-search"></i> Filter
+                                </button>
+                                <a href="/feeding" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.TotalFeedings}}</h4>
+                                    <p class="mb-0">Total Feedings</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-cup-straw display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.TodayFeedings}}</h4>
+                                    <p class="mb-0">Today's Feedings</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-calendar-day display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.UniquePelicans}}</h4>
+                                    <p class="mb-0">Pelicans Fed</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-emoji-sunglasses display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.OverdueFeedings}}</h4>
+                                    <p class="mb-0">Overdue Feedings</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-exclamation-triangle display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feeding Records Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Pelican</th>
+                                    <th>Food Type</th>
+                                    <th>Amount</th>
+                                    <th>Fed By</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .FeedingRecords}}
+                                <tr>
+                                    <td>
+                                        <div>{{.FeedingTime.Format "Jan 2, 2006"}}</div>
+                                        <small class="text-muted">{{.FeedingTime.Format "15:04"}}</small>
+                                    </td>
+                                    <td>
+                                        <a href="/pelicans/{{.PelicanID}}" class="text-decoration-none">
+                                            <strong>{{.PelicanName}}</strong>
+                                        </a>
+                                        <br>
+                                        <small class="text-muted">ID: {{.PelicanID}}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {{if eq .FoodType "fish"}}bg-primary
+                                            {{else if eq .FoodType "supplements"}}bg-success
+                                            {{else if eq .FoodType "medication"}}bg-danger
+                                            {{else if eq .FoodType "formula"}}bg-info
+                                            {{else}}bg-secondary{{end}}">
+                                            {{.FoodType}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong>{{.Amount}}</strong> {{.Unit}}
+                                    </td>
+                                    <td>{{.FedBy}}</td>
+                                    <td>
+                                        {{if .Notes}}
+                                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{.Notes}}">
+                                                {{.Notes}}
+                                            </span>
+                                        {{else}}
+                                            <span class="text-muted">-</span>
+                                        {{end}}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/feeding/{{.ID}}" class="btn btn-outline-primary" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="/feeding/{{.ID}}/edit" class="btn btn-outline-secondary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger" title="Delete" 
+                                                    onclick="confirmDelete('{{.ID}}', '{{.PelicanName}}', '{{.FeedingTime.Format "Jan 2, 15:04"}}')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-cup-straw display-4"></i>
+                                        <p class="mt-2">No feeding records found</p>
+                                        <a href="/feeding/new" class="btn btn-success">Record First Feeding</a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {{if gt .TotalPages 1}}
+                    <nav aria-label="Feeding records pagination">
+                        <ul class="pagination justify-content-center mt-3">
+                            {{if gt .CurrentPage 1}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{sub .CurrentPage 1}}{{if .PelicanFilter}}&pelican_id={{.PelicanFilter}}{{end}}{{if .FoodTypeFilter}}&food_type={{.FoodTypeFilter}}{{end}}{{if .DateFrom}}&date_from={{.DateFrom}}{{end}}{{if .DateTo}}&date_to={{.DateTo}}{{end}}">Previous</a>
+                            </li>
+                            {{end}}
+                            
+                            {{range .PageNumbers}}
+                            <li class="page-item {{if eq . $.CurrentPage}}active{{end}}">
+                                <a class="page-link" href="?page={{.}}{{if $.PelicanFilter}}&pelican_id={{$.PelicanFilter}}{{end}}{{if $.FoodTypeFilter}}&food_type={{$.FoodTypeFilter}}{{end}}{{if $.DateFrom}}&date_from={{$.DateFrom}}{{end}}{{if $.DateTo}}&date_to={{$.DateTo}}{{end}}">{{.}}</a>
+                            </li>
+                            {{end}}
+                            
+                            {{if lt .CurrentPage .TotalPages}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{add .CurrentPage 1}}{{if .PelicanFilter}}&pelican_id={{.PelicanFilter}}{{end}}{{if .FoodTypeFilter}}&food_type={{.FoodTypeFilter}}{{end}}{{if .DateFrom}}&date_from={{.DateFrom}}{{end}}{{if .DateTo}}&date_to={{.DateTo}}{{end}}">Next</a>
+                            </li>
+                            {{end}}
+                        </ul>
+                    </nav>
+                    {{end}}
+                    
+                    <!-- Summary Info -->
+                    <div class="text-center text-muted mt-3">
+                        Showing {{len .FeedingRecords}} of {{.TotalCount}} feeding records
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this feeding record?</p>
+                <div id="deleteDetails" class="alert alert-info"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">Delete Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(feedingId, pelicanName, feedingTime) {
+    document.getElementById('deleteForm').action = '/feeding/' + feedingId;
+    document.getElementById('deleteDetails').innerHTML = 
+        '<strong>Pelican:</strong> ' + pelicanName + '<br>' +
+        '<strong>Feeding Time:</strong> ' + feedingTime;
+    
+    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+{{end}}

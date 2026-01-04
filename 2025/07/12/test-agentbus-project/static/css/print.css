@@ -1,0 +1,151 @@
+/* Print-specific styles for Pelican Farm Management */
+
+@media print {
+  /* Hide non-essential elements */
+  .navbar,
+  .modal,
+  .btn,
+  .dropdown,
+  .alert,
+  .floating-action,
+  [data-bs-toggle],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset colors for print */
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+
+  /* Optimize layout for print */
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+    margin: 0;
+    padding: 15pt;
+  }
+
+  /* Headers */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+  }
+
+  /* Tables */
+  .table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 10pt;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #000 !important;
+    padding: 4pt;
+    text-align: left;
+  }
+
+  .table th {
+    background: #f0f0f0 !important;
+    font-weight: bold;
+  }
+
+  /* Cards */
+  .card {
+    border: 1px solid #000 !important;
+    margin-bottom: 10pt;
+    page-break-inside: avoid;
+  }
+
+  .card-header {
+    background: #f0f0f0 !important;
+    border-bottom: 1px solid #000 !important;
+    padding: 5pt;
+    font-weight: bold;
+  }
+
+  .card-body {
+    padding: 5pt;
+  }
+
+  /* Statistics cards */
+  .stats-card {
+    display: inline-block;
+    width: 30%;
+    margin: 5pt;
+    vertical-align: top;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+
+  /* Add header/footer for pages */
+  @page {
+    margin: 1in;
+    @top-center {
+      content: "Pelican Farm Management System";
+      font-size: 10pt;
+      font-weight: bold;
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 8pt;
+    }
+  }
+
+  /* Print timestamp */
+  .print-header {
+    text-align: right;
+    font-size: 8pt;
+    margin-bottom: 10pt;
+    border-bottom: 1px solid #000;
+    padding-bottom: 5pt;
+  }
+
+  /* Ensure content starts on new page */
+  .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .row {
+    margin: 0 !important;
+  }
+
+  .col-md-4,
+  .col-lg-4,
+  .col-lg-8 {
+    width: 100% !important;
+    margin-bottom: 10pt;
+  }
+}
+
+/* Add JavaScript-generated print header */
+body.printing::before {
+  content: "Printed on " attr(data-print-date);
+  display: block;
+  text-align: right;
+  font-size: 8pt;
+  margin-bottom: 10pt;
+  border-bottom: 1px solid #000;
+  padding-bottom: 5pt;
+}

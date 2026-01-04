@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Pelican Farm Management</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">🦩 Pelican Farm</a>
+            <div class="nav-menu" id="navMenu">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/pelicans" class="nav-link">Pelicans</a>
+                <a href="/feeding" class="nav-link">Feeding</a>
+                <a href="/health" class="nav-link">Health</a>
+            </div>
+            <div class="nav-toggle" id="navToggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {{if .Flash}}
+        <div class="alert alert-{{.Flash.Type}}">
+            {{.Flash.Message}}
+        </div>
+        {{end}}
+
+        <main class="main-content">
+            {{template "content" .}}
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Pelican Farm Management System</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,187 @@
+{{define "content"}}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-house me-2"></i>
+                Farm Management
+            </h1>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFarmModal">
+                <i class="bi bi-plus-circle me-1"></i>Add Farm
+            </button>
+        </div>
+    </div>
+</div>
+
+{{if .Farms}}
+<div class="row">
+    {{range .Farms}}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card farm-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{.Name}}</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="editFarm({{.ID}}, '{{.Name}}', '{{.Location}}', '{{.Description}}')" data-bs-toggle="modal" data-bs-target="#editFarmModal">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="#" onclick="deleteFarm({{.ID}}, '{{.Name}}')">
+                                <i class="bi bi-trash me-1"></i>Delete
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    <strong>Location:</strong> {{.Location}}
+                </p>
+                {{if .Description}}
+                <p class="card-text">{{.Description}}</p>
+                {{end}}
+                <div class="stats-row">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary mb-1">{{.PelicanCount}}</h4>
+                                <small class="text-muted">Pelicans</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success mb-1">{{.HealthyCount}}</h4>
+                            <small class="text-muted">Healthy</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="/pelicans?farm={{.ID}}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-eye me-1"></i>View Pelicans
+                </a>
+                {{if .PelicanCount}}
+                <span class="badge bg-secondary ms-2">{{.PelicanCount}} birds</span>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    {{end}}
+</div>
+{{else}}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body empty-state">
+                <i class="bi bi-house-add fs-1"></i>
+                <h4 class="text-muted">No farms yet</h4>
+                <p class="text-muted">Create your first farm to start managing pelicans.</p>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFarmModal">
+                    <i class="bi bi-plus-circle me-1"></i>Create First Farm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+<!-- Add Farm Modal -->
+<div class="modal fade" id="addFarmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="/farms" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Farm
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Farm Name *</label>
+                        <input type="text" class="form-control" id="name" name="name" required placeholder="e.g., Sunset Pelican Ranch">
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location *</label>
+                        <input type="text" class="form-control" id="location" name="location" required placeholder="e.g., Florida Keys, FL">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Brief description of the farm..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Create Farm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Farm Modal -->
+<div class="modal fade" id="editFarmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editFarmForm" method="POST">
+                <input type="hidden" id="editMethod" name="_method" value="PUT">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil me-2"></i>Edit Farm
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Farm Name *</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editLocation" class="form-label">Location *</label>
+                        <input type="text" class="form-control" id="editLocation" name="location" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Update Farm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editFarm(id, name, location, description) {
+    document.getElementById('editFarmForm').action = '/farms/' + id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editLocation').value = location;
+    document.getElementById('editDescription').value = description;
+}
+
+function deleteFarm(id, name) {
+    if (confirm('Are you sure you want to delete farm "' + name + '"? This will also affect any pelicans assigned to this farm.')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/farms/' + id;
+        
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        form.appendChild(methodInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{{end}}

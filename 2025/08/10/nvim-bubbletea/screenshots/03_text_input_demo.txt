@@ -1,0 +1,30 @@
+Text Input Demo
+
+> Type something here...
+
+(Press Enter to submit, Esc to go back)
+
+
+
+
+
+
+
+
+
+<ome/ubuntu/.local/share/nvim/bubbletea-tui/bubbletea-tui --width=100 --height=14 14,0-1         All
+
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+[No Name]                                                                         0,0-1          All
+-- TERMINAL --

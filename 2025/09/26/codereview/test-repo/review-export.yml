@@ -1,0 +1,30 @@
+annotations:
+    - file: app.js
+      line: 2
+      message: Email validation is too simple, should use proper regex
+      severity: major
+      status: open
+      type: issue
+    - file: app.js
+      line: 3
+      message: Consider adding more comprehensive validation
+      severity: minor
+      status: open
+      suggestion: '// TODO: Add proper email regex validation and length checks'
+      type: suggestion
+review:
+    base_commit: master
+    branch: feature/user-auth
+    commit: 47f767fc8ca47e962819cad4a97b232859c4941a
+    created: "2025-09-26T12:18:24Z"
+    id: rev-1758903504
+    reviewer: reviewer@example.com
+    status: pending
+    title: Review user authentication feature
+summary:
+    files_changed: 1
+    issues_found: 1
+    lines_added: 0
+    lines_removed: 0
+    suggestions: 1
+tags: []

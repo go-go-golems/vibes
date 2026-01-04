@@ -1,0 +1,340 @@
+{{define "content"}}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="bi bi-heart-pulse"></i> Health Records</h1>
+                <a href="/health/new" class="btn btn-info">
+                    <i class="bi bi-plus-circle"></i> New Health Check
+                </a>
+            </div>
+            
+            <!-- Search and Filter Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="pelican_id" class="form-label">Pelican</label>
+                            <select class="form-select" id="pelican_id" name="pelican_id">
+                                <option value="">All Pelicans</option>
+                                {{range .Pelicans}}
+                                <option value="{{.ID}}" {{if eq $.PelicanFilter .ID}}selected{{end}}>{{.Name}} ({{.ID}})</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="check_type" class="form-label">Check Type</label>
+                            <select class="form-select" id="check_type" name="check_type">
+                                <option value="">All Types</option>
+                                <option value="routine" {{if eq .CheckTypeFilter "routine"}}selected{{end}}>Routine</option>
+                                <option value="emergency" {{if eq .CheckTypeFilter "emergency"}}selected{{end}}>Emergency</option>
+                                <option value="follow-up" {{if eq .CheckTypeFilter "follow-up"}}selected{{end}}>Follow-up</option>
+                                <option value="intake" {{if eq .CheckTypeFilter "intake"}}selected{{end}}>Intake Examination</option>
+                                <option value="pre-release" {{if eq .CheckTypeFilter "pre-release"}}selected{{end}}>Pre-release</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="normal" {{if eq .StatusFilter "normal"}}selected{{end}}>Normal</option>
+                                <option value="abnormal" {{if eq .StatusFilter "abnormal"}}selected{{end}}>Abnormal</option>
+                                <option value="concerning" {{if eq .StatusFilter "concerning"}}selected{{end}}>Concerning</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_from" class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{.DateFrom}}">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="date_to" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{.DateTo}}">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <a href="/health" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.TotalChecks}}</h4>
+                                    <p class="mb-0">Total Health Checks</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-heart-pulse display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.NormalChecks}}</h4>
+                                    <p class="mb-0">Normal Results</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-check-circle display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.AbnormalChecks}}</h4>
+                                    <p class="mb-0">Abnormal Results</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-exclamation-triangle display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4>{{.Summary.ThisWeekChecks}}</h4>
+                                    <p class="mb-0">This Week</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="bi bi-calendar-week display-6"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Records Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Pelican</th>
+                                    <th>Check Type</th>
+                                    <th>Status</th>
+                                    <th>Weight</th>
+                                    <th>Temperature</th>
+                                    <th>Veterinarian</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .HealthRecords}}
+                                <tr>
+                                    <td>
+                                        <div>{{.CheckDate.Format "Jan 2, 2006"}}</div>
+                                        <small class="text-muted">{{.CheckDate.Format "15:04"}}</small>
+                                    </td>
+                                    <td>
+                                        <a href="/pelicans/{{.PelicanID}}" class="text-decoration-none">
+                                            <strong>{{.PelicanName}}</strong>
+                                        </a>
+                                        <br>
+                                        <small class="text-muted">ID: {{.PelicanID}}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {{if eq .CheckType "routine"}}bg-primary
+                                            {{else if eq .CheckType "emergency"}}bg-danger
+                                            {{else if eq .CheckType "follow-up"}}bg-warning
+                                            {{else if eq .CheckType "intake"}}bg-info
+                                            {{else if eq .CheckType "pre-release"}}bg-success
+                                            {{else}}bg-secondary{{end}}">
+                                            {{.CheckType}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {{if eq .Status "normal"}}bg-success
+                                            {{else if eq .Status "abnormal"}}bg-danger
+                                            {{else if eq .Status "concerning"}}bg-warning
+                                            {{else}}bg-secondary{{end}}">
+                                            {{.Status}}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {{if .Weight}}
+                                            <strong>{{printf "%.1f" .Weight}}</strong> kg
+                                            {{if .WeightChange}}
+                                                <br>
+                                                <small class="{{if gt .WeightChange 0}}text-success{{else if lt .WeightChange 0}}text-danger{{else}}text-muted{{end}}">
+                                                    {{if gt .WeightChange 0}}+{{end}}{{printf "%.1f" .WeightChange}} kg
+                                                </small>
+                                            {{end}}
+                                        {{else}}
+                                            <span class="text-muted">-</span>
+                                        {{end}}
+                                    </td>
+                                    <td>
+                                        {{if .Temperature}}
+                                            {{printf "%.1f" .Temperature}}°C
+                                            {{if or (lt .Temperature 37.0) (gt .Temperature 42.0)}}
+                                                <i class="bi bi-exclamation-triangle text-warning" title="Temperature outside normal range"></i>
+                                            {{end}}
+                                        {{else}}
+                                            <span class="text-muted">-</span>
+                                        {{end}}
+                                    </td>
+                                    <td>{{.Veterinarian}}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="/health/{{.ID}}" class="btn btn-outline-info" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="/health/{{.ID}}/edit" class="btn btn-outline-secondary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {{if eq .Status "abnormal"}}
+                                            <a href="/health/new?pelican_id={{.PelicanID}}&check_type=follow-up" class="btn btn-outline-warning" title="Schedule Follow-up">
+                                                <i class="bi bi-clock"></i>
+                                            </a>
+                                            {{end}}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{else}}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="bi bi-heart-pulse display-4"></i>
+                                        <p class="mt-2">No health records found</p>
+                                        <a href="/health/new" class="btn btn-info">Record First Health Check</a>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {{if gt .TotalPages 1}}
+                    <nav aria-label="Health records pagination">
+                        <ul class="pagination justify-content-center mt-3">
+                            {{if gt .CurrentPage 1}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{sub .CurrentPage 1}}{{if .PelicanFilter}}&pelican_id={{.PelicanFilter}}{{end}}{{if .CheckTypeFilter}}&check_type={{.CheckTypeFilter}}{{end}}{{if .StatusFilter}}&status={{.StatusFilter}}{{end}}{{if .DateFrom}}&date_from={{.DateFrom}}{{end}}{{if .DateTo}}&date_to={{.DateTo}}{{end}}">Previous</a>
+                            </li>
+                            {{end}}
+                            
+                            {{range .PageNumbers}}
+                            <li class="page-item {{if eq . $.CurrentPage}}active{{end}}">
+                                <a class="page-link" href="?page={{.}}{{if $.PelicanFilter}}&pelican_id={{$.PelicanFilter}}{{end}}{{if $.CheckTypeFilter}}&check_type={{$.CheckTypeFilter}}{{end}}{{if $.StatusFilter}}&status={{$.StatusFilter}}{{end}}{{if $.DateFrom}}&date_from={{$.DateFrom}}{{end}}{{if $.DateTo}}&date_to={{$.DateTo}}{{end}}">{{.}}</a>
+                            </li>
+                            {{end}}
+                            
+                            {{if lt .CurrentPage .TotalPages}}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{add .CurrentPage 1}}{{if .PelicanFilter}}&pelican_id={{.PelicanFilter}}{{end}}{{if .CheckTypeFilter}}&check_type={{.CheckTypeFilter}}{{end}}{{if .StatusFilter}}&status={{.StatusFilter}}{{end}}{{if .DateFrom}}&date_from={{.DateFrom}}{{end}}{{if .DateTo}}&date_to={{.DateTo}}{{end}}">Next</a>
+            </li>
+                            {{end}}
+                        </ul>
+                    </nav>
+                    {{end}}
+                    
+                    <!-- Summary Info -->
+                    <div class="text-center text-muted mt-3">
+                        Showing {{len .HealthRecords}} of {{.TotalCount}} health records
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6>Pelicans Needing Check-ups</h6>
+                                    {{if .OverdueCheckups}}
+                                    <ul class="list-group list-group-flush">
+                                        {{range .OverdueCheckups}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                            <div>
+                                                <strong>{{.Name}}</strong>
+                                                <br>
+                                                <small class="text-muted">Last check: {{.LastCheck.Format "Jan 2"}}</small>
+                                            </div>
+                                            <a href="/health/new?pelican_id={{.ID}}" class="btn btn-sm btn-info">
+                                                <i class="bi bi-plus"></i> Check
+                                            </a>
+                                        </li>
+                                        {{end}}
+                                    </ul>
+                                    {{else}}
+                                    <p class="text-muted">All pelicans are up to date!</p>
+                                    {{end}}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h6>Recent Abnormal Results</h6>
+                                    {{if .RecentAbnormal}}
+                                    <ul class="list-group list-group-flush">
+                                        {{range .RecentAbnormal}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                            <div>
+                                                <strong>{{.PelicanName}}</strong>
+                                                <br>
+                                                <small class="text-muted">{{.CheckDate.Format "Jan 2"}} - {{.CheckType}}</small>
+                                            </div>
+                                            <a href="/health/{{.ID}}" class="btn btn-sm btn-outline-warning">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </li>
+                                        {{end}}
+                                    </ul>
+                                    {{else}}
+                                    <p class="text-muted">No recent abnormal results</p>
+                                    {{end}}
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h6>Reports & Analytics</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="/reports/health-summary" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-graph-up"></i> Health Summary Report
+                                        </a>
+                                        <a href="/reports/weight-trends" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-graph-down"></i> Weight Trends
+                                        </a>
+                                        <a href="/reports/health-export" class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-download"></i> Export Health Data
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,28 @@
+git:
+    default_base: main
+    ignore_patterns:
+        - '*.log'
+        - node_modules/
+        - .git/
+server:
+    host: localhost
+    port: 8080
+settings:
+    auto_assign: false
+    database_path: .codereview/reviews.db
+    default_reviewer: reviewer@example.com
+    require_approval: false
+templates:
+    performance:
+        required_checks:
+            - Time complexity
+            - Memory usage
+        tags:
+            - performance
+    security:
+        required_checks:
+            - Input validation
+            - Authentication
+            - Authorization
+        tags:
+            - security

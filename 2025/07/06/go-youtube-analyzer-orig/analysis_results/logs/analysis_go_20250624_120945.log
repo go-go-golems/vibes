@@ -1,0 +1,21 @@
+[[36m12:09:45[0m] [34mINFO [0m | 🤖 Initialized Gemini client with model: gemini-2.5-flash
+[[36m12:09:45[0m] [34mINFO [0m | ✅ Step 1: Analyzer initialized
+[[36m12:09:45[0m] [34mINFO [0m | ⚙️ Step 2: Starting video analysis
+[[36m12:09:45[0m] [34mINFO [0m | Step: Initializing analysis (10%)
+[[36m12:09:45[0m] [34mINFO [0m | ⚙️ Step 3: Validating video URL
+[[36m12:09:45[0m] [34mINFO [0m | ✅ Step 4: Video URL validation successful
+[[36m12:09:45[0m] [34mINFO [0m | Step: Video URL validated (20%)
+[[36m12:09:45[0m] [34mINFO [0m | ⚙️ Step 5: Preparing analysis context
+[[36m12:09:45[0m] [34mINFO [0m | Step: Context prepared (30%)
+[[36m12:09:45[0m] [34mINFO [0m | ⚙️ Step 6: Executing Gemini video analysis
+[[36m12:09:45[0m] [34mINFO [0m | Step: Calling Gemini API (40%)
+[[36m12:09:45[0m] [34mINFO [0m | 🎬 Starting video analysis for: https://www.youtube.com/watch?v=J3oJqan2Gv8
+[[36m12:09:45[0m] [34mINFO [0m | 📝 Using prompt length: 2366 characters
+[[36m12:10:32[0m] [34mINFO [0m | 🔗 API Call 1: video_analysis (gemini-2.5-flash) - 47.16s
+[[36m12:10:32[0m] [34mINFO [0m | ✅ Received response: 15688 characters
+[[36m12:10:32[0m] [34mINFO [0m | Step: Analysis completed (70%)
+[[36m12:10:32[0m] [34mINFO [0m | ⚙️ Step 7: Processing analysis results
+[[36m12:10:32[0m] [34mINFO [0m | Step: Results processed (85%)
+[[36m12:10:32[0m] [34mINFO [0m | ✅ Step 8: Analysis completed successfully
+[[36m12:10:32[0m] [34mINFO [0m | Step: Analysis complete (100%)
+[[36m12:10:32[0m] [34mINFO [0m | Results saved to: analysis_results/analysis_go_20250624_120945.json

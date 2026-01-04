@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeReview - Local Git Review Tool</title>
+    <meta name="description" content="A comprehensive local code review application built with Go CLI backend and React frontend, featuring SQLite storage and embedded web server.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <h1>🔍 CodeReview</h1>
+                    <span class="tagline">Local Git Review Tool</span>
+                </div>
+                <nav class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#screenshots">Screenshots</a>
+                    <a href="#download">Download</a>
+                    <a href="#docs">Documentation</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Professional Code Reviews
+                    <span class="highlight">Made Simple</span>
+                </h1>
+                <p class="hero-description">
+                    A comprehensive local code review application built with Go CLI backend and React frontend. 
+                    Features SQLite storage, embedded web server, and a modern annotation system for efficient code reviews.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#download" class="btn btn-primary">Download Now</a>
+                    <a href="#screenshots" class="btn btn-secondary">View Screenshots</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">7</span>
+                        <span class="stat-label">CLI Commands</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">4</span>
+                        <span class="stat-label">Annotation Types</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">1</span>
+                        <span class="stat-label">Binary Deploy</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="screenshots/localhost_2025-09-26_16-37-32_3622.webp" alt="CodeReview Interface" class="screenshot-main">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Powerful Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast CLI</h3>
+                    <p>Complete command-line interface with init, create, list, show, annotate, export, and serve commands. Built with Go for maximum performance.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Modern Web Interface</h3>
+                    <p>Beautiful React frontend with shadcn/ui components, Tailwind CSS, and responsive design. Professional UI that adapts to your workflow.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Smart Annotations</h3>
+                    <p>Four types of annotations: Issues, Suggestions, Praise, and Questions. Each with severity levels and inline code suggestions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗄️</div>
+                    <h3>SQLite Storage</h3>
+                    <p>Lightweight, portable database storage. All review data persists locally with proper relationships and indexing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Git Integration</h3>
+                    <p>Native git operations for diff analysis, branch comparison, and commit tracking. Works with any git repository.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📦</div>
+                    <h3>Single Binary</h3>
+                    <p>Complete application in one executable. React frontend embedded in Go binary using go:embed for zero-dependency deployment.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section id="screenshots" class="screenshots">
+        <div class="container">
+            <h2 class="section-title">See It In Action</h2>
+            
+            <div class="screenshot-section">
+                <div class="screenshot-content">
+                    <h3>Review Dashboard</h3>
+                    <p>Clean, organized view of all your code reviews with status indicators, file counts, and annotation statistics. Navigate between reviews with ease.</p>
+                </div>
+                <div class="screenshot-image">
+                    <img src="screenshots/localhost_2025-09-26_16-22-07_4261.webp" alt="Review Dashboard" class="screenshot">
+                </div>
+            </div>
+
+            <div class="screenshot-section reverse">
+                <div class="screenshot-content">
+                    <h3>Multi-File Navigation</h3>
+                    <p>Visual file grid showing all changed files with annotation counts and severity indicators. Click any file to view its diff and annotations.</p>
+                </div>
+                <div class="screenshot-image">
+                    <img src="screenshots/localhost_2025-09-26_16-37-45_4963.webp" alt="Multi-File Navigation" class="screenshot">
+                </div>
+            </div>
+
+            <div class="screenshot-section">
+                <div class="screenshot-content">
+                    <h3>Inline Diff Viewer</h3>
+                    <p>Line-by-line diff display with syntax highlighting and inline annotations. See exactly what changed with proper context and formatting.</p>
+                </div>
+                <div class="screenshot-image">
+                    <img src="screenshots/localhost_2025-09-26_16-37-52_9894.webp" alt="Diff Viewer with Annotations" class="screenshot">
+                </div>
+            </div>
+
+            <div class="screenshot-section reverse">
+                <div class="screenshot-content">
+                    <h3>Annotation System</h3>
+                    <p>Comprehensive annotation panel with different types (issues, suggestions, praise, questions), severity levels, and code suggestions.</p>
+                </div>
+                <div class="screenshot-image">
+                    <img src="screenshots/localhost_2025-09-26_16-29-53_7449.webp" alt="Annotation Panel" class="screenshot">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Specs -->
+    <section class="tech-specs">
+        <div class="container">
+            <h2 class="section-title">Technical Specifications</h2>
+            <div class="specs-grid">
+                <div class="spec-category">
+                    <h3>Backend</h3>
+                    <ul>
+                        <li>Go 1.24+ with Cobra CLI framework</li>
+                        <li>SQLite database with proper schema</li>
+                        <li>RESTful API with JSON responses</li>
+                        <li>Git integration for diff analysis</li>
+                        <li>Embedded web server with CORS support</li>
+                    </ul>
+                </div>
+                <div class="spec-category">
+                    <h3>Frontend</h3>
+                    <ul>
+                        <li>React 19 with functional components</li>
+                        <li>shadcn/ui component library</li>
+                        <li>Tailwind CSS for styling</li>
+                        <li>Vite for build optimization</li>
+                        <li>Responsive design principles</li>
+                    </ul>
+                </div>
+                <div class="spec-category">
+                    <h3>Features</h3>
+                    <ul>
+                        <li>7 CLI commands for complete workflow</li>
+                        <li>4 annotation types with severity levels</li>
+                        <li>Multi-file review support</li>
+                        <li>YAML export functionality</li>
+                        <li>Real-time web interface</li>
+                    </ul>
+                </div>
+                <div class="spec-category">
+                    <h3>Deployment</h3>
+                    <ul>
+                        <li>Single binary executable</li>
+                        <li>Zero external dependencies</li>
+                        <li>Cross-platform support</li>
+                        <li>Portable SQLite database</li>
+                        <li>Configurable port and host</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <div class="container">
+            <h2 class="section-title">Get Started Today</h2>
+            <div class="download-content">
+                <div class="download-info">
+                    <h3>Complete Package Includes:</h3>
+                    <ul class="download-list">
+                        <li>✅ Go CLI source code with all commands</li>
+                        <li>✅ React frontend with modern UI components</li>
+                        <li>✅ SQLite database schema and migrations</li>
+                        <li>✅ Makefile for automated building</li>
+                        <li>✅ Complete documentation and examples</li>
+                        <li>✅ Test repository with sample reviews</li>
+                        <li>✅ Screenshots and usage demonstrations</li>
+                    </ul>
+                </div>
+                <div class="download-box">
+                    <h3>Download Package</h3>
+                    <p>Complete source code and documentation</p>
+                    <div class="download-size">~2.5MB compressed</div>
+                    <a href="codereview-complete-package.zip" class="btn btn-primary btn-large" download>
+                        📦 Download ZIP Package
+                    </a>
+                    <div class="download-note">
+                        Includes source code, documentation, and examples
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section id="docs" class="quick-start">
+        <div class="container">
+            <h2 class="section-title">Quick Start Guide</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Extract & Build</h3>
+                    <div class="code-block">
+                        <code>
+unzip codereview-complete-package.zip<br>
+cd codereview/<br>
+make build
+                        </code>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Initialize Repository</h3>
+                    <div class="code-block">
+                        <code>
+cd your-git-repo/<br>
+/path/to/codereview init<br>
+./codereview create "Review title"
+                        </code>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Add Annotations</h3>
+                    <div class="code-block">
+                        <code>
+./codereview annotate -f file.js -l 42 \<br>
+  -t issue -s major "Fix this bug"<br>
+./codereview show rev-123456
+                        </code>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Launch Web Interface</h3>
+                    <div class="code-block">
+                        <code>
+./codereview serve --port 8080<br>
+# Open http://localhost:8080<br>
+# Enjoy the modern UI!
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🔍 CodeReview</h3>
+                    <p>Professional local code review tool built with Go and React.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Features</h4>
+                    <ul>
+                        <li>CLI Interface</li>
+                        <li>Web Dashboard</li>
+                        <li>Annotation System</li>
+                        <li>Git Integration</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Technology</h4>
+                    <ul>
+                        <li>Go 1.24+</li>
+                        <li>React 19</li>
+                        <li>SQLite</li>
+                        <li>shadcn/ui</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#download">Download</a></li>
+                        <li><a href="#docs">Documentation</a></li>
+                        <li><a href="#screenshots">Screenshots</a></li>
+                        <li><a href="#features">Features</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CodeReview Tool. Built with ❤️ using Go and React.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
