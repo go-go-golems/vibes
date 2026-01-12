@@ -292,3 +292,44 @@ I patched the simplified Playground runtime to forward UI event payloads to plug
 ### Technical details
 - `handleEvent` now takes `eventPayload` and passes it as the handler arg.
 - Calculator and greeter plugins read from `state.plugins.calculator` and `state.plugins.greeter`.
+
+## Step 7: Document options and begin registry wiring
+
+I added a new analysis document outlining the two stabilization options: normalize the Redux state shape, and wire the plugin registry UI/runtime. I then started on option 2 by wiring the current `pluginManager` runtime to dispatch plugin lifecycle actions in `Playground`, so the registry stays in sync.
+
+This establishes a path to use the existing registry UI and status data without immediately restoring the sandbox worker path.
+
+**Commit (code):** e7cac8b6 — "Wire plugin registry into Playground"
+
+### What I did
+- Added `analysis/02-options-normalize-store-vs-registry-wiring.md`.
+- Updated `Playground.tsx` to dispatch plugin lifecycle actions and render from the registry state.
+
+### Why
+- The user asked for a clear comparison of option 1 (state normalization) vs option 2 (registry wiring).
+- The registry data was stale because the simplified runtime never dispatched lifecycle actions.
+
+### What worked
+- The registry now reflects plugins loaded through the simplified UI.
+
+### What didn't work
+- N/A
+
+### What I learned
+- Wiring the registry can be done without reintroducing the sandbox, but isolation and allowlisting remain absent.
+
+### What was tricky to build
+- Handling custom plugin IDs so the registry entry matches the runtime’s returned ID.
+
+### What warrants a second pair of eyes
+- Confirm the registry UI and plugin metadata are consistent across preset and custom plugin loads.
+
+### What should be done in the future
+- Decide whether to restore the sandbox path (option 2A) or continue with the in-process runtime (option 2B).
+
+### Code review instructions
+- Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx`.
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/ttmp/2026/01/12/js-plugin-redux-fix--fix-js-plugin-experiment-redux-integration/analysis/02-options-normalize-store-vs-registry-wiring.md`.
+
+### Technical details
+- Custom plugins use a temporary ID during load; the registry entry is swapped to the plugin’s declared ID once resolved.

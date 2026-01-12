@@ -49,3 +49,12 @@ Fixed preset plugin state access and event payload forwarding; updated analysis/
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx — Forward event payloads to handlers
 
+
+## 2026-01-12
+
+Added option analysis doc and wired plugin registry actions in Playground.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/ttmp/2026/01/12/js-plugin-redux-fix--fix-js-plugin-experiment-redux-integration/analysis/02-options-normalize-store-vs-registry-wiring.md — Options analysis
+
