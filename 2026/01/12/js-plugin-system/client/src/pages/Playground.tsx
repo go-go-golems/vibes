@@ -1,6 +1,13 @@
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
+import {
+  pluginLoadFailed,
+  pluginLoadStarted,
+  pluginLoadSucceeded,
+  pluginRemoved,
+  pluginToggled,
+} from "@/store/store";
 import { WidgetRenderer } from "@/components/WidgetRenderer";
 import { pluginManager } from "@/lib/pluginManager";
 import { presetPlugins } from "@/lib/presetPlugins";
@@ -18,10 +25,11 @@ import { Button } from "@/components/ui/button";
 export default function Playground() {
   const state = useSelector((s: RootState) => s);
   const dispatch = useDispatch();
-  const [loadedPlugins, setLoadedPlugins] = React.useState<string[]>([]);
   const [selectedPreset, setSelectedPreset] = React.useState<string>("");
   const [customCode, setCustomCode] = React.useState<string>("");
   const [error, setError] = React.useState<string>("");
+  const plugins = useSelector((s: RootState) => s.plugins.plugins);
+  const pluginList = Object.values(plugins);
 
   // Create UI builder for plugins
   const uiBuilder = {
@@ -74,49 +82,70 @@ export default function Playground() {
         throw new Error(`Preset not found: ${presetId}`);
       }
 
-      await pluginManager.loadPlugin(preset.code, {
+      dispatch(pluginLoadStarted({ id: preset.id, code: preset.code }));
+      const plugin = await pluginManager.loadPlugin(preset.code, {
         ui: uiBuilder,
         createActions,
       });
-
-      setLoadedPlugins((prev) => {
-        if (!prev.includes(presetId)) {
-          return [...prev, presetId];
-        }
-        return prev;
-      });
+      if (plugin.id !== preset.id) {
+        dispatch(pluginRemoved(preset.id));
+        dispatch(pluginLoadStarted({ id: plugin.id, code: preset.code }));
+      }
+      dispatch(
+        pluginLoadSucceeded({
+          id: plugin.id,
+          meta: {
+            id: plugin.id,
+            title: plugin.title,
+            widgets: Object.keys(plugin.widgets),
+          },
+        })
+      );
       setSelectedPreset(presetId);
     } catch (err) {
       setError(`Failed to load preset: ${String(err)}`);
+      dispatch(pluginLoadFailed({ id: presetId, error: String(err) }));
     }
   };
 
   const loadCustom = async () => {
+    let tempId = "custom";
     try {
       setError("");
       if (!customCode.trim()) {
         throw new Error("Plugin code cannot be empty");
       }
 
+      tempId = `custom_${Date.now()}`;
+      dispatch(pluginLoadStarted({ id: tempId, code: customCode }));
       const plugin = await pluginManager.loadPlugin(customCode, {
         ui: uiBuilder,
         createActions,
       });
 
-      setLoadedPlugins((prev) => {
-        if (!prev.includes(plugin.id)) {
-          return [...prev, plugin.id];
-        }
-        return prev;
-      });
+      if (plugin.id !== tempId) {
+        dispatch(pluginRemoved(tempId));
+        dispatch(pluginLoadStarted({ id: plugin.id, code: customCode }));
+      }
+      dispatch(
+        pluginLoadSucceeded({
+          id: plugin.id,
+          meta: {
+            id: plugin.id,
+            title: plugin.title,
+            widgets: Object.keys(plugin.widgets),
+          },
+        })
+      );
     } catch (err) {
       setError(`Failed to load custom plugin: ${String(err)}`);
+      dispatch(pluginLoadFailed({ id: tempId, error: String(err) }));
     }
   };
 
   const unloadPlugin = (id: string) => {
     pluginManager.removePlugin(id);
-    setLoadedPlugins((prev) => prev.filter((p) => p !== id));
+    dispatch(pluginRemoved(id));
   };
 
   const handleEvent = (pluginId: string, widgetId: string, eventRef: any, eventPayload?: any) => {
@@ -140,33 +169,51 @@ export default function Playground() {
           <div className="border border-cyan-400/30 rounded-sm p-4 bg-card/50">
             <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">PRESETS</h2>
             <div className="space-y-2">
-              {presetPlugins.map((preset) => (
+              {presetPlugins.map((preset) => {
+                const isLoaded = plugins[preset.id]?.status === "loaded";
+                return (
                 <Button
                   key={preset.id}
                   onClick={() => loadPreset(preset.id)}
-                  variant={loadedPlugins.includes(preset.id) ? "default" : "outline"}
+                  variant={isLoaded ? "default" : "outline"}
                   className="w-full justify-start font-mono text-xs"
                 >
                   {preset.title}
-                  {loadedPlugins.includes(preset.id) && " ✓"}
+                  {isLoaded && " ✓"}
                 </Button>
-              ))}
+              );
+              })}
             </div>
 
             <div className="mt-6 border-t border-cyan-400/20 pt-4">
               <h3 className="text-sm font-bold text-cyan-400 mb-2 font-mono">LOADED</h3>
               <div className="space-y-1">
-                {loadedPlugins.map((id) => (
-                  <div key={id} className="flex items-center justify-between text-xs font-mono">
-                    <span>{id}</span>
-                    <button
-                      onClick={() => unloadPlugin(id)}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
+                {pluginList.length === 0 ? (
+                  <div className="text-muted-foreground text-xs font-mono">No plugins loaded</div>
+                ) : (
+                  pluginList.map((plugin) => (
+                    <div key={plugin.id} className="flex items-center justify-between text-xs font-mono">
+                      <div className="flex flex-col">
+                        <span>{plugin.id}</span>
+                        <span className="text-muted-foreground">{plugin.status}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => dispatch(pluginToggled(plugin.id))}
+                          className={plugin.enabled ? "text-cyan-400" : "text-muted-foreground"}
+                        >
+                          {plugin.enabled ? "ON" : "OFF"}
+                        </button>
+                        <button
+                          onClick={() => unloadPlugin(plugin.id)}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -189,16 +236,18 @@ export default function Playground() {
           {/* Right Panel: Live Widgets */}
           <div className="border border-cyan-400/30 rounded-sm p-4 bg-card/50">
             <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">LIVE WIDGETS</h2>
-            {loadedPlugins.length === 0 ? (
+            {pluginList.length === 0 ? (
               <div className="text-muted-foreground text-xs font-mono">No plugins loaded</div>
             ) : (
               <div className="space-y-4 max-h-96 overflow-y-auto">
-                {loadedPlugins.map((pluginId) => {
-                  const plugin = pluginManager.getPlugin(pluginId);
+                {pluginList
+                  .filter((p) => p.status === "loaded" && p.enabled)
+                  .map((pluginMeta) => {
+                  const plugin = pluginManager.getPlugin(pluginMeta.id);
                   if (!plugin) return null;
 
                   return (
-                    <div key={pluginId} className="border border-cyan-400/20 rounded p-2 bg-background/30">
+                    <div key={pluginMeta.id} className="border border-cyan-400/20 rounded p-2 bg-background/30">
                       <div className="text-xs font-bold text-cyan-400 mb-2 font-mono">{plugin.title}</div>
                       <div className="space-y-2">
                         {Object.entries(plugin.widgets).map(([widgetId, widget]) => {
@@ -209,7 +258,7 @@ export default function Playground() {
                                 <WidgetRenderer
                                   tree={tree}
                                   onEvent={(eventRef, eventPayload) =>
-                                    handleEvent(pluginId, widgetId, eventRef, eventPayload)
+                                    handleEvent(pluginMeta.id, widgetId, eventRef, eventPayload)
                                   }
                                 />
                               </div>
