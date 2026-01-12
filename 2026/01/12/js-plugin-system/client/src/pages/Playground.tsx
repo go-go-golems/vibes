@@ -20,9 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Zap } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Playground() {
   const dispatch = useDispatch();
+  const [, setLocation] = useLocation();
   const plugins = useSelector((state: RootState) => state.plugins.plugins);
   const [sandbox, setSandbox] = React.useState<PluginSandboxClient | null>(null);
   const [selectedPluginId, setSelectedPluginId] = React.useState<string | null>(null);
@@ -121,6 +123,14 @@ export default function Playground() {
           </div>
           
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/docs")}
+              className="font-mono text-xs uppercase tracking-wide border-accent/50"
+            >
+              Docs
+            </Button>
             <Select value={selectedPreset} onValueChange={handleLoadPreset}>
               <SelectTrigger className="w-[200px] font-mono text-xs border-accent/30">
                 <SelectValue placeholder="Load preset..." />
