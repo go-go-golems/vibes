@@ -1,281 +1,182 @@
+// Design Philosophy: Technical Brutalism - Asymmetric split-pane IDE-like layout
+// Plugin list (left) + Editor (center) + Widget output (right/bottom)
+
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store/store";
-import {
-  pluginLoadFailed,
-  pluginLoadStarted,
-  pluginLoadSucceeded,
-  pluginRemoved,
-  pluginToggled,
-} from "@/store/store";
-import { WidgetRenderer } from "@/components/WidgetRenderer";
-import { pluginManager } from "@/lib/pluginManager";
-import { presetPlugins } from "@/lib/presetPlugins";
-import type { UINode } from "@/lib/uiTypes";
+import type { RootState } from "@/store/store";
+import { pluginLoadStarted, pluginLoadSucceeded, pluginLoadFailed } from "@/store/store";
+import { PluginSandboxClient } from "@/lib/pluginSandboxClient";
+import { store } from "@/store/store";
+import { PluginList } from "@/components/PluginList";
+import { PluginEditor } from "@/components/PluginEditor";
+import { PluginWidget } from "@/components/PluginWidget";
 import { Button } from "@/components/ui/button";
+import { PRESET_PLUGINS } from "@/lib/presets";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, Zap } from "lucide-react";
 
-/**
- * Plugin Playground - Load and run multiple plugins simultaneously
- * Features:
- * - Preset plugin selector
- * - Plugin editor with syntax highlighting
- * - Multi-plugin view showing all loaded plugins
- * - Real-time state updates via Redux
- */
 export default function Playground() {
-  const state = useSelector((s: RootState) => s);
   const dispatch = useDispatch();
+  const plugins = useSelector((state: RootState) => state.plugins.plugins);
+  const [sandbox, setSandbox] = React.useState<PluginSandboxClient | null>(null);
+  const [selectedPluginId, setSelectedPluginId] = React.useState<string | null>(null);
+  const [editorCode, setEditorCode] = React.useState("");
   const [selectedPreset, setSelectedPreset] = React.useState<string>("");
-  const [customCode, setCustomCode] = React.useState<string>("");
-  const [error, setError] = React.useState<string>("");
-  const plugins = useSelector((s: RootState) => s.plugins.plugins);
-  const pluginList = Object.values(plugins);
 
-  // Create UI builder for plugins
-  const uiBuilder = {
-    text: (content: string) => ({
-      kind: "text" as const,
-      text: content,
-    }),
-    button: (label: string, props?: any) => ({
-      kind: "button" as const,
-      props: { label, ...props },
-    }),
-    input: (value: string, props?: any) => ({
-      kind: "input" as const,
-      props: { value, ...props },
-    }),
-    row: (children: UINode[]) => ({
-      kind: "row" as const,
-      children,
-    }),
-    panel: (children: UINode[]) => ({
-      kind: "panel" as const,
-      children,
-    }),
-    badge: (text: string) => ({
-      kind: "badge" as const,
-      text,
-    }),
-    table: (rows: any[][], props?: any) => ({
-      kind: "table" as const,
-      props: { headers: props?.headers || [], rows },
-    }),
-  };
+  // Initialize sandbox
+  React.useEffect(() => {
+    const workerUrl = new URL("../workers/pluginSandbox.worker.ts", import.meta.url);
+    const client = new PluginSandboxClient({
+      store,
+      workerUrl,
+      allowDispatch: (pluginId, action) => {
+        return typeof action?.type === "string" && action.type.startsWith(`plugin.${pluginId}/`);
+      },
+    });
+    setSandbox(client);
 
-  const createActions = (namespace: string, actionNames: string[]) => {
-    const actions: Record<string, any> = {};
-    for (const name of actionNames) {
-      actions[name] = (payload?: any) => ({
-        type: `${namespace}/${name}`,
-        payload,
-      });
-    }
-    return actions;
-  };
+    return () => {
+      client.terminate();
+    };
+  }, []);
 
-  const loadPreset = async (presetId: string) => {
-    try {
-      setError("");
-      const preset = presetPlugins.find((p) => p.id === presetId);
-      if (!preset) {
-        throw new Error(`Preset not found: ${presetId}`);
+  const handleLoadPlugin = React.useCallback(
+    async (pluginId: string, code: string) => {
+      if (!sandbox) return;
+
+      dispatch(pluginLoadStarted({ id: pluginId, code }));
+
+      try {
+        const meta = await sandbox.loadPlugin(pluginId, code);
+        dispatch(pluginLoadSucceeded({ id: pluginId, meta }));
+      } catch (error) {
+        dispatch(pluginLoadFailed({ id: pluginId, error: String(error) }));
       }
+    },
+    [sandbox, dispatch]
+  );
 
-      dispatch(pluginLoadStarted({ id: preset.id, code: preset.code }));
-      const plugin = await pluginManager.loadPlugin(preset.code, {
-        ui: uiBuilder,
-        createActions,
-      });
-      if (plugin.id !== preset.id) {
-        dispatch(pluginRemoved(preset.id));
-        dispatch(pluginLoadStarted({ id: plugin.id, code: preset.code }));
-      }
-      dispatch(
-        pluginLoadSucceeded({
-          id: plugin.id,
-          meta: {
-            id: plugin.id,
-            title: plugin.title,
-            widgets: Object.keys(plugin.widgets),
-          },
-        })
-      );
+  const handleLoadPreset = React.useCallback(
+    (presetId: string) => {
+      const preset = PRESET_PLUGINS.find((p) => p.id === presetId);
+      if (!preset) return;
+
+      setEditorCode(preset.code);
       setSelectedPreset(presetId);
-    } catch (err) {
-      setError(`Failed to load preset: ${String(err)}`);
-      dispatch(pluginLoadFailed({ id: presetId, error: String(err) }));
-    }
-  };
+      handleLoadPlugin(preset.id, preset.code);
+    },
+    [handleLoadPlugin]
+  );
 
-  const loadCustom = async () => {
-    let tempId = "custom";
-    try {
-      setError("");
-      if (!customCode.trim()) {
-        throw new Error("Plugin code cannot be empty");
-      }
+  const handleRunEditor = React.useCallback(() => {
+    if (!editorCode.trim()) return;
+    
+    const pluginId = selectedPluginId || `plugin_${Date.now()}`;
+    handleLoadPlugin(pluginId, editorCode);
+  }, [editorCode, selectedPluginId, handleLoadPlugin]);
 
-      tempId = `custom_${Date.now()}`;
-      dispatch(pluginLoadStarted({ id: tempId, code: customCode }));
-      const plugin = await pluginManager.loadPlugin(customCode, {
-        ui: uiBuilder,
-        createActions,
-      });
+  const selectedPlugin = selectedPluginId ? plugins[selectedPluginId] : null;
 
-      if (plugin.id !== tempId) {
-        dispatch(pluginRemoved(tempId));
-        dispatch(pluginLoadStarted({ id: plugin.id, code: customCode }));
-      }
-      dispatch(
-        pluginLoadSucceeded({
-          id: plugin.id,
-          meta: {
-            id: plugin.id,
-            title: plugin.title,
-            widgets: Object.keys(plugin.widgets),
-          },
-        })
-      );
-    } catch (err) {
-      setError(`Failed to load custom plugin: ${String(err)}`);
-      dispatch(pluginLoadFailed({ id: tempId, error: String(err) }));
-    }
-  };
-
-  const unloadPlugin = (id: string) => {
-    pluginManager.removePlugin(id);
-    dispatch(pluginRemoved(id));
-  };
-
-  const handleEvent = (pluginId: string, widgetId: string, eventRef: any, eventPayload?: any) => {
-    try {
-      pluginManager.callHandler(pluginId, widgetId, eventRef.handler, dispatch, eventPayload, state);
-    } catch (err) {
-      console.error("Event error:", err);
-    }
-  };
+  // Get all enabled plugins and their widgets
+  const enabledPlugins = Object.values(plugins).filter(
+    (p) => p.enabled && p.status === "loaded"
+  );
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-cyan-400 mb-2 font-mono">PLUGIN PLAYGROUND</h1>
-        <p className="text-muted-foreground mb-6 font-mono text-sm">
-          QuickJS VM • React + Redux • Multi-Plugin Support
-        </p>
+    <div className="h-screen flex flex-col bg-background">
+      {/* Header */}
+      <header className="border-b border-accent/30 bg-card/50 px-6 py-4 shadow-[0_2px_20px_rgba(0,255,255,0.1)]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-mono text-2xl font-bold uppercase tracking-wider text-accent">
+              Plugin Playground
+            </h1>
+            <p className="font-mono text-xs text-muted-foreground mt-1">
+              QuickJS VM Sandbox • React + Redux + WASM
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Select value={selectedPreset} onValueChange={handleLoadPreset}>
+              <SelectTrigger className="w-[200px] font-mono text-xs border-accent/30">
+                <SelectValue placeholder="Load preset..." />
+              </SelectTrigger>
+              <SelectContent>
+                {PRESET_PLUGINS.map((preset) => (
+                  <SelectItem key={preset.id} value={preset.id} className="font-mono text-xs">
+                    {preset.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Left Panel: Plugin Selector */}
-          <div className="border border-cyan-400/30 rounded-sm p-4 bg-card/50">
-            <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">PRESETS</h2>
-            <div className="space-y-2">
-              {presetPlugins.map((preset) => {
-                const isLoaded = plugins[preset.id]?.status === "loaded";
-                return (
-                <Button
-                  key={preset.id}
-                  onClick={() => loadPreset(preset.id)}
-                  variant={isLoaded ? "default" : "outline"}
-                  className="w-full justify-start font-mono text-xs"
-                >
-                  {preset.title}
-                  {isLoaded && " ✓"}
-                </Button>
-              );
-              })}
-            </div>
+      {/* Main Content */}
+      <div className="flex-1 flex min-h-0">
+        {/* Left Sidebar - Plugin List */}
+        <div className="w-64 flex-shrink-0">
+          <PluginList
+            onSelectPlugin={setSelectedPluginId}
+            selectedPluginId={selectedPluginId}
+          />
+        </div>
 
-            <div className="mt-6 border-t border-cyan-400/20 pt-4">
-              <h3 className="text-sm font-bold text-cyan-400 mb-2 font-mono">LOADED</h3>
-              <div className="space-y-1">
-                {pluginList.length === 0 ? (
-                  <div className="text-muted-foreground text-xs font-mono">No plugins loaded</div>
-                ) : (
-                  pluginList.map((plugin) => (
-                    <div key={plugin.id} className="flex items-center justify-between text-xs font-mono">
-                      <div className="flex flex-col">
-                        <span>{plugin.id}</span>
-                        <span className="text-muted-foreground">{plugin.status}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => dispatch(pluginToggled(plugin.id))}
-                          className={plugin.enabled ? "text-cyan-400" : "text-muted-foreground"}
-                        >
-                          {plugin.enabled ? "ON" : "OFF"}
-                        </button>
-                        <button
-                          onClick={() => unloadPlugin(plugin.id)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
+        {/* Center - Editor */}
+        <div className="flex-1 flex flex-col min-w-0 border-r border-accent/30">
+          <PluginEditor
+            code={editorCode}
+            onChange={setEditorCode}
+            onRun={handleRunEditor}
+          />
+        </div>
+
+        {/* Right - Widget Output */}
+        <div className="w-96 flex-shrink-0 flex flex-col bg-card/30">
+          <div className="px-4 py-3 border-b border-accent/30 bg-accent/5">
+            <h2 className="font-mono text-sm uppercase tracking-wider font-bold text-accent">
+              Live Widgets
+            </h2>
+            <p className="font-mono text-xs text-muted-foreground mt-1">
+              {enabledPlugins.length} plugin(s) active
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {enabledPlugins.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                <Zap className="w-12 h-12 text-accent/30 mb-4" />
+                <p className="font-mono text-sm text-muted-foreground">
+                  No active widgets
+                </p>
+                <p className="font-mono text-xs text-muted-foreground mt-2">
+                  Load a preset or write your own plugin
+                </p>
               </div>
-            </div>
-          </div>
-
-          {/* Middle Panel: Code Editor */}
-          <div className="border border-cyan-400/30 rounded-sm p-4 bg-card/50">
-            <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">CUSTOM PLUGIN</h2>
-            <textarea
-              value={customCode}
-              onChange={(e) => setCustomCode(e.target.value)}
-              placeholder="definePlugin(({ ui, createActions }) => { ... })"
-              className="w-full h-48 bg-background/50 border border-cyan-400/20 rounded p-2 font-mono text-xs text-foreground resize-none focus:outline-none focus:border-cyan-400"
-            />
-            <Button onClick={loadCustom} className="w-full mt-2 font-mono text-xs">
-              LOAD PLUGIN
-            </Button>
-            {error && <div className="mt-2 text-red-400 text-xs font-mono">{error}</div>}
-          </div>
-
-          {/* Right Panel: Live Widgets */}
-          <div className="border border-cyan-400/30 rounded-sm p-4 bg-card/50">
-            <h2 className="text-lg font-bold text-cyan-400 mb-4 font-mono">LIVE WIDGETS</h2>
-            {pluginList.length === 0 ? (
-              <div className="text-muted-foreground text-xs font-mono">No plugins loaded</div>
             ) : (
-              <div className="space-y-4 max-h-96 overflow-y-auto">
-                {pluginList
-                  .filter((p) => p.status === "loaded" && p.enabled)
-                  .map((pluginMeta) => {
-                  const plugin = pluginManager.getPlugin(pluginMeta.id);
-                  if (!plugin) return null;
-
-                  return (
-                    <div key={pluginMeta.id} className="border border-cyan-400/20 rounded p-2 bg-background/30">
-                      <div className="text-xs font-bold text-cyan-400 mb-2 font-mono">{plugin.title}</div>
-                      <div className="space-y-2">
-                        {Object.entries(plugin.widgets).map(([widgetId, widget]) => {
-                          try {
-                            const tree = widget.render({ state });
-                            return (
-                              <div key={widgetId}>
-                                <WidgetRenderer
-                                  tree={tree}
-                                  onEvent={(eventRef, eventPayload) =>
-                                    handleEvent(pluginMeta.id, widgetId, eventRef, eventPayload)
-                                  }
-                                />
-                              </div>
-                            );
-                          } catch (err) {
-                            return (
-                              <div key={widgetId} className="text-red-400 text-xs font-mono">
-                                Render error: {String(err)}
-                              </div>
-                            );
-                          }
-                        })}
-                      </div>
+              enabledPlugins.map((plugin) =>
+                plugin.meta.widgets.map((widgetId) => (
+                  <div key={`${plugin.id}-${widgetId}`} className="mb-4">
+                    <div className="font-mono text-xs uppercase tracking-wider text-accent mb-2 px-1">
+                      {plugin.meta.title || plugin.id} / {widgetId}
                     </div>
-                  );
-                })}
-              </div>
+                    {sandbox && (
+                      <PluginWidget
+                        sandbox={sandbox}
+                        pluginId={plugin.id}
+                        widgetId={widgetId}
+                      />
+                    )}
+                  </div>
+                ))
+              )
             )}
           </div>
         </div>
