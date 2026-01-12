@@ -19,8 +19,26 @@ export function PluginWidget({ sandbox, pluginId, widgetId }: PluginWidgetProps)
   const state = useSelector((s: RootState) => s);
   const [tree, setTree] = React.useState<UINode | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<{
+    name?: string;
+    message: string;
+    stack?: string;
+    raw?: unknown;
+  } | null>(null);
   const [renderTrigger, setRenderTrigger] = React.useState(0);
+
+  const normalizeError = React.useCallback((err: unknown) => {
+    if (err && typeof err === "object") {
+      const maybeName = (err as { name?: unknown }).name;
+      const maybeMessage = (err as { message?: unknown }).message;
+      const maybeStack = (err as { stack?: unknown }).stack;
+      const name = typeof maybeName === "string" ? maybeName : undefined;
+      const message = typeof maybeMessage === "string" ? maybeMessage : String(err);
+      const stack = typeof maybeStack === "string" ? maybeStack : undefined;
+      return { name, message, stack, raw: err };
+    }
+    return { message: String(err) };
+  }, []);
 
   React.useEffect(() => {
     let alive = true;
@@ -51,7 +69,7 @@ export function PluginWidget({ sandbox, pluginId, widgetId }: PluginWidgetProps)
           if (alive) {
             console.error("[PluginWidget] Render failed:", err);
             (window as any).__lastRenderError = String(err);
-            setError(String(err));
+            setError(normalizeError(err));
             setLoading(false);
           }
         });
@@ -68,7 +86,7 @@ export function PluginWidget({ sandbox, pluginId, widgetId }: PluginWidgetProps)
       console.log("[PluginWidget] Event triggered:", ref, eventPayload);
       sandbox.event(pluginId, widgetId, ref.handler, eventPayload, state).catch((err) => {
         console.error(`[PluginWidget] Event handler error:`, err);
-        setError(String(err));
+        setError(normalizeError(err));
       });
       // Force a re-render by incrementing the trigger
       // This ensures the effect re-runs and the widget is re-rendered with updated state
@@ -92,7 +110,25 @@ export function PluginWidget({ sandbox, pluginId, widgetId }: PluginWidgetProps)
     return (
       <div className="border border-destructive/50 bg-destructive/10 rounded-sm p-4 font-mono text-sm text-destructive">
         <div className="font-bold uppercase tracking-wide mb-2">RENDER ERROR</div>
-        <pre className="text-xs overflow-auto max-h-40">{error}</pre>
+        <div className="text-xs text-destructive/80">
+          {error.name ? `${error.name}: ` : ""}
+          {error.message}
+        </div>
+        <details className="mt-3 text-xs text-destructive/90">
+          <summary className="cursor-pointer select-none">Show error details</summary>
+          <div className="mt-2 space-y-2">
+            {error.stack && (
+              <pre className="text-[11px] overflow-auto max-h-48 whitespace-pre-wrap">
+                {error.stack}
+              </pre>
+            )}
+            {error.raw && (
+              <pre className="text-[11px] overflow-auto max-h-48 whitespace-pre-wrap">
+                {JSON.stringify(error.raw, null, 2)}
+              </pre>
+            )}
+          </div>
+        </details>
       </div>
     );
   }
