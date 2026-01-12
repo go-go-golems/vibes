@@ -21,7 +21,11 @@ RelatedFiles:
     - Path: 2026/01/12/js-plugin-system/client/src/pages/Docs.tsx
       Note: In-app docs page added
     - Path: 2026/01/12/js-plugin-system/client/src/pages/Playground.tsx
-      Note: Docs nav
+      Note: |-
+        Docs nav
+        UI state persistence and restore
+    - Path: 2026/01/12/js-plugin-system/client/src/store/store.ts
+      Note: LocalStorage persistence
     - Path: 2026/01/12/js-plugin-system/pasted_content(1).txt
       Note: Original architecture sketch
     - Path: 2026/01/12/js-plugin-system/pasted_content_2.txt
@@ -38,6 +42,7 @@ LastUpdated: 2026-01-12T15:55:08.892024352-05:00
 WhatFor: ""
 WhenToUse: ""
 ---
+
 
 
 
@@ -701,3 +706,44 @@ The error panel now captures name/message/stack and renders a collapsible detail
 
 ### Technical details
 - The UI uses a `<details>` element so the stack trace stays hidden by default.
+
+## Step 17: Persist playground state in localStorage
+
+I wired localStorage persistence for both the Redux plugin slice and the playground UI state so reloading the page restores loaded plugins, plugin state, and the current editor context. Persisted plugin entries are sanitized on load and reloaded into the sandbox when the worker comes online.
+
+This keeps the experiment usable across reloads without losing plugins or resetting counters/greeter/calculator values.
+
+**Commit (code):** 3dc45d47 — "Persist plugin playground state to localStorage"
+
+### What I did
+- Added localStorage load/save logic in the Redux store with schema validation and a versioned payload.
+- Reset plugin statuses to `idle` on restore and reloaded plugins into the sandbox on startup.
+- Persisted Playground UI state (selected plugin, editor code, selected preset) with a small debounce.
+
+### Why
+- The plugin experiment is iterative; losing state on refresh slows debugging and authoring.
+
+### What worked
+- Reloading the page restores plugin state and rehydrates the sandbox without manual reloading.
+
+### What didn't work
+- N/A
+
+### What I learned
+- Restoring plugin metadata is useful for immediate UI feedback even before the sandbox reloads.
+
+### What was tricky to build
+- Avoiding stale plugin statuses by forcing them back to `idle` before reloading.
+
+### What warrants a second pair of eyes
+- Confirm the persistence schema covers all desired plugin state and that reload behavior is correct for disabled plugins.
+
+### What should be done in the future
+- If the persisted payload grows, consider pruning plugin meta or adding migrations.
+
+### Code review instructions
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/store/store.ts`.
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx`.
+
+### Technical details
+- Storage keys: `pluginPlaygroundState` and `pluginPlaygroundUiState`.
