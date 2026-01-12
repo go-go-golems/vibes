@@ -112,3 +112,12 @@ Restored presets module for sandbox runtime.
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/presets.ts — Preset scripts restored
 
+
+## 2026-01-12
+
+Added new preset examples and plugin scripting reference.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/presets.ts — Additional preset plugins
+

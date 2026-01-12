@@ -529,6 +529,46 @@ After cleanup, `presets.ts` needed to be restored because the sandbox Playground
 ### Technical details
 - N/A
 
+## Step 14: Add example plugins and scripting reference
+
+I expanded the preset plugin list with additional examples that exercise the existing Redux state shape and UI DSL, then added a detailed scripting reference document. This gives concrete examples to copy from and a stable contract to align future plugins.
+
+**Commit (code):** 3bdd3c04 — "Add more preset plugins"
+
+### What I did
+- Added new preset plugins: Counter Dial, Greeter Banner, and State Audit.
+- Created `reference/02-plugin-scripting-reference.md` with a full DSL + handler contract guide.
+
+### Why
+- More examples make it easier to validate the sandbox and help users author plugins.
+- A reference doc reduces ambiguity about the DSL, event payloads, and state shape.
+
+### What worked
+- Preset additions remain compatible with the normalized `state.plugins.*` shape.
+- The reference doc captures the lifecycle and contract details in one place.
+
+### What didn't work
+- N/A
+
+### What I learned
+- Reusing existing actions keeps new examples functional without adding reducers.
+
+### What was tricky to build
+- N/A
+
+### What warrants a second pair of eyes
+- Confirm the new presets match the intended UX and naming conventions.
+
+### What should be done in the future
+- Add a new reducer slice if we want example plugins to persist additional state.
+
+### Code review instructions
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/presets.ts`.
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/ttmp/2026/01/12/js-plugin-redux-fix--fix-js-plugin-experiment-redux-integration/reference/02-plugin-scripting-reference.md`.
+
+### Technical details
+- New presets use `plugin.counter`, `plugin.greeter`, and `plugin.calculator` actions only.
+
 ## Step 12: Add explicit unload control
 
 I added an explicit unload button to the plugin list that disables a plugin before removing it, matching the intent you requested. This should make it clearer when a plugin is being disposed versus simply toggled on/off.
