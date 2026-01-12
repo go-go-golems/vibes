@@ -28,6 +28,7 @@ export default function Playground() {
   const [selectedPluginId, setSelectedPluginId] = React.useState<string | null>(null);
   const [editorCode, setEditorCode] = React.useState("");
   const [selectedPreset, setSelectedPreset] = React.useState<string>("");
+  const prevPluginIdsRef = React.useRef<Set<string>>(new Set());
 
   // Initialize sandbox
   React.useEffect(() => {
@@ -45,6 +46,23 @@ export default function Playground() {
       client.terminate();
     };
   }, []);
+
+  React.useEffect(() => {
+    if (!sandbox) return;
+    const currentIds = new Set(Object.keys(plugins));
+    const removed: string[] = [];
+    for (const id of prevPluginIdsRef.current) {
+      if (!currentIds.has(id)) {
+        removed.push(id);
+      }
+    }
+    removed.forEach((id) => {
+      sandbox.unloadPlugin(id).catch((err) => {
+        console.error(`[PluginSandbox] Failed to unload ${id}:`, err);
+      });
+    });
+    prevPluginIdsRef.current = currentIds;
+  }, [sandbox, plugins]);
 
   const handleLoadPlugin = React.useCallback(
     async (pluginId: string, code: string) => {

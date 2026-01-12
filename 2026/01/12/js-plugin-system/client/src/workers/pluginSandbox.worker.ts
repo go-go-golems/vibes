@@ -7,7 +7,8 @@ import { getQuickJS } from "quickjs-emscripten";
 type RpcRequest =
   | { id: number; type: "loadPlugin"; pluginId: string; code: string }
   | { id: number; type: "render"; pluginId: string; widgetId: string; state: any }
-  | { id: number; type: "event"; pluginId: string; widgetId: string; handler: string; event: any; state: any };
+  | { id: number; type: "event"; pluginId: string; widgetId: string; handler: string; event: any; state: any }
+  | { id: number; type: "unloadPlugin"; pluginId: string };
 
 type RpcResponse =
   | { id: number; ok: true; result: any }
@@ -269,6 +270,20 @@ async function handleEvent(msg: Extract<RpcRequest, { type: "event" }>) {
   });
 }
 
+async function handleUnload(msg: Extract<RpcRequest, { type: "unloadPlugin" }>) {
+  const ctx = plugins.get(msg.pluginId);
+  if (!ctx) return null;
+
+  try {
+    ctx.vm.dispose();
+  } catch {
+    // Ignore disposal errors for already-collected contexts.
+  }
+
+  plugins.delete(msg.pluginId);
+  return null;
+}
+
 self.onmessage = async (e: MessageEvent<RpcRequest>) => {
   const msg = e.data;
   let resp: RpcResponse;
@@ -277,7 +292,8 @@ self.onmessage = async (e: MessageEvent<RpcRequest>) => {
     let result: any;
     if (msg.type === "loadPlugin") result = await handleLoadPlugin(msg);
     else if (msg.type === "render") result = await handleRender(msg);
-    else result = await handleEvent(msg);
+    else if (msg.type === "event") result = await handleEvent(msg);
+    else result = await handleUnload(msg);
 
     resp = { id: msg.id, ok: true, result };
   } catch (error) {

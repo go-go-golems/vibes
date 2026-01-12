@@ -78,6 +78,10 @@ export class PluginSandboxClient {
     return this.call("event", { pluginId, widgetId, handler, event, state });
   }
 
+  unloadPlugin(pluginId: string): Promise<void> {
+    return this.call("unloadPlugin", { pluginId });
+  }
+
   terminate() {
     this.worker.terminate();
   }
