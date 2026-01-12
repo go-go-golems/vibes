@@ -60,7 +60,8 @@ Provide a deep, file-based map of how the current plugin experiment is wired, wh
 - The plugin list now includes an explicit unload control that disables before removal.
 
 ### Alternative runtimes and dead code paths
-- Removed the in-process runtime (`pluginManager.ts`, `presets.ts`, and `minimalPlugin.ts`) to avoid split-path drift.
+- Removed the in-process runtime (`pluginManager.ts` and `minimalPlugin.ts`) to avoid split-path drift.
+- Kept `presets.ts` as the sandbox preset source used by `Playground`.
 
 ## Plugin API and UI DSL
 

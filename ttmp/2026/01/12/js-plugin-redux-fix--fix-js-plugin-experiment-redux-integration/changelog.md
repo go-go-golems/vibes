@@ -103,3 +103,12 @@ Added explicit unload control in plugin list.
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginList.tsx — Added unload control
 
+
+## 2026-01-12
+
+Restored presets module for sandbox runtime.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/presets.ts — Preset scripts restored
+

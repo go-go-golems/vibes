@@ -460,7 +460,7 @@ I removed the remaining in-process runtime files and added an explicit unload RP
 **Commit (code):** ee776f2a — "Add sandbox unload support"
 
 ### What I did
-- Removed `pluginManager.ts`, `presets.ts`, and `minimalPlugin.ts` from the workspace.
+- Removed `pluginManager.ts` and `minimalPlugin.ts` from the workspace.
 - Added `unloadPlugin` support to `pluginSandbox.worker.ts` and `pluginSandboxClient.ts`.
 - Hooked `Playground` to call `sandbox.unloadPlugin` when registry entries are removed.
 
@@ -484,7 +484,7 @@ I removed the remaining in-process runtime files and added an explicit unload RP
 - Verify that unload is safe while a widget is rendering and does not race with in-flight RPC calls.
 
 ### What should be done in the future
-- Consider an explicit “unload” button in the UI that disables the plugin before disposing it.
+- N/A
 
 ### Code review instructions
 - Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx`.
@@ -492,6 +492,42 @@ I removed the remaining in-process runtime files and added an explicit unload RP
 
 ### Technical details
 - Unload RPC: `sandbox.unloadPlugin(id)` -> worker `handleUnload` disposes the VM context.
+
+## Step 13: Restore sandbox presets file
+
+After cleanup, `presets.ts` needed to be restored because the sandbox Playground imports `PRESET_PLUGINS` from there. I restored the file so the preset selector can load plugins again.
+
+**Commit (code):** 889d2252 — "Restore sandbox preset plugins"
+
+### What I did
+- Restored `presets.ts` from the bundle history.
+
+### Why
+- The sandbox UI depends on `PRESET_PLUGINS` and failed to load without this module.
+
+### What worked
+- Preset selector resolves again; no missing module errors.
+
+### What didn't work
+- N/A
+
+### What I learned
+- Preset scripts are part of the sandbox runtime, not the in-process path.
+
+### What was tricky to build
+- N/A
+
+### What warrants a second pair of eyes
+- Confirm the preset scripts still align with the normalized `state.plugins.*` shape.
+
+### What should be done in the future
+- Keep preset scripts alongside the sandbox runtime and avoid deleting them during cleanup.
+
+### Code review instructions
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/presets.ts`.
+
+### Technical details
+- N/A
 
 ## Step 12: Add explicit unload control
 

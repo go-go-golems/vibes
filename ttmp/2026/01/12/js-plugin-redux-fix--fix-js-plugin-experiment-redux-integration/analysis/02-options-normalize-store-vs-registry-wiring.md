@@ -14,6 +14,8 @@ RelatedFiles:
       Note: Registry UI for plugin lifecycle
     - Path: 2026/01/12/js-plugin-system/client/src/lib/pluginSandboxClient.ts
       Note: Sandbox runtime client (worker path)
+    - Path: 2026/01/12/js-plugin-system/client/src/lib/presets.ts
+      Note: Preset plugin scripts used by the sandbox runtime
     - Path: 2026/01/12/js-plugin-system/client/src/pages/Playground.tsx
       Note: Primary runtime wiring for registry vs in-process path
     - Path: 2026/01/12/js-plugin-system/client/src/store/store.ts
