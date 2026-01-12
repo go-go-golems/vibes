@@ -1,0 +1,168 @@
+Here’s a “cool” app shape that fits your constraints and feels *very* Redux-native:
+
+## App concept: **OpsDeck** (a programmable control-panel/dashboard)
+
+A React + Redux Toolkit app that’s basically a “mission control” UI. The core app owns all privileged stuff (network, storage, device control, etc). Users load **scripts** that can:
+
+* define **widgets** (from a *restricted* widget palette)
+* define **handlers** (event callbacks)
+* **dispatch Redux actions** and **read state**
+* *nothing else* (no DOM, no `window`, no `fetch`, no imports)
+
+This is perfect for: home automation dashboards, internal tooling consoles, maker-lab device panels, incident runbooks, etc.
+
+---
+
+## The key trick: scripts only emit “intent”; the host performs effects
+
+Scripts do **not** get `fetch()` or storage. Instead they dispatch “intent” actions like:
+
+* `effects/httpRequestRequested({ requestId, url, method })`
+* `devices/zigbeeSceneRequested({ sceneId })`
+* `storage/readRequested({ key })`
+
+Then the **host app** (RTK listener middleware / thunk / saga) decides what to do, performs the privileged operation, and dispatches the result action back into the store (`effects/httpRequestSucceeded`, etc.).
+
+So scripts can *cause things to happen* via Redux, but only through the actions you allow.
+
+---
+
+## Widget model: “restricted widget DSL”, rendered by React
+
+Instead of letting scripts define arbitrary React components, you give them a tiny UI DSL that returns a JSON-ish tree:
+
+Allowed primitives (example):
+
+* `ui.panel`, `ui.row`, `ui.text`, `ui.button`, `ui.input`, `ui.badge`, `ui.table`, `ui.sparkline`
+
+The host app maps that tree to real React components.
+
+This keeps scripts from touching the DOM and gives you a stable surface.
+
+---
+
+## Script API (what the sandbox exposes)
+
+When a script loads, you evaluate it in a sandbox and only give it:
+
+* `definePlugin(pluginDef)`
+* `ui` (widget constructors)
+* `createActions(namespace, names[])` → action creators
+* `dispatch(action)`
+* `getState()`
+
+That’s it.
+
+Optionally you can avoid exposing `dispatch/getState` directly and instead pass them only to handlers as a `ctx`.
+
+---
+
+## Example plugin script (what a user writes)
+
+Imagine a “Scene Button + Status” widget:
+
+* it renders a couple buttons
+* on click, it dispatches an *intent* action
+* it reads state to show status
+
+Pseudo-shape:
+
+```js
+definePlugin(({ ui, createActions }) => {
+  const actions = createActions("plugin.scenes", [
+    "sceneRequested",
+    "noteSet",
+  ])
+
+  return {
+    id: "scenes",
+    title: "Scene Controls",
+
+    widgets: {
+      ScenePad: {
+        title: "Living Room",
+        render({ state }) {
+          const last = state.lastScene ?? "—"
+          return ui.panel([
+            ui.text(`Last scene: ${last}`),
+            ui.row([
+              ui.button("Cozy", { onClick: "cozy" }),
+              ui.button("Bright", { onClick: "bright" }),
+            ]),
+          ])
+        },
+
+        handlers: {
+          cozy({ dispatch }) {
+            dispatch(actions.sceneRequested({ sceneId: "cozy" }))
+          },
+          bright({ dispatch }) {
+            dispatch(actions.sceneRequested({ sceneId: "bright" }))
+          },
+        },
+      },
+    },
+  }
+})
+```
+
+On the host side, you’d have middleware that listens for `plugin.scenes/sceneRequested` and actually triggers the real effect (HTTP call, Zigbee command, etc.), then updates store state.
+
+---
+
+## Host-side architecture (how it hangs together)
+
+### 1) Redux store slices
+
+* `core/*` slices: app data, auth, device state, etc.
+* `plugins/*` slice: per-plugin state (or a single generic “plugin state bag” keyed by plugin id)
+* `effects/*` slice: request/response tracking for privileged operations
+
+### 2) PluginManager (runtime)
+
+Responsibilities:
+
+* load script text (file upload, URL, DB)
+* evaluate in sandbox
+* validate plugin definition (widget ids, handler names, action namespace rules)
+* register widgets in a `WidgetRegistry`
+
+### 3) WidgetRegistry + React renderer
+
+* The UI shows a “dashboard layout” (saved in Redux)
+* Each tile points to `{ pluginId, widgetId, config }`
+* Renderer asks the plugin for `render()` and converts the `ui.*` tree into React elements
+* When a user clicks a button, the renderer routes to the correct handler
+
+### 4) Handler invocation (the only “active” code path)
+
+When an event happens:
+
+* host calls `runHandler(pluginId, widgetId, handlerName, eventArgs)`
+* sandbox executes handler with a **tight ctx**:
+
+  * `dispatch` (wrapped to enforce allowlist/namespaces)
+  * `getState` (optionally filtered to a “view” of state)
+  * maybe `widgetConfig` and `eventArgs`
+
+### 5) Action gateway (your safety valve)
+
+Wrap `dispatch` so the plugin can only dispatch:
+
+* action types in its namespace (`plugin.<id>/*`)
+* and/or a small allowlist (`effects/httpRequestRequested`, etc.)
+
+Anything else is rejected.
+
+---
+
+## Why this is a nice Redux/React fit
+
+* **Redux is the contract boundary**: plugins can only “ask” via actions.
+* **React stays in charge of rendering**: scripts never become arbitrary React code.
+* **Side effects are centralized**: one place to secure/network/throttle.
+* **Widgets are portable**: the DSL output is stable and serializable.
+
+---
+
+If you want, I can turn this sketch into a concrete “minimal skeleton” (folders + types + the plugin API surface) and pick one sandbox strategy (SES compartments vs QuickJS-in-a-Worker) that matches how hostile you expect the scripts to be.
