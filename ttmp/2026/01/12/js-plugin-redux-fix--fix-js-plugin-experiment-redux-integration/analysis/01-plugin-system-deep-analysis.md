@@ -56,10 +56,10 @@ Provide a deep, file-based map of how the current plugin experiment is wired, wh
 - `client/src/pages/Playground.tsx` is the active entry. It initializes `PluginSandboxClient` and drives plugin lifecycle through the Redux registry.
 - Plugins are loaded through the sandbox worker, and widget rendering uses `PluginWidget` (which calls `sandbox.render`).
 - UI rendering is still handled by `client/src/components/WidgetRenderer.tsx`, which converts data-only UI trees into React components.
+- Plugin removal now triggers a sandbox unload RPC so the worker can dispose VM contexts.
 
 ### Alternative runtimes and dead code paths
-- `client/src/lib/pluginManager.ts` remains as an in-process alternative (no sandbox/worker isolation), but `Playground` now uses the sandbox path.
-- Removed unused in-process helpers (`presetPlugins.ts`, `MinimalPluginWidget.tsx`) to reduce drift.
+- Removed the in-process runtime (`pluginManager.ts`, `presets.ts`, and `minimalPlugin.ts`) to avoid split-path drift.
 
 ## Plugin API and UI DSL
 
@@ -181,12 +181,6 @@ These diffs are recorded in `various/js-plugin-diff.sqlite` under the ticket, so
 
 ## Concrete fix direction (next steps)
 
-- Choose a single runtime path (in-process `pluginManager` or worker-based sandbox) and delete or wire the unused one.
-- Align the plugin contract:
-  - Decide whether handlers receive `args` as the second parameter or an `event` object in context.
-  - Make `WidgetRenderer`, `Playground`, and sandbox handler invocation consistent.
-- Normalize Redux state shape:
-  - Either move plugin state to root or update plugin code to read from `state.plugins.*`.
-  - Remove the duplicate `counter` reducer to avoid drift.
-- Wire plugin registry actions if Redux should track plugin lifecycle, or remove the slice if local state is the intended source of truth.
-- If QuickJS is required, implement the worker design from `pasted_content_2.txt` and remove `new Function` evaluators.
+- Confirm the sandbox worker path is the only runtime and remove any remaining references to in-process loaders.
+- Keep the plugin contract consistent (`event.args` for buttons, `event.value` for inputs) across `WidgetRenderer`, `PluginWidget`, and the worker.
+- Continue using `state.plugins.*` as the single state shape (no duplicate reducers).

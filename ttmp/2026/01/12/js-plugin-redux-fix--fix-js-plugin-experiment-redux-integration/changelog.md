@@ -85,3 +85,12 @@ Removed unused in-process helpers and clarified runtime documentation.
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/MinimalPluginWidget.tsx — Removed unused in-process widget
 
+
+## 2026-01-12
+
+Removed in-process runtime files and added sandbox unload RPC.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/workers/pluginSandbox.worker.ts — Added unload handler for sandbox
+

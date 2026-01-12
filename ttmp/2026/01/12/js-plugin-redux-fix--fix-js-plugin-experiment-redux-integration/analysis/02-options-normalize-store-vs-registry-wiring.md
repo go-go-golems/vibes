@@ -12,8 +12,6 @@ Owners: []
 RelatedFiles:
     - Path: 2026/01/12/js-plugin-system/client/src/components/PluginList.tsx
       Note: Registry UI for plugin lifecycle
-    - Path: 2026/01/12/js-plugin-system/client/src/lib/pluginManager.ts
-      Note: In-process plugin runtime
     - Path: 2026/01/12/js-plugin-system/client/src/lib/pluginSandboxClient.ts
       Note: Sandbox runtime client (worker path)
     - Path: 2026/01/12/js-plugin-system/client/src/pages/Playground.tsx
@@ -66,7 +64,8 @@ Pick a single, consistent shape for plugin state and remove the duplicate reduce
 ### What it means
 The plugin registry (`pluginsSlice`) tracks plugin lifecycle and status; the UI should reflect that registry. Two realistic sub-variants:
 - **Option 2A (restore sandbox path):** Reintroduce the worker-based `PluginSandboxClient` in `Playground.tsx` and use `PluginList`, `PluginEditor`, and `PluginWidget` as the primary UI.
-- **Option 2B (wire in-process runtime):** Keep `pluginManager` for loading/rendering, but dispatch lifecycle actions (`pluginLoadStarted`, `pluginLoadSucceeded`, `pluginLoadFailed`, `pluginRemoved`, `pluginToggled`) so the registry UI stays in sync.
+- **Option 2B (wire in-process runtime):** Keep an in-process loader for loading/rendering, but dispatch lifecycle actions (`pluginLoadStarted`, `pluginLoadSucceeded`, `pluginLoadFailed`, `pluginRemoved`, `pluginToggled`) so the registry UI stays in sync.
+  - Note: the in-process loader was removed during cleanup; reintroduce it only if you need this path.
 
 ### Pros
 - Restores the “complete” behavior: plugin list, statuses, enable/disable toggles, and predictable registry state.

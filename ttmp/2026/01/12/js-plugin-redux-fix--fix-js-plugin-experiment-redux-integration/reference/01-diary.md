@@ -452,3 +452,43 @@ I cleaned out a couple of unused helper files from the earlier in-process (non-s
 
 ### Technical details
 - N/A
+
+## Step 11: Remove in-process runtime and add sandbox unload
+
+I removed the remaining in-process runtime files and added an explicit unload RPC to the sandbox worker. The Playground now calls `unloadPlugin` when a plugin is removed so the worker can dispose of the VM context and free memory.
+
+**Commit (code):** ee776f2a — "Add sandbox unload support"
+
+### What I did
+- Removed `pluginManager.ts`, `presets.ts`, and `minimalPlugin.ts` from the workspace.
+- Added `unloadPlugin` support to `pluginSandbox.worker.ts` and `pluginSandboxClient.ts`.
+- Hooked `Playground` to call `sandbox.unloadPlugin` when registry entries are removed.
+
+### Why
+- Keeping an unused in-process runtime risks future drift and confusion.
+- The worker needed a cleanup path to avoid accumulating VM contexts.
+
+### What worked
+- The sandbox can now dispose contexts on removal.
+
+### What didn't work
+- N/A
+
+### What I learned
+- The sandbox path benefits from explicit lifecycle hooks, not just load/render/event.
+
+### What was tricky to build
+- Detecting removed plugin IDs without changing the existing PluginList UI behavior.
+
+### What warrants a second pair of eyes
+- Verify that unload is safe while a widget is rendering and does not race with in-flight RPC calls.
+
+### What should be done in the future
+- Consider an explicit “unload” button in the UI that disables the plugin before disposing it.
+
+### Code review instructions
+- Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx`.
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/pluginSandboxClient.ts` and `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/workers/pluginSandbox.worker.ts`.
+
+### Technical details
+- Unload RPC: `sandbox.unloadPlugin(id)` -> worker `handleUnload` disposes the VM context.
