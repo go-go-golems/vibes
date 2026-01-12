@@ -10,22 +10,35 @@ DocType: reference
 Intent: long-term
 Owners: []
 RelatedFiles:
+    - Path: 2026/01/12/js-plugin-system/client/src/App.tsx
+      Note: Docs route wiring
+    - Path: 2026/01/12/js-plugin-system/client/src/components/PluginEditor.tsx
+      Note: |-
+        Editor IntelliSense and plugin API typings
+        Editor DSL completions and typings
     - Path: 2026/01/12/js-plugin-system/client/src/components/WidgetRenderer.tsx
       Note: UI DSL renderer
     - Path: 2026/01/12/js-plugin-system/client/src/lib/presets.ts
       Note: Preset examples used by the sandbox
     - Path: 2026/01/12/js-plugin-system/client/src/lib/uiTypes.ts
       Note: UI DSL type definitions
+    - Path: 2026/01/12/js-plugin-system/client/src/pages/Docs.tsx
+      Note: |-
+        In-app reference page content
+        In-app plugin scripting reference
+    - Path: 2026/01/12/js-plugin-system/client/src/pages/Playground.tsx
+      Note: Docs navigation entry
     - Path: 2026/01/12/js-plugin-system/client/src/store/store.ts
       Note: Redux state shape for plugins
     - Path: 2026/01/12/js-plugin-system/client/src/workers/pluginSandbox.worker.ts
       Note: Sandbox lifecycle and handler contract
 ExternalSources: []
 Summary: Reference guide for the plugin DSL, handler contract, and sandbox lifecycle.
-LastUpdated: 2026-01-12T16:43:00-05:00
+LastUpdated: 2026-01-12T21:05:00-05:00
 WhatFor: Copy/paste-ready guide to authoring plugins and understanding the sandbox contract.
 WhenToUse: Use when writing or debugging plugin scripts and their Redux interactions.
 ---
+
 
 
 # Plugin Scripting Reference
@@ -109,6 +122,10 @@ state.plugins.plugins   // registry metadata
 - Render: `render(pluginId, widgetId, state)` returns a UI tree.
 - Event: `event(pluginId, widgetId, handler, event, state)` executes handler.
 - Unload: `unloadPlugin(pluginId)` disposes the VM context.
+
+### Editor support
+- The plugin editor embeds a lightweight JavaScript IntelliSense setup.
+- Snippet completion includes `definePlugin` and common `ui.*` helpers.
 
 ## Usage Examples
 
