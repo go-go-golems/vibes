@@ -57,6 +57,53 @@ export const PRESET_PLUGINS: PresetPlugin[] = [
 });`,
   },
   {
+    id: "counter-dial",
+    name: "Counter Dial",
+    description: "Uses the counter widget primitive for quick +/- actions.",
+    code: `definePlugin(({ ui, createActions }) => {
+  const actions = createActions("plugin.counter", [
+    "incremented",
+    "decremented",
+    "reset"
+  ]);
+
+  return {
+    id: "counter-dial",
+    title: "Counter Dial",
+    description: "Compact counter control",
+    
+    widgets: {
+      DialWidget: {
+        title: "Dial",
+        render({ state }) {
+          const count = (state && state.plugins && state.plugins.counter) || 0;
+          return ui.panel([
+            ui.text("Counter Dial"),
+            ui.counter(count, {
+              onIncrement: { handler: "increment" },
+              onDecrement: { handler: "decrement" }
+            }),
+            ui.button("Reset", { onClick: { handler: "reset" }, variant: "destructive" })
+          ]);
+        },
+        
+        handlers: {
+          increment({ dispatch }) {
+            dispatch(actions.incremented());
+          },
+          decrement({ dispatch }) {
+            dispatch(actions.decremented());
+          },
+          reset({ dispatch }) {
+            dispatch(actions.reset());
+          }
+        }
+      }
+    }
+  };
+});`,
+  },
+  {
     id: "status",
     name: "Status Dashboard",
     description: "Shows plugin status with badges and tables. Demonstrates reading Redux state.",
@@ -130,6 +177,44 @@ export const PRESET_PLUGINS: PresetPlugin[] = [
         handlers: {
           nameChanged({ dispatch, event }) {
             dispatch(actions.nameChanged(event.value));
+          }
+        }
+      }
+    }
+  };
+});`,
+  },
+  {
+    id: "greeter-banner",
+    name: "Greeter Banner",
+    description: "Read-only banner that mirrors the greeter state.",
+    code: `definePlugin(({ ui, createActions }) => {
+  const actions = createActions("plugin.greeter", ["nameChanged"]);
+
+  return {
+    id: "greeter-banner",
+    title: "Greeter Banner",
+    description: "Greeter mirror and clear action",
+    
+    widgets: {
+      BannerWidget: {
+        title: "Banner",
+        render({ state }) {
+          const name = (state && state.plugins && state.plugins.greeter && state.plugins.greeter.name) || "";
+          const message = name ? ("Greetings, " + name + ".") : "No name set.";
+          return ui.panel([
+            ui.text(message),
+            ui.row([
+              ui.badge("SOURCE: GREETER"),
+              ui.badge("MODE: READ-ONLY")
+            ]),
+            ui.button("Clear Name", { onClick: { handler: "clearName" }, variant: "destructive" })
+          ]);
+        },
+        
+        handlers: {
+          clearName({ dispatch }) {
+            dispatch(actions.nameChanged(""));
           }
         }
       }
@@ -242,6 +327,44 @@ export const PRESET_PLUGINS: PresetPlugin[] = [
                 ["Calculator", "ACTIVE", "YES", "1"]
               ],
               { headers: ["Plugin", "Status", "Enabled", "Widgets"] }
+            )
+          ]);
+        },
+        
+        handlers: {}
+      }
+    }
+  };
+});`,
+  },
+  {
+    id: "state-audit",
+    name: "State Audit",
+    description: "Read-only snapshot of key plugin state values.",
+    code: `definePlugin(({ ui, createActions }) => {
+  return {
+    id: "state-audit",
+    title: "State Audit",
+    description: "Quick state snapshot",
+    
+    widgets: {
+      AuditWidget: {
+        title: "Audit",
+        render({ state }) {
+          const counter = (state && state.plugins && state.plugins.counter) || 0;
+          const name = (state && state.plugins && state.plugins.greeter && state.plugins.greeter.name) || "";
+          const calc = (state && state.plugins && state.plugins.calculator) || { display: "0" };
+          const display = calc.display || "0";
+          
+          return ui.panel([
+            ui.text("State Snapshot"),
+            ui.table(
+              [
+                ["Counter", String(counter)],
+                ["Greeter Name", name || "(empty)"],
+                ["Calc Display", display]
+              ],
+              { headers: ["Key", "Value"] }
             )
           ]);
         },
