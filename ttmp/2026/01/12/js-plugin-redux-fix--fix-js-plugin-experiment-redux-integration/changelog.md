@@ -67,3 +67,12 @@ Normalized plugin state shape and restored sandbox runtime; updated analysis/dia
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx — Switched back to sandbox runtime and registry UI
 
+
+## 2026-01-12
+
+Documented focus fix and updated breakpoint analysis.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/ttmp/2026/01/12/js-plugin-redux-fix--fix-js-plugin-experiment-redux-integration/reference/01-diary.md — Recorded focus fix step
+

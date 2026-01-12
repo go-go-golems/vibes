@@ -10,6 +10,8 @@ DocType: analysis
 Intent: long-term
 Owners: []
 RelatedFiles:
+    - Path: 2026/01/12/js-plugin-system/client/src/components/PluginWidget.tsx
+      Note: Sandbox widget renderer with loading behavior
     - Path: 2026/01/12/js-plugin-system/client/src/components/WidgetRenderer.tsx
       Note: UI DSL rendering and event dispatch
     - Path: 2026/01/12/js-plugin-system/client/src/lib/pluginManager.ts
@@ -38,6 +40,7 @@ LastUpdated: 2026-01-12T15:55:06.000508708-05:00
 WhatFor: Map how plugins execute, how Redux is used, and where the current experiment diverges from the intended architecture.
 WhenToUse: Use when fixing the plugin experiment or reconciling plugin contracts and state shape.
 ---
+
 
 
 
@@ -157,19 +160,22 @@ These diffs are recorded in `various/js-plugin-diff.sqlite` under the ticket, so
 2. Input event payload dropped (fixed for sandbox path)
    - `WidgetRenderer` now sends button args as `{ args }`, and `PluginWidget` passes the payload into the sandbox handler.
 
-3. Sandbox handler argument mismatch
-   - `pluginSandboxClient.event` only passes `eventPayload?.args` as the second arg, which is undefined for button clicks and input changes in the current UI DSL.
+3. Input focus dropped on re-render (fixed)
+   - `PluginWidget` used to swap to a loading placeholder on every state change, unmounting inputs. It now keeps the tree mounted unless there is no tree yet.
 
-4. Duplicate counter state
-   - `counter` is stored both under `state.plugins.counter` and `state.counter`, creating ambiguity about which value is authoritative.
+4. Sandbox handler argument mismatch (fixed)
+   - Button events now deliver `{ args }` and input events deliver `{ value }`, matching the worker handler contract.
 
-5. Unwired plugin registry
-   - `pluginsSlice` tracks plugin metadata and status, but nothing in `Playground` dispatches load or status actions, so the registry stays empty.
+5. Duplicate counter state (fixed)
+   - The top-level `counter` reducer was removed; the plugins slice is the single source of truth.
 
-6. QuickJS / worker plan not implemented
-   - The bundle and pasted content point to QuickJS usage, but the worker path remains unused and QuickJS is not integrated.
+6. Unwired plugin registry (fixed)
+   - `Playground` dispatches lifecycle actions and renders from the registry.
 
-7. Simplify pass removed the sandbox wiring (fixed)
+7. QuickJS / worker plan not implemented (fixed)
+   - The worker is restored and used as the active path.
+
+8. Simplify pass removed the sandbox wiring (fixed)
    - The sandboxed runtime is restored as the active path in `Playground`, so registry status and worker isolation are live again.
 
 ## Concrete fix direction (next steps)

@@ -379,3 +379,40 @@ I then restored the sandboxed runtime in `Playground` (with `PluginSandboxClient
 
 ### Technical details
 - `WidgetRenderer` now sends button events as `{ args: onClick.args }` for sandbox handlers.
+
+## Step 9: Keep greeter input focused during updates
+
+The greeter input lost focus because the sandbox widget renderer was swapping to a loading placeholder on every state change, which unmounted the input. I changed the loading logic to keep the rendered tree mounted unless there is no tree yet, so typing no longer drops focus.
+
+**Commit (code):** c756756e — "Keep plugin widgets mounted during re-render"
+
+### What I did
+- Adjusted `PluginWidget` to avoid setting `loading` when a tree already exists.
+- Only show the loading placeholder when no tree is present.
+
+### Why
+- Unmounting the input during each render cycle caused focus loss when typing.
+
+### What worked
+- The widget tree remains mounted, preserving input focus.
+
+### What didn't work
+- N/A
+
+### What I learned
+- The sandbox render path should avoid placeholder swapping during normal state updates.
+
+### What was tricky to build
+- Ensuring loading logic still covers the initial render without flicker.
+
+### What warrants a second pair of eyes
+- Confirm other widgets that rely on transient loading states still behave as expected.
+
+### What should be done in the future
+- Consider a non-blocking “rendering” indicator that does not replace the widget tree.
+
+### Code review instructions
+- Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginWidget.tsx`.
+
+### Technical details
+- Loading state now gates the placeholder only when `tree` is null.
