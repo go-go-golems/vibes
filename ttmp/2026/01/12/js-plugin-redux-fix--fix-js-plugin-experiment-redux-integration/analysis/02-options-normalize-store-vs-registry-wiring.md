@@ -81,11 +81,10 @@ The plugin registry (`pluginsSlice`) tracks plugin lifecycle and status; the UI 
 - Drive the left panel and the live widget list from `state.plugins.plugins` instead of local component state.
 - Filter rendering by `status === "loaded"` and `enabled === true`.
 
-## Recommendation path
-Short term: Option 2B (wire registry to the current runtime) gives visibility and matches the earlier UX without reintroducing sandbox complexity.
-Medium term: Option 1A (plugins slice as source of truth) removes the dual counter state and prevents repeated mismatch bugs.
+## Current implementation status
+- **Option 1A done:** removed the duplicate top-level counter reducer and aligned preset/mini plugin selectors to `state.plugins.*`.
+- **Option 2A done:** restored `PluginSandboxClient` + `pluginSandbox.worker.ts` in `Playground.tsx`, with registry-driven UI and widget rendering.
 
 ## Open questions
 - Do we want QuickJS isolation to be a core requirement? If yes, Option 2A becomes necessary.
 - Should plugin state be namespaced by plugin ID (e.g., `state.plugins.data[pluginId]`) rather than shared fields?
-

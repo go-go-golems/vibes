@@ -50,14 +50,12 @@ Provide a deep, file-based map of how the current plugin experiment is wired, wh
 ## System map (current workspace)
 
 ### Entry point and active runtime
-- `client/src/pages/Playground.tsx` is the active entry. It builds a UI DSL, loads plugins with `pluginManager`, and renders widget trees directly inside the component.
-- Plugin instances are stored only in memory via `pluginManager` (not Redux). `loadedPlugins` is a local React state array.
-- UI rendering is handled by `client/src/components/WidgetRenderer.tsx`, which converts data-only UI trees into React components.
+- `client/src/pages/Playground.tsx` is the active entry. It initializes `PluginSandboxClient` and drives plugin lifecycle through the Redux registry.
+- Plugins are loaded through the sandbox worker, and widget rendering uses `PluginWidget` (which calls `sandbox.render`).
+- UI rendering is still handled by `client/src/components/WidgetRenderer.tsx`, which converts data-only UI trees into React components.
 
 ### Alternative runtimes and dead code paths
-- `client/src/components/PluginWidget.tsx` and `client/src/lib/pluginSandboxClient.ts` form a sandboxed path (in-process) but are not used by `Playground`.
-- `client/src/workers/pluginSandbox.worker.ts` exists, but there is no client wiring to create the worker or route RPC messages.
-- `client/src/components/PluginEditor.tsx` and `client/src/components/PluginList.tsx` are also not wired into the active UI.
+- `client/src/lib/pluginManager.ts` and `client/src/lib/presetPlugins.ts` remain as an in-process alternative, but `Playground` now uses the sandbox path.
 
 ## Plugin API and UI DSL
 
@@ -115,8 +113,8 @@ Provide a deep, file-based map of how the current plugin experiment is wired, wh
 - `pasted_content_2.txt` sketches a QuickJS-in-worker design with a strict dispatch bridge.
 
 ### Actual implementation
-- `pluginSandbox.worker.ts` uses `new Function(...)` instead of QuickJS and is not wired into the app.
-- `pluginSandboxClient.ts` is an in-process evaluator and ignores `workerUrl` and `allowDispatch` parameters.
+- `pluginSandbox.worker.ts` now uses QuickJS again and is wired into `Playground` via `PluginSandboxClient`.
+- `pluginSandboxClient.ts` runs as a worker RPC client and enforces a dispatch allowlist.
 - `package.json` includes `quickjs-emscripten`, but no implementation imports or uses it.
 
 ## History artifacts
@@ -154,10 +152,10 @@ These diffs are recorded in `various/js-plugin-diff.sqlite` under the ticket, so
 ## Likely breakpoints for "does not really work"
 
 1. State path mismatch (fixed)
-   - `presetPlugins.ts` now reads `state.plugins.calculator` and `state.plugins.greeter` to match the reducer.
+   - Preset and minimal plugins now read from `state.plugins.*` after removing the duplicate root counter reducer.
 
-2. Input event payload dropped (fixed)
-   - `Playground` now forwards the `eventPayload` from `WidgetRenderer` to `pluginManager.callHandler`.
+2. Input event payload dropped (fixed for sandbox path)
+   - `WidgetRenderer` now sends button args as `{ args }`, and `PluginWidget` passes the payload into the sandbox handler.
 
 3. Sandbox handler argument mismatch
    - `pluginSandboxClient.event` only passes `eventPayload?.args` as the second arg, which is undefined for button clicks and input changes in the current UI DSL.
@@ -171,8 +169,8 @@ These diffs are recorded in `various/js-plugin-diff.sqlite` under the ticket, so
 6. QuickJS / worker plan not implemented
    - The bundle and pasted content point to QuickJS usage, but the worker path remains unused and QuickJS is not integrated.
 
-7. Simplify pass removed the sandbox wiring
-   - The last commit removed the sandboxed runtime from the active UI, so the Redux-backed plugin registry, enable/disable toggles, and worker isolation are no longer part of the live path.
+7. Simplify pass removed the sandbox wiring (fixed)
+   - The sandboxed runtime is restored as the active path in `Playground`, so registry status and worker isolation are live again.
 
 ## Concrete fix direction (next steps)
 

@@ -333,3 +333,49 @@ This establishes a path to use the existing registry UI and status data without 
 
 ### Technical details
 - Custom plugins use a temporary ID during load; the registry entry is swapped to the plugin’s declared ID once resolved.
+
+## Step 8: Normalize store shape and restore the sandbox runtime
+
+I removed the duplicate top-level counter reducer so plugins read from a single state shape and updated the remaining selectors to match `state.plugins.*`. This eliminates the root vs slice split that was causing state display confusion.
+
+I then restored the sandboxed runtime in `Playground` (with `PluginSandboxClient` + QuickJS worker), switched the UI back to the registry-driven layout, and aligned event payloads for the sandbox handler signature.
+
+**Commit (code):** c8b76a66 — "Normalize plugin state shape"
+**Commit (code):** 747ae8f1 — "Restore sandbox runtime in Playground"
+
+### What I did
+- Removed the duplicate top-level `counter` reducer and aligned preset/mini plugin selectors.
+- Replaced the in-process `PluginSandboxClient` with the worker RPC version.
+- Restored QuickJS worker implementation and the registry-driven Playground layout.
+- Adjusted button event payloads to send `{ args }` so sandbox handlers receive `event.args`.
+
+### Why
+- A single state shape prevents stale UI reads and repeated path mismatches.
+- The sandbox runtime reintroduces registry-backed UX and isolation boundaries.
+
+### What worked
+- Registry-backed plugin list is active again in the UI layout.
+- Sandbox handlers now receive consistent event payloads for buttons and inputs.
+
+### What didn't work
+- N/A
+
+### What I learned
+- The sandbox path expects `event.args`; wiring the payload consistently is required for digit/operation handlers.
+
+### What was tricky to build
+- Ensuring the sandbox worker, client, and widget renderer agree on payload shape.
+
+### What warrants a second pair of eyes
+- Confirm plugin dispatch allowlisting still behaves correctly for custom plugin IDs.
+
+### What should be done in the future
+- Decide whether to keep `pluginManager` as a fallback or remove it entirely to avoid split paths.
+
+### Code review instructions
+- Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/store/store.ts`.
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx` and `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/pluginSandboxClient.ts`.
+- Validate `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/workers/pluginSandbox.worker.ts` + `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/WidgetRenderer.tsx`.
+
+### Technical details
+- `WidgetRenderer` now sends button events as `{ args: onClick.args }` for sandbox handlers.

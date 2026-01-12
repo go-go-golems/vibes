@@ -58,3 +58,12 @@ Added option analysis doc and wired plugin registry actions in Playground.
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/ttmp/2026/01/12/js-plugin-redux-fix--fix-js-plugin-experiment-redux-integration/analysis/02-options-normalize-store-vs-registry-wiring.md — Options analysis
 
+
+## 2026-01-12
+
+Normalized plugin state shape and restored sandbox runtime; updated analysis/diary and completed tasks.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx — Switched back to sandbox runtime and registry UI
+
