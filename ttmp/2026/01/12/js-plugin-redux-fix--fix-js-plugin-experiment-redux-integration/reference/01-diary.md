@@ -16,6 +16,8 @@ RelatedFiles:
       Note: Docs route
     - Path: 2026/01/12/js-plugin-system/client/src/components/PluginEditor.tsx
       Note: Editor completions
+    - Path: 2026/01/12/js-plugin-system/client/src/components/PluginWidget.tsx
+      Note: Expanded error detail rendering
     - Path: 2026/01/12/js-plugin-system/client/src/pages/Docs.tsx
       Note: In-app docs page added
     - Path: 2026/01/12/js-plugin-system/client/src/pages/Playground.tsx
@@ -36,6 +38,7 @@ LastUpdated: 2026-01-12T15:55:08.892024352-05:00
 WhatFor: ""
 WhenToUse: ""
 ---
+
 
 
 
@@ -659,3 +662,42 @@ This pairs the in-app guidance with the reference doc updates so the UI and docs
 
 ### Technical details
 - Snippets include `definePlugin`, `ui.panel`, `ui.row`, `ui.column`, `ui.text`, `ui.badge`, `ui.button`, `ui.input`, `ui.counter`, and `ui.table`.
+
+## Step 16: Expand plugin render error detail
+
+I improved the render error display so plugin exceptions show a summary plus expandable details. This makes it easier to debug plugin scripts without relying on console logs alone.
+
+The error panel now captures name/message/stack and renders a collapsible detail block so we can see full QuickJS traces or raw error objects.
+
+**Commit (code):** 77c80b7e — "Show detailed plugin render errors"
+
+### What I did
+- Normalized error objects in `PluginWidget` to preserve name/message/stack.
+- Added a collapsible detail section for stack and raw error JSON.
+
+### Why
+- Plugin errors often arrive as rich objects from QuickJS; flattening them to strings hides the useful context.
+
+### What worked
+- Error summaries show immediately, and details are available on demand.
+
+### What didn't work
+- N/A
+
+### What I learned
+- QuickJS error objects already include stack traces when returned through the worker RPC.
+
+### What was tricky to build
+- Avoiding JSON stringify crashes while still showing raw error data for inspection.
+
+### What warrants a second pair of eyes
+- Confirm the error rendering doesn't leak overly large objects or slow down the widget panel.
+
+### What should be done in the future
+- If error volume grows, consider truncating raw JSON in the UI.
+
+### Code review instructions
+- Review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginWidget.tsx`.
+
+### Technical details
+- The UI uses a `<details>` element so the stack trace stays hidden by default.

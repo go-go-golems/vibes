@@ -132,3 +132,12 @@ Add in-app docs page and editor completions (commits 1b05ec81, 306633a3)
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Docs.tsx — In-app documentation content
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx — Docs navigation entry
 
+
+## 2026-01-12
+
+Show expanded render error details (commit 77c80b7e)
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginWidget.tsx — Error detail rendering
+
