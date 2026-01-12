@@ -22,6 +22,8 @@ import {
 import { Plus, Zap } from "lucide-react";
 import { useLocation } from "wouter";
 
+const UI_STORAGE_KEY = "pluginPlaygroundUiState";
+
 export default function Playground() {
   const dispatch = useDispatch();
   const [, setLocation] = useLocation();
@@ -31,6 +33,8 @@ export default function Playground() {
   const [editorCode, setEditorCode] = React.useState("");
   const [selectedPreset, setSelectedPreset] = React.useState<string>("");
   const prevPluginIdsRef = React.useRef<Set<string>>(new Set());
+  const hasRestoredPluginsRef = React.useRef(false);
+  const uiPersistRef = React.useRef<number | null>(null);
 
   // Initialize sandbox
   React.useEffect(() => {
@@ -48,6 +52,55 @@ export default function Playground() {
       client.terminate();
     };
   }, []);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(UI_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        selectedPluginId?: string | null;
+        editorCode?: string;
+        selectedPreset?: string;
+      };
+      if (typeof parsed.selectedPluginId === "string") {
+        setSelectedPluginId(parsed.selectedPluginId);
+      }
+      if (typeof parsed.editorCode === "string") {
+        setEditorCode(parsed.editorCode);
+      }
+      if (typeof parsed.selectedPreset === "string") {
+        setSelectedPreset(parsed.selectedPreset);
+      }
+    } catch {
+      // Ignore invalid localStorage payloads.
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (uiPersistRef.current) {
+      window.clearTimeout(uiPersistRef.current);
+    }
+    uiPersistRef.current = window.setTimeout(() => {
+      const payload = {
+        selectedPluginId,
+        editorCode,
+        selectedPreset,
+      };
+      try {
+        window.localStorage.setItem(UI_STORAGE_KEY, JSON.stringify(payload));
+      } catch {
+        // Ignore localStorage errors.
+      }
+    }, 200);
+
+    return () => {
+      if (uiPersistRef.current) {
+        window.clearTimeout(uiPersistRef.current);
+      }
+    };
+  }, [selectedPluginId, editorCode, selectedPreset]);
 
   React.useEffect(() => {
     if (!sandbox) return;
@@ -81,6 +134,17 @@ export default function Playground() {
     },
     [sandbox, dispatch]
   );
+
+  React.useEffect(() => {
+    if (!sandbox || hasRestoredPluginsRef.current) return;
+    hasRestoredPluginsRef.current = true;
+    const savedPlugins = Object.values(store.getState().plugins.plugins);
+    savedPlugins.forEach((plugin) => {
+      if (plugin.code) {
+        handleLoadPlugin(plugin.id, plugin.code);
+      }
+    });
+  }, [sandbox, handleLoadPlugin]);
 
   const handleLoadPreset = React.useCallback(
     (presetId: string) => {
