@@ -121,3 +121,14 @@ Added new preset examples and plugin scripting reference.
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/lib/presets.ts — Additional preset plugins
 
+
+## 2026-01-12
+
+Add in-app docs page and editor completions (commits 1b05ec81, 306633a3)
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginEditor.tsx — Added DSL IntelliSense
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Docs.tsx — In-app documentation content
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Playground.tsx — Docs navigation entry
+

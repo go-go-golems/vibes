@@ -12,6 +12,14 @@ Owners: []
 RelatedFiles:
     - Path: 2026/01/12/js-plugin-system/DEBUG_FINDINGS.md
       Note: Prior debugging notes
+    - Path: 2026/01/12/js-plugin-system/client/src/App.tsx
+      Note: Docs route
+    - Path: 2026/01/12/js-plugin-system/client/src/components/PluginEditor.tsx
+      Note: Editor completions
+    - Path: 2026/01/12/js-plugin-system/client/src/pages/Docs.tsx
+      Note: In-app docs page added
+    - Path: 2026/01/12/js-plugin-system/client/src/pages/Playground.tsx
+      Note: Docs nav
     - Path: 2026/01/12/js-plugin-system/pasted_content(1).txt
       Note: Original architecture sketch
     - Path: 2026/01/12/js-plugin-system/pasted_content_2.txt
@@ -28,6 +36,7 @@ LastUpdated: 2026-01-12T15:55:08.892024352-05:00
 WhatFor: ""
 WhenToUse: ""
 ---
+
 
 
 # Diary
@@ -604,3 +613,49 @@ I added an explicit unload button to the plugin list that disables a plugin befo
 
 ### Technical details
 - Unload dispatches `pluginToggled` when needed, then `pluginRemoved`.
+
+## Step 15: Add in-app docs page and editor completions
+
+I added a dedicated documentation page inside the app that explains the plugin DSL, handler contract, and state shape with copy/paste-ready examples. I also expanded the editor IntelliSense so plugin authors get snippets and helper completions directly in the editor.
+
+This pairs the in-app guidance with the reference doc updates so the UI and docs stay aligned, and it makes the plugin authoring flow easier to navigate from the Playground.
+
+**Commit (code):** 1b05ec81 — "Add plugin docs page and editor completions"
+
+### What I did
+- Added `Docs` page content with QuickJS DSL reference and examples.
+- Wired `/docs` routing in `App.tsx` and added a Docs button to the Playground header.
+- Expanded Monaco completions for `definePlugin` and the `ui.*` helpers.
+- Updated the scripting reference doc to note editor support and related files.
+- Checked off tasks 5 and 6 in the ticket.
+
+### Why
+- The in-app docs reduce friction for writing new plugins and clarifies the DSL contract.
+- Editor completions provide lightweight LSP-style guidance without introducing a full language server.
+
+### What worked
+- The docs page layout matches the existing brutalist UI theme and uses the same Tailwind tokens.
+- Completions are registered once per editor instance to avoid duplicate suggestions.
+
+### What didn't work
+- N/A
+
+### What I learned
+- The in-app docs can reuse the same code snippets as the reference doc without adding new dependencies.
+
+### What was tricky to build
+- Making the docs page readable on small viewports without losing the monospace-heavy layout.
+
+### What warrants a second pair of eyes
+- Validate that the docs examples and action namespace guidance match the runtime allowlist behavior.
+
+### What should be done in the future
+- Consider adding more snippet templates (tables, badge rows) if authors request them.
+
+### Code review instructions
+- Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/pages/Docs.tsx`.
+- Then review `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginEditor.tsx` for completions.
+- Validate by running `pnpm dev --host` and visiting `http://localhost:5174/docs`.
+
+### Technical details
+- Snippets include `definePlugin`, `ui.panel`, `ui.row`, `ui.column`, `ui.text`, `ui.badge`, `ui.button`, `ui.input`, `ui.counter`, and `ui.table`.
