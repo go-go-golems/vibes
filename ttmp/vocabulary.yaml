@@ -1,0 +1,14 @@
+topics:
+    - slug: frontend
+      description: Frontend UI + client-side app
+    - slug: redux
+      description: Redux state management
+    - slug: plugins
+      description: Plugin system design/architecture
+docTypes:
+    - slug: analysis
+      description: Analysis documents
+    - slug: reference
+      description: Reference documents
+intent: []
+status: []
