@@ -89,7 +89,7 @@ definePlugin(({ ui, createActions }) => {
       status: {
         render({ state }) {
           const pluginCount = Object.keys(state.plugins?.plugins || {}).length;
-          const counterValue = state.counter || 0;
+          const counterValue = state.plugins?.counter || 0;
           
           return ui.panel([
             ui.text("System Status"),
