@@ -76,3 +76,12 @@ Documented focus fix and updated breakpoint analysis.
 
 - /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/ttmp/2026/01/12/js-plugin-redux-fix--fix-js-plugin-experiment-redux-integration/reference/01-diary.md — Recorded focus fix step
 
+
+## 2026-01-12
+
+Removed unused in-process helpers and clarified runtime documentation.
+
+### Related Files
+
+- /home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/MinimalPluginWidget.tsx — Removed unused in-process widget
+

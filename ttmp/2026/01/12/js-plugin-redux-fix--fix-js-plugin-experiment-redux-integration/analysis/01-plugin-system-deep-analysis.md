@@ -58,7 +58,8 @@ Provide a deep, file-based map of how the current plugin experiment is wired, wh
 - UI rendering is still handled by `client/src/components/WidgetRenderer.tsx`, which converts data-only UI trees into React components.
 
 ### Alternative runtimes and dead code paths
-- `client/src/lib/pluginManager.ts` and `client/src/lib/presetPlugins.ts` remain as an in-process alternative, but `Playground` now uses the sandbox path.
+- `client/src/lib/pluginManager.ts` remains as an in-process alternative (no sandbox/worker isolation), but `Playground` now uses the sandbox path.
+- Removed unused in-process helpers (`presetPlugins.ts`, `MinimalPluginWidget.tsx`) to reduce drift.
 
 ## Plugin API and UI DSL
 

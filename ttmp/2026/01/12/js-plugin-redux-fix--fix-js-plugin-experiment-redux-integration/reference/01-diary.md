@@ -416,3 +416,39 @@ The greeter input lost focus because the sandbox widget renderer was swapping to
 
 ### Technical details
 - Loading state now gates the placeholder only when `tree` is null.
+
+## Step 10: Remove unused in-process helpers
+
+I cleaned out a couple of unused helper files from the earlier in-process (non-sandbox) path to reduce confusion. The active runtime is the sandbox worker path, so keeping old presets and a minimal widget around just adds drift.
+
+**Commit (code):** 41a458ef — "Remove unused in-process plugin helpers"
+
+### What I did
+- Removed `presetPlugins.ts` and `MinimalPluginWidget.tsx` from the tracked codebase.
+
+### Why
+- These files were no longer referenced after restoring the sandbox path, and their presence implied a working non-sandbox runtime that is not active.
+
+### What worked
+- Cleaned the tree without affecting the sandbox runtime.
+
+### What didn't work
+- N/A
+
+### What I learned
+- N/A
+
+### What was tricky to build
+- N/A
+
+### What warrants a second pair of eyes
+- Confirm nothing in the UI or docs still references the removed files.
+
+### What should be done in the future
+- Decide whether to remove `pluginManager.ts` entirely if we commit to the sandbox path.
+
+### Code review instructions
+- Verify removal in `2026/01/12/js-plugin-system/client/src/components/MinimalPluginWidget.tsx` and `2026/01/12/js-plugin-system/client/src/lib/presetPlugins.ts`.
+
+### Technical details
+- N/A
