@@ -492,3 +492,39 @@ I removed the remaining in-process runtime files and added an explicit unload RP
 
 ### Technical details
 - Unload RPC: `sandbox.unloadPlugin(id)` -> worker `handleUnload` disposes the VM context.
+
+## Step 12: Add explicit unload control
+
+I added an explicit unload button to the plugin list that disables a plugin before removing it, matching the intent you requested. This should make it clearer when a plugin is being disposed versus simply toggled on/off.
+
+**Commit (code):** f5c9006c — "Add explicit unload control"
+
+### What I did
+- Added an unload button to `PluginList` that toggles the plugin off and then removes it.
+
+### Why
+- The sandbox now supports explicit unload; the UI should expose that action clearly.
+
+### What worked
+- The list now offers distinct toggle (power), unload (stop), and remove (trash) actions.
+
+### What didn't work
+- N/A
+
+### What I learned
+- N/A
+
+### What was tricky to build
+- N/A
+
+### What warrants a second pair of eyes
+- Confirm the unload action is not redundant with remove for your workflow expectations.
+
+### What should be done in the future
+- Consider consolidating unload/remove once behavior expectations are confirmed.
+
+### Code review instructions
+- Start with `/home/manuel/workspaces/2026-01-12/add-quick-js-redux-experiment/vibes/2026/01/12/js-plugin-system/client/src/components/PluginList.tsx`.
+
+### Technical details
+- Unload dispatches `pluginToggled` when needed, then `pluginRemoved`.

@@ -57,6 +57,7 @@ Provide a deep, file-based map of how the current plugin experiment is wired, wh
 - Plugins are loaded through the sandbox worker, and widget rendering uses `PluginWidget` (which calls `sandbox.render`).
 - UI rendering is still handled by `client/src/components/WidgetRenderer.tsx`, which converts data-only UI trees into React components.
 - Plugin removal now triggers a sandbox unload RPC so the worker can dispose VM contexts.
+- The plugin list now includes an explicit unload control that disables before removal.
 
 ### Alternative runtimes and dead code paths
 - Removed the in-process runtime (`pluginManager.ts`, `presets.ts`, and `minimalPlugin.ts`) to avoid split-path drift.
